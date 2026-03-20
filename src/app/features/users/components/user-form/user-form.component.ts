@@ -63,7 +63,6 @@ export class UserFormComponent implements OnInit, OnChanges, ControlValueAccesso
     });
 
     this.loadRoles();
-    this.loadEmployees();
 
     this.userForm.get('roleId')?.valueChanges.subscribe((roleId) => {
       this.onRoleChange(roleId);
@@ -207,16 +206,6 @@ export class UserFormComponent implements OnInit, OnChanges, ControlValueAccesso
     });
   }
 
-  private loadEmployees(): void {
-    this.employeeService.getAllActive().subscribe({
-      next: (list) => {
-        this.employees = list ?? [];
-      },
-      error: (error) => {
-        console.error('Failed to load employees', error);
-      }
-    });
-  }
 
   private onRoleChange(roleId: string): void {
     this.selectedRole = this.roles.find(r => r.id === roleId) || null;

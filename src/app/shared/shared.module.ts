@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { SharedRoutingModule } from './shared-routing.module';
 import {DataTableComponent} from "./data-table/data-table.component";
+import {ActionIconButtonComponent} from './components/action-icons/action-icon-button/action-icon-button.component';
 
 
 @NgModule({
@@ -12,6 +13,7 @@ import {DataTableComponent} from "./data-table/data-table.component";
     ],
     imports: [
         CommonModule,
+        ActionIconButtonComponent,
         SharedRoutingModule
     ]
 })

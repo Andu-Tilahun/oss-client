@@ -1,50 +1,55 @@
-<app-page-header
-  pageTitle="User Management"
-  subTitle="list user information"
-  [showBackButton]="false"
-  [loading]="loading"
+<app-page-split-layout
+  [showLeftTitle]="true"
+  [showRightTitle]="true"
+  leftTitle="User Management"
+  rightTitle="User Detail"
+  [rightItem]="selectedUser"
+  [rightEmptyMessage]="'Select a row to view details.'"
+  (rightEdit)="onEdit($event)"
+  (rightClose)="onCloseDetail()"
 >
-  <!-- Main Content -->
-  <ng-template #mainContent>
-    <div class="p-6">
-      <h2 class="text-base font-semibold text-slate-700 mb-4">User lists</h2>
-
-      <app-data-table
-        [columns]="columns"
-        [data]="users"
-        [loading]="loading"
-        [total]="total"
-        [pageSize]="pageSize"
-        [pageIndex]="pageIndex"
-        [showIndex]="true"
-        [showAddButton]="true"
-        [showRefreshButton]="true"
-        [showExportButton]="true"
-        [showViewButton]="false"
-        [showEditButton]="true"
-        [showDeleteButton]="true"
-        (pageChange)="onPageChange($event)"
-        (addClick)="onAdd()"
-        (refreshClick)="onRefresh()"
-        (exportClick)="onExport()"
-        (viewClick)="onView($event)"
-        (editClick)="onEdit($event)"
-        (deleteClick)="onDelete($event)"
-      >
-        <div extraTableHeader class="w-full flex justify-end">
-          <app-user-filter
-            [(searchText)]="searchText"
-            [roleFilters]="roleFilters"
-            [genderFilters]="genderFilters"
-            (filterChange)="onFilterChange()"
-            (searchChange)="onSearch()"
-            (clearFilters)="clearFilters()"
-          ></app-user-filter>
-        </div>
-      </app-data-table>
+  <ng-template #extraTableHeader>
+    <div class="w-full">
+      <app-user-filter
+        [(searchText)]="searchText"
+        [roleFilters]="roleFilters"
+        [genderFilters]="genderFilters"
+        (filterChange)="onFilterChange()"
+        (searchChange)="onSearch()"
+        (clearFilters)="clearFilters()"
+      ></app-user-filter>
     </div>
   </ng-template>
-</app-page-header>
+  <ng-template #leftContent>
+    <app-data-table
+      [columns]="columns"
+      [data]="users"
+      [loading]="loading"
+      [total]="total"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [showIndex]="true"
+      [showAddButton]="true"
+      [showRefreshButton]="true"
+      [showExportButton]="true"
+      [showViewButton]="true"
+      [showEditButton]="true"
+      [showDeleteButton]="true"
+      (pageChange)="onPageChange($event)"
+      (addClick)="onAdd()"
+      (refreshClick)="onRefresh()"
+      (exportClick)="onExport()"
+      (viewClick)="onView($event)"
+      (editClick)="onEdit($event)"
+      (deleteClick)="onDelete($event)"
+    >
+    </app-data-table>
+  </ng-template>
+
+  <ng-template #rightContent let-user>
+    <app-user-view [user]="user" [refreshKey]="detailRefreshKey"></app-user-view>
+  </ng-template>
+</app-page-split-layout>
 
 <!-- Create User Modal -->
 <app-user-create-modal

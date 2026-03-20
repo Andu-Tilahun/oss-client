@@ -55,6 +55,8 @@ export class UserListComponent implements OnInit {
   lockLoading = false;
   showDeleteModal = false;
   selectedUser: User | null = null;
+  // Forces the right-side detail component to re-render after list mutations.
+  detailRefreshKey = 0;
 
   columns: DataTableColumn<User>[] = [
     {
@@ -99,12 +101,37 @@ export class UserListComponent implements OnInit {
   loadUsers() {
     this.loading = true;
     const filterRequest: FilterRequest = this.buildFilterRequest();
+    const previousSelectedId = this.selectedUser?.id;
     this.userService.filterUsers(filterRequest).subscribe({
       next: (response: PageResponse<User>) => {
         this.users = response.content;
         this.total = response.totalElements;
         this.loading = false;
         this.toastService.success(`Users retrieved successfully`);
+
+        // Default selection (mirrors the farm-plot behavior)
+        // 1) If the list is empty => no selection
+        // 2) If nothing was selected => select first row
+        // 3) If something was selected => keep it if it still exists
+        if (this.users.length === 0) {
+          this.selectedUser = null;
+          return;
+        }
+
+        if (!previousSelectedId) {
+          this.selectedUser = {...this.users[0]};
+          this.detailRefreshKey++;
+          return;
+        }
+
+        const match = this.users.find((u) => u.id === previousSelectedId);
+        if (match) {
+          this.selectedUser = {...match};
+          return;
+        }
+
+        this.selectedUser = {...this.users[0]};
+        this.detailRefreshKey++;
       },
       error: (error) => {
         this.toastService.error(
@@ -137,25 +164,39 @@ export class UserListComponent implements OnInit {
   }
 
   onView(user: User) {
-    console.log('View user:', user);
-    // Navigate to user detail page or show detail modal
+    // For the split view: select the row for the right pane.
+    this.selectedUser = {...user};
+    this.showCreateModal = false;
+    this.showEditModal = false;
+    this.showDeleteModal = false;
+    this.showLockModal = false;
+    this.showUnlockModal = false;
   }
 
   onEdit(user: User) {
-    this.selectedUser = user;
+    this.selectedUser = {...user};
+    this.showCreateModal = false;
+    this.showDeleteModal = false;
+    this.showLockModal = false;
+    this.showUnlockModal = false;
     this.showEditModal = true;
   }
 
   // Lock/Unlock Actions
   onToggleLock(user: User) {
-    this.selectedUser = user;
+    this.selectedUser = {...user};
+    this.showCreateModal = false;
+    this.showEditModal = false;
+    this.showDeleteModal = false;
 
     if (user.accountNonLocked) {
       // User is unlocked, show lock confirmation
       this.showLockModal = true;
+      this.showUnlockModal = false;
     } else {
       // User is locked, show unlock confirmation
       this.showUnlockModal = true;
+      this.showLockModal = false;
     }
   }
 
@@ -169,6 +210,8 @@ export class UserListComponent implements OnInit {
         this.lockLoading = false;
         this.showLockModal = false;
         this.selectedUser = null;
+        this.showEditModal = false;
+        this.showDeleteModal = false;
         this.toastService.success(`User locked successfully`);
         this.loadUsers();
       },
@@ -192,6 +235,8 @@ export class UserListComponent implements OnInit {
         this.lockLoading = false;
         this.showUnlockModal = false;
         this.selectedUser = null;
+        this.showEditModal = false;
+        this.showDeleteModal = false;
         this.toastService.success(`User unlocked successfully`);
 
         this.loadUsers();
@@ -207,7 +252,11 @@ export class UserListComponent implements OnInit {
   }
 
   onDelete(user: User) {
-    this.selectedUser = user;
+    this.selectedUser = {...user};
+    this.showCreateModal = false;
+    this.showEditModal = false;
+    this.showLockModal = false;
+    this.showUnlockModal = false;
     this.showDeleteModal = true;
   }
 
@@ -228,6 +277,15 @@ export class UserListComponent implements OnInit {
         );
       }
     });
+  }
+
+  onCloseDetail(): void {
+    this.selectedUser = null;
+    this.showCreateModal = false;
+    this.showEditModal = false;
+    this.showDeleteModal = false;
+    this.showLockModal = false;
+    this.showUnlockModal = false;
   }
 
   onUserCreated() {

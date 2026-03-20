@@ -1,0 +1,59 @@
+<app-detail-card>
+  <div *ngIf="loading" class="text-sm text-gray-600">Loading user…</div>
+  <div *ngIf="error && !loading" class="text-sm text-red-600">{{ error }}</div>
+  <div *ngIf="!user && !loading" class="text-sm text-gray-500">No user selected.</div>
+
+  <ng-container *ngIf="user && !loading">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
+      <div class="flex items-center gap-6">
+        <app-profile-picture-upload
+          [currentFileId]="user.profileImageUuid"
+          [viewOnly]="true"
+          size="small"
+        ></app-profile-picture-upload>
+
+        <div>
+          <h3 class="text-2xl font-bold text-gray-900">
+            {{ user.firstName }} {{ user.middleName }} {{ user.lastName }}
+          </h3>
+          <p class="text-gray-600 mt-1">{{ user.username }}</p>
+
+          <span
+            class="mt-2 inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
+            [ngClass]="statusPillClass(user.accountNonLocked)"
+          >
+            {{ user.accountNonLocked ? 'Active' : 'Locked' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <hr class="border-gray-200 mb-8" />
+
+    <app-detail-section title="Personal Information">
+      <app-detail-field label="First Name" [value]="user.firstName" />
+      <app-detail-field label="Middle Name" [value]="user.middleName || '-'" />
+      <app-detail-field label="Last Name" [value]="user.lastName" />
+      <app-detail-field label="Email" [value]="user.email" />
+      <app-detail-field label="Gender" [value]="user.gender" />
+    </app-detail-section>
+
+    <app-detail-section title="Account">
+      <app-detail-field label="Username" [value]="user.username" />
+      <app-detail-field label="Role" [value]="user.role" />
+      <app-detail-field label="Status" [value]="user.accountNonLocked ? 'Active' : 'Locked'" />
+    </app-detail-section>
+
+    <app-detail-section title="Record">
+      <app-detail-field
+        label="Created At"
+        [value]="user.createdAt ? (user.createdAt | date:'medium') : '-'"
+      />
+      <app-detail-field
+        label="Updated At"
+        [value]="user.updatedAt ? (user.updatedAt | date:'medium') : '-'"
+      />
+    </app-detail-section>
+  </ng-container>
+</app-detail-card>
+
