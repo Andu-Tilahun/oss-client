@@ -1,26 +1,3 @@
-<!-- Create Farm Plot Modal -->
-<app-farm-plot-create-modal
-  [(visible)]="showCreateModal"
-  (farmPlotCreated)="onFarmPlotCreated()"
-></app-farm-plot-create-modal>
-
-<!-- Edit Farm Plot Modal -->
-<app-farm-plot-edit-modal
-  [(visible)]="showEditModal"
-  [farmPlot]="selectedPlot"
-  (farmPlotUpdated)="onFarmPlotUpdated()"
-></app-farm-plot-edit-modal>
-
-<!-- Delete/Deactivate Confirmation Modal -->
-<app-confirmation-modal
-  [(visible)]="showDeleteModal"
-  title="Deactivate Farm Plot"
-  message="Are you sure you want to deactivate this farm plot?"
-  confirmText="Deactivate"
-  (confirm)="confirmDelete()"
-></app-confirmation-modal>
-
-
 <app-page-split-layout
   [showLeftTitle]="true"
   [showRightTitle]="true"
@@ -73,4 +50,28 @@
     <app-farm-plot-view [plot]="plot" [refreshKey]="detailRefreshKey"></app-farm-plot-view>
   </ng-template>
 </app-page-split-layout>
+
+<!-- Create Farm Plot Modal -->
+<app-farm-plot-create-modal
+  [(visible)]="showCreateModal"
+  (farmPlotCreated)="onFarmPlotCreated()"
+></app-farm-plot-create-modal>
+
+<!-- Edit Farm Plot Modal -->
+<app-farm-plot-edit-modal
+  [(visible)]="showEditModal"
+  [farmPlot]="selectedPlot"
+  (farmPlotUpdated)="onFarmPlotUpdated()"
+></app-farm-plot-edit-modal>
+
+<!-- Delete/Deactivate Confirmation Modal -->
+<app-confirmation-modal
+  [(visible)]="showDeleteModal"
+  title="Deactivate Farm Plot"
+  message="Are you sure you want to deactivate this farm plot?"
+  confirmText="Deactivate"
+  (confirm)="confirmDelete()"
+></app-confirmation-modal>
+
+
 
