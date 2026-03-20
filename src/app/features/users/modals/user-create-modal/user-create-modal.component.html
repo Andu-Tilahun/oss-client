@@ -1,0 +1,17 @@
+<app-modal
+  [(visible)]="visible"
+  title="Create New User"
+  size="lg"
+  [confirmText]="'Create User'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-user-form
+      #userForm
+      mode="create"
+    ></app-user-form>
+  </ng-template>
+</app-modal>

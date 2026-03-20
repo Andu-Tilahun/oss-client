@@ -1,0 +1,50 @@
+.filter-dropdown-container {
+  position: relative;
+}
+
+.filter-dropdown {
+  position: relative;
+}
+
+.filter-content {
+  max-height: 400px;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    max-height 0.25s ease-in-out,
+    opacity 0.25s ease-in-out,
+    transform 0.25s ease-in-out;
+}
+
+.filter-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-4px);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Ensure dropdowns appear above other content */
+.filter-dropdown > div[class*="absolute"] {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* Custom scrollbar for dropdown */
+.filter-dropdown > div[class*="absolute"]::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filter-dropdown > div[class*="absolute"]::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.filter-dropdown > div[class*="absolute"]::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.filter-dropdown > div[class*="absolute"]::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

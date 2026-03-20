@@ -1,0 +1,63 @@
+<app-page-header
+  pageTitle="Branch Management"
+  subTitle="list region information"
+  [showBackButton]="false"
+  [loading]="loading"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <h2 class="text-base font-semibold text-slate-700 mb-4">Branch lists</h2>
+
+      <app-data-table
+        [columns]="columns"
+        [data]="branches"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showIndex]="true"
+        [showAddButton]="true"
+        [showRefreshButton]="true"
+        [showExportButton]="false"
+        [showViewButton]="true"
+        [showEditButton]="true"
+        [showDeleteButton]="true"
+        (pageChange)="onPageChange($event)"
+        (addClick)="onAdd()"
+        (refreshClick)="onRefresh()"
+        (viewClick)="onView($event)"
+        (editClick)="onEdit($event)"
+        (deleteClick)="onDelete($event)"
+      >
+        <div extraTableHeader class="w-full flex justify-end">
+          <app-branch-filter
+            [(searchText)]="searchText"
+            (searchChange)="onSearch()"
+            (clearFilters)="clearFilters()"
+          ></app-branch-filter>
+        </div>
+      </app-data-table>
+    </div>
+  </ng-template>
+</app-page-header>
+
+<app-branch-create-modal
+  [(visible)]="showCreateModal"
+  (branchCreated)="onBranchCreated()"
+></app-branch-create-modal>
+
+<app-branch-edit-modal
+  [(visible)]="showEditModal"
+  [branch]="selectedBranch"
+  (branchUpdated)="onBranchUpdated()"
+></app-branch-edit-modal>
+
+<app-confirmation-modal
+  [(visible)]="showDeleteModal"
+  title="Delete Branch"
+  [message]="'Are you sure you want to delete ' + (selectedBranch?.branchName || 'this branch') + '?'"
+  type="danger"
+  confirmText="Delete"
+  (confirm)="confirmDelete()"
+></app-confirmation-modal>
+

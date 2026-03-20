@@ -1,0 +1,41 @@
+<app-detail-card>
+  <div *ngIf="loading" class="text-sm text-gray-600">Loading notification…</div>
+  <div *ngIf="error && !loading" class="text-sm text-red-600">{{ error }}</div>
+  <div *ngIf="id == null && !loading" class="text-sm text-gray-500">No notification selected.</div>
+
+  <ng-container *ngIf="notification && !loading">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
+      <h3 class="text-2xl font-bold text-gray-900">{{ notification.subject || notification.notificationType }}</h3>
+      <span class="text-sm font-medium text-gray-600">{{ notification.status }}</span>
+    </div>
+
+    <hr class="border-gray-200 mb-8" />
+
+    <!-- Details -->
+    <app-detail-section title="Notification Information">
+      <app-detail-field label="Type" [value]="notification.notificationType" />
+      <app-detail-field label="Recipient" [value]="notification.recipient" />
+      <app-detail-field label="Subject" [value]="notification.subject" />
+      <app-detail-field label="Status" [value]="notification.status" />
+      <app-detail-field label="Event Type" [value]="notification.eventType" />
+    </app-detail-section>
+
+    <!-- Message -->
+    <app-detail-section *ngIf="notification.message" title="Message">
+      <div class="col-span-full p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700 whitespace-pre-wrap">
+        {{ notification.message }}
+      </div>
+    </app-detail-section>
+
+    <!-- Error / Timestamps -->
+    <app-detail-section title="Record">
+      <app-detail-field label="Error" [value]="notification.errorMessage" />
+      <app-detail-field label="Sent At" [value]="notification.sentAt ? (notification.sentAt | date:'medium') : '-'" />
+      <app-detail-field label="Created At" [value]="notification.createdAt ? (notification.createdAt | date:'medium') : '-'" />
+      <app-detail-field label="Updated At" [value]="notification.updatedAt ? (notification.updatedAt | date:'medium') : '-'" />
+    </app-detail-section>
+
+  </ng-container>
+</app-detail-card>

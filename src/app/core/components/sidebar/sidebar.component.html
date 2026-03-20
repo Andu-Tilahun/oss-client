@@ -1,0 +1,114 @@
+<div
+  [class]="isCollapsed ? 'w-20' : 'w-64'"
+  class="font-sans bg-gray-900 text-white h-full transition-all duration-300 flex flex-col"
+>
+  <!-- Logo -->
+  <div class="p-4 border-b border-gray-800 space-y-3">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+        </div>
+        <span *ngIf="!isCollapsed" class="text-xl font-bold">MyApp</span>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div *ngIf="!isCollapsed" class="relative">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="applySearch()"
+        placeholder="Search menu..."
+        class="w-full px-3 py-2 text-sm bg-gray-800 border border-gray-700 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      />
+    </div>
+  </div>
+
+  <!-- Menu Items -->
+  <nav class="flex-1 overflow-y-auto py-4">
+    <ul class="space-y-1 px-3">
+      <li *ngFor="let item of menuItems">
+        <!-- Main Menu Item -->
+        <div>
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="bg-blue-600"
+            [routerLinkActiveOptions]="{exact: false}"
+            (click)="item.children && toggleSubmenu(item)"
+            class="flex items-center justify-between px-3 py-3 rounded-lg hover:bg-gray-800 cursor-pointer transition-colors group"
+          >
+            <div class="flex items-center space-x-3">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon"></path>
+              </svg>
+              <span *ngIf="!isCollapsed" class="text-sm font-medium">{{ item.label }}</span>
+            </div>
+
+            <!-- Dropdown Arrow -->
+            <svg
+              *ngIf="item.children && !isCollapsed"
+              [class.rotate-180]="item.expanded"
+              class="w-4 h-4 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </a>
+
+          <!-- Submenu -->
+          <ul
+            *ngIf="item.children && item.expanded && !isCollapsed"
+            class="ml-8 mt-2 space-y-1"
+          >
+            <li *ngFor="let child of item.children">
+              <a
+                [routerLink]="child.route"
+                routerLinkActive
+                #rla="routerLinkActive"
+                [routerLinkActiveOptions]="{ exact: true }"
+                class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-800 transition-colors"
+                [ngClass]="{
+                  'text-blue-400 bg-gray-800': rla.isActive,
+                  'text-gray-400 hover:text-white': !rla.isActive
+                }"
+              >
+                {{ child.label }}
+              </a>
+            </li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Footer -->
+  <div class="p-4 border-t border-gray-800">
+    <button
+      (click)="toggleSidebar()"
+      class="w-full flex items-center justify-center px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          *ngIf="!isCollapsed"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+        ></path>
+        <path
+          *ngIf="isCollapsed"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M13 5l7 7-7 7M5 5l7 7-7 7"
+        ></path>
+      </svg>
+      <span *ngIf="!isCollapsed" class="ml-2 text-sm">Collapse</span>
+    </button>
+  </div>
+</div>

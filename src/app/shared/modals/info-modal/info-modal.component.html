@@ -1,0 +1,22 @@
+<app-modal
+  [(visible)]="visible"
+  [title]="title"
+  size="sm"
+  [showCancelButton]="false"
+  [confirmText]="buttonText"
+  (confirm)="handleClose()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <div [class]="'rounded-lg border p-4 ' + config.bgColor + ' ' + config.borderColor">
+    <div class="flex items-start space-x-3">
+      <div [class]="'w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ' + config.iconBg">
+        <svg [class]="'w-5 h-5 ' + config.iconColor" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="config.icon"></path>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <p class="text-gray-700">{{ message }}</p>
+      </div>
+    </div>
+  </div>
+</app-modal>

@@ -1,0 +1,12 @@
+<app-page-header
+  pageTitle="Subcity Details"
+  subTitle="View subcity information"
+  [showBackButton]="true"
+  (back)="goBack()"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <app-subcity-view [id]="id ?? undefined"></app-subcity-view>
+    </div>
+  </ng-template>
+</app-page-header>

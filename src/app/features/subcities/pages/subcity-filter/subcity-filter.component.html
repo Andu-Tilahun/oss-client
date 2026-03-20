@@ -1,0 +1,22 @@
+<div class="flex items-center space-x-2">
+  <input
+    type="text"
+    class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    placeholder="Search subcity/zone..."
+    [(ngModel)]="searchText"
+    (ngModelChange)="onSearchTextChange($event)"
+  />
+  <button
+    class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+    (click)="onSearch()"
+  >
+    Search
+  </button>
+  <button
+    class="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+    (click)="onClearFilters()"
+  >
+    Clear
+  </button>
+</div>
+

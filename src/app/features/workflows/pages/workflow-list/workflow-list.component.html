@@ -1,0 +1,73 @@
+<app-page-header
+  pageTitle="Workflow Management"
+  subTitle="list workflow information"
+  [showBackButton]="false"
+  [loading]="loading"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <h2 class="text-base font-semibold text-slate-700 mb-4">Workflow lists</h2>
+      <app-data-table
+        [columns]="columns"
+        [data]="workflows"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showIndex]="true"
+        [showAddButton]="true"
+        [showRefreshButton]="true"
+        [showViewButton]="true"
+        [showEditButton]="true"
+        [showDeleteButton]="true"
+        (pageChange)="onPageChange($event)"
+        (addClick)="onAdd()"
+        (refreshClick)="onRefresh()"
+        (viewClick)="onView($event)"
+        (editClick)="onEdit($event)"
+        (deleteClick)="onDeleteClick($event)"
+      >
+        <div extraTableHeader class="w-full flex justify-end">
+          <app-workflow-filter
+            [(searchText)]="searchText"
+            [(selectedRequestTypes)]="selectedRequestTypes"
+            (searchChange)="onSearch()"
+            (clearFilters)="clearFilters()"
+          ></app-workflow-filter>
+        </div>
+      </app-data-table>
+    </div>
+  </ng-template>
+</app-page-header>
+
+<!-- Create Workflow Modal -->
+<app-workflow-create-modal
+  [(visible)]="showCreateModal"
+  (workflowCreated)="loadWorkflows()"
+></app-workflow-create-modal>
+
+<!-- Edit Workflow Modal -->
+<app-workflow-edit-modal
+  [(visible)]="showEditModal"
+  [workflow]="selectedWorkflow"
+  (workflowUpdated)="loadWorkflows()"
+></app-workflow-edit-modal>
+
+<!-- Delete Confirmation Modal -->
+<app-confirmation-modal
+  [(visible)]="showDeleteModal"
+  title="Delete Workflow"
+  [message]="'Are you sure you want to delete workflow: ' + selectedWorkflow?.name + '?'"
+  type="danger"
+  confirmText="Delete"
+  [confirmLoading]="deleteLoading"
+  (confirm)="confirmDelete()"
+></app-confirmation-modal>
+
+<!-- Success Modal -->
+<app-info-modal
+  [(visible)]="showSuccessModal"
+  title="Success"
+  [message]="successMessage"
+  type="success"
+></app-info-modal>

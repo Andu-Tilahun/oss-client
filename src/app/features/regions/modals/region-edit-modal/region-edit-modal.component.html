@@ -1,0 +1,19 @@
+<app-modal
+  [(visible)]="visible"
+  title="Edit Region"
+  size="md"
+  [confirmText]="'Update Region'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-region-form
+      #regionForm
+      mode="edit"
+      [region]="region"
+    ></app-region-form>
+  </ng-template>
+</app-modal>
+

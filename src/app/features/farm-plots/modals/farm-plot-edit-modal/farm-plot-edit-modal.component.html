@@ -1,0 +1,20 @@
+<app-modal
+  [(visible)]="visible"
+  title="Edit Farm Plot"
+  size="xxl"
+  [confirmText]="'Save Changes'"
+  [confirmLoading]="isLoading"
+  [showCancelButton]="true"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-farm-plot-form
+      #farmPlotForm
+      mode="edit"
+      [farmPlot]="farmPlot"
+    ></app-farm-plot-form>
+  </ng-template>
+</app-modal>
+

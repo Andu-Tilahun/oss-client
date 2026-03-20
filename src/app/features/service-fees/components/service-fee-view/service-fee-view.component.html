@@ -1,0 +1,34 @@
+<app-detail-card>
+  <div *ngIf="loading" class="text-sm text-gray-600">Loading service fee…</div>
+  <div *ngIf="error && !loading" class="text-sm text-red-600">{{ error }}</div>
+  <div *ngIf="!id && !loading" class="text-sm text-gray-500">No service fee selected.</div>
+
+  <ng-container *ngIf="fee && !loading">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
+      <h3 class="text-2xl font-bold text-gray-900">{{ formatPaymentType(fee.paymentType) }}</h3>
+      <span [class]="fee.active ? 'text-green-600 font-medium' : 'text-gray-500'">
+        {{ fee.active ? 'Active' : 'Inactive' }}
+      </span>
+    </div>
+
+    <hr class="border-gray-200 mb-8" />
+
+    <!-- Details -->
+    <app-detail-section title="Fee Details">
+      <app-detail-field label="Payment Type" [value]="formatPaymentType(fee.paymentType)" />
+      <app-detail-field label="Amount" [value]="fee.amount" />
+      <app-detail-field label="Description" [value]="fee.description" />
+      <app-detail-field label="Active" [value]="fee.active ? 'Yes' : 'No'" />
+      <app-detail-field label="End Date" [value]="fee.endDate ? (fee.endDate | date:'d MMM yyyy') : '-'" />
+    </app-detail-section>
+
+    <!-- Timestamps -->
+    <app-detail-section title="Record">
+      <app-detail-field label="Created At" [value]="fee.createdAt ? (fee.createdAt | date:'medium') : '-'" />
+      <app-detail-field label="Updated At" [value]="fee.updatedAt ? (fee.updatedAt | date:'medium') : '-'" />
+    </app-detail-section>
+
+  </ng-container>
+</app-detail-card>

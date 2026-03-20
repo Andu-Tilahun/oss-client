@@ -1,0 +1,22 @@
+<app-page-header
+  pageTitle="Detail Clearing Agent Applicant"
+  subTitle="Clearing Agent Applicant Details"
+  [showBackButton]="true"
+  [loading]="loading"
+>
+  <ng-template #mainContent>
+    <div class="lg:col-span-2">
+      <app-user-request-detail
+        [userRequestId]="userRequestId"
+        [requestType]="userRequestType"
+        [dynamicTabs]="dynamicTabs"
+      >
+        <ng-template #applicantTab>
+          <app-clearing-agent-applicant-view [userRequestId]="userRequestId"></app-clearing-agent-applicant-view>
+        </ng-template>
+
+      </app-user-request-detail>
+    </div>
+  </ng-template>
+</app-page-header>
+

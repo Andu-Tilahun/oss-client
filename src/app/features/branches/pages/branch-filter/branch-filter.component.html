@@ -1,0 +1,29 @@
+<div class="flex items-center gap-3">
+  <div class="flex-1">
+    <input
+      type="search"
+      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      placeholder="Search branches..."
+      [ngModel]="searchText"
+      (ngModelChange)="onSearchTextChange($event)"
+      (keyup.enter)="onSearch()"
+    />
+  </div>
+
+  <button
+    type="button"
+    class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
+    (click)="onSearch()"
+  >
+    Search
+  </button>
+
+  <button
+    type="button"
+    class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50"
+    (click)="onClearFilters()"
+  >
+    Clear
+  </button>
+</div>
+

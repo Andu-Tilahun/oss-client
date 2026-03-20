@@ -1,0 +1,15 @@
+<app-modal
+  [(visible)]="visible"
+  title="Edit Branch"
+  size="md"
+  [confirmText]="'Update Branch'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-branch-form #branchForm mode="edit" [branch]="branch"></app-branch-form>
+  </ng-template>
+</app-modal>
+

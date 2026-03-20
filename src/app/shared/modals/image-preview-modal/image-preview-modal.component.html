@@ -1,0 +1,17 @@
+<app-modal
+  [(visible)]="visible"
+  [title]="title"
+  [showFooter]="false"
+  size="xl"
+  [centered]="true"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <div class="text-center">
+    <img
+      [src]="imageUrl"
+      [alt]="imageAlt"
+      class="max-w-full h-auto rounded-lg mx-auto"
+    />
+    <p *ngIf="caption" class="mt-4 text-gray-600">{{ caption }}</p>
+  </div>
+</app-modal>

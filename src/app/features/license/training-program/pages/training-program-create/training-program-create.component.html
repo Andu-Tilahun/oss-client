@@ -1,0 +1,16 @@
+<app-training-program-stepper
+  mode="create"
+  [programId]="programId"
+  [program]="program"
+  [regions]="regions"
+  [organizations]="organizations"
+  [isLoading]="isLoading"
+  [isSaving]="isSaving"
+  [(currentStep)]="currentStep"
+  (basicInfoSubmit)="onBasicInfoSubmit($event)"
+  (regionalQuotaSubmit)="onRegionalQuotaSubmit($event)"
+  (organizationalQuotaSubmit)="onOrganizationalQuotaSubmit($event)"
+  (completed)="onConfirm()"
+  (cancelRequested)="onCancel()"
+></app-training-program-stepper>
+

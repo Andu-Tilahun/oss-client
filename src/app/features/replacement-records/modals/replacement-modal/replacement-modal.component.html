@@ -1,0 +1,18 @@
+<app-modal
+  [(visible)]="visible"
+  title="Confirm Replacement"
+  [showFooter]="true"
+  confirmText="Confirm Replacement"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+>
+  <div class="space-y-4">
+    <div class="text-sm text-gray-600">
+      <div><span class="font-semibold">Employee:</span> {{ record?.employeeCode || '' }} {{ record?.employeeName || record?.employeeId }}</div>
+      <div><span class="font-semibold">Old Item:</span> {{ record?.itemSerialNumber || record?.itemId }}</div>
+    </div>
+    <app-replacement-form [queue]="queue"></app-replacement-form>
+  </div>
+</app-modal>
+

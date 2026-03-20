@@ -1,0 +1,12 @@
+<app-page-header
+  pageTitle="Notification Details"
+  subTitle="View notification log"
+  [showBackButton]="true"
+  (back)="goBack()"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <app-notification-view [id]="id ?? undefined"></app-notification-view>
+    </div>
+  </ng-template>
+</app-page-header>

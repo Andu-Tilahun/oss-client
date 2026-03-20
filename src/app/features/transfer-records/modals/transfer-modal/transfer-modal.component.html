@@ -1,0 +1,21 @@
+<app-modal
+  [(visible)]="visible"
+  title="Transfer Item"
+  [showFooter]="true"
+  confirmText="Confirm Transfer"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+>
+  <div class="space-y-4">
+    <div class="text-sm text-gray-600">
+      <div><span class="font-semibold">Item:</span> {{ record?.itemSerialNumber || record?.itemId }}</div>
+      <div>
+        <span class="font-semibold">From:</span>
+        {{ record?.employeeCode || '' }} {{ record?.employeeName || record?.employeeId }}
+      </div>
+    </div>
+    <app-transfer-form [employees]="employees"></app-transfer-form>
+  </div>
+</app-modal>
+

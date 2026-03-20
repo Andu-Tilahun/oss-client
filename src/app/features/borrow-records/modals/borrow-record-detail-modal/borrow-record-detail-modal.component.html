@@ -1,0 +1,34 @@
+<app-modal
+  [(visible)]="visible"
+  title="Borrow Record Details"
+  [showFooter]="true"
+  [showConfirmButton]="false"
+  cancelText="Close"
+  (cancel)="visibleChange.emit(false)"
+>
+  <div *ngIf="!record" class="text-sm text-gray-500">No record selected.</div>
+
+  <ng-container *ngIf="record">
+    <app-detail-card>
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
+        <h3 class="text-2xl font-bold text-gray-900">{{ record.itemSerialNumber || record.itemId }}</h3>
+        <span class="text-sm font-medium text-gray-600">{{ record.status }}</span>
+      </div>
+
+      <hr class="border-gray-200 mb-8" />
+
+      <app-detail-section title="Borrow Information">
+        <app-detail-field label="Employee" [value]="(record.employeeCode || '') + ' — ' + (record.employeeName || '')" />
+        <app-detail-field label="Employee Code" [value]="record.employeeCode ?? '-'" />
+        <app-detail-field label="Item Serial" [value]="record.itemSerialNumber ?? '-'" />
+        <app-detail-field label="Item Name" [value]="record.itemName ?? record.itemTypeName ?? '-'" />
+        <app-detail-field label="Item Type" [value]="record.itemTypeName ?? '-'" />
+        <app-detail-field label="Borrowed At" [value]="record.borrowedAt || '-'" />
+        <app-detail-field label="Returned At" [value]="record.returnedAt ?? '-'" />
+        <app-detail-field label="Condition at Borrow" [value]="record.conditionAtBorrow" />
+        <app-detail-field label="Condition at Return" [value]="record.conditionAtReturn ?? '-'" />
+        <app-detail-field label="Status" [value]="record.status" />
+      </app-detail-section>
+    </app-detail-card>
+  </ng-container>
+</app-modal>

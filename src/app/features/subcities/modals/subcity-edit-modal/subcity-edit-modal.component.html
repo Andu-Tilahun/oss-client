@@ -1,0 +1,20 @@
+<app-modal
+  [(visible)]="visible"
+  title="Edit Subcity/Zone"
+  size="md"
+  [confirmText]="'Update Subcity/Zone'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-subcity-form
+      #subcityForm
+      mode="edit"
+      [subcity]="subcity"
+      [regions]="regions"
+    ></app-subcity-form>
+  </ng-template>
+</app-modal>
+

@@ -1,0 +1,12 @@
+<app-page-header
+  pageTitle="Workflow Details"
+  subTitle="View workflow information"
+  [showBackButton]="true"
+  (back)="goBack()"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <app-workflow-view [id]="id ?? undefined"></app-workflow-view>
+    </div>
+  </ng-template>
+</app-page-header>

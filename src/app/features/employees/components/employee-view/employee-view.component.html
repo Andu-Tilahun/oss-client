@@ -1,0 +1,25 @@
+<app-detail-card>
+  <div *ngIf="loading" class="text-sm text-gray-600">Loading employee…</div>
+  <div *ngIf="error && !loading" class="text-sm text-red-600">{{ error }}</div>
+  <div *ngIf="!id && !loading" class="text-sm text-gray-500">No employee selected.</div>
+
+  <ng-container *ngIf="employee && !loading">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
+      <h3 class="text-2xl font-bold text-gray-900">{{ employee.name }}</h3>
+      <span class="text-sm font-medium text-gray-600">{{ employee.employeeCode }}</span>
+    </div>
+
+    <hr class="border-gray-200 mb-8" />
+
+    <app-detail-section title="Employee Information">
+      <app-detail-field label="Name" [value]="employee.name" />
+      <app-detail-field label="Employee Code" [value]="employee.employeeCode" />
+      <app-detail-field label="Department" [value]="employee.departmentName || '-'" />
+      <app-detail-field label="Position" [value]="employee.position || '-'" />
+      <app-detail-field label="Gender" [value]="employee.gender || '-'" />
+      <app-detail-field label="Age" [value]="(employee.age ?? '-') + ''" />
+      <app-detail-field label="Status" [value]="employee.status" />
+    </app-detail-section>
+  </ng-container>
+</app-detail-card>
+

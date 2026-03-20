@@ -1,0 +1,14 @@
+<app-modal
+  [(visible)]="visible"
+  title="Edit Item Type"
+  size="md"
+  confirmText="Update Item Type"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-item-type-form #form mode="edit" [itemType]="itemType"></app-item-type-form>
+  </ng-template>
+</app-modal>

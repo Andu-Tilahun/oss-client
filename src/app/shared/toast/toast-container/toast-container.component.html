@@ -1,0 +1,53 @@
+<div class="toast-container">
+  <div
+    *ngFor="let toast of toasts"
+    [@toastAnimation]
+    [class]="'toast ' + getColorClasses(toast.type)"
+  >
+    <div class="toast-content">
+      <!-- Icon -->
+      <div class="flex-shrink-0">
+        <svg
+          [class]="'toast-icon ' + getIconColorClass(toast.type)"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            [attr.d]="getIcon(toast.type)"
+          ></path>
+        </svg>
+      </div>
+
+      <!-- Content -->
+      <div class="toast-message">
+        <p *ngIf="toast.title" class="toast-title">{{ toast.title }}</p>
+        <p class="toast-text">{{ toast.message }}</p>
+      </div>
+
+      <!-- Close Button -->
+      <button
+        *ngIf="toast.dismissible"
+        (click)="dismiss(toast.id)"
+        class="toast-close"
+        type="button"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Progress Bar (Optional) -->
+    <div *ngIf="toast.duration" class="toast-progress">
+      <div
+        class="toast-progress-bar"
+        [class]="getIconColorClass(toast.type)"
+        [style.animation-duration.ms]="toast.duration"
+      ></div>
+    </div>
+  </div>
+</div>

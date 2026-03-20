@@ -1,0 +1,40 @@
+<app-data-table
+  [columns]="columns"
+  [data]="records"
+  [loading]="loading"
+  [total]="records.length"
+  [pageSize]="10"
+  [pageIndex]="1"
+  [showPagination]="true"
+  [showIndex]="true"
+  [showRefreshButton]="true"
+  [showActionColumn]="false"
+  refreshButtonText="Refresh"
+  (refreshClick)="load()"
+  (viewClick)="onView($event)"
+  noDataMessage="No borrow records found"
+></app-data-table>
+
+<app-replacement-modal
+  [(visible)]="showModal"
+  [record]="selected"
+  (confirmed)="onConfirmed()"
+></app-replacement-modal>
+
+<app-transfer-modal
+  [(visible)]="showTransferModal"
+  [record]="selected"
+  (transferred)="onTransferred()"
+></app-transfer-modal>
+
+<app-return-modal
+  [(visible)]="showReturnModal"
+  [record]="selected"
+  (returned)="onReturned()"
+></app-return-modal>
+
+<app-borrow-record-detail-modal
+  [(visible)]="showDetailModal"
+  [record]="selected"
+></app-borrow-record-detail-modal>
+

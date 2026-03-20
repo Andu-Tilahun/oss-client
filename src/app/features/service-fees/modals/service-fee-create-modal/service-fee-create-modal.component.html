@@ -1,0 +1,15 @@
+<app-modal
+  [(visible)]="visible"
+  title="Create Service Fee"
+  size="md"
+  [confirmText]="'Create Service Fee'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-service-fee-form #serviceFeeForm mode="create"></app-service-fee-form>
+  </ng-template>
+</app-modal>
+

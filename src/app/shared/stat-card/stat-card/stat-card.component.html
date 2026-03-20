@@ -1,0 +1,39 @@
+<div
+  class="rounded-xl p-5 border shadow-sm hover:shadow-md transition-shadow"
+  [ngClass]="styles.wrapper"
+>
+  <!-- Top row: label + optional icon -->
+  <div class="flex items-center justify-between mb-2">
+    <p
+      class="text-xs font-medium uppercase tracking-wider"
+      [ngClass]="styles.label"
+    >
+      {{ label }}
+    </p>
+
+    <svg
+      *ngIf="iconPath"
+      class="w-5 h-5"
+      [ngClass]="styles.icon"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        [attr.d]="iconPath"
+      />
+    </svg>
+  </div>
+
+  <!-- Value row -->
+  <p class="text-2xl font-bold" [ngClass]="styles.value">
+    {{ value | number }}
+    <span *ngIf="suffix" class="text-sm font-medium ml-1 opacity-70">{{ suffix }}</span>
+  </p>
+
+  <!-- Optional projected extra content (e.g. a trend badge) -->
+  <ng-content></ng-content>
+</div>

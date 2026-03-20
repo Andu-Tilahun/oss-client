@@ -1,0 +1,221 @@
+<div class="document-upload">
+  <!-- Label -->
+  <label class="block text-sm font-medium text-gray-700 mb-2">
+    {{ label }}
+    <span *ngIf="required" class="text-red-500">*</span>
+  </label>
+
+  <!-- View-only preview (used in applicant detail tab, etc.) -->
+  <div *ngIf="viewOnly; else editableBlock">
+    <div
+      *ngIf="currentFile"
+      class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+      (click)="viewDocument()"
+      title="Preview"
+    >
+      <ng-container [ngSwitch]="getFileIcon()">
+        <!-- Image thumbnail icon -->
+        <svg
+          *ngSwitchCase="'image'"
+          class="w-5 h-5 text-blue-600 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+          ></path>
+        </svg>
+
+        <!-- PDF icon -->
+        <svg
+          *ngSwitchCase="'pdf'"
+          class="w-5 h-5 text-red-600 mr-2"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h12l4 4v16H2v-1z"></path>
+        </svg>
+
+        <!-- Generic document icon -->
+        <svg
+          *ngSwitchDefault
+          class="w-5 h-5 text-gray-600 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          ></path>
+        </svg>
+      </ng-container>
+
+      <span class="text-xs font-medium text-gray-800 truncate max-w-[160px]">
+        {{ currentFile.originalFilename }}
+      </span>
+
+      <!-- Small eye/icon for 'preview' -->
+      <svg
+        class="w-4 h-4 text-gray-500 ml-2"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+        ></path>
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+        ></path>
+      </svg>
+    </div>
+    <div *ngIf="!currentFile" class="text-xs text-gray-500">
+      No file available.
+    </div>
+  </div>
+
+  <!-- Editable upload / preview / delete -->
+  <ng-template #editableBlock>
+  <!-- Upload Tiles -->
+  <div class="flex items-start space-x-3">
+    <!-- Upload tile -->
+    <button
+      type="button"
+      (click)="triggerFileInput(fileInput)"
+      [disabled]="isUploading"
+      class="flex flex-col items-center justify-center w-24 h-24 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      title="Upload from device"
+    >
+      <svg class="w-6 h-6 mb-1 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+      </svg>
+      <span class="text-xs font-medium text-gray-700">
+        {{ isUploading ? 'Uploading' : 'Upload' }}
+      </span>
+    </button>
+
+    <!-- Capture tile (reuses file input for now) -->
+    <button
+      type="button"
+      (click)="triggerFileInput(fileInput)"
+      [disabled]="isUploading"
+      class="flex flex-col items-center justify-center w-24 h-24 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      title="Capture from camera"
+    >
+      <svg class="w-6 h-6 mb-1 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h4l2-2h4l2 2h4v11a2 2 0 01-2 2H6a2 2 0 01-2-2V7z"></path>
+        <circle cx="12" cy="13" r="3" stroke-width="2"></circle>
+      </svg>
+      <span class="text-xs font-medium text-gray-700">
+        Capture
+      </span>
+    </button>
+
+    <!-- Preview & delete tile -->
+    <div
+      *ngIf="currentFile && !isUploading"
+      class="relative flex flex-col items-center justify-center w-36 h-24 rounded-lg border border-gray-200 bg-white cursor-pointer group"
+      (click)="viewDocument()"
+      title="Preview document"
+    >
+      <!-- Icon / thumbnail -->
+      <ng-container [ngSwitch]="getFileIcon()">
+        <!-- Image preview -->
+        <img
+          *ngSwitchCase="'image'"
+          [src]="currentFile.presignedUrl"
+          alt="Preview"
+          class="w-full h-full object-cover rounded-lg"
+        />
+
+        <!-- PDF icon -->
+        <svg
+          *ngSwitchCase="'pdf'"
+          class="w-8 h-8 text-red-600"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path d="M4 18h12V6h-4V2H4v16zm-2 1V0h12l4 4v16H2v-1z"></path>
+        </svg>
+
+        <!-- Generic document icon -->
+        <svg
+          *ngSwitchDefault
+          class="w-8 h-8 text-gray-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          ></path>
+        </svg>
+      </ng-container>
+
+      <!-- File name -->
+      <div class="absolute bottom-1 left-1 right-8 px-1">
+        <p class="text-[10px] text-gray-800 truncate">
+          {{ currentFile.originalFilename }}
+        </p>
+      </div>
+
+      <!-- Delete button -->
+      <button
+        type="button"
+        (click)="removeDocument(); $event.stopPropagation()"
+        class="absolute top-1 right-1 inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-600 text-white text-xs opacity-90 hover:opacity-100"
+        title="Delete"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+  </ng-template>
+
+  <!-- Hidden File Input -->
+  <input
+    #fileInput
+    type="file"
+    [accept]="accept"
+    (change)="onFileSelected($event)"
+    class="hidden"
+  />
+
+  <!-- Progress Bar -->
+  <div *ngIf="isUploading" class="mt-3">
+    <div class="flex items-center justify-between text-sm text-gray-600 mb-1">
+      <span>Uploading...</span>
+      <span>{{ uploadProgress }}%</span>
+    </div>
+    <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div
+        class="h-full bg-blue-500 transition-all duration-300"
+        [style.width.%]="uploadProgress">
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !viewOnly" class="mt-2 flex items-center text-red-600 text-sm">
+    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+    {{ errorMessage }}
+  </div>
+</div>

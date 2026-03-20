@@ -1,0 +1,150 @@
+<form [formGroup]="workflowForm" class="space-y-6">
+  <!-- Basic Information -->
+  <div class="border-b border-gray-200 pb-6">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">Basic Information</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Name -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Workflow Name <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          formControlName="name"
+          class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [class.border-red-500]="workflowForm.get('name')?.invalid && workflowForm.get('name')?.touched"
+          placeholder="Enter workflow name"
+        />
+        <div *ngIf="workflowForm.get('name')?.invalid && workflowForm.get('name')?.touched" class="mt-1 text-sm text-red-600">
+          Name is required
+        </div>
+      </div>
+
+      <!-- Request Type -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Request Type <span class="text-red-500">*</span>
+        </label>
+        <select
+          formControlName="requestType"
+          class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [class.border-red-500]="workflowForm.get('requestType')?.invalid && workflowForm.get('requestType')?.touched"
+        >
+          <option value="">Select request type</option>
+          <option *ngFor="let type of requestTypes" [value]="type">{{ type }}</option>
+        </select>
+        <div *ngIf="workflowForm.get('requestType')?.invalid && workflowForm.get('requestType')?.touched" class="mt-1 text-sm text-red-600">
+          Request type is required
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Workflow Transitions -->
+  <div class="mt-6">
+    <app-repeater
+      [formArray]="transitions"
+      title="Workflow Transitions"
+      addButtonText="Add Transition"
+      emptyStateText="No transitions added yet. Click 'Add Transition' to begin."
+      [showIndex]="false"
+      [showEmptyStateAddButton]="false"
+      (add)="addTransition()"
+      (remove)="removeTransition($event)"
+    >
+      <ng-template #itemTemplate let-item let-i="index">
+        <div
+          [formGroup]="item"
+          class="grid grid-cols-1 md:grid-cols-2 gap-4"
+        >
+          <!-- Current Status -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Current Status <span class="text-red-500">*</span>
+            </label>
+            <select
+              formControlName="currentStatus"
+              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-500]="(item.get('currentStatus')?.invalid && item.get('currentStatus')?.touched) || isDuplicateTransition(i) || hasSameStatus(i)"
+            >
+              <option value="">Select status</option>
+              <option *ngFor="let status of workflowStatuses" [value]="status">{{ status }}</option>
+            </select>
+          </div>
+
+          <!-- Next Status -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Next Status <span class="text-red-500">*</span>
+            </label>
+            <select
+              formControlName="nextStatus"
+              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-500]="(item.get('nextStatus')?.invalid && item.get('nextStatus')?.touched) || isDuplicateTransition(i) || hasSameStatus(i)"
+            >
+              <option value="">Select status</option>
+              <option *ngFor="let status of workflowStatuses" [value]="status">{{ status }}</option>
+            </select>
+          </div>
+
+          <!-- Role -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Role <span class="text-red-500">*</span>
+            </label>
+            <select
+              formControlName="roleId"
+              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-500]="item.get('roleId')?.invalid && item.get('roleId')?.touched"
+            >
+              <option value="">Select role</option>
+              <option *ngFor="let role of roles" [value]="role.id">
+                {{ role.roleName }}
+              </option>
+            </select>
+            <div *ngIf="item.get('roleId')?.invalid && item.get('roleId')?.touched" class="mt-1 text-sm text-red-600">
+              Role is required
+            </div>
+          </div>
+
+          <!-- Label -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Label <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              formControlName="label"
+              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-500]="item.get('label')?.invalid && item.get('label')?.touched"
+              placeholder="e.g., Approve, Reject"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Action
+            </label>
+            <select
+              formControlName="action"
+              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option *ngFor="let act of workflowTransitionActions" [ngValue]="act">
+                {{ act == null ? 'None' : (actionLabels[act] || act) }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Duplicate / invalid transition warnings -->
+          <div *ngIf="isDuplicateTransition(i)" class="md:col-span-2 text-sm text-red-600">
+            A transition with the same current and next status already exists.
+          </div>
+          <div *ngIf="hasSameStatus(i)" class="md:col-span-2 text-sm text-red-600">
+            Current status and next status cannot be the same.
+          </div>
+        </div>
+      </ng-template>
+    </app-repeater>
+  </div>
+</form>

@@ -1,0 +1,37 @@
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+  <div class="flex items-center justify-between" *ngIf="steps?.length">
+    <ng-container *ngFor="let step of steps; let i = index">
+      <!-- Step circle + labels -->
+      <div class="flex items-center group">
+        <div
+          (click)="onStepClick(i)"
+          [class]="
+            currentStep >= i + 1
+              ? 'bg-blue-600 text-white shadow-md'
+              : (step.clickable ? 'bg-gray-200 text-gray-500 hover:bg-gray-300 cursor-pointer' : 'bg-gray-200 text-gray-500')
+          "
+          class="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all duration-200"
+          [class.cursor-pointer]="step.clickable && i + 1 < currentStep"
+        >
+          {{ i + 1 }}
+        </div>
+        <div class="ml-3">
+          <p class="font-medium text-gray-900 text-sm tracking-wide">
+            {{ step.label }}
+          </p>
+          <p *ngIf="step.description" class="text-xs text-gray-500 mt-0.5">
+            {{ step.description }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Connector between steps -->
+      <div
+        *ngIf="i < steps.length - 1"
+        [class]="currentStep >= i + 2 ? 'bg-blue-600' : 'bg-gray-200'"
+        class="flex-1 h-0.5 mx-4 rounded-full transition-colors duration-300"
+      ></div>
+    </ng-container>
+  </div>
+</div>
+

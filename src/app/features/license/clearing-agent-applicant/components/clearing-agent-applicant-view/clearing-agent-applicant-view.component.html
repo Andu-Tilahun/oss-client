@@ -1,0 +1,81 @@
+<app-detail-card>
+  <div *ngIf="loading" class="text-sm text-gray-600">Loading...</div>
+  <div *ngIf="error" class="text-sm text-red-600">{{ error }}</div>
+
+  <ng-container *ngIf="!loading && applicant">
+
+    <!-- Profile header -->
+    <div class="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8">
+      <div class="flex-shrink-0">
+        <img
+          *ngIf="photoUrl"
+          [src]="photoUrl"
+          alt="Applicant photo"
+          class="w-24 h-24 rounded-full object-cover border-2 border-blue-500 shadow-sm"
+        />
+        <div
+          *ngIf="!photoUrl"
+          class="w-24 h-24 rounded-full bg-blue-100 border-2 border-blue-300 flex items-center justify-center text-2xl font-semibold text-blue-700"
+        >
+          {{ fullName ? fullName.charAt(0) : '?' }}
+        </div>
+      </div>
+      <div class="flex-1">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <h3 class="text-2xl font-bold text-gray-900">{{ fullName }}</h3>
+            <p class="mt-1 text-sm text-gray-500">
+              Ref: <span class="font-mono text-gray-700">{{ applicant.referenceNumber }}</span>
+            </p>
+          </div>
+          <div class="flex gap-4 md:flex-col md:items-end md:gap-1 text-sm">
+            <p>
+              <span class="text-gray-500">Type:</span>
+              <span class="ml-1 font-medium text-gray-900">{{ applicant.applicantType }}</span>
+            </p>
+            <p>
+              <span class="text-gray-500">Training:</span>
+              <span class="ml-1 font-medium text-gray-900">
+                {{ applicant.trainingProgramTitle || applicant.trainingProgramId }}
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="border-gray-200 mb-8" />
+
+    <!-- Personal Information -->
+    <app-detail-section title="Personal Information">
+      <app-detail-field label="First Name"   [value]="applicant.firstName" />
+      <app-detail-field label="Middle Name"  [value]="applicant.middleName" />
+      <app-detail-field label="Last Name"    [value]="applicant.lastName" />
+      <app-detail-field label="Gender"       [value]="applicant.gender" />
+      <app-detail-field label="Date of Birth" [value]="applicant.dateOfBirth | date:'mediumDate'" />
+      <app-detail-field label="Email"        [value]="applicant.email" />
+      <app-detail-field label="Phone"        [value]="applicant.phoneNumber" />
+    </app-detail-section>
+
+    <!-- Documents -->
+    <app-detail-section title="Documents">
+      <ng-container *ngIf="(applicant.documents?.length ?? 0) > 0; else noDocs">
+        <div
+          *ngFor="let d of applicant.documents"
+          class="p-4 bg-gray-50 rounded-lg border border-gray-200"
+        >
+          <app-document-upload
+            [label]="d.documentType"
+            [currentFileId]="d.attachmentId"
+            [required]="false"
+            [viewOnly]="true"
+          ></app-document-upload>
+        </div>
+      </ng-container>
+      <ng-template #noDocs>
+        <p class="text-sm text-gray-500 col-span-full">No documents uploaded.</p>
+      </ng-template>
+    </app-detail-section>
+
+  </ng-container>
+</app-detail-card>

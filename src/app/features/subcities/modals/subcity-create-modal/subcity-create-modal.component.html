@@ -1,0 +1,19 @@
+<app-modal
+  [(visible)]="visible"
+  title="Create Subcity/Zone"
+  size="md"
+  [confirmText]="'Create Subcity/Zone'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-subcity-form
+      #subcityForm
+      mode="create"
+      [regions]="regions"
+    ></app-subcity-form>
+  </ng-template>
+</app-modal>
+

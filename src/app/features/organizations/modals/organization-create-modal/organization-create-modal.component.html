@@ -1,0 +1,18 @@
+<app-modal
+  [(visible)]="visible"
+  title="Create New Organization"
+  size="md"
+  [confirmText]="'Create Organization'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-organization-form
+      #organizationForm
+      mode="create"
+    ></app-organization-form>
+  </ng-template>
+</app-modal>
+

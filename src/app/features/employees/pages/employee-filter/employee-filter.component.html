@@ -1,0 +1,59 @@
+<app-filter-bar
+  [(searchText)]="searchText"
+  (searchTextChange)="onSearchTextInput($event)"
+  searchPlaceholder="Name / Employee Code"
+  applyLabel="Apply"
+  clearLabel="Clear"
+  (searchChange)="onSearch()"
+  (clearFilters)="onClearFilters()"
+>
+  <div class="filter-dropdown relative flex flex-wrap gap-2 items-center">
+    <!-- Status dropdown -->
+    <div class="relative">
+      <button
+        type="button"
+        (click)="toggleStatusDropdown($event)"
+        class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 min-w-[150px] justify-between text-left"
+      >
+        <span class="text-sm text-slate-700">
+          <span class="font-medium">Status:</span>
+          {{ getSelectedStatusesLabel() }}
+        </span>
+        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      <div
+        *ngIf="statusDropdownOpen"
+        class="absolute z-50 mt-1 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-2"
+      >
+        <div class="space-y-1 px-2">
+          <label
+            *ngFor="let s of statuses"
+            class="flex items-center cursor-pointer hover:bg-slate-50 p-2 rounded"
+          >
+            <input
+              type="checkbox"
+              [checked]="isStatusSelected(s)"
+              (change)="toggleStatus(s)"
+              class="w-4 h-4 text-blue-500 border-slate-300 rounded focus:ring-blue-500"
+            />
+            <span class="ml-2 text-sm text-slate-700">{{ s }}</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Department dropdown -->
+    <div>
+      <select
+        [ngModel]="selectedDepartmentId"
+        (ngModelChange)="onDepartmentChange($event)"
+        class="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 w-40"
+      >
+        <option value="">All Departments</option>
+        <option *ngFor="let d of departments" [value]="d.id">{{ d.name }}</option>
+      </select>
+    </div>
+  </div>
+</app-filter-bar>

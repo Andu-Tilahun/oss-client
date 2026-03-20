@@ -1,0 +1,29 @@
+<app-page-header
+  pageTitle="Farm Lease Management"
+  subTitle="lease farm plots and generate payment schedules"
+  [showBackButton]="false"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <div class="flex items-center justify-between gap-4 mb-6">
+        <h2 class="text-base font-semibold text-slate-700">Lease agreements</h2>
+        <button
+          (click)="onAddLease()"
+          class="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow"
+        >
+          Register a Lease
+        </button>
+      </div>
+
+      <p class="text-sm text-slate-600">
+        Use the registration wizard to create a new lease agreement.
+      </p>
+    </div>
+  </ng-template>
+</app-page-header>
+
+<app-farm-lease-create-modal
+  [(visible)]="showCreateModal"
+  (leaseCreated)="onLeaseCreated()"
+></app-farm-lease-create-modal>
+

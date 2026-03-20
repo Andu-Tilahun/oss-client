@@ -1,0 +1,59 @@
+<app-page-header
+  pageTitle="Item Management"
+  subTitle="Manage physical assets"
+  [showBackButton]="false"
+  [loading]="loading"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <h2 class="text-base font-semibold text-slate-700 mb-4">Item lists</h2>
+
+      <app-data-table
+        [columns]="columns"
+        [data]="items"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showIndex]="true"
+        [showAddButton]="true"
+        [showRefreshButton]="true"
+        [showViewButton]="true"
+        [showEditButton]="true"
+        [showDeleteButton]="false"
+        addButtonText="Add Item"
+        (pageChange)="onPageChange($event)"
+        (addClick)="onAdd()"
+        (refreshClick)="onRefresh()"
+        (viewClick)="onView($event)"
+        (editClick)="onEdit($event)"
+      >
+        <div extraTableHeader class="w-full flex justify-end">
+          <app-item-filter
+            [(searchText)]="searchText"
+            [itemTypes]="itemTypes"
+            [(selectedItemTypeId)]="selectedItemTypeId"
+            [(selectedStatuses)]="selectedStatuses"
+            [(selectedConditions)]="selectedConditions"
+            (filterChange)="onFilterChange()"
+            (searchChange)="onFilterChange()"
+            (clearFilters)="clearFilters()"
+          ></app-item-filter>
+        </div>
+      </app-data-table>
+    </div>
+  </ng-template>
+</app-page-header>
+
+<app-item-create-modal
+  [(visible)]="showCreateModal"
+  [itemTypes]="itemTypes"
+  (itemCreated)="onItemCreated()"
+></app-item-create-modal>
+
+<app-item-edit-modal
+  [(visible)]="showEditModal"
+  [item]="selectedItem"
+  [itemTypes]="itemTypes"
+  (itemUpdated)="onItemUpdated()"
+></app-item-edit-modal>

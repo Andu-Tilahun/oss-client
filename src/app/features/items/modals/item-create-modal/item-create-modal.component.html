@@ -1,0 +1,14 @@
+<app-modal
+  [(visible)]="visible"
+  title="Create New Item"
+  size="lg"
+  confirmText="Create Item"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-item-form #form mode="create" [itemTypes]="itemTypes"></app-item-form>
+  </ng-template>
+</app-modal>

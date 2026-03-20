@@ -1,0 +1,66 @@
+<app-page-header
+  pageTitle="Service Fee Management"
+  subTitle="list service fee information"
+  [showBackButton]="false"
+  [loading]="loading"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <h2 class="text-base font-semibold text-slate-700 mb-4">Service fee list</h2>
+
+      <app-data-table
+        [columns]="columns"
+        [data]="serviceFees"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showIndex]="true"
+        [showAddButton]="true"
+        [showRefreshButton]="true"
+        [showViewButton]="true"
+        [showEditButton]="true"
+        [showDeleteButton]="true"
+        (pageChange)="onPageChange($event)"
+        (addClick)="onAdd()"
+        (refreshClick)="onRefresh()"
+        (viewClick)="onView($event)"
+        (editClick)="onEdit($event)"
+        (deleteClick)="onDelete($event)"
+      >
+        <div extraTableHeader class="w-full flex justify-end">
+          <app-service-fee-filter
+            [(searchText)]="searchText"
+            [(paymentType)]="paymentType"
+            [(active)]="active"
+            (searchChange)="onSearch()"
+            (clearFilters)="clearFilters()"
+          ></app-service-fee-filter>
+        </div>
+      </app-data-table>
+    </div>
+  </ng-template>
+</app-page-header>
+
+<!-- Create Service Fee Modal -->
+<app-service-fee-create-modal
+  [(visible)]="showCreateModal"
+  (serviceFeeCreated)="onServiceFeeCreated()"
+></app-service-fee-create-modal>
+
+<!-- Edit Service Fee Modal -->
+<app-service-fee-edit-modal
+  [(visible)]="showEditModal"
+  [serviceFee]="selectedServiceFee"
+  (serviceFeeUpdated)="onServiceFeeUpdated()"
+></app-service-fee-edit-modal>
+
+<!-- Delete Confirmation Modal -->
+<app-confirmation-modal
+  [(visible)]="showDeleteModal"
+  title="Delete Service Fee"
+  message="Are you sure you want to delete this service fee?"
+  confirmText="Delete"
+  (confirm)="confirmDelete()"
+></app-confirmation-modal>
+

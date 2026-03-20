@@ -1,0 +1,36 @@
+<form [formGroup]="form" class="space-y-3">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Employee ID (scan)</label>
+      <input
+        formControlName="employeeId"
+        class="w-full border border-slate-300 rounded-md px-3 py-2 bg-white"
+      />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Item ID (scan)</label>
+      <input
+        formControlName="itemId"
+        class="w-full border border-slate-300 rounded-md px-3 py-2 bg-white"
+      />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Scanned By</label>
+      <input
+        formControlName="scannedBy"
+        class="w-full border border-slate-300 rounded-md px-3 py-2 bg-white"
+      />
+      <p
+        *ngIf="form.get('scannedBy')?.touched && form.get('scannedBy')?.invalid"
+        class="text-xs text-red-600 mt-1"
+      >
+        Scanned By is required.
+      </p>
+    </div>
+  </div>
+
+  <p class="text-xs text-slate-500">
+    Provide exactly one of Employee ID or Item ID. The system auto-alternates Check-In/Check-Out.
+  </p>
+</form>
+

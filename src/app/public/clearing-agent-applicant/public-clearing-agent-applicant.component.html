@@ -1,0 +1,58 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 py-8 px-4">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex items-center justify-between text-white mb-6">
+      <div>
+        <h1 class="text-2xl font-bold drop-shadow">Clearing Agent Applicant</h1>
+        <p class="text-sm text-white/90 drop-shadow">Register or edit your application</p>
+      </div>
+      <a routerLink="/login" class="text-sm font-semibold hover:underline drop-shadow">Back to login</a>
+    </div>
+
+    <!-- Choice card -->
+    <div class="bg-white/95 rounded-2xl shadow-2xl border border-white/60 p-6 mb-6">
+      <h2 class="text-lg font-bold text-gray-900">Do you already have a reference number?</h2>
+      <p class="text-sm text-gray-600 mt-1">
+        If you registered before, choose “Yes” and load your data. Otherwise choose “No” to create a new registration.
+      </p>
+
+      <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <div class="md:col-span-2">
+          <app-reference-number-choice
+            [choice]="choice"
+            (choiceChange)="onChoiceChange($event)"
+            [loading]="loading"
+            (load)="lookup($event)"
+          ></app-reference-number-choice>
+        </div>
+
+        <div class="md:col-span-1">
+          <div class="text-xs text-gray-600">
+            <p class="font-semibold text-gray-800">Public registration types</p>
+            <p class="mt-1">- Private</p>
+            <p>- Former Employee</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stepper area -->
+    <div *ngIf="mode === 'new' || (mode === 'edit' && applicant)">
+      <app-clearing-agent-applicant-stepper
+        [fullPage]="false"
+        [mode]="stepperMode"
+        [applicant]="applicant"
+        [trainingPrograms]="trainingPrograms"
+        [applicantTypeOptions]="publicApplicantTypeOptions"
+        [currentStep]="currentStep"
+        [isLoading]="loading"
+        [isSaving]="saving"
+        (currentStepChange)="currentStep = $event"
+        (applicantInfoSubmit)="onApplicantInfoSubmit($event)"
+        (documentsSubmit)="onDocumentsSubmit($event)"
+        (submitRequested)="onSubmit()"
+        (cancelRequested)="reset()"
+      ></app-clearing-agent-applicant-stepper>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,13 @@
+<app-page-header title="Gate Logs" subtitle="Scan gate-tracked laptops on entry and exit."></app-page-header>
+
+<div class="p-4 space-y-4">
+  <div class="bg-white rounded border p-4 space-y-3">
+    <app-gate-scan-form></app-gate-scan-form>
+    <div class="flex justify-end">
+      <button class="px-4 py-2 bg-blue-600 text-white rounded" (click)="onScan()">Scan</button>
+    </div>
+  </div>
+
+  <app-data-table [columns]="columns" [data]="logs" [loading]="loading"></app-data-table>
+</div>
+

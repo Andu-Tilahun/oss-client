@@ -1,0 +1,54 @@
+<div class="filter-dropdown-container flex flex-col gap-3">
+  <div class="filter-content flex items-center gap-4 flex-wrap">
+    <!-- Search Input -->
+    <div class="flex-1 min-w-[250px]">
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg
+            class="h-5 w-5 text-slate-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            ></path>
+          </svg>
+        </div>
+        <input
+          type="search"
+          [ngModel]="searchText"
+          (ngModelChange)="onSearchTextChange($event)"
+          (keyup.enter)="onSearch()"
+          [placeholder]="searchPlaceholder"
+          class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+        />
+      </div>
+    </div>
+
+    <!-- Apply/Search Button -->
+    <button
+      type="button"
+      (click)="onSearch()"
+      class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+    >
+      {{ applyLabel }}
+    </button>
+
+    <!-- Projected extra controls (dropdowns, ranges, etc.) -->
+    <ng-content></ng-content>
+
+    <!-- Clear Button -->
+    <button
+      type="button"
+      (click)="onClear()"
+      class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm text-slate-700 font-medium"
+    >
+      {{ clearLabel }}
+    </button>
+  </div>
+</div>
+

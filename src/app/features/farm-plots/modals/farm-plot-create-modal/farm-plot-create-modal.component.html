@@ -1,0 +1,16 @@
+<app-modal
+  [(visible)]="visible"
+  title="Create Farm Plot"
+  size="xxl"
+  [confirmText]="'Create Farm Plot'"
+  [confirmLoading]="isLoading"
+  [showCancelButton]="true"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-farm-plot-form #farmPlotForm mode="create"></app-farm-plot-form>
+  </ng-template>
+</app-modal>
+

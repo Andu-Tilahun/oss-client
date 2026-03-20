@@ -1,0 +1,40 @@
+<div class="flex gap-6 flex-wrap">
+  <label class="inline-flex items-center gap-2 cursor-pointer">
+    <input
+      type="radio"
+      name="refChoice"
+      [checked]="choice === 'existing'"
+      (change)="onSelect('existing')"
+    />
+    <span class="text-sm font-medium text-gray-900">{{ existingLabel }}</span>
+  </label>
+
+  <label class="inline-flex items-center gap-2 cursor-pointer">
+    <input
+      type="radio"
+      name="refChoice"
+      [checked]="choice === 'new'"
+      (change)="onSelect('new')"
+    />
+    <span class="text-sm font-medium text-gray-900">{{ newLabel }}</span>
+  </label>
+</div>
+
+<div *ngIf="choice === 'existing'" class="mt-4">
+  <form [formGroup]="form" (ngSubmit)="submit()" class="flex items-center gap-2 flex-wrap">
+    <input
+      type="text"
+      formControlName="referenceNumber"
+      [placeholder]="placeholder"
+      class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono w-72"
+    />
+    <button
+      type="submit"
+      [disabled]="form.invalid || loading"
+      class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+    >
+      {{ loadButtonText }}
+    </button>
+  </form>
+</div>
+

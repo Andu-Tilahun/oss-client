@@ -1,0 +1,18 @@
+<app-modal
+  [(visible)]="visible"
+  title="Create New Region"
+  size="md"
+  [confirmText]="'Create Region'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-region-form
+      #regionForm
+      mode="create"
+    ></app-region-form>
+  </ng-template>
+</app-modal>
+

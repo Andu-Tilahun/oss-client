@@ -1,0 +1,19 @@
+<app-detail-card>
+  <div *ngIf="loading" class="text-sm text-gray-600">Loading region…</div>
+  <div *ngIf="error && !loading" class="text-sm text-red-600">{{ error }}</div>
+  <div *ngIf="!id && !loading" class="text-sm text-gray-500">No region selected.</div>
+
+  <ng-container *ngIf="region && !loading">
+
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
+      <h3 class="text-2xl font-bold text-gray-900">{{ region.name }}</h3>
+    </div>
+
+    <hr class="border-gray-200 mb-8" />
+
+    <app-detail-section title="Region Information">
+      <app-detail-field label="Name" [value]="region.name" />
+    </app-detail-section>
+
+  </ng-container>
+</app-detail-card>

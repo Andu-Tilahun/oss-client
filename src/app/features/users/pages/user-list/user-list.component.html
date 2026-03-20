@@ -1,0 +1,92 @@
+<app-page-header
+  pageTitle="User Management"
+  subTitle="list user information"
+  [showBackButton]="false"
+  [loading]="loading"
+>
+  <!-- Main Content -->
+  <ng-template #mainContent>
+    <div class="p-6">
+      <h2 class="text-base font-semibold text-slate-700 mb-4">User lists</h2>
+
+      <app-data-table
+        [columns]="columns"
+        [data]="users"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showIndex]="true"
+        [showAddButton]="true"
+        [showRefreshButton]="true"
+        [showExportButton]="true"
+        [showViewButton]="false"
+        [showEditButton]="true"
+        [showDeleteButton]="true"
+        (pageChange)="onPageChange($event)"
+        (addClick)="onAdd()"
+        (refreshClick)="onRefresh()"
+        (exportClick)="onExport()"
+        (viewClick)="onView($event)"
+        (editClick)="onEdit($event)"
+        (deleteClick)="onDelete($event)"
+      >
+        <div extraTableHeader class="w-full flex justify-end">
+          <app-user-filter
+            [(searchText)]="searchText"
+            [roleFilters]="roleFilters"
+            [genderFilters]="genderFilters"
+            (filterChange)="onFilterChange()"
+            (searchChange)="onSearch()"
+            (clearFilters)="clearFilters()"
+          ></app-user-filter>
+        </div>
+      </app-data-table>
+    </div>
+  </ng-template>
+</app-page-header>
+
+<!-- Create User Modal -->
+<app-user-create-modal
+  [(visible)]="showCreateModal"
+  (userCreated)="onUserCreated()"
+></app-user-create-modal>
+
+<!-- Edit User Modal -->
+<app-user-edit-modal
+  [(visible)]="showEditModal"
+  [user]="selectedUser"
+  (userUpdated)="onUserUpdated()"
+></app-user-edit-modal>
+
+<!-- Lock User Confirmation Modal -->
+<app-confirmation-modal
+  [(visible)]="showLockModal"
+  title="Lock User Account"
+  [message]="'Are you sure you want to lock ' + selectedUser?.username + '? The user will not be able to log in until unlocked.'"
+  type="warning"
+  confirmText="Lock User"
+  [confirmLoading]="lockLoading"
+  (confirm)="handleLockUser()"
+></app-confirmation-modal>
+
+<!-- Unlock User Confirmation Modal -->
+<app-confirmation-modal
+  [(visible)]="showUnlockModal"
+  title="Unlock User Account"
+  [message]="'Are you sure you want to unlock ' + selectedUser?.username + '? The user will be able to log in again.'"
+  type="info"
+  confirmText="Unlock User"
+  [confirmLoading]="lockLoading"
+  (confirm)="handleUnlockUser()"
+></app-confirmation-modal>
+
+<!-- Delete Confirmation Modal -->
+<app-confirmation-modal
+  [(visible)]="showDeleteModal"
+  title="Delete User"
+  [message]="'Are you sure you want to delete ' + (selectedUser?.username || 'this user') + '? This action cannot be undone.'"
+  type="danger"
+  confirmText="Delete"
+  (confirm)="confirmDelete()"
+></app-confirmation-modal>

@@ -1,0 +1,20 @@
+<app-modal
+  [(visible)]="visible"
+  title="Edit Woreda"
+  size="md"
+  [confirmText]="'Update Woreda'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-woreda-form
+      #woredaForm
+      mode="edit"
+      [woreda]="woreda"
+      [subcities]="subcities"
+    ></app-woreda-form>
+  </ng-template>
+</app-modal>
+

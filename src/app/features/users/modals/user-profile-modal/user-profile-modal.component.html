@@ -1,0 +1,19 @@
+<app-modal
+  [(visible)]="visible"
+  title="Edit User"
+  size="lg"
+  [confirmText]="'Save Changes'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-user-form
+      #userForm
+      mode="edit"
+      [user]="user"
+      [profileUpdate]="true"
+    ></app-user-form>
+  </ng-template>
+</app-modal>

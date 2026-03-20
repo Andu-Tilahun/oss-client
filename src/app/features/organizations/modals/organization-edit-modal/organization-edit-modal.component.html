@@ -1,0 +1,19 @@
+<app-modal
+  [(visible)]="visible"
+  title="Edit Organization"
+  size="md"
+  [confirmText]="'Update Organization'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-organization-form
+      #organizationForm
+      mode="edit"
+      [organization]="organization"
+    ></app-organization-form>
+  </ng-template>
+</app-modal>
+

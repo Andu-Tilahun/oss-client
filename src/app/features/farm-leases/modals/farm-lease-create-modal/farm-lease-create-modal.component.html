@@ -1,0 +1,20 @@
+<app-modal
+  [(visible)]="visible"
+  title="Create Lease Agreement"
+  size="xxl"
+  [showFooter]="false"
+  [maskClosable]="false"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-lease-registration-stepper
+      [(currentStep)]="currentStep"
+      [farmPlots]="farmPlots"
+      [isSaving]="isSaving"
+      (leaseDetailsSubmit)="onLeaseDetailsSubmit($event)"
+      (paymentSubmit)="onPaymentSubmit($event)"
+      (completed)="onConfirm()"
+    ></app-lease-registration-stepper>
+  </ng-template>
+</app-modal>
+

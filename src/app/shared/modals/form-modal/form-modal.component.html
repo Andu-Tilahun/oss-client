@@ -1,0 +1,21 @@
+<app-modal
+  [(visible)]="visible"
+  [title]="title"
+  [size]="size"
+  [confirmText]="submitText"
+  [cancelText]="cancelText"
+  [confirmLoading]="submitLoading"
+  [confirmDisabled]="submitDisabled"
+  (confirm)="handleSubmit()"
+  (cancel)="handleCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <form class="space-y-4">
+      <ng-container *ngIf="formContent">
+        <ng-container *ngTemplateOutlet="formContent"></ng-container>
+      </ng-container>
+      <ng-content></ng-content>
+    </form>
+  </ng-template>
+</app-modal>

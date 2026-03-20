@@ -1,0 +1,17 @@
+<app-modal
+  [(visible)]="visible"
+  title="Create New Employee"
+  size="lg"
+  [confirmText]="'Create Employee'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-employee-form
+      #employeeForm
+      mode="create"
+    ></app-employee-form>
+  </ng-template>
+</app-modal>

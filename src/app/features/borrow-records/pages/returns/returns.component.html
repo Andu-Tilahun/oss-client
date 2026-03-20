@@ -1,0 +1,12 @@
+<app-page-header
+  pageTitle="Returns"
+  subTitle="Active borrowed items to be returned"
+  [showBackButton]="false"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <app-borrow-records-list [autoLoad]="true"></app-borrow-records-list>
+    </div>
+  </ng-template>
+</app-page-header>
+

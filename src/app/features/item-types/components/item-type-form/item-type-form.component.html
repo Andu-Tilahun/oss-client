@@ -1,0 +1,29 @@
+<form [formGroup]="form" class="space-y-4">
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-2">Name <span class="text-red-500">*</span></label>
+    <input
+      type="text"
+      formControlName="name"
+      class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      placeholder="e.g. Laptop, Chair"
+    />
+    <p *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="mt-1 text-sm text-red-600">
+      Name is required
+    </p>
+  </div>
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+    <input
+      type="text"
+      formControlName="category"
+      class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      placeholder="e.g. IT Equipment, Furniture"
+    />
+  </div>
+  <div>
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input type="checkbox" formControlName="gateTracked" class="w-4 h-4 text-blue-500 rounded" />
+      <span class="text-sm text-gray-700">Gate-tracked (eligible for check-in/check-out)</span>
+    </label>
+  </div>
+</form>

@@ -1,0 +1,59 @@
+<app-page-header
+  pageTitle="Employee Management"
+  subTitle="Register and manage employees"
+  [showBackButton]="false"
+  [loading]="loading"
+  [noCard]="true"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+<!--      <h2 class="text-base font-semibold text-slate-700 mb-4">Employee List</h2>-->
+
+      <app-data-table
+        [columns]="columns"
+        [data]="employees"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showPagination]="true"
+        [showIndex]="true"
+        [showAddButton]="true"
+        [showRefreshButton]="true"
+        [showEditButton]="true"
+        [showViewButton]="true"
+        [showDeleteButton]="false"
+        addButtonText="Add Employee"
+        refreshButtonText="Refresh"
+        noDataMessage="No employees found"
+        (pageChange)="onPageChange($event)"
+        (addClick)="onAdd()"
+        (refreshClick)="onRefresh()"
+        (viewClick)="onView($event)"
+        (editClick)="onEdit($event)"
+      >
+        <div extraTableHeader class="w-full flex justify-end">
+          <app-employee-filter
+            [(searchText)]="searchText"
+            [(selectedStatuses)]="selectedStatuses"
+            [(selectedDepartmentId)]="selectedDepartmentId"
+            (filterChange)="onFilterChange()"
+            (searchChange)="onFilterChange()"
+            (clearFilters)="clearFilters()"
+          ></app-employee-filter>
+        </div>
+      </app-data-table>
+    </div>
+  </ng-template>
+</app-page-header>
+
+<app-employee-create-modal
+  [(visible)]="showCreateModal"
+  (employeeCreated)="onEmployeeCreated()"
+></app-employee-create-modal>
+
+<app-employee-edit-modal
+  [(visible)]="showEditModal"
+  [employee]="selectedEmployee"
+  (employeeUpdated)="onEmployeeUpdated()"
+></app-employee-edit-modal>

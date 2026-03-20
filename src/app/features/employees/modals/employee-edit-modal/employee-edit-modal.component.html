@@ -1,0 +1,18 @@
+<app-modal
+  [(visible)]="visible"
+  title="Edit Employee"
+  size="lg"
+  [confirmText]="'Update'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-employee-form
+      #employeeForm
+      mode="edit"
+      [employee]="employee"
+    ></app-employee-form>
+  </ng-template>
+</app-modal>

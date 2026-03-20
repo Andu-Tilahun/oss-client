@@ -1,0 +1,29 @@
+<app-page-header
+  pageTitle="Audit Logs"
+  subTitle="View system audit trail"
+  [showBackButton]="false"
+  [loading]="loading"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <app-data-table
+        [columns]="columns"
+        [data]="audits"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showIndex]="true"
+        [showAddButton]="false"
+        [showRefreshButton]="true"
+        [showViewButton]="true"
+        [showEditButton]="false"
+        [showDeleteButton]="false"
+        (pageChange)="onPageChange($event)"
+        (refreshClick)="loadAudits()"
+        (viewClick)="onView($event)"
+      ></app-data-table>
+    </div>
+  </ng-template>
+</app-page-header>
+

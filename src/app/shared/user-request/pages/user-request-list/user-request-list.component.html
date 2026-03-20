@@ -1,0 +1,37 @@
+  <app-data-table
+    [columns]="columns"
+    [data]="paginatedRequests"
+    [loading]="loading"
+    [total]="filteredRequests.length"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex"
+    [showPagination]="true"
+    [showIndex]="true"
+    [showActionColumn]="true"
+    [showAddButton]="false"
+    [showRefreshButton]="true"
+    [showExportButton]="true"
+    [showViewButton]="true"
+    [showEditButton]="false"
+    [rowClickable]="true"
+    noDataMessage="No user requests found"
+    (refreshClick)="onRefresh()"
+    (exportClick)="onDownload()"
+    (pageChange)="onPageChange($event)"
+    (viewClick)="onRowClick($event)"
+    (rowClick)="onRowClick($event)"
+  >
+    <div extraTableHeader class="w-full flex justify-end">
+      <app-user-request-filter
+        [(searchText)]="searchText"
+        [(selectedRequestTypes)]="selectedRequestTypes"
+        [(selectedStatus)]="selectedStatus"
+        [requestTypes]="requestTypes"
+        [statusOptions]="statusOptions"
+        (searchChange)="onSearch()"
+        (filterChange)="onFilterChange()"
+        (clearFilters)="onClearFilters()"
+      ></app-user-request-filter>
+    </div>
+  </app-data-table>
+

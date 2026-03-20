@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global font - applies to all pages: menu, buttons, forms, 404, 403, login, etc. */
+@layer base {
+  html,
+  body {
+    @apply m-0 p-0 h-full;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* Ensure all elements inherit the font (buttons, inputs, menus, modals, etc.) */
+  *,
+  *::before,
+  *::after {
+    font-family: inherit;
+  }
+
+  /* Form elements often use system fonts - force inheritance */
+  button,
+  input,
+  select,
+  textarea,
+  label,
+  a,
+  span,
+  div,
+  p,
+  h1, h2, h3, h4, h5, h6 {
+    font-family: inherit;
+  }
+}
+
+/* Force font on buttons and menu - override any conflicting styles */
+button,
+input,
+select,
+textarea,
+nav,
+nav a,
+nav span,
+nav button,
+[role="button"],
+.font-sans {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

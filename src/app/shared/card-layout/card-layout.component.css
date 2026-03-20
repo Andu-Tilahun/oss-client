@@ -1,0 +1,66 @@
+/* Uses same CSS variables as user-request-detail when used in that context; fallbacks for use elsewhere */
+:host {
+  --card-bg: var(--surface, #ffffff);
+  --card-surface-2: var(--surface-2, #faf9f7);
+  --card-border: var(--border, #e8e5e0);
+  --card-text-muted: var(--text-muted, #9c9791);
+  --card-radius: var(--radius, 14px);
+  --card-shadow-sm: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.06));
+  --card-accent-bg: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+  --card-font: var(--font, 'DM Sans', sans-serif);
+}
+
+.card-layout {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  box-shadow: var(--card-shadow-sm);
+  font-family: var(--card-font);
+}
+
+.card-layout-header {
+  background: var(--card-surface-2);
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.card-layout-header--accent {
+  background: var(--card-accent-bg);
+  border-bottom-color: rgba(255, 255, 255, 0.15);
+}
+
+.card-layout-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--card-text-muted);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.card-layout-header--accent .card-layout-title {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.card-layout-icon {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.card-layout-header--accent .card-layout-icon {
+  opacity: 0.8;
+}
+
+.card-layout-body {
+  padding: 20px;
+}
+
+.card-layout-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--card-border);
+  background: var(--card-surface-2);
+}

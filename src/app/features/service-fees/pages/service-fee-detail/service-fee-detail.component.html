@@ -1,0 +1,12 @@
+<app-page-header
+  pageTitle="Service Fee Details"
+  subTitle="View service fee information"
+  [showBackButton]="true"
+  (back)="goBack()"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <app-service-fee-view [id]="id ?? undefined"></app-service-fee-view>
+    </div>
+  </ng-template>
+</app-page-header>

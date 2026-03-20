@@ -1,0 +1,44 @@
+<app-detail-card>
+  <div *ngIf="loading" class="text-sm text-gray-600">Loading payment…</div>
+  <div *ngIf="error && !loading" class="text-sm text-red-600">{{ error }}</div>
+  <div *ngIf="!id && !loading" class="text-sm text-gray-500">No payment selected.</div>
+
+  <ng-container *ngIf="payment && !loading">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
+      <h3 class="text-2xl font-bold text-gray-900">Order {{ payment.orderNumber }}</h3>
+      <span [class]="'status-' + payment.paymentDetailStatus.toLowerCase()">
+        {{ payment.paymentDetailStatus }}
+      </span>
+    </div>
+
+    <hr class="border-gray-200 mb-8" />
+
+    <!-- Payment Info -->
+    <app-detail-section title="Payment Information">
+      <app-detail-field label="Order Number" [value]="payment.orderNumber" />
+      <app-detail-field label="Utility" [value]="payment.utility" />
+      <app-detail-field label="Amount" [value]="payment.amount" />
+      <app-detail-field label="Transaction ID" [value]="payment.transactionId" />
+      <app-detail-field label="Status" [value]="payment.paymentDetailStatus" />
+    </app-detail-section>
+
+    <!-- Payer -->
+    <app-detail-section title="Payer">
+      <app-detail-field label="Full Name" [value]="payment.fullName" />
+      <app-detail-field label="Email" [value]="payment.email" />
+      <app-detail-field label="Phone" [value]="payment.phoneNumber" />
+    </app-detail-section>
+
+    <!-- Dates -->
+    <app-detail-section title="Dates">
+      <app-detail-field label="Due Date" [value]="payment.dueDate ? (payment.dueDate | date:'d MMM yyyy') : '-'" />
+      <app-detail-field label="Expiration Date" [value]="payment.expirationDate ? (payment.expirationDate | date:'d MMM yyyy') : '-'" />
+      <app-detail-field label="Paid Date" [value]="payment.paidDate ? (payment.paidDate | date:'d MMM yyyy') : '-'" />
+      <app-detail-field label="Transaction Date" [value]="payment.transactionDate ? (payment.transactionDate | date:'d MMM yyyy') : '-'" />
+      <app-detail-field label="Created At" [value]="payment.createdAt ? (payment.createdAt | date:'medium') : '-'" />
+    </app-detail-section>
+
+  </ng-container>
+</app-detail-card>

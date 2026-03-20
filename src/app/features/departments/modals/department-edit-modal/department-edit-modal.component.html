@@ -1,0 +1,14 @@
+<app-modal
+  [(visible)]="visible"
+  title="Edit Department"
+  size="md"
+  confirmText="Update Department"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-department-form #form mode="edit" [department]="department"></app-department-form>
+  </ng-template>
+</app-modal>

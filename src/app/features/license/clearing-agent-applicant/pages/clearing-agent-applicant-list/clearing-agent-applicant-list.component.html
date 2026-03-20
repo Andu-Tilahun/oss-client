@@ -1,0 +1,50 @@
+<app-page-header
+  pageTitle="CCA Applicant Management"
+  subTitle="list cca applicant information"
+  [showBackButton]="false"
+  [loading]="loading"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <h2 class="text-base font-semibold text-slate-700 mb-4">CCA Applicant lists</h2>
+
+      <!-- Table -->
+      <app-data-table
+        [columns]="columns"
+        [data]="applicants"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showPagination]="true"
+        [showIndex]="true"
+        [showActionColumn]="true"
+        [showViewButton]="true"
+        [showEditButton]="false"
+        [showDeleteButton]="false"
+        [showRefreshButton]="true"
+        refreshButtonText="Refresh"
+        noDataMessage="No applicants found"
+        [rowClickable]="true"
+        (pageChange)="onPageChange($event)"
+        (viewClick)="viewApplicant($event)"
+        (rowClick)="onRowClick($event)"
+        (refreshClick)="loadApplicants()"
+      >
+        <div extraTableHeader class="w-full flex justify-end">
+          <app-clearing-agent-applicant-filter
+            [(searchText)]="searchText"
+            [trainingPrograms]="trainingPrograms"
+            [(selectedTrainingProgramId)]="selectedTrainingProgramId"
+            [applicantTypes]="applicantTypes"
+            [(selectedApplicantTypes)]="selectedApplicantTypes"
+            (filterChange)="onFilterChange()"
+            (searchChange)="onFilterChange()"
+            (clearFilters)="clearFilters()"
+          ></app-clearing-agent-applicant-filter>
+        </div>
+      </app-data-table>
+    </div>
+  </ng-template>
+</app-page-header>
+

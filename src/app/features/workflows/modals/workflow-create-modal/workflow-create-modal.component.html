@@ -1,0 +1,19 @@
+<app-modal
+  [(visible)]="visible"
+  title="Create New Workflow"
+  size="xl"
+  [confirmText]="'Create Workflow'"
+  [confirmLoading]="isLoading"
+  [confirmDisabled]="!workflowForm || !workflowForm.hasTransitions || workflowForm.hasValidationErrors()"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-workflow-form
+      #workflowForm
+      mode="create"
+    ></app-workflow-form>
+  </ng-template>
+</app-modal>
+

@@ -1,0 +1,27 @@
+<app-modal
+  [(visible)]="visible"
+  title="Return Item"
+  [showFooter]="true"
+  confirmText="Confirm Return"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+>
+  <div class="space-y-4" *ngIf="record">
+    <div class="text-sm text-slate-700">
+      <div><span class="font-medium">Employee:</span> {{ record.employeeCode }} — {{ record.employeeName }}</div>
+      <div><span class="font-medium">Item:</span> {{ record.itemSerialNumber }} — {{ record.itemName || record.itemTypeName }}</div>
+      <div><span class="font-medium">Borrowed at:</span> {{ record.borrowedAt }}</div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Condition at return</label>
+      <select
+        [(ngModel)]="conditionAtReturn"
+        class="w-full border border-slate-300 rounded-md px-3 py-2 bg-white"
+      >
+        <option *ngFor="let c of conditions" [ngValue]="c">{{ c }}</option>
+      </select>
+    </div>
+  </div>
+</app-modal>
+

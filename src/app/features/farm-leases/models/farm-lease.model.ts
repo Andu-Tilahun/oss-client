@@ -1,0 +1,38 @@
+export type LeaseStatus = 'ACTIVE' | 'PENDING' | 'TERMINATED';
+export type LeaseTermStatus = 'ACTIVE' | 'PAID' | 'PASSED';
+
+export interface LeaseTerm {
+  id: string;
+  scheduledDate: string; // yyyy-MM-dd
+  dueDate: string;
+  amount: number;
+  paidDate?: string;
+  status: LeaseTermStatus;
+}
+
+export interface LeaseAgreement {
+  id: string;
+  farmPlotId: string;
+  investorId: string;
+
+  startDate: string;
+  endDate: string;
+  totalDurationMonths: number;
+  status: LeaseStatus;
+  totalAmount: number;
+
+  terms?: LeaseTerm[];
+}
+
+export interface LeaseCreateRequest {
+  farmPlotId: string;
+  startDate: string; // yyyy-MM-dd
+  totalDurationMonths: number;
+  endDate?: string; // optional
+  totalAmount: number;
+}
+
+export interface LeaseGenerateTermsRequest {
+  paymentStartDate: string; // yyyy-MM-dd
+}
+

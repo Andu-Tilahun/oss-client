@@ -1,0 +1,29 @@
+<app-detail-card>
+  <div *ngIf="loading" class="text-sm text-gray-600">Loading audit log…</div>
+  <div *ngIf="error && !loading" class="text-sm text-red-600">{{ error }}</div>
+  <div *ngIf="id == null && !loading" class="text-sm text-gray-500">No audit selected.</div>
+
+  <ng-container *ngIf="audit && !loading">
+
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
+      <h3 class="text-2xl font-bold text-gray-900">{{ audit.entityType }} – {{ audit.action }}</h3>
+    </div>
+
+    <hr class="border-gray-200 mb-8" />
+
+    <app-detail-section title="Audit Information">
+      <app-detail-field label="Entity Type" [value]="audit.entityType" />
+      <app-detail-field label="Entity ID" [value]="audit.entityId" />
+      <app-detail-field label="Action" [value]="audit.action" />
+      <app-detail-field label="Created By" [value]="audit.createdBy" />
+      <app-detail-field label="Created At" [value]="audit.createdAt ? (audit.createdAt | date:'medium') : '-'" />
+    </app-detail-section>
+
+    <app-detail-section *ngIf="audit.data" title="Data">
+      <div class="col-span-full p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700 whitespace-pre-wrap font-mono">
+        {{ audit.data }}
+      </div>
+    </app-detail-section>
+
+  </ng-container>
+</app-detail-card>

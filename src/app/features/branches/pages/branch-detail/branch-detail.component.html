@@ -1,0 +1,12 @@
+<app-page-header
+  pageTitle="Branch Details"
+  subTitle="View branch information"
+  [showBackButton]="true"
+  (back)="goBack()"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <app-branch-view [id]="id ?? undefined"></app-branch-view>
+    </div>
+  </ng-template>
+</app-page-header>

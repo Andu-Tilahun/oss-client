@@ -1,0 +1,97 @@
+<div class="filter-dropdown-container flex flex-col gap-3">
+  <div class="filter-content flex items-center gap-4 flex-wrap">
+    <!-- Search Input -->
+    <div class="flex-1 min-w-[250px]">
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            ></path>
+          </svg>
+        </div>
+        <input
+          type="search"
+          [ngModel]="searchText"
+          (ngModelChange)="onSearchTextChange($event)"
+          (keyup.enter)="onSearch()"
+          placeholder="Search user requests..."
+          class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+        />
+      </div>
+    </div>
+
+    <!-- Request Type Filter Dropdown -->
+    <div class="filter-dropdown relative" *ngIf="requestTypes.length">
+      <button
+        type="button"
+        (click)="toggleRequestTypeDropdown($event)"
+        class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 min-w-[170px] justify-between text-left"
+      >
+        <span class="text-sm text-slate-700">
+          <span class="font-medium">Type:</span> {{ getSelectedRequestTypeLabels() }}
+        </span>
+        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+        <span
+          *ngIf="selectedRequestTypes.length > 0 && selectedRequestTypes.length < requestTypes.length"
+          class="ml-1 px-2 py-0.5 bg-blue-500 text-white text-xs rounded-full"
+        >
+          {{ selectedRequestTypes.length }}
+        </span>
+      </button>
+
+      <div
+        *ngIf="requestTypeDropdownOpen"
+        class="absolute z-50 mt-1 w-56 bg-white rounded-lg shadow-lg border border-slate-200 py-2"
+      >
+        <div class="space-y-1 px-2">
+          <label
+            *ngFor="let type of requestTypes"
+            class="flex items-center cursor-pointer hover:bg-slate-50 p-2 rounded"
+          >
+            <input
+              type="checkbox"
+              [checked]="isRequestTypeSelected(type)"
+              (change)="onRequestTypeToggle(type, $any($event.target).checked)"
+              class="w-4 h-4 text-blue-500 border-slate-300 rounded focus:ring-blue-500"
+            />
+            <span class="ml-2 text-sm text-slate-700">{{ type }}</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Filter -->
+    <div class="filter-dropdown relative" *ngIf="statusOptions.length">
+      <select
+        [ngModel]="selectedStatus"
+        (ngModelChange)="onStatusChange($event)"
+        class="px-4 py-2 border border-slate-200 rounded-lg bg-white text-sm text-slate-700 min-w-[170px] focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+      >
+        <option value="">Status: All</option>
+        <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+      </select>
+    </div>
+
+    <!-- Search Button -->
+    <button
+      (click)="onSearch()"
+      class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+    >
+      Search
+    </button>
+
+    <!-- Clear Filters Button -->
+    <button
+      (click)="onClearFilters()"
+      class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm text-slate-700 font-medium"
+    >
+      Clear Filters
+    </button>
+  </div>
+</div>

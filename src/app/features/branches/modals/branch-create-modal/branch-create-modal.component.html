@@ -1,0 +1,15 @@
+<app-modal
+  [(visible)]="visible"
+  title="Create New Organization"
+  size="md"
+  [confirmText]="'Create Branch'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-branch-form #branchForm mode="create"></app-branch-form>
+  </ng-template>
+</app-modal>
+

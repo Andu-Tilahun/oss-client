@@ -1,0 +1,67 @@
+<app-page-header
+  pageTitle="Farm Plot Management"
+  subTitle="register and manage agricultural land parcels"
+  [showBackButton]="false"
+  [loading]="loading"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <h2 class="text-base font-semibold text-slate-700 mb-4">Farm plots</h2>
+
+      <app-data-table
+        [columns]="columns"
+        [data]="plots"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showAddButton]="true"
+        [showRefreshButton]="true"
+        [showEditButton]="true"
+        [showDeleteButton]="true"
+        (pageChange)="onPageChange($event)"
+        (addClick)="onAdd()"
+        (refreshClick)="onRefresh()"
+        (editClick)="onEdit($event)"
+        (deleteClick)="onDelete($event)"
+      >
+        <div extraTableHeader class="w-full flex justify-end">
+          <app-farm-plot-filter
+            [(searchText)]="searchText"
+            [status]="status"
+            (statusChange)="status = $event"
+            [soilType]="soilType"
+            (soilTypeChange)="soilType = $event"
+            [sizeType]="sizeType"
+            (sizeTypeChange)="sizeType = $event"
+            (searchChange)="onSearch()"
+            (clearFilters)="clearFilters()"
+          ></app-farm-plot-filter>
+        </div>
+      </app-data-table>
+    </div>
+  </ng-template>
+</app-page-header>
+
+<!-- Create Farm Plot Modal -->
+<app-farm-plot-create-modal
+  [(visible)]="showCreateModal"
+  (farmPlotCreated)="onFarmPlotCreated()"
+></app-farm-plot-create-modal>
+
+<!-- Edit Farm Plot Modal -->
+<app-farm-plot-edit-modal
+  [(visible)]="showEditModal"
+  [farmPlot]="selectedPlot"
+  (farmPlotUpdated)="onFarmPlotUpdated()"
+></app-farm-plot-edit-modal>
+
+<!-- Delete/Deactivate Confirmation Modal -->
+<app-confirmation-modal
+  [(visible)]="showDeleteModal"
+  title="Deactivate Farm Plot"
+  message="Are you sure you want to deactivate this farm plot?"
+  confirmText="Deactivate"
+  (confirm)="confirmDelete()"
+></app-confirmation-modal>
+

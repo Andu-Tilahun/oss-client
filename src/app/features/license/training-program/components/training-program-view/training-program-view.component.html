@@ -1,0 +1,66 @@
+<app-detail-card>
+  <div *ngIf="loading" class="text-sm text-gray-600">Loading training program…</div>
+  <div *ngIf="error && !loading" class="text-sm text-red-600">{{ error }}</div>
+  <div *ngIf="!userRequestId && !loading" class="text-sm text-gray-500">No training program selected.</div>
+
+  <ng-container *ngIf="program && !loading">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
+      <h3 class="text-2xl font-bold text-gray-900">{{ program.title }}</h3>
+      <span [class]="getStatusClass()">{{ program.status }}</span>
+    </div>
+
+    <hr class="border-gray-200 mb-8" />
+
+    <!-- Dates -->
+    <app-detail-section title="Dates">
+      <app-detail-field label="Registration Start" [value]="program.registrationStartDate | date:'d MMM yyyy'" />
+      <app-detail-field label="Registration End"   [value]="program.registrationEndDate   | date:'d MMM yyyy'" />
+      <app-detail-field label="Training Start"     [value]="program.trainingStartDate     | date:'d MMM yyyy'" />
+      <app-detail-field label="Training End"       [value]="program.trainingEndDate       | date:'d MMM yyyy'" />
+    </app-detail-section>
+
+    <!-- Quota Summary -->
+    <app-detail-section title="Quota Summary">
+      <app-detail-field label="Private Quota"          [value]="program.privateQuota || 0" />
+      <app-detail-field label="Former Employee Quota"  [value]="program.formerEmployeeQuota || 0" />
+      <app-detail-field label="Total Quota"            [value]="getTotalQuota()" />
+    </app-detail-section>
+
+    <!-- Regional Quota -->
+    <app-detail-section
+      *ngIf="program.regionalQuotaEnabled && regionalQuotas.length"
+      title="Regional Quota"
+    >
+      <app-detail-field label="Total" [value]="getTotalRegionalQuota()" />
+      <div class="col-span-full mt-2 space-y-2">
+        <div
+          *ngFor="let q of regionalQuotas"
+          class="flex justify-between text-sm px-3 py-2 bg-gray-50 rounded-lg border border-gray-200"
+        >
+          <span class="text-gray-700">{{ q.externalName || q.externalId }}</span>
+          <span class="font-medium text-gray-900">{{ q.usedQuota || 0 }} / {{ q.quota || 0 }}</span>
+        </div>
+      </div>
+    </app-detail-section>
+
+    <!-- Organizational Quota -->
+    <app-detail-section
+      *ngIf="program.organizationalQuotaEnabled && organizationalQuotas.length"
+      title="Organizational Quota"
+    >
+      <app-detail-field label="Total" [value]="getTotalOrganizationalQuota()" />
+      <div class="col-span-full mt-2 space-y-2">
+        <div
+          *ngFor="let q of organizationalQuotas"
+          class="flex justify-between text-sm px-3 py-2 bg-gray-50 rounded-lg border border-gray-200"
+        >
+          <span class="text-gray-700">{{ q.externalName || q.externalId }}</span>
+          <span class="font-medium text-gray-900">{{ q.usedQuota || 0 }} / {{ q.quota || 0 }}</span>
+        </div>
+      </div>
+    </app-detail-section>
+
+  </ng-container>
+</app-detail-card>

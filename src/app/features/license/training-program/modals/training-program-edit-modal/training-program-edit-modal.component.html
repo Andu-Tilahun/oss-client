@@ -1,0 +1,27 @@
+<app-modal
+  [(visible)]="visible"
+  title="Edit Training Program"
+  size="xxl"
+  [showFooter]="false"
+  [maskClosable]="false"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-training-program-stepper
+      mode="edit"
+      [programId]="programId"
+      [program]="program"
+      [regions]="regions"
+      [organizations]="organizations"
+      [isLoading]="isLoading"
+      [isSaving]="isSaving"
+      [(currentStep)]="currentStep"
+      (basicInfoSubmit)="onBasicInfoSubmit($event)"
+      (regionalQuotaSubmit)="onRegionalQuotaSubmit($event)"
+      (organizationalQuotaSubmit)="onOrganizationalQuotaSubmit($event)"
+      (completed)="onConfirm()"
+      (cancelRequested)="onCompleted()"
+    ></app-training-program-stepper>
+  </ng-template>
+</app-modal>
+

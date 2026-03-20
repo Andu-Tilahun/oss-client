@@ -1,0 +1,12 @@
+<app-page-header
+  pageTitle="Woreda Details"
+  subTitle="View woreda information"
+  [showBackButton]="true"
+  (back)="goBack()"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <app-woreda-view [id]="id ?? undefined"></app-woreda-view>
+    </div>
+  </ng-template>
+</app-page-header>

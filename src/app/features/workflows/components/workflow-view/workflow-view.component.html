@@ -1,0 +1,42 @@
+<app-detail-card>
+  <div *ngIf="loading" class="text-sm text-gray-600">Loading workflow…</div>
+  <div *ngIf="error && !loading" class="text-sm text-red-600">{{ error }}</div>
+  <div *ngIf="!id && !loading" class="text-sm text-gray-500">No workflow selected.</div>
+
+  <ng-container *ngIf="workflow && !loading">
+
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
+      <h3 class="text-2xl font-bold text-gray-900">{{ workflow.name }}</h3>
+    </div>
+
+    <hr class="border-gray-200 mb-8" />
+
+    <app-detail-section title="Workflow Information">
+      <app-detail-field label="Name" [value]="workflow.name" />
+      <app-detail-field label="Request Type" [value]="workflow.requestType" />
+    </app-detail-section>
+
+    <app-detail-section
+      *ngIf="workflow.workflowTransitions?.length"
+      title="Transitions"
+    >
+      <div class="col-span-full mt-2 space-y-2">
+        <div
+          *ngFor="let t of workflow.workflowTransitions"
+          class="flex flex-wrap items-center gap-2 text-sm px-3 py-2 bg-gray-50 rounded-lg border border-gray-200"
+        >
+          <span class="font-medium text-gray-700">{{ t.currentStatus }}</span>
+          <span class="text-gray-400">→</span>
+          <span class="font-medium text-gray-700">{{ t.nextStatus }}</span>
+          <span class="text-gray-500">({{ t.label }})</span>
+        </div>
+      </div>
+    </app-detail-section>
+
+    <app-detail-section title="Record">
+      <app-detail-field label="Created" [value]="workflow.createdDate ? (workflow.createdDate | date:'medium') : '-'" />
+      <app-detail-field label="Modified" [value]="workflow.modifiedDate ? (workflow.modifiedDate | date:'medium') : '-'" />
+    </app-detail-section>
+
+  </ng-container>
+</app-detail-card>

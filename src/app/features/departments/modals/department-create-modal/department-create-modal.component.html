@@ -1,0 +1,14 @@
+<app-modal
+  [(visible)]="visible"
+  title="Create New Department"
+  size="md"
+  confirmText="Create Department"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-department-form #form mode="create"></app-department-form>
+  </ng-template>
+</app-modal>

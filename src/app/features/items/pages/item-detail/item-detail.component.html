@@ -1,0 +1,13 @@
+<app-page-header
+  pageTitle="Item Details"
+  subTitle="View item information"
+  [showBackButton]="true"
+  (back)="goBack()"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <app-item-view [id]="id ?? undefined"></app-item-view>
+    </div>
+  </ng-template>
+</app-page-header>
+

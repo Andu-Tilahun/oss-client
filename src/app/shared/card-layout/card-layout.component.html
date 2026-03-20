@@ -1,0 +1,14 @@
+<div class="card-layout">
+  <header class="card-layout-header" [class.card-layout-header--accent]="headerVariant === 'accent'">
+    <h2 class="card-layout-title">
+      <span *ngIf="headerIcon" class="card-layout-icon material-icons">{{ headerIcon }}</span>
+      {{ title }}
+    </h2>
+  </header>
+  <div class="card-layout-body">
+    <ng-content></ng-content>
+  </div>
+  <footer class="card-layout-footer" *ngIf="hasFooter">
+    <ng-content select="[cardFooter]"></ng-content>
+  </footer>
+</div>

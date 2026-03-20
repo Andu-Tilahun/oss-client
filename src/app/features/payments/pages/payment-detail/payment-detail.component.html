@@ -1,0 +1,12 @@
+<app-page-header
+  pageTitle="Payment Details"
+  subTitle="View payment information"
+  [showBackButton]="true"
+  (back)="goBack()"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <app-payment-view [id]="id ?? undefined"></app-payment-view>
+    </div>
+  </ng-template>
+</app-page-header>

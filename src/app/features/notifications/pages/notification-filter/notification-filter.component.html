@@ -1,0 +1,30 @@
+<div class="flex items-center space-x-2 flex-wrap gap-2 justify-end">
+  <select
+    class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    [ngModel]="status"
+    (ngModelChange)="onStatusChange($event)"
+  >
+    <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
+  </select>
+
+  <select
+    class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    [ngModel]="priority"
+    (ngModelChange)="onPriorityChange($event)"
+  >
+    <option *ngFor="let opt of priorityOptions" [value]="opt.value">{{ opt.label }}</option>
+  </select>
+
+  <button
+    class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+    (click)="onSearch()"
+  >
+    Search
+  </button>
+  <button
+    class="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+    (click)="onClearFilters()"
+  >
+    Clear
+  </button>
+</div>

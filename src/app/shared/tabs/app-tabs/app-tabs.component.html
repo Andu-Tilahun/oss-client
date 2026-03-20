@@ -1,0 +1,39 @@
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+  <div class="border-b border-gray-200 px-6 flex items-center justify-between gap-4">
+    <nav class="-mb-px flex space-x-8 flex-1" aria-label="Tabs">
+      <button
+        *ngFor="let tab of tabs"
+        (click)="setTab(tab.key)"
+        [class.border-blue-500]="activeTab === tab.key"
+        [class.text-blue-600]="activeTab === tab.key"
+        [class.text-gray-500]="activeTab !== tab.key"
+        [class.border-transparent]="activeTab !== tab.key"
+        class="whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium
+               hover:text-gray-700 hover:border-gray-300 transition-all duration-200"
+      >
+        <span class="flex items-center gap-2">
+          <svg
+            *ngIf="paths(tab).length"
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              *ngFor="let p of paths(tab)"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              [attr.d]="p"
+            />
+          </svg>
+          {{ tab.label }}
+        </span>
+      </button>
+    </nav>
+    <ng-content select="[actions]"></ng-content>
+  </div>
+  <div class="px-6 py-8">
+    <ng-content></ng-content>
+  </div>
+</div>

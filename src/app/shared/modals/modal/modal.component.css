@@ -1,0 +1,16 @@
+/* Animation for modal entrance */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Apply animation to modal */
+:host ::ng-deep .inline-block {
+  animation: modalFadeIn 0.2s ease-out;
+}

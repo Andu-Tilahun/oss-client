@@ -1,0 +1,9 @@
+<app-filter-bar
+  [(searchText)]="searchText"
+  (searchTextChange)="onSearchTextChange($event)"
+  searchPlaceholder="Search item types..."
+  applyLabel="Search"
+  clearLabel="Clear"
+  (searchChange)="searchChange.emit()"
+  (clearFilters)="onClearFilters()"
+></app-filter-bar>

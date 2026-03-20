@@ -1,0 +1,69 @@
+<div class="border-b border-gray-200">
+  <!-- Header Section -->
+  <div class="px-6 py-4">
+    <div class="flex items-center justify-between">
+      <!-- Left: Back Button & Title -->
+      <div class="flex items-center space-x-4 flex-1">
+        <!-- Back Button -->
+        <button
+          *ngIf="showBackButton"
+          (click)="goBack()"
+          class="inline-flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 transition-colors group"
+          title="Go back"
+        >
+          <svg class="w-5 h-5 text-gray-600 group-hover:text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+
+        <!-- Title Section -->
+        <div>
+          <h1 class="text-lg font-semibold text-gray-800">
+            {{ pageTitle }}
+          </h1>
+<!--          <p *ngIf="subTitle" class="text-xs text-gray-500 mt-0.5">-->
+<!--            {{ subTitle }}-->
+<!--          </p>-->
+        </div>
+      </div>
+
+      <!-- Right: Extra Content -->
+      <div *ngIf="showExtraContent && extraContent" class="flex-shrink-0">
+        <ng-container *ngTemplateOutlet="extraContent"></ng-container>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  <div class="relative">
+    <!-- Loading Overlay -->
+    <div *ngIf="loading" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+      <div class="flex items-center space-x-3">
+        <svg class="animate-spin h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span class="text-gray-600 font-medium">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div *ngIf="mainContent">
+      <!-- Without Card -->
+      <ng-container *ngIf="noCard">
+        <div class="px-6 py-4">
+          <ng-container *ngTemplateOutlet="mainContent"></ng-container>
+        </div>
+      </ng-container>
+
+      <!-- With Card -->
+      <ng-container *ngIf="!noCard">
+        <div class="px-6 pb-6">
+          <div class="">
+            <ng-container *ngTemplateOutlet="mainContent"></ng-container>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

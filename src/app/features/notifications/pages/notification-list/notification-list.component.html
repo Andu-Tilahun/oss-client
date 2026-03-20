@@ -1,0 +1,39 @@
+<app-page-header
+  pageTitle="Notifications"
+  subTitle="View notification logs"
+  [showBackButton]="false"
+  [loading]="loading"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <h2 class="text-base font-semibold text-slate-700 mb-4">Notification list</h2>
+      <app-data-table
+        [columns]="columns"
+        [data]="notifications"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showIndex]="true"
+        [showAddButton]="false"
+        [showRefreshButton]="true"
+        [showViewButton]="true"
+        [showEditButton]="false"
+        [showDeleteButton]="false"
+        (pageChange)="onPageChange($event)"
+        (refreshClick)="loadNotifications()"
+        (viewClick)="onView($event)"
+      >
+        <div extraTableHeader class="w-full flex justify-end">
+          <app-notification-filter
+            [(status)]="status"
+            [(priority)]="priority"
+            (searchChange)="onSearch()"
+            (clearFilters)="clearFilters()"
+          ></app-notification-filter>
+        </div>
+      </app-data-table>
+    </div>
+  </ng-template>
+</app-page-header>
+

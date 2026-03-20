@@ -1,0 +1,12 @@
+<app-page-header
+  pageTitle="Region Details"
+  subTitle="View region information"
+  [showBackButton]="true"
+  (back)="goBack()"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <app-region-view [id]="id ?? undefined"></app-region-view>
+    </div>
+  </ng-template>
+</app-page-header>

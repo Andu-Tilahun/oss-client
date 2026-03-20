@@ -1,0 +1,19 @@
+<app-modal
+  [(visible)]="visible"
+  title="Edit Workflow"
+  size="xl"
+  [confirmText]="'Update Workflow'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+      <app-workflow-form
+        #workflowForm
+        mode="edit"
+        [workflow]="workflow"
+      ></app-workflow-form>
+  </ng-template>
+</app-modal>
+

@@ -1,0 +1,55 @@
+<app-page-header
+  pageTitle="Training Program Management"
+  subTitle="list training program information"
+  [showBackButton]="false"
+  [loading]="loading"
+>
+  <ng-template #mainContent>
+
+    <!-- Data Table -->
+    <div class="p-6">
+      <h2 class="text-base font-semibold text-slate-700 mb-4">Training Program lists</h2>
+<!--      <app-user-request-list-->
+<!--        [requestTypes]="[requestTye]"-->
+<!--        (selected)="viewProgram($event)"-->
+<!--      ></app-user-request-list>-->
+      <app-data-table
+        [columns]="columns"
+        [data]="programs"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showPagination]="true"
+        [showIndex]="true"
+        [showActionColumn]="true"
+        [showAddButton]="true"
+        [showRefreshButton]="true"
+        [showEditButton]="false"
+        [showViewButton]="true"
+        noDataMessage="No training programs found"
+        (pageChange)="onPageChange($event)"
+        (addClick)="createProgram()"
+        (refreshClick)="loadPrograms()"
+        (viewClick)="viewProgram($event)"
+      >
+        <div extraTableHeader class="w-full flex justify-end">
+          <app-training-program-filter
+            [(searchText)]="searchText"
+            [(selectedStatuses)]="selectedStatuses"
+            (filterChange)="onFilterChange()"
+            (searchChange)="onSearch()"
+            (clearFilters)="clearFilters()"
+          ></app-training-program-filter>
+        </div>
+      </app-data-table>
+    </div>
+  </ng-template>
+</app-page-header>
+
+<!-- Create Training Program Modal -->
+<app-training-program-create-modal
+  [(visible)]="showCreateModal"
+  (programCreated)="onProgramCreated()"
+></app-training-program-create-modal>
+

@@ -1,0 +1,12 @@
+<app-modal
+  [(visible)]="visible"
+  title="Borrow Item"
+  [showFooter]="true"
+  confirmText="Confirm Borrow"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+>
+  <app-borrow-form [availableItems]="availableItems"></app-borrow-form>
+</app-modal>
+

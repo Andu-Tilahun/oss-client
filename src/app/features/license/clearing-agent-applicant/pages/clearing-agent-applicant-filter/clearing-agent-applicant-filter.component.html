@@ -1,0 +1,85 @@
+<app-filter-bar
+  [(searchText)]="searchText"
+  (searchTextChange)="onSearchTextInput($event)"
+  searchPlaceholder="Name / Reference No"
+  applyLabel="Apply"
+  clearLabel="Clear"
+  (searchChange)="onSearch()"
+  (clearFilters)="onClearFilters()"
+>
+  <!-- Training Program dropdown -->
+    <div class="filter-dropdown relative">
+      <button
+        type="button"
+        (click)="toggleTrainingDropdown($event)"
+        class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 min-w-[180px] justify-between text-left"
+      >
+        <span class="text-sm text-slate-700">
+          <span class="font-medium">Training Program:</span>
+          {{ getSelectedTrainingLabel() }}
+        </span>
+        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+
+      <div
+        *ngIf="trainingDropdownOpen"
+        class="absolute z-50 mt-1 w-64 bg-white rounded-lg shadow-lg border border-slate-200 py-2"
+      >
+        <button
+          type="button"
+          class="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 text-slate-700"
+          (click)="selectTrainingProgram('')"
+        >
+          All
+        </button>
+        <button
+          type="button"
+          *ngFor="let p of trainingPrograms"
+          class="w-full text-left px-3 py-2 text-sm hover:bg-slate-50 text-slate-700"
+          (click)="selectTrainingProgram(p.id)"
+        >
+          {{ p.title }}
+        </button>
+      </div>
+    </div>
+
+  <!-- Applicant Type dropdown -->
+  <div class="filter-dropdown relative">
+      <button
+        type="button"
+        (click)="toggleApplicantTypeDropdown($event)"
+        class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 min-w-[170px] justify-between text-left"
+      >
+        <span class="text-sm text-slate-700">
+          <span class="font-medium">Applicant Type:</span>
+          {{ getSelectedApplicantTypesLabel() }}
+        </span>
+        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+
+      <div
+        *ngIf="applicantTypeDropdownOpen"
+        class="absolute z-50 mt-1 w-56 bg-white rounded-lg shadow-lg border border-slate-200 py-2"
+      >
+        <div class="space-y-1 px-2">
+          <label
+            *ngFor="let t of applicantTypes"
+            class="flex items-center cursor-pointer hover:bg-slate-50 p-2 rounded"
+          >
+            <input
+              type="checkbox"
+              [checked]="isApplicantTypeSelected(t)"
+              (change)="toggleApplicantType(t)"
+              class="w-4 h-4 text-blue-500 border-slate-300 rounded focus:ring-blue-500"
+            />
+            <span class="ml-2 text-sm text-slate-700">{{ t }}</span>
+          </label>
+        </div>
+      </div>
+  </div>
+</app-filter-bar>
+

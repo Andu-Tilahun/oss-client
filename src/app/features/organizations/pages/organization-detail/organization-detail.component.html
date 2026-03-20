@@ -1,0 +1,12 @@
+<app-page-header
+  pageTitle="Organization Details"
+  subTitle="View organization information"
+  [showBackButton]="true"
+  (back)="goBack()"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <app-organization-view [id]="id ?? undefined"></app-organization-view>
+    </div>
+  </ng-template>
+</app-page-header>

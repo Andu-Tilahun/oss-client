@@ -1,0 +1,12 @@
+<app-page-header
+  pageTitle="Audit Log Details"
+  subTitle="View audit log entry"
+  [showBackButton]="true"
+  (back)="goBack()"
+>
+  <ng-template #mainContent>
+    <div class="p-6">
+      <app-audit-view [id]="id ?? undefined"></app-audit-view>
+    </div>
+  </ng-template>
+</app-page-header>

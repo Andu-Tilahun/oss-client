@@ -1,0 +1,140 @@
+<div class="license-card">
+  <app-tabs
+    [tabs]="tabs"
+    [activeTab]="activeTab"
+    (activeTabChange)="activeTab = $event">
+    <div actions class="actions-wrap">
+
+      <!-- Generic Actions dropdown: only when there are transitions and none have an action -->
+      <ng-container *ngIf="transitions.length > 0 && !hasAnyTransitionAction()">
+        <button type="button" class="btn-actions" (click)="toggleActionsDropdown($event)">
+          Actions
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div class="dropdown-menu" *ngIf="showActionsDropdown">
+          <button *ngFor="let t of transitions"
+                  type="button"
+                  class="dropdown-item"
+                  (click)="openProcessModal(t); showActionsDropdown = false">
+            {{ t.label || t.nextStatus }}
+          </button>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Request Tab -->
+    <div *ngIf="activeTab === 'request'">
+      <div *ngIf="loading" class="loading-state">Loading request details…</div>
+      <div *ngIf="!loading" class="content-grid">
+        <app-card-layout title="Request Information">
+          <div class="field-row">
+            <span class="field-label">Request Type</span>
+            <span class="field-value">{{ userRequest?.requestType || '—' }}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Status</span>
+            <span class="badge" [ngClass]="getStatusBadgeClass(userRequest?.status || '')">{{ userRequest?.status || '—' }}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Request No.</span>
+            <span class="field-value mono">{{ userRequest?.applicationNumber || '—' }}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Requested At</span>
+            <span class="field-value mono">{{ (userRequest?.createdDate | date:'yyyy-MM-dd HH:mm') || '—' }}</span>
+          </div>
+        </app-card-layout>
+
+        <app-card-layout title="Assign Officer" headerVariant="accent">
+          <div class="officer-body">
+            <app-user-profile-picture
+              [userId]="userRequest?.assignedToId"
+              size="small"
+              [viewOnly]="true"
+            />
+            <div class="officer-label">Currently Assigned</div>
+            <div class="officer-name">{{ userRequest?.assignedToId || 'Not Assigned' }}</div>
+          </div>
+          <div cardFooter>
+            <button class="btn-assign" type="button" (click)="openAssignModal()" [disabled]="!hasTransitionAction('ASSIGN_EXPERT')">
+              <span class="icon material-icons">person_add</span>
+              Assign Officer
+            </button>
+          </div>
+        </app-card-layout>
+      </div>
+    </div>
+
+    <!-- Dynamic Tabs from @Input() dynamicTabs -->
+    <ng-container *ngFor="let tab of dynamicTabs">
+      <div *ngIf="activeTab === tab.key">
+        <ng-container *ngTemplateOutlet="tab.templateRef"></ng-container>
+      </div>
+    </ng-container>
+
+    <!-- History Tab -->
+    <div *ngIf="activeTab === 'history'">
+      <div class="history-wrap">
+        <div class="history-line"></div>
+        <ng-container *ngIf="history.length === 0">
+          <div class="empty-state">No history yet.</div>
+        </ng-container>
+        <div *ngFor="let log of history" class="history-item">
+          <div class="history-dot"></div>
+          <div class="history-date">{{ log.createdDate | date:'d MMM yyyy' }}</div>
+          <div class="history-card">
+            <div class="history-card-top">
+              <div class="history-user">
+                <app-user-profile-picture
+                  [userId]="log.userId"
+                  size="small"
+                  [viewOnly]="true"
+                />
+                {{ log.createdBy || '—' }}
+              </div>
+              <div class="history-time">{{ log.createdDate | date:'HH:mm' }}</div>
+            </div>
+            <div class="status-transition">
+              <span class="badge" [ngClass]="getStatusBadgeClass(log.previousStatus)" style="font-size:11px;padding:2px 8px;">{{ log.previousStatus || '—' }}</span>
+              <span class="arrow">→</span>
+              <span class="badge" [ngClass]="getStatusBadgeClass(log.status)" style="font-size:11px;padding:2px 8px;">{{ log.status }}</span>
+            </div>
+            <div class="history-remark" *ngIf="log.remark">{{ log.remark }}</div>
+            <div *ngIf="log.userRequestStatusLogAttachments?.length">
+              <div class="attachments-label">Attachments</div>
+              <div *ngFor="let att of log.userRequestStatusLogAttachments" class="attachment-row">
+                <span class="attachment-name">{{ att.fileDescription || att.attachment }}</span>
+                <button class="btn-view" type="button" (click)="viewAttachment(att.attachment)">View</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-tabs>
+</div>
+
+<!-- Process Modal -->
+<app-user-request-process-modal
+  [(visible)]="showProcessModal"
+  [processing]="processing"
+  [selectedTransition]="selectedTransition"
+  [(remark)]="remark"
+  (confirm)="process()"
+  (fileUploaded)="onFileUploaded($event)"
+  (fileRemoved)="onFileRemoved()">
+</app-user-request-process-modal>
+
+<!-- Assign Officer Modal -->
+<app-user-request-assign-modal
+  [(visible)]="showAssignModal"
+  [userRequest]="userRequest ?? null"
+  [processing]="processing"
+  [(selectedUserId)]="assignSelectedUserId"
+  [(remark)]="assignRemark"
+  (confirm)="assign()"
+  (fileUploaded)="onAssignFileUploaded($event)"
+  (fileRemoved)="onAssignFileRemoved()">
+</app-user-request-assign-modal>

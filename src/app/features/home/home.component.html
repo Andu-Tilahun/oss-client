@@ -1,0 +1,38 @@
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
+  <div class="text-center px-4">
+    <!-- Welcome Message -->
+    <div class="mb-8">
+      <h1 class="text-6xl md:text-8xl font-bold text-white mb-4 animate-fade-in">
+        Welcome!
+      </h1>
+
+      <div class="space-y-2">
+        <p class="text-3xl md:text-4xl text-white font-semibold animate-slide-up">
+          {{ greeting }}, {{ currentUser?.firstName || 'User' }}
+        </p>
+
+        <p class="text-xl md:text-2xl text-white opacity-90 animate-slide-up-delay">
+          We're glad to have you here
+        </p>
+      </div>
+    </div>
+
+    <!-- Decorative Element -->
+    <div class="flex justify-center">
+      <div class="w-24 h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center animate-pulse-slow">
+        <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
+        </svg>
+      </div>
+    </div>
+
+    <div *ngIf="currentUser?.regionId || currentUser?.organizationId" class="mt-10 flex justify-center">
+      <a
+        routerLink="/clearing-agent-unit-registration"
+        class="inline-flex items-center gap-2 px-6 py-3 bg-white/90 hover:bg-white text-gray-900 font-semibold rounded-xl shadow-lg transition"
+      >
+        Register Clearing Agents (Unit)
+      </a>
+    </div>
+  </div>
+</div>
