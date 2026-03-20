@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './filter-bar.component.html',
   styleUrls: ['./filter-bar.component.css'],
 })
-export class FilterBarComponent {
+export class FilterBarComponent implements OnChanges {
   @Input() searchText = '';
   @Output() searchTextChange = new EventEmitter<string>();
 
@@ -19,6 +19,20 @@ export class FilterBarComponent {
 
   @Output() searchChange = new EventEmitter<void>();
   @Output() clearFilters = new EventEmitter<void>();
+
+  /**
+   * Allows the dropdown/filter area to be collapsed/expanded.
+   */
+  @Input() collapsible = true;
+  @Input() collapsedByDefault = false;
+
+  protected isCollapsed = false;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['collapsedByDefault']) {
+      this.isCollapsed = !!this.collapsedByDefault;
+    }
+  }
 
   get hasValidSearchText(): boolean {
     return this.searchText.trim().length > 0;
@@ -35,6 +49,10 @@ export class FilterBarComponent {
 
   onClear(): void {
     this.clearFilters.emit();
+  }
+
+  toggleCollapsed(): void {
+    this.isCollapsed = !this.isCollapsed;
   }
 }
 

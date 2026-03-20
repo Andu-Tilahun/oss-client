@@ -1,7 +1,7 @@
 <div class="w-full">
 
   <!-- Action Header -->
-  <div class="mb-4 flex items-center justify-between flex-wrap gap-3 bg-white p-4" *ngIf="showAddButton||showRefreshButton">
+  <div class="mb-4 flex items-center justify-between flex-wrap gap-3">
     <div class="flex items-center gap-2">
       <!-- Add Button -->
       <button
@@ -41,7 +41,7 @@
     </div>
 
     <!-- Extra Content Projection -->
-    <div class="flex-1 bg-white">
+    <div class="flex-1">
       <ng-content select="[extraTableHeader]"></ng-content>
     </div>
   </div>

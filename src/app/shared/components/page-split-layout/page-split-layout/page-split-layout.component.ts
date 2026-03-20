@@ -30,7 +30,35 @@ export class PageSplitLayoutComponent {
   @Output() rightClose = new EventEmitter<void>();
 
   @ContentChild('leftContent') leftContent?: TemplateRef<unknown>;
+  /**
+   * Optional header area rendered above `#leftContent` in the left column.
+   * Intended for filters / toolbars.
+   */
+  @ContentChild('leftExtraTableHeader') leftExtraTableHeader?: TemplateRef<unknown>;
+
+  /**
+   * Optional header area rendered once at the top of the whole layout,
+   * above both left and right columns.
+   */
+  @ContentChild('extraTableHeader') extraTableHeader?: TemplateRef<unknown>;
+
   @ContentChild('rightContent') rightContent?: TemplateRef<unknown>;
+  /**
+   * Optional header area rendered above `#rightContent` in the right column.
+   */
+  @ContentChild('rightExtraTableHeader') rightExtraTableHeader?: TemplateRef<unknown>;
+
+  protected hasLeftExtraHeader(): boolean {
+    return !!this.leftExtraTableHeader;
+  }
+
+  protected hasExtraTableHeader(): boolean {
+    return !!this.extraTableHeader;
+  }
+
+  protected hasRightExtraHeader(): boolean {
+    return !!this.rightExtraTableHeader;
+  }
 
   protected hasLeft(): boolean {
     return !!this.leftContent;
