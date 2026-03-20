@@ -1,0 +1,32 @@
+<div *ngIf="item; else noSelection">
+  <div class="flex justify-end gap-2">
+    <app-action-icon-button
+      *ngIf="showEditButton"
+      icon="edit"
+      (click)="onEditClick()"
+    ></app-action-icon-button>
+
+    <app-action-icon-button
+      *ngIf="showCloseButton"
+      icon="close"
+      (click)="close.emit()"
+    ></app-action-icon-button>
+  </div>
+
+  <div class="mt-4">
+    <ng-container *ngIf="detailViewTpl; else defaultView">
+      <ng-container
+        *ngTemplateOutlet="detailViewTpl; context: { $implicit: item }"
+      ></ng-container>
+    </ng-container>
+
+    <ng-template #defaultView>
+      <div class="text-sm text-gray-500">No detail view configured.</div>
+    </ng-template>
+  </div>
+</div>
+
+<ng-template #noSelection>
+  <div class="text-sm text-gray-500">{{ emptyMessage }}</div>
+</ng-template>
+

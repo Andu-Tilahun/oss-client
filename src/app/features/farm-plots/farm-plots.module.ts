@@ -8,6 +8,13 @@ import {FarmPlotFilterComponent} from './pages/farm-plot-filter/farm-plot-filter
 import {FarmPlotListComponent} from './pages/farm-plot-list/farm-plot-list.component';
 import {FarmPlotCreateModalComponent} from './modals/farm-plot-create-modal/farm-plot-create-modal.component';
 import {FarmPlotEditModalComponent} from './modals/farm-plot-edit-modal/farm-plot-edit-modal.component';
+import {
+    PageSplitLayoutComponent
+} from "../../shared/components/page-split-layout/page-split-layout/page-split-layout.component";
+import {
+  ActionIconButtonComponent
+} from "../../shared/components/action-icons/action-icon-button/action-icon-button.component";
+import {FarmPlotViewComponent} from './components/farm-plot-view/farm-plot-view.component';
 
 @NgModule({
   declarations: [FarmPlotListComponent],
@@ -20,6 +27,8 @@ import {FarmPlotEditModalComponent} from './modals/farm-plot-edit-modal/farm-plo
     FarmPlotFilterComponent,
     FarmPlotCreateModalComponent,
     FarmPlotEditModalComponent,
+    PageSplitLayoutComponent,
+    FarmPlotViewComponent,
   ],
 })
 export class FarmPlotsModule {}

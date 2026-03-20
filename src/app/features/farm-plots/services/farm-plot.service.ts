@@ -21,8 +21,8 @@ export class FarmPlotService {
     return this.httpService.post<PageResponse<FarmPlot>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/filter`, request);
   }
 
-  getFarmPlotById(id: string): Observable<ApiResponse<FarmPlot>> {
-    return this.httpService.get<ApiResponse<FarmPlot>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}`);
+  getFarmPlotById(id: string): Observable<FarmPlot> {
+    return this.httpService.get<FarmPlot>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}`);
   }
 
   createFarmPlot(request: FarmPlotRequest): Observable<ApiResponse<FarmPlot>> {

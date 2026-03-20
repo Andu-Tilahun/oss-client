@@ -1,15 +1,14 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {StepperComponent, StepConfig} from '../../../../../shared/components/stepper/stepper.component';
+import {StepperComponent, StepConfig} from '../../../../shared/components/stepper/stepper.component';
 import {FarmPlot} from '../../../farm-plots/models/farm-plot.model';
 import {LeaseCreateRequest, LeaseGenerateTermsRequest, LeaseTerm} from '../../models/farm-lease.model';
-import {StepperComponent} from "../../../../shared/components/stepper/stepper.component";
 
 @Component({
   selector: 'app-lease-registration-stepper',
   standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, StepperComponent, StepperComponent],
+  imports: [CommonModule, ReactiveFormsModule, StepperComponent],
   templateUrl: './lease-registration-stepper.component.html',
   styleUrls: ['./lease-registration-stepper.component.css'],
 })
@@ -197,5 +196,11 @@ export class LeaseRegistrationStepperComponent implements OnInit, OnChanges {
 
   get totalAmountPreview(): number {
     return Number(this.leaseDetailsForm.get('totalAmount')?.value || 0);
+  }
+
+  get selectedFarmPlotTitle(): string {
+    const selectedId = this.leaseDetailsForm.get('farmPlotId')?.value;
+    const plot = this.farmPlots?.find(p => p.id === selectedId);
+    return plot?.title ?? '-';
   }
 }

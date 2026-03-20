@@ -116,12 +116,12 @@
     <label class="block text-sm font-medium text-gray-700 mb-2">
       Image
     </label>
-    <app-profile-picture-upload
+    <app-document-upload
       [currentFileId]="profileImageUuid"
       size="large"
       (fileUploaded)="onImageUploaded($event)"
       (fileRemoved)="onImageRemoved()"
-    ></app-profile-picture-upload>
+    ></app-document-upload>
   </div>
 </form>
 

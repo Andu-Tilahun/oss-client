@@ -20,11 +20,16 @@ export class FilterBarComponent {
   @Output() searchChange = new EventEmitter<void>();
   @Output() clearFilters = new EventEmitter<void>();
 
+  get hasValidSearchText(): boolean {
+    return this.searchText.trim().length > 0;
+  }
+
   onSearchTextChange(value: string): void {
     this.searchTextChange.emit(value);
   }
 
   onSearch(): void {
+    if (!this.hasValidSearchText) return;
     this.searchChange.emit();
   }
 

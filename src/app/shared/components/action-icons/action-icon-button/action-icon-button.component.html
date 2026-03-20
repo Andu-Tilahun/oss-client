@@ -1,0 +1,24 @@
+<button
+  type="button"
+  class="inline-flex items-center justify-center w-8 h-8 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all duration-200 shadow-sm hover:shadow"
+  [ngClass]="[buttonSizeClass, buttonClass]"
+  [disabled]="disabled"
+  [attr.title]="computedTitle"
+  (click)="click.emit()"
+>
+  <svg
+    [ngClass]="[svgSizeClass, svgClass]"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      [attr.d]="iconPathD"
+    ></path>
+  </svg>
+</button>
+
+

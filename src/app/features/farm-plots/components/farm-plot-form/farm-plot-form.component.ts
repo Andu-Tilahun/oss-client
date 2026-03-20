@@ -8,13 +8,14 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import {ProfilePictureUploadComponent} from '../../../shared/file-upload/profile-picture-upload/profile-picture-upload.component';
+import {ProfilePictureUploadComponent} from '../../../../shared/file-upload/profile-picture-upload/profile-picture-upload.component';
 import {FarmPlot, FarmPlotRequest, FarmPlotSizeType, FarmPlotSoilType, FarmPlotStatus} from '../../models/farm-plot.model';
+import {DocumentUploadComponent} from "../../../../shared/file-upload/document-upload/document-upload.component";
 
 @Component({
   selector: 'app-farm-plot-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ProfilePictureUploadComponent],
+    imports: [CommonModule, ReactiveFormsModule, ProfilePictureUploadComponent, DocumentUploadComponent],
   templateUrl: './farm-plot-form.component.html',
   styleUrls: ['./farm-plot-form.component.css'],
   providers: [

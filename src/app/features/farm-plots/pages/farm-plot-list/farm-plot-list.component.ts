@@ -1,20 +1,16 @@
 import {Component} from '@angular/core';
-import {Router} from '@angular/router';
-import {FarmPlot} from '../../models/farm-plot.model';
+import {
+  FarmPlot,
+  FarmPlotFilterRequest,
+  FarmPlotSizeType,
+  FarmPlotSoilType,
+  FarmPlotStatus
+} from '../../models/farm-plot.model';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
-import {ColumnType} from '../../../../shared/data-table/models/column-types.model';
 import {FarmPlotService} from '../../services/farm-plot.service';
 import {PageResponse} from '../../../../shared/models/api-response.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
-import {FarmPlotFilterRequest, FarmPlotStatus, FarmPlotSizeType, FarmPlotSoilType} from '../../models/farm-plot.model';
-import {FarmPlotCreateModalComponent} from '../../modals/farm-plot-create-modal/farm-plot-create-modal.component';
-import {FarmPlotEditModalComponent} from '../../modals/farm-plot-edit-modal/farm-plot-edit-modal.component';
-import {ConfirmationModalComponent} from '../../../../shared/modals/confirmation-modal/confirmation-modal.component';
-import {FarmPlotFilterComponent} from '../farm-plot-filter/farm-plot-filter.component';
-import {PageHeaderComponent} from '../../../../shared/components/page-header/page-header.component';
-import {NgClass} from '@angular/common';
-import {DataTableComponent} from '../../../../shared/data-table/data-table.component';
 
 @Component({
   selector: 'app-farm-plot-list',
@@ -42,6 +38,9 @@ export class FarmPlotListComponent {
 
   selectedPlot: FarmPlot | null = null;
 
+  // Forces the right-side detail component to reload after updates.
+  detailRefreshKey = 0;
+
   columns: DataTableColumn<FarmPlot>[] = [
     {header: 'Title', value: (p) => p.title},
     {
@@ -54,9 +53,9 @@ export class FarmPlotListComponent {
 
   constructor(
     private farmPlotService: FarmPlotService,
-    private toastService: ToastService,
-    private router: Router
-  ) {}
+    private toastService: ToastService
+  ) {
+  }
 
   ngOnInit(): void {
     this.loadPlots();
@@ -84,6 +83,31 @@ export class FarmPlotListComponent {
         this.total = response.totalElements;
         this.loading = false;
         this.toastService.success('Farm plots retrieved successfully');
+
+        // Default selection: show first element only when nothing is selected.
+        // If a plot was already selected, keep it if it still exists in the new page data.
+        const previousSelectedId = this.selectedPlot?.id;
+
+        if (this.plots.length === 0) {
+          this.selectedPlot = null;
+          return;
+        }
+
+        if (!previousSelectedId) {
+          this.selectedPlot = {...this.plots[0]};
+          this.detailRefreshKey++;
+          return;
+        }
+
+        const match = this.plots.find((p) => p.id === previousSelectedId);
+        if (match) {
+          this.selectedPlot = {...match};
+          return;
+        }
+
+        // Selected item is no longer in the list; fall back to the first item.
+        this.selectedPlot = {...this.plots[0]};
+        this.detailRefreshKey++;
       },
       error: (error) => {
         this.toastService.error(error.message || 'Failed to fetch farm plots', 'Fetch Farm Plots');
@@ -113,6 +137,10 @@ export class FarmPlotListComponent {
     this.loadPlots();
   }
 
+  onFilterChange(): void {
+    this.onSearch();
+  }
+
   clearFilters(): void {
     this.searchText = '';
     this.status = '';
@@ -125,11 +153,27 @@ export class FarmPlotListComponent {
 
   onEdit(plot: FarmPlot): void {
     this.selectedPlot = plot;
+    this.showDeleteModal = false;
     this.showEditModal = true;
+  }
+
+  onView(plot: FarmPlot): void {
+    // Clone to ensure the right-pane change detection sees a new object reference.
+    this.selectedPlot = {...plot};
+    this.showCreateModal = false;
+    this.showEditModal = false;
+    this.showDeleteModal = false;
+  }
+
+  onCloseDetail(): void {
+    this.selectedPlot = null;
+    this.showEditModal = false;
+    this.showDeleteModal = false;
   }
 
   onDelete(plot: FarmPlot): void {
     this.selectedPlot = plot;
+    this.showEditModal = false;
     this.showDeleteModal = true;
   }
 
@@ -149,10 +193,12 @@ export class FarmPlotListComponent {
   }
 
   onFarmPlotCreated(): void {
+    this.detailRefreshKey++;
     this.loadPlots();
   }
 
   onFarmPlotUpdated(): void {
+    this.detailRefreshKey++;
     this.loadPlots();
   }
 }

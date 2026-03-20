@@ -20,6 +20,8 @@
         </div>
         <input
           type="search"
+          required
+          aria-required="true"
           [ngModel]="searchText"
           (ngModelChange)="onSearchTextChange($event)"
           (keyup.enter)="onSearch()"
@@ -33,7 +35,8 @@
     <button
       type="button"
       (click)="onSearch()"
-      class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+      [disabled]="!hasValidSearchText"
+      class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
     >
       {{ applyLabel }}
     </button>

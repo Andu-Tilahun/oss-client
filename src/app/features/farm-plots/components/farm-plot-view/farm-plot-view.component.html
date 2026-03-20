@@ -1,0 +1,47 @@
+<app-detail-card>
+  <div *ngIf="loading" class="text-sm text-gray-600">Loading farm plot…</div>
+  <div *ngIf="error && !loading" class="text-sm text-red-600">{{ error }}</div>
+  <div *ngIf="!plot && !loading" class="text-sm text-gray-500">No farm plot selected.</div>
+
+  <ng-container *ngIf="plot && !loading">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
+      <div>
+        <h3 class="text-2xl font-bold text-gray-900">{{ plot.title }}</h3>
+        <p *ngIf="plot.description" class="mt-1 text-sm text-gray-500">{{ plot.description }}</p>
+      </div>
+
+      <span
+        class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
+        [ngClass]="statusPillClass(plot.status)"
+      >
+        {{ plot.status }}
+      </span>
+    </div>
+
+    <hr class="border-gray-200 mb-8" />
+
+    <app-detail-section title="Farm Plot Information">
+      <app-detail-field label="Title" [value]="plot.title" />
+      <app-detail-field label="Status" [value]="plot.status" />
+      <app-detail-field label="Size" [value]="sizeText(plot)" />
+      <app-detail-field label="Soil Type" [value]="plot.soilType" />
+      <app-detail-field label="Latitude" [value]="plot.latitude" />
+      <app-detail-field label="Longitude" [value]="plot.longitude" />
+      <app-detail-field label="Description" [value]="plot.description || '-'" />
+    </app-detail-section>
+
+    <app-detail-section title="Media">
+      <div class="col-span-full">
+        <app-document-upload
+          label="Image"
+          [currentFileId]="plot.imageUuid"
+          [viewOnly]="true"
+          [required]="false"
+        ></app-document-upload>
+      </div>
+    </app-detail-section>
+  </ng-container>
+
+  <!-- fallback handled by the "No farm plot selected" block above -->
+</app-detail-card>
+

@@ -158,9 +158,7 @@
               <div class="space-y-1">
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Farm Plot</p>
                 <p class="font-medium text-gray-900">
-                  {{
-                    farmPlots.find(p => p.id === leaseDetailsForm.get('farmPlotId')?.value)?.title || '-'
-                  }}
+                  {{ selectedFarmPlotTitle }}
                 </p>
               </div>
               <div class="space-y-1">

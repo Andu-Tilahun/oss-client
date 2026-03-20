@@ -2,11 +2,12 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {FarmPlotSizeType, FarmPlotSoilType, FarmPlotStatus} from '../../models/farm-plot.model';
+import {FilterBarComponent} from '../../../../shared/components/filter-bar/filter-bar.component';
 
 @Component({
   selector: 'app-farm-plot-filter',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FilterBarComponent],
   templateUrl: './farm-plot-filter.component.html',
   styleUrls: ['./farm-plot-filter.component.css'],
 })
@@ -25,10 +26,11 @@ export class FarmPlotFilterComponent {
 
   @Output() searchChange = new EventEmitter<void>();
   @Output() clearFilters = new EventEmitter<void>();
+  @Output() filterChange = new EventEmitter<void>();
 
-  readonly statuses: Array<FarmPlotStatus | ''> = ['', 'ACTIVE', 'INACTIVE', 'UNDER_MAINTENANCE'];
-  readonly soilTypes: Array<FarmPlotSoilType | ''> = ['', 'SANDY', 'CLAY', 'LOAMY'];
-  readonly sizeTypes: Array<FarmPlotSizeType | ''> = ['', 'ACRES', 'HECTARES'];
+  readonly statuses: Array<FarmPlotStatus | ''> = ['ACTIVE', 'INACTIVE', 'UNDER_MAINTENANCE'];
+  readonly soilTypes: Array<FarmPlotSoilType | ''> = ['SANDY', 'CLAY', 'LOAMY'];
+  readonly sizeTypes: Array<FarmPlotSizeType | ''> = ['ACRES', 'HECTARES'];
 
   onSearchTextChange(value: string) {
     this.searchTextChange.emit(value);
@@ -36,6 +38,21 @@ export class FarmPlotFilterComponent {
 
   onSearch() {
     this.searchChange.emit();
+  }
+
+  onStatusChange(value: FarmPlotStatus | '') {
+    this.statusChange.emit(value);
+    this.filterChange.emit();
+  }
+
+  onSoilTypeChange(value: FarmPlotSoilType | '') {
+    this.soilTypeChange.emit(value);
+    this.filterChange.emit();
+  }
+
+  onSizeTypeChange(value: FarmPlotSizeType | '') {
+    this.sizeTypeChange.emit(value);
+    this.filterChange.emit();
   }
 
   onClearFilters() {
