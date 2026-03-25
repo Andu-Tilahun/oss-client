@@ -179,7 +179,14 @@ export const routes: Routes = [
     path: 'farm-leases',
     loadChildren: () => import('./features/farm-leases/farm-leases.module').then(m => m.FarmLeasesModule),
     canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['INVESTOR'] },
+    data: { roles: ['INVESTOR', 'ADMIN'] },
+  },
+  {
+    path: 'farm-crowdfunding',
+    loadChildren: () =>
+      import('./features/farm-crowdfunding/farm-crowdfunding.module').then((m) => m.FarmCrowdfundingModule),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['INVESTOR', 'ADMIN'] },
   },
   {
     path: 'my-borrows',

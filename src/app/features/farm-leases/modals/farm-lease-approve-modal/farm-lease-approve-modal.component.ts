@@ -7,11 +7,11 @@ import {LeaseAgreement} from '../../models/farm-lease.model';
 export type AdminLeaseDecision = 'APPROVE' | 'REJECT';
 
 @Component({
-  selector: 'app-farm-lease-admin-action-modal',
+  selector: 'app-farm-lease-approve-modal',
   standalone: true,
   imports: [CommonModule, FormsModule, ModalComponent],
-  templateUrl: './farm-lease-admin-action-modal.component.html',
-  styleUrls: ['./farm-lease-admin-action-modal.component.css'],
+  templateUrl: './farm-lease-approve-modal.component.html',
+  styleUrls: ['./farm-lease-approve-modal.component.css'],
 })
 export class FarmLeaseAdminActionModalComponent implements OnChanges {
   @Input() visible = false;

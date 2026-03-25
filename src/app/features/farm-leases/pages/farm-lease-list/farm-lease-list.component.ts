@@ -7,7 +7,7 @@ import {ToastService} from '../../../../shared/toast/toast.service';
 import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
 import {PageSplitRightAction} from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
 import {AuthService} from '../../../auth/services/auth.service';
-import {AdminLeaseDecision} from '../../modals/farm-lease-admin-action-modal/farm-lease-admin-action-modal.component';
+import {AdminLeaseDecision} from '../../modals/farm-lease-approve-modal/farm-lease-approve-modal.component';
 
 @Component({
   selector: 'app-farm-lease-list',
@@ -72,6 +72,10 @@ export class FarmLeaseListComponent implements OnInit {
     return this.normalizeStatus(lease?.status) === 'ACTIVE';
   }
 
+  private isLeasePending(lease: LeaseAgreement | null | undefined): boolean {
+    return this.normalizeStatus(lease?.status) === 'PENDING';
+  }
+
   public shouldShowLeaseEditButton(lease: LeaseAgreement | null | undefined): boolean {
     if (!lease) return false;
     if (this.isAdmin) return false; // Admins can approve but not edit
@@ -80,12 +84,20 @@ export class FarmLeaseListComponent implements OnInit {
 
   private shouldShowApproveLeaseAction(lease: LeaseAgreement | null | undefined): boolean {
     if (!lease) return false;
-    // As requested: admins see approve for active leases.
-    return this.isAdmin && this.isLeaseActive(lease);
+    // Admin approves/rejects leases that are registered but not yet active.
+    return this.isAdmin && this.isLeasePending(lease);
   }
 
   ngOnInit(): void {
+    // Admin should start on "needs decision" leases.
+    if (this.isAdmin && !this.status) {
+      this.status = 'PENDING';
+    }
     this.loadLeases();
+  }
+
+  public get isAdminUser(): boolean {
+    return this.isAdmin;
   }
 
   private buildFilterRequest(): LeaseFilterRequest {

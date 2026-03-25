@@ -22,6 +22,7 @@ export const Endpoints = {
   // Farm
   FARM_PLOTS_ENDPOINT: '/farm/farm-plots',
   FARM_LEASES_ENDPOINT: '/farm/leases',
+  FARM_CROWDFUNDING_ENDPOINT: '/farm/crowdfunding',
 
   // Inventory
   EMPLOYEES_ENDPOINT: '/inventory/employees',

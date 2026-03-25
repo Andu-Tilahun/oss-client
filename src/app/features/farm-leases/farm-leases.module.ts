@@ -5,7 +5,7 @@ import {SharedModule} from '../../shared/shared.module';
 import {FarmLeaseListComponent} from './pages/farm-lease-list/farm-lease-list.component';
 import {FarmLeaseCreateModalComponent} from './modals/farm-lease-create-modal/farm-lease-create-modal.component';
 import {FarmLeaseEditModalComponent} from './modals/farm-lease-edit-modal/farm-lease-edit-modal.component';
-import {FarmLeaseAdminActionModalComponent} from './modals/farm-lease-admin-action-modal/farm-lease-admin-action-modal.component';
+import {FarmLeaseAdminActionModalComponent} from './modals/farm-lease-approve-modal/farm-lease-approve-modal.component';
 import {PageSplitLayoutComponent} from '../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
 import {FarmLeaseFilterComponent} from './pages/farm-lease-filter/farm-lease-filter.component';
 import {FarmLeaseViewComponent} from './components/farm-lease-view/farm-lease-view.component';

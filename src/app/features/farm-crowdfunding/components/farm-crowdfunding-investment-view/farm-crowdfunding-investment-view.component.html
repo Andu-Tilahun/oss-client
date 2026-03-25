@@ -1,0 +1,36 @@
+<div *ngIf="investment; else empty" class="p-4 space-y-3">
+  <div class="text-lg font-semibold">Investment</div>
+
+  <div class="grid grid-cols-2 gap-3 text-sm">
+    <div>
+      <div class="text-gray-500">Campaign</div>
+      <div>{{ investment.campaign?.title ?? investment.crowdFundingId }}</div>
+    </div>
+    <div>
+      <div class="text-gray-500">Amount</div>
+      <div>{{ formatAmount(investment.amount) }}</div>
+    </div>
+    <div>
+      <div class="text-gray-500">Payment method</div>
+      <div>{{ investment.paymentMethod }}</div>
+    </div>
+    <div>
+      <div class="text-gray-500">Status</div>
+      <div>{{ investment.status }}</div>
+    </div>
+    <div>
+      <div class="text-gray-500">Approval</div>
+      <div>{{ investment.approvalStatus }}</div>
+    </div>
+  </div>
+
+  <div class="text-sm">
+    <div class="text-gray-500">ROI</div>
+    <div class="whitespace-pre-wrap">{{ investment.roi ?? '-' }}</div>
+  </div>
+</div>
+
+<ng-template #empty>
+  <div class="p-4 text-sm text-gray-500">No investment selected.</div>
+</ng-template>
+

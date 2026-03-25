@@ -1,0 +1,79 @@
+<app-page-split-layout
+  [showLeftTitle]="false"
+  [showRightTitle]="false"
+  leftTitle="Crowdfunding"
+  rightTitle="Campaign Detail"
+  [rightItem]="selectedCampaign"
+  [rightEmptyMessage]="'Select a row to view details.'"
+  [showRightEditButton]="false"
+  [rightActions]="rightActions"
+>
+  <ng-template #extraTableHeader>
+    <div class="w-full flex flex-col gap-2">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+        <input
+          class="form-control"
+          type="text"
+          placeholder="Search by UUID (campaign/operation)"
+          [(ngModel)]="searchText"
+          (keyup.enter)="onSearch()"
+        />
+        <select class="form-control" [(ngModel)]="status" (change)="onFilterChange()">
+          <option value="">All statuses</option>
+          <option value="OPEN">OPEN</option>
+          <option value="CLOSED">CLOSED</option>
+          <option value="FUNDED">FUNDED</option>
+          <option value="FAILED">FAILED</option>
+        </select>
+        <div class="flex gap-2">
+          <button class="btn btn-primary w-full" (click)="onSearch()">Search</button>
+          <button class="btn btn-outline w-full" (click)="clearFilters()">Clear</button>
+        </div>
+      </div>
+      <div class="text-xs text-gray-500">
+        Tip: Investors are default-filtered to <b>OPEN</b> campaigns.
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #leftContent>
+    <app-data-table
+      [columns]="columns"
+      [data]="campaigns"
+      [loading]="loading"
+      [total]="total"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [showAddButton]="isAdminUser"
+      [showRefreshButton]="true"
+      [showViewButton]="true"
+      [showEditButton]="false"
+      [showDeleteButton]="false"
+      [addButtonText]="'Create campaign'"
+      (pageChange)="onPageChange($event)"
+      (addClick)="onAdd()"
+      (refreshClick)="onRefresh()"
+      (viewClick)="onView($event)"
+    >
+    </app-data-table>
+  </ng-template>
+
+  <ng-template #rightContent let-campaign>
+    <app-farm-crowdfunding-campaign-view
+      [campaign]="campaign"
+      [refreshKey]="detailRefreshKey"
+    ></app-farm-crowdfunding-campaign-view>
+  </ng-template>
+</app-page-split-layout>
+
+<app-farm-crowdfunding-create-campaign-modal
+  [(visible)]="showCreateCampaignModal"
+  (campaignCreated)="onCampaignCreated()"
+></app-farm-crowdfunding-create-campaign-modal>
+
+<app-farm-crowdfunding-create-investment-modal
+  [(visible)]="showCreateInvestmentModal"
+  [campaign]="selectedCampaign"
+  (investmentCreated)="onInvestmentCreated()"
+></app-farm-crowdfunding-create-investment-modal>
+

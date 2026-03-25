@@ -1,0 +1,81 @@
+<app-page-split-layout
+  [showLeftTitle]="false"
+  [showRightTitle]="false"
+  leftTitle="Investments"
+  rightTitle="Investment Detail"
+  [rightItem]="selectedInvestment"
+  [rightEmptyMessage]="'Select a row to view details.'"
+  [showRightEditButton]="false"
+  [rightActions]="rightActions"
+>
+  <ng-template #extraTableHeader>
+    <div class="w-full flex flex-col gap-2">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+        <input
+          class="form-control"
+          type="text"
+          placeholder="Search by UUID (investment/campaign)"
+          [(ngModel)]="searchText"
+          (keyup.enter)="onSearch()"
+        />
+        <select class="form-control" [(ngModel)]="status" (change)="onFilterChange()">
+          <option value="">All statuses</option>
+          <option value="PENDING">PENDING</option>
+          <option value="ACTIVE">ACTIVE</option>
+          <option value="PAID">PAID</option>
+          <option value="FAILED">FAILED</option>
+        </select>
+        <select class="form-control" [(ngModel)]="approval" (change)="onFilterChange()">
+          <option value="">All approvals</option>
+          <option value="PENDING">PENDING</option>
+          <option value="ACCEPTED">ACCEPTED</option>
+          <option value="REJECTED">REJECTED</option>
+        </select>
+        <div class="flex gap-2">
+          <button class="btn btn-primary w-full" (click)="onSearch()">Search</button>
+          <button class="btn btn-outline w-full" (click)="clearFilters()">Clear</button>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #leftContent>
+    <app-data-table
+      [columns]="columns"
+      [data]="investments"
+      [loading]="loading"
+      [total]="total"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [showAddButton]="false"
+      [showRefreshButton]="true"
+      [showViewButton]="true"
+      [showEditButton]="false"
+      [showDeleteButton]="false"
+      (pageChange)="onPageChange($event)"
+      (refreshClick)="onRefresh()"
+      (viewClick)="onView($event)"
+    >
+    </app-data-table>
+  </ng-template>
+
+  <ng-template #rightContent let-investment>
+    <app-farm-crowdfunding-investment-view
+      [investment]="investment"
+      [refreshKey]="detailRefreshKey"
+    ></app-farm-crowdfunding-investment-view>
+  </ng-template>
+</app-page-split-layout>
+
+<app-farm-crowdfunding-set-roi-modal
+  [(visible)]="showSetRoiModal"
+  [investment]="selectedInvestment"
+  (roiSaved)="onRoiSaved()"
+></app-farm-crowdfunding-set-roi-modal>
+
+<app-farm-crowdfunding-investor-decision-modal
+  [(visible)]="showInvestorDecisionModal"
+  [investment]="selectedInvestment"
+  (decisionSaved)="onDecisionSaved()"
+></app-farm-crowdfunding-investor-decision-modal>
+

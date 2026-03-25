@@ -29,7 +29,7 @@
       [total]="total"
       [pageSize]="pageSize"
       [pageIndex]="pageIndex"
-      [showAddButton]="true"
+      [showAddButton]="!isAdminUser"
       [showRefreshButton]="true"
       [showViewButton]="true"
       [showEditButton]="false"
@@ -60,8 +60,8 @@
   (leaseUpdated)="onLeaseUpdated()"
 ></app-farm-lease-edit-modal>
 
-<app-farm-lease-admin-action-modal
+<app-farm-lease-approve-modal
   [(visible)]="showAdminActionModal"
   [lease]="selectedLease"
   (decisionSelected)="onAdminDecision($event)"
-></app-farm-lease-admin-action-modal>
+></app-farm-lease-approve-modal>
