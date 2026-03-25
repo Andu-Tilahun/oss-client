@@ -1,0 +1,14 @@
+<section class="farm-lease-payment-page">
+  <div class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Payment schedule</h2>
+    <p class="text-sm text-gray-500 mt-1">
+      Add one or more installments. Amounts must add up to the lease total; use &quot;Add payment&quot; for extra lines.
+    </p>
+  </div>
+
+  <app-farm-lease-payment-form
+    [leaseDetails]="leaseDetails"
+    [lease]="lease"
+    [readOnly]="readOnly"
+  ></app-farm-lease-payment-form>
+</section>

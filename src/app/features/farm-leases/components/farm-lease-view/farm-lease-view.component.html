@@ -1,0 +1,50 @@
+<app-detail-card>
+  <div *ngIf="loading" class="text-sm text-gray-600">Loading lease…</div>
+  <div *ngIf="error && !loading" class="text-sm text-red-600">{{ error }}</div>
+  <div *ngIf="!lease && !loading" class="text-sm text-gray-500">No lease selected.</div>
+
+  <ng-container *ngIf="lease && !loading && detail">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
+      <div>
+        <h3 class="text-2xl font-bold text-gray-900">Lease agreement</h3>
+      </div>
+
+      <span
+        class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
+        [ngClass]="statusPillClass(detail.status)"
+      >
+        {{ detail.status }}
+      </span>
+    </div>
+
+    <hr class="border-gray-200 mb-8" />
+
+    <app-detail-section title="Lease terms">
+      <app-detail-field label="Start date" [value]="detail.startDate" />
+      <app-detail-field label="End date" [value]="detail.endDate" />
+      <app-detail-field
+        label="Duration (months)"
+        [value]="detail.totalDurationMonths != null ? detail.totalDurationMonths.toString() : '-'"
+      />
+      <app-detail-field label="Total amount" [value]="formatAmount(detail.totalAmount)" />
+    </app-detail-section>
+
+    <app-farm-plot-view></app-farm-plot-view>
+
+    <app-detail-section *ngIf="detail.terms?.length" title="Payment schedule">
+      <div class="col-span-full overflow-x-auto">
+        <app-data-table
+          [columns]="paymentColumns"
+          [data]="detail.terms ?? []"
+          [loading]="false"
+          [total]="detail.terms?.length ?? 0"
+          [pageIndex]="1"
+          [pageSize]="detail.terms?.length ?? 10"
+          [showPagination]="false"
+          [showIndex]="true"
+          [showActionColumn]="false"
+        ></app-data-table>
+      </div>
+    </app-detail-section>
+  </ng-container>
+</app-detail-card>

@@ -36,3 +36,23 @@ export interface LeaseGenerateTermsRequest {
   paymentStartDate: string; // yyyy-MM-dd
 }
 
+/** One line in a custom payment schedule (repeater row). */
+export interface FarmLeasePaymentLine {
+  dueDate: string; // yyyy-MM-dd
+  amount: number;
+}
+
+/** Request body for POST .../leases/{id}/terms/define */
+export interface LeaseDefineTermsRequest {
+  terms: FarmLeasePaymentLine[];
+}
+
+export interface LeaseFilterRequest {
+  searchText?: string;
+  statuses?: LeaseStatus[];
+  sortBy?: string;
+  sortDirection?: 'ASC' | 'DESC';
+  page: number;
+  size: number;
+}
+

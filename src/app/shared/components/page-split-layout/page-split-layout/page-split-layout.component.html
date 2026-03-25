@@ -42,14 +42,29 @@
           <ng-container *ngIf="hasRightItem(); else customRightContent">
             <div
               class="mb-4 flex items-center justify-between flex-wrap gap-3"
-              *ngIf="showRightEditButton || showRightCloseButton"
+              *ngIf="hasRightActionToolbar()"
             >
-              <app-action-icon-button
-                *ngIf="showRightEditButton"
-                icon="edit"
-                [size]="'md'"
-                (click)="rightEdit.emit(rightItem)"
-              ></app-action-icon-button>
+              <div class="flex items-center flex-wrap gap-2">
+                <app-action-icon-button
+                  *ngIf="showRightEditButton"
+                  icon="edit"
+                  [size]="'md'"
+                  (click)="rightEdit.emit(rightItem)"
+                ></app-action-icon-button>
+
+                <ng-container *ngFor="let action of rightActions">
+                  <app-action-icon-button
+                    *ngIf="isRightActionVisible(action)"
+                    [icon]="action.icon"
+                    [title]="action.title || action.id"
+                    [size]="'md'"
+                    [disabled]="isRightActionDisabled(action)"
+                    [buttonClass]="action.buttonClass || ''"
+                    [svgClass]="action.svgClass || ''"
+                    (click)="onRightActionClick(action)"
+                  ></app-action-icon-button>
+                </ng-container>
+              </div>
 
               <app-action-icon-button
                 *ngIf="showRightCloseButton"

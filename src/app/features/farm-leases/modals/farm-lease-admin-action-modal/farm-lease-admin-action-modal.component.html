@@ -1,0 +1,40 @@
+<app-modal
+  [(visible)]="visible"
+  title="Admin Lease Action"
+  size="md"
+  [confirmText]="'Submit'"
+  [cancelText]="'Cancel'"
+  [confirmLoading]="confirmLoading"
+  [showFooter]="true"
+  [maskClosable]="false"
+  (confirm)="onConfirm()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <div class="space-y-5">
+    <div class="text-sm text-gray-600">
+      Select an action for the selected lease.
+    </div>
+
+    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+      <div class="text-xs font-medium text-gray-500">Lease ID</div>
+      <div class="text-sm font-semibold text-gray-900 break-all">
+        {{ lease?.id ?? '-' }}
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        Decision <span class="text-red-500">*</span>
+      </label>
+      <select
+        [(ngModel)]="decision"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+      >
+        <option [ngValue]="'APPROVE'">Approve</option>
+        <option [ngValue]="'REJECT'">Reject</option>
+      </select>
+    </div>
+  </div>
+</app-modal>
+

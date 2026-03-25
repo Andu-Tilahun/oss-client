@@ -1,6 +1,13 @@
-import {Component} from '@angular/core';
-import {FarmLeaseCreateModalComponent} from '../../modals/farm-lease-create-modal/farm-lease-create-modal.component';
-import {PageHeaderComponent} from '../../../../shared/components/page-header/page-header.component';
+import {Component, OnInit} from '@angular/core';
+import {LeaseAgreement, LeaseFilterRequest, LeaseStatus} from '../../models/farm-lease.model';
+import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
+import {FarmLeaseService} from '../../services/farm-lease.service';
+import {PageResponse} from '../../../../shared/models/api-response.model';
+import {ToastService} from '../../../../shared/toast/toast.service';
+import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
+import {PageSplitRightAction} from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
+import {AuthService} from '../../../auth/services/auth.service';
+import {AdminLeaseDecision} from '../../modals/farm-lease-admin-action-modal/farm-lease-admin-action-modal.component';
 
 @Component({
   selector: 'app-farm-lease-list',
@@ -8,15 +15,228 @@ import {PageHeaderComponent} from '../../../../shared/components/page-header/pag
   templateUrl: './farm-lease-list.component.html',
   styleUrl: './farm-lease-list.component.css',
 })
-export class FarmLeaseListComponent {
-  showCreateModal = false;
+export class FarmLeaseListComponent implements OnInit {
+  leases: LeaseAgreement[] = [];
+  loading = false;
+  total = 0;
+  pageSize = 10;
+  pageIndex = 1;
+  currentPage = 0;
 
-  onAddLease(): void {
+  searchText = '';
+  status: LeaseStatus | '' = '';
+
+  showCreateModal = false;
+  showEditModal = false;
+  selectedLease: LeaseAgreement | null = null;
+  detailRefreshKey = 0;
+
+  private isAdmin = false;
+  showAdminActionModal = false;
+  private adminActionLoading = false;
+
+  columns: DataTableColumn<LeaseAgreement>[] = [
+    {header: 'Start', value: (l) => l.startDate},
+    {header: 'End', value: (l) => l.endDate},
+    {header: 'Duration (mo)', value: (l) => String(l.totalDurationMonths)},
+    {header: 'Status', value: (l) => l.status},
+    {header: 'Amount', value: (l) => this.formatAmount(l.totalAmount)},
+  ];
+
+  rightActions: PageSplitRightAction<LeaseAgreement>[];
+
+  constructor(
+    private farmLeaseService: FarmLeaseService,
+    private toastService: ToastService,
+    private authService: AuthService,
+  ) {
+    const role = (this.authService.getCurrentUser()?.role ?? '').toString().trim().toUpperCase();
+    this.isAdmin = role === 'ADMIN';
+
+    this.rightActions = [
+      {
+        id: 'approve',
+        icon: 'check',
+        title: 'Approve lease',
+        visible: (l) => this.shouldShowApproveLeaseAction(l),
+        action: (l) => this.onApproveLease(l),
+      },
+    ];
+  }
+
+  private normalizeStatus(status: unknown): string {
+    return (status ?? '').toString().trim().toUpperCase();
+  }
+
+  private isLeaseActive(lease: LeaseAgreement | null | undefined): boolean {
+    return this.normalizeStatus(lease?.status) === 'ACTIVE';
+  }
+
+  public shouldShowLeaseEditButton(lease: LeaseAgreement | null | undefined): boolean {
+    if (!lease) return false;
+    if (this.isAdmin) return false; // Admins can approve but not edit
+    return !this.isLeaseActive(lease); // Hide edit when lease is active
+  }
+
+  private shouldShowApproveLeaseAction(lease: LeaseAgreement | null | undefined): boolean {
+    if (!lease) return false;
+    // As requested: admins see approve for active leases.
+    return this.isAdmin && this.isLeaseActive(lease);
+  }
+
+  ngOnInit(): void {
+    this.loadLeases();
+  }
+
+  private buildFilterRequest(): LeaseFilterRequest {
+    return {
+      searchText: this.searchText || undefined,
+      statuses: this.status ? [this.status] : undefined,
+      sortBy: 'startDate',
+      sortDirection: 'DESC',
+      page: this.currentPage,
+      size: this.pageSize,
+    };
+  }
+
+  loadLeases(): void {
+    this.loading = true;
+    const request = this.buildFilterRequest();
+    this.farmLeaseService.filterLeases(request).subscribe({
+      next: (response: PageResponse<LeaseAgreement>) => {
+        this.leases = response.content;
+        this.total = response.totalElements;
+        this.loading = false;
+        this.toastService.success('Leases retrieved successfully');
+
+        const previousSelectedId = this.selectedLease?.id;
+
+        if (this.leases.length === 0) {
+          this.selectedLease = null;
+          return;
+        }
+
+        if (!previousSelectedId) {
+          this.selectedLease = {...this.leases[0]};
+          this.detailRefreshKey++;
+          return;
+        }
+
+        const match = this.leases.find((l) => l.id === previousSelectedId);
+        if (match) {
+          this.selectedLease = {...match};
+          return;
+        }
+
+        this.selectedLease = {...this.leases[0]};
+        this.detailRefreshKey++;
+      },
+      error: (error) => {
+        this.toastService.error(error.message || 'Failed to fetch leases', 'Fetch Leases');
+        this.loading = false;
+      },
+    });
+  }
+
+  onPageChange(params: TableQueryParams) {
+    this.pageIndex = params.pageIndex;
+    this.currentPage = this.pageIndex - 1;
+    this.pageSize = params.pageSize;
+    this.loadLeases();
+  }
+
+  onAdd(): void {
     this.showCreateModal = true;
+  }
+
+  onRefresh(): void {
+    this.loadLeases();
+  }
+
+  onSearch(): void {
+    this.currentPage = 0;
+    this.pageIndex = 1;
+    this.loadLeases();
+  }
+
+  onFilterChange(): void {
+    this.onSearch();
+  }
+
+  clearFilters(): void {
+    this.searchText = '';
+    this.status = '';
+    this.currentPage = 0;
+    this.pageIndex = 1;
+    this.loadLeases();
+  }
+
+  onView(lease: LeaseAgreement): void {
+    this.selectedLease = {...lease};
+    this.showCreateModal = false;
+    this.showEditModal = false;
+  }
+
+  onEdit(lease: LeaseAgreement): void {
+    this.selectedLease = {...lease};
+    this.showCreateModal = false;
+    this.showEditModal = true;
+  }
+
+  onApproveLease(lease: LeaseAgreement): void {
+    // Open admin action modal (Approve/Reject).
+    this.selectedLease = {...lease};
+    this.showEditModal = false;
+    this.showCreateModal = false;
+    this.showAdminActionModal = true;
+  }
+
+  onAdminDecision(decision: AdminLeaseDecision): void {
+    const leaseId = this.selectedLease?.id;
+    if (!leaseId) return;
+
+    if (this.adminActionLoading) return;
+    this.adminActionLoading = true;
+
+    const request$ = this.farmLeaseService.adminDecideLease(leaseId, decision);
+
+    request$.subscribe({
+      next: () => {
+        this.adminActionLoading = false;
+        this.toastService.success(
+          decision === 'APPROVE' ? 'Lease approved successfully' : 'Lease rejected successfully',
+          'Admin Lease Action',
+        );
+        this.detailRefreshKey++;
+        this.loadLeases();
+      },
+      error: () => {
+        this.adminActionLoading = false;
+      },
+    });
   }
 
   onLeaseCreated(): void {
     this.showCreateModal = false;
+    this.detailRefreshKey++;
+    this.loadLeases();
+  }
+
+  onLeaseUpdated(): void {
+    this.showEditModal = false;
+    this.detailRefreshKey++;
+    this.loadLeases();
+  }
+
+  private formatAmount(value: number | undefined): string {
+    if (value === undefined || value === null) return '-';
+    return new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(
+      value,
+    );
+  }
+
+  private shortId(id: string): string {
+    if (!id || id.length <= 16) return id;
+    return `${id.slice(0, 8)}…${id.slice(-6)}`;
   }
 }
-

@@ -1,0 +1,62 @@
+<form [formGroup]="form" class="space-y-6">
+  <div *ngIf="leaseDetails" class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+    <div>
+      <p class="text-sm font-medium text-gray-700">Lease total</p>
+      <p class="text-2xl font-bold text-gray-900">{{ leaseDetails.totalAmount | number: '1.2-4' }}</p>
+    </div>
+    <div>
+      <p class="text-sm font-medium text-gray-700">Sum of installments</p>
+      <p
+        class="text-2xl font-bold"
+        [class.text-red-600]="amountMismatch"
+        [class.text-gray-900]="!amountMismatch"
+      >
+        {{ sumOfAmounts | number: '1.2-4' }}
+      </p>
+    </div>
+  </div>
+
+  <p *ngIf="leaseDetails && amountMismatch" class="text-sm text-red-600">
+    The sum of installment amounts must equal the lease total amount.
+  </p>
+
+  <app-repeater
+    [formArray]="payments"
+    title="Installments"
+    addButtonText="Add payment"
+    emptyStateText="No payments added yet. Click 'Add payment' to add an installment."
+    [minItems]="1"
+    [showIndex]="true"
+    (add)="addPayment()"
+    (remove)="removePayment($event)"
+  >
+    <ng-template #itemTemplate let-item let-i="index">
+      <div [formGroup]="item" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Due date <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            formControlName="dueDate"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            [class.border-red-500]="item.get('dueDate')?.invalid && item.get('dueDate')?.touched"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Amount <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="number"
+            formControlName="amount"
+            min="0.0001"
+            step="0.01"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            [class.border-red-500]="item.get('amount')?.invalid && item.get('amount')?.touched"
+          />
+        </div>
+      </div>
+    </ng-template>
+  </app-repeater>
+</form>

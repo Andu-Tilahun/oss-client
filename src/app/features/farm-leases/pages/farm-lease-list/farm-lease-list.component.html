@@ -1,29 +1,67 @@
-<app-page-header
-  pageTitle="Farm Lease Management"
-  subTitle="lease farm plots and generate payment schedules"
-  [showBackButton]="false"
+<app-page-split-layout
+  [showLeftTitle]="false"
+  [showRightTitle]="false"
+  leftTitle="Farm Lease Management"
+  rightTitle="Lease Detail"
+  [rightItem]="selectedLease"
+  [rightEmptyMessage]="'Select a row to view details.'"
+  [showRightEditButton]="shouldShowLeaseEditButton(selectedLease)"
+  [rightActions]="rightActions"
+  (rightEdit)="onEdit($event)"
 >
-  <ng-template #mainContent>
-    <div class="p-6">
-      <div class="flex items-center justify-between gap-4 mb-6">
-        <h2 class="text-base font-semibold text-slate-700">Lease agreements</h2>
-        <button
-          (click)="onAddLease()"
-          class="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow"
-        >
-          Register a Lease
-        </button>
-      </div>
-
-      <p class="text-sm text-slate-600">
-        Use the registration wizard to create a new lease agreement.
-      </p>
+  <ng-template #extraTableHeader>
+    <div class="w-full">
+      <app-farm-lease-filter
+        [(searchText)]="searchText"
+        [(status)]="status"
+        (filterChange)="onFilterChange()"
+        (searchChange)="onFilterChange()"
+        (clearFilters)="clearFilters()"
+      ></app-farm-lease-filter>
     </div>
   </ng-template>
-</app-page-header>
+
+  <ng-template #leftContent>
+    <app-data-table
+      [columns]="columns"
+      [data]="leases"
+      [loading]="loading"
+      [total]="total"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [showAddButton]="true"
+      [showRefreshButton]="true"
+      [showViewButton]="true"
+      [showEditButton]="false"
+      [showDeleteButton]="false"
+      [addButtonText]="'Register'"
+      (pageChange)="onPageChange($event)"
+      (addClick)="onAdd()"
+      (refreshClick)="onRefresh()"
+      (viewClick)="onView($event)"
+      (editClick)="onEdit($event)"
+    >
+    </app-data-table>
+  </ng-template>
+
+  <ng-template #rightContent let-lease>
+    <app-farm-lease-view [lease]="lease" [refreshKey]="detailRefreshKey"></app-farm-lease-view>
+  </ng-template>
+</app-page-split-layout>
 
 <app-farm-lease-create-modal
   [(visible)]="showCreateModal"
   (leaseCreated)="onLeaseCreated()"
 ></app-farm-lease-create-modal>
 
+<app-farm-lease-edit-modal
+  [(visible)]="showEditModal"
+  [lease]="selectedLease"
+  (leaseUpdated)="onLeaseUpdated()"
+></app-farm-lease-edit-modal>
+
+<app-farm-lease-admin-action-modal
+  [(visible)]="showAdminActionModal"
+  [lease]="selectedLease"
+  (decisionSelected)="onAdminDecision($event)"
+></app-farm-lease-admin-action-modal>

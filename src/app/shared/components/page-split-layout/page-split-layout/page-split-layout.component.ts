@@ -1,6 +1,7 @@
 import {CommonModule} from '@angular/common';
 import {Component, ContentChild, EventEmitter, Input, Output, TemplateRef} from '@angular/core';
 import {ActionIconButtonComponent} from '../../action-icons/action-icon-button/action-icon-button.component';
+import {PageSplitRightAction} from './page-split-right-action.model';
 
 @Component({
   selector: 'app-page-split-layout',
@@ -25,6 +26,12 @@ export class PageSplitLayoutComponent {
 
   @Input() showRightEditButton = true;
   @Input() showRightCloseButton = false;
+
+  /**
+   * Extra icon actions (approve, reject, etc.), evaluated against {@link rightItem}.
+   * Same idea as data-table column actions: define in the host component and pass in.
+   */
+  @Input() rightActions: PageSplitRightAction<any>[] = [];
 
   @Output() rightEdit = new EventEmitter<any>();
   @Output() rightClose = new EventEmitter<void>();
@@ -70,6 +77,48 @@ export class PageSplitLayoutComponent {
 
   protected hasRightItem(): boolean {
     return this.rightItem !== null && this.rightItem !== undefined;
+  }
+
+  protected hasRightActionToolbar(): boolean {
+    return (
+      this.showRightEditButton ||
+      this.showRightCloseButton ||
+      this.hasAnyVisibleRightAction()
+    );
+  }
+
+  protected hasAnyVisibleRightAction(): boolean {
+    if (!this.hasRightItem() || !this.rightActions?.length) {
+      return false;
+    }
+    return this.rightActions.some((a) => this.isRightActionVisible(a));
+  }
+
+  protected isRightActionVisible(action: PageSplitRightAction<any>): boolean {
+    if (!this.rightItem) {
+      return false;
+    }
+    if (!action.visible) {
+      return true;
+    }
+    return action.visible(this.rightItem);
+  }
+
+  protected isRightActionDisabled(action: PageSplitRightAction<any>): boolean {
+    if (!this.rightItem) {
+      return true;
+    }
+    if (!action.disabled) {
+      return false;
+    }
+    return action.disabled(this.rightItem);
+  }
+
+  protected onRightActionClick(action: PageSplitRightAction<any>): void {
+    if (!this.rightItem || this.isRightActionDisabled(action)) {
+      return;
+    }
+    action.action(this.rightItem);
   }
 }
 

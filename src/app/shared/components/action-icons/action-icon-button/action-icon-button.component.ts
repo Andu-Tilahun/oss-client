@@ -1,7 +1,14 @@
 import {CommonModule} from '@angular/common';
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 
-export type ActionIconType = 'plus' | 'edit' | 'close' | 'save' | 'refresh' | 'export';
+export type ActionIconType =
+  | 'plus'
+  | 'edit'
+  | 'close'
+  | 'save'
+  | 'refresh'
+  | 'export'
+  | 'check';
 
 @Component({
   selector: 'app-action-icon-button',
@@ -60,6 +67,8 @@ export class ActionIconButtonComponent {
         // Simple "save" disk (floppy-like) icon.
         // Note: exact glyph may differ from your screenshot, but matches the project style.
         return 'M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2zM17 21v-8H7v8h10zM7 5h8v4H7V5z';
+      case 'check':
+        return 'M5 13l4 4L19 7';
       default:
         return 'M12 4v16m8-8H4';
     }
