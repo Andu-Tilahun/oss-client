@@ -40,6 +40,20 @@
         ></app-document-upload>
       </div>
     </app-detail-section>
+
+    <app-detail-section title="Location Map">
+      <div class="col-span-full">
+        <app-oss-map
+          [interactive]="false"
+          [height]="'300px'"
+          [zoom]="14"
+          [latitude]="plot.latitude"
+          [longitude]="plot.longitude"
+          [locations]="[{ lat: plot.latitude, lng: plot.longitude, name: plot.title }]"
+          [fitBounds]="true"
+        ></app-oss-map>
+      </div>
+    </app-detail-section>
   </ng-container>
 
   <!-- fallback handled by the "No farm plot selected" block above -->

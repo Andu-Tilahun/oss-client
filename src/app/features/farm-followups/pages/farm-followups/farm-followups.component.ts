@@ -9,6 +9,8 @@ import {FarmPlotService} from '../../../farm-plots/services/farm-plot.service';
 import {FarmPlot} from '../../../farm-plots/models/farm-plot.model';
 import {FarmFollowUpsService, FollowUpCreateRequest} from '../../services/farm-followups.service';
 import {ToastService} from '../../../../shared/toast/toast.service';
+import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
+import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
 
 @Component({
   selector: 'app-farm-followups',
@@ -45,6 +47,18 @@ export class FarmFollowUpsComponent implements OnInit {
   showWorkerUpdateModal = false;
   selectedAdminPlan: FarmlandRestorationPlan | null = null;
   selectedWorkerPlan: FarmlandRestorationPlan | null = null;
+  searchText = '';
+  statusFilter: RestorationPlanStatus | '' = '';
+  pageSize = 10;
+  pageIndex = 1;
+
+  adminColumns: DataTableColumn<FarmlandRestorationPlan>[] = [
+    {header: 'Farm Plot', value: (p) => p.farmPlotId || '-'},
+    {header: 'Start', value: (p) => p.startDate || '-'},
+    {header: 'End', value: (p) => p.endDate || '-'},
+    {header: 'Assigned To', value: (p) => p.assignedTo || '-'},
+    {header: 'Status', value: (p) => p.status || '-'},
+  ];
 
   constructor(
     private service: FarmFollowUpsService,
@@ -83,6 +97,8 @@ export class FarmFollowUpsComponent implements OnInit {
       this.service.getRestorationPlansForAdmin().subscribe({
         next: (items) => {
           this.restorationPlansForAdmin = items;
+          this.selectedAdminPlan = items.length ? {...items[0]} : null;
+          this.pageIndex = 1;
           this.loading = false;
         },
         error: () => this.loading = false,
@@ -113,6 +129,78 @@ export class FarmFollowUpsComponent implements OnInit {
 
   onRestorationUpdated(): void {
     this.loadAll();
+  }
+
+  get filteredAdminPlans(): FarmlandRestorationPlan[] {
+    let items = this.restorationPlansForAdmin;
+    const search = this.searchText.trim().toLowerCase();
+
+    if (search) {
+      items = items.filter((item) => {
+        const haystack = [
+          item.id,
+          item.farmPlotId,
+          item.assignedTo,
+          item.status,
+          item.startDate,
+          item.endDate,
+        ].join(' ').toLowerCase();
+        return haystack.includes(search);
+      });
+    }
+
+    if (this.statusFilter) {
+      items = items.filter((item) => item.status === this.statusFilter);
+    }
+
+    return items;
+  }
+
+  get pagedAdminPlans(): FarmlandRestorationPlan[] {
+    const start = (this.pageIndex - 1) * this.pageSize;
+    return this.filteredAdminPlans.slice(start, start + this.pageSize);
+  }
+
+  get selectedAdminPlanStatusPillClass(): string {
+    return this.statusPillClass(this.selectedAdminPlan?.status);
+  }
+
+  onAdminPageChange(params: TableQueryParams): void {
+    this.pageIndex = params.pageIndex;
+    this.pageSize = params.pageSize;
+  }
+
+  onAdminFilterSearch(): void {
+    this.pageIndex = 1;
+  }
+
+  onAdminClearFilters(): void {
+    this.searchText = '';
+    this.statusFilter = '';
+    this.pageIndex = 1;
+  }
+
+  onAdminStatusChange(value: string): void {
+    this.statusFilter = value as RestorationPlanStatus | '';
+    this.pageIndex = 1;
+  }
+
+  onAdminView(plan: FarmlandRestorationPlan): void {
+    this.selectedAdminPlan = {...plan};
+  }
+
+  statusPillClass(status?: RestorationPlanStatus): string {
+    switch ((status || '').toUpperCase()) {
+      case 'ACTIVE':
+        return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+      case 'RESTORATION_END':
+        return 'border-sky-200 bg-sky-50 text-sky-700';
+      case 'CANCELLED':
+        return 'border-rose-200 bg-rose-50 text-rose-700';
+      case 'SUBMITTED':
+      default:
+        return 'border-amber-200 bg-amber-50 text-amber-700';
+    }
   }
 
   createQuickFarmOperationSchedule(operationId: string): void {

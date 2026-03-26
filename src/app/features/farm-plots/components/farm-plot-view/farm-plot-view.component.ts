@@ -6,6 +6,7 @@ import {DetailCardComponent} from '../../../../shared/components/detail-field/de
 import {DetailSectionComponent} from '../../../../shared/components/detail-field/detail-section/detail-section.component';
 import {DetailFieldComponent} from '../../../../shared/components/detail-field/detail-field/detail-field.component';
 import {DocumentUploadComponent} from '../../../../shared/file-upload/document-upload/document-upload.component';
+import {OssMapComponent} from '../../../../shared/oss-map/oss-map.component';
 
 @Component({
   selector: 'app-farm-plot-view',
@@ -16,6 +17,7 @@ import {DocumentUploadComponent} from '../../../../shared/file-upload/document-u
     DetailSectionComponent,
     DetailFieldComponent,
     DocumentUploadComponent,
+    OssMapComponent,
   ],
   templateUrl: './farm-plot-view.component.html',
 })
