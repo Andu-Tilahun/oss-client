@@ -1,0 +1,19 @@
+<app-modal
+  [(visible)]="visible"
+  title="Create Restoration Plan"
+  size="xl"
+  confirmText="Create"
+  [confirmLoading]="confirmLoading"
+  (visibleChange)="visibleChange.emit($event)"
+  (confirm)="onConfirm()"
+  (cancel)="onCancel()"
+>
+  <ng-template #modalBody>
+    <app-restoration-plan-form
+      mode="create"
+      [farmPlots]="farmPlots"
+      [extensionWorkers]="extensionWorkers"
+    ></app-restoration-plan-form>
+  </ng-template>
+</app-modal>
+

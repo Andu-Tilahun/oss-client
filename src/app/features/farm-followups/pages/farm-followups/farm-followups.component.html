@@ -1,198 +1,110 @@
 <div class="p-6 space-y-8">
-  <div class="bg-white border rounded-lg shadow-sm p-5">
-    <h2 class="text-lg font-semibold mb-4">Farm Operation Follow-ups</h2>
-
-    <form [formGroup]="farmScheduleForm" (ngSubmit)="submitFarmSchedule()" class="space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Operation</label>
-          <select formControlName="operationId" class="w-full px-3 py-2 border rounded-lg">
-            <option value="" disabled>Select operation</option>
-            <option *ngFor="let op of assignedFarmOperations" [value]="op.id">{{ op.id }}</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Scheduled date</label>
-          <input type="datetime-local" formControlName="scheduledDate" class="w-full px-3 py-2 border rounded-lg" />
-        </div>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <input type="checkbox" formControlName="notify" id="farmNotify" class="h-4 w-4" />
-        <label for="farmNotify" class="text-sm text-gray-700">Notify stakeholders</label>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Remark (plan)</label>
-        <textarea formControlName="remark" rows="3" class="w-full px-3 py-2 border rounded-lg" placeholder="Planting instructions, tasks, etc."></textarea>
-      </div>
-
-      <button type="submit" [disabled]="farmScheduleForm.invalid" class="btn btn-primary">Create / Update Plan</button>
-    </form>
-
-    <div class="mt-6">
-      <div class="text-sm font-semibold text-gray-900 mb-2">Existing follow-ups</div>
-      <div *ngIf="farmFollowUps.length === 0" class="text-sm text-gray-500">No follow-up rows yet.</div>
-
-      <div *ngIf="farmFollowUps.length > 0" class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-          <thead>
-            <tr class="text-left border-b">
-              <th class="py-2 pr-3">Scheduled</th>
-              <th class="py-2 pr-3">Status</th>
-              <th class="py-2 pr-3">Plan remark</th>
-              <th class="py-2 pr-3">Follow-up remark</th>
-              <th class="py-2">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of farmFollowUps" class="border-b last:border-b-0">
-              <td class="py-2 pr-3">{{ item.scheduledDate }}</td>
-              <td class="py-2 pr-3">{{ item.status }}</td>
-              <td class="py-2 pr-3">{{ item.remark || '-' }}</td>
-              <td class="py-2 pr-3">{{ item.followUpRemark || '-' }}</td>
-              <td class="py-2">
-                <button class="btn btn-outline btn-sm" (click)="selectFarmFollowUp(item)">Edit</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  <div *ngIf="isAdmin" class="bg-white border rounded-lg shadow-sm p-5 space-y-6">
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold">Farmland Restoration Plans (Admin)</h2>
+      <button class="btn btn-primary" (click)="openCreateRestorationModal()">Create Plan</button>
     </div>
 
-    <div *ngIf="selectedFarmFollowUp" class="mt-6 border rounded-lg p-4 bg-gray-50">
-      <div class="text-sm font-semibold mb-2">Update selected follow-up</div>
-      <div class="text-xs text-gray-500 mb-3">ID: {{ selectedFarmFollowUp.id }}</div>
-
-      <form [formGroup]="farmUpdateForm" (ngSubmit)="updateFarmFollowUp()" class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-          <select formControlName="status" class="w-full px-3 py-2 border rounded-lg">
-            <option *ngFor="let s of followUpStatuses" [value]="s">{{ s }}</option>
-          </select>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <input type="checkbox" formControlName="notify" id="farmNotifyEdit" class="h-4 w-4" />
-          <label for="farmNotifyEdit" class="text-sm text-gray-700">Notify stakeholders</label>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Plan remark</label>
-          <textarea formControlName="remark" rows="2" class="w-full px-3 py-2 border rounded-lg"></textarea>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Follow-up remark</label>
-          <textarea formControlName="followUpRemark" rows="3" class="w-full px-3 py-2 border rounded-lg" placeholder="What happened on scheduled date?"></textarea>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Issues encountered</label>
-          <textarea formControlName="issuesEncountered" rows="2" class="w-full px-3 py-2 border rounded-lg" placeholder="Pests, weather delays, etc."></textarea>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Save Update</button>
-      </form>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr class="text-left border-b">
+            <th class="py-2 pr-3">Farm Plot</th>
+            <th class="py-2 pr-3">Start</th>
+            <th class="py-2 pr-3">End</th>
+            <th class="py-2 pr-3">Assigned To</th>
+            <th class="py-2 pr-3">Status</th>
+            <th class="py-2">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of restorationPlansForAdmin" class="border-b last:border-b-0">
+            <td class="py-2 pr-3">{{ item.farmPlotId }}</td>
+            <td class="py-2 pr-3">{{ item.startDate }}</td>
+            <td class="py-2 pr-3">{{ item.endDate }}</td>
+            <td class="py-2 pr-3">{{ item.assignedTo || '-' }}</td>
+            <td class="py-2 pr-3">{{ item.status }}</td>
+            <td class="py-2">
+              <button class="btn btn-outline btn-sm" (click)="openEditRestorationModal(item)">Edit</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <div class="bg-white border rounded-lg shadow-sm p-5">
-    <h2 class="text-lg font-semibold mb-4">Lease Follow-ups</h2>
+  <div *ngIf="isExtensionWorker" class="bg-white border rounded-lg shadow-sm p-5 space-y-6">
+    <h2 class="text-lg font-semibold">My Assigned Restoration Plans</h2>
 
-    <form [formGroup]="leaseScheduleForm" (ngSubmit)="submitLeaseSchedule()" class="space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Lease</label>
-          <select formControlName="leaseId" class="w-full px-3 py-2 border rounded-lg">
-            <option value="" disabled>Select lease</option>
-            <option *ngFor="let l of assignedLeases" [value]="l.id">{{ l.id }}</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Scheduled date</label>
-          <input type="datetime-local" formControlName="scheduledDate" class="w-full px-3 py-2 border rounded-lg" />
-        </div>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <input type="checkbox" formControlName="notify" id="leaseNotify" class="h-4 w-4" />
-        <label for="leaseNotify" class="text-sm text-gray-700">Notify stakeholders</label>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Remark (plan)</label>
-        <textarea formControlName="remark" rows="3" class="w-full px-3 py-2 border rounded-lg" placeholder="Tasks for the lease schedule date"></textarea>
-      </div>
-
-      <button type="submit" [disabled]="leaseScheduleForm.invalid" class="btn btn-primary">Create / Update Plan</button>
-    </form>
-
-    <div class="mt-6">
-      <div class="text-sm font-semibold text-gray-900 mb-2">Existing follow-ups</div>
-      <div *ngIf="leaseFollowUps.length === 0" class="text-sm text-gray-500">No follow-up rows yet.</div>
-
-      <div *ngIf="leaseFollowUps.length > 0" class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-          <thead>
-            <tr class="text-left border-b">
-              <th class="py-2 pr-3">Scheduled</th>
-              <th class="py-2 pr-3">Status</th>
-              <th class="py-2 pr-3">Plan remark</th>
-              <th class="py-2 pr-3">Follow-up remark</th>
-              <th class="py-2">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of leaseFollowUps" class="border-b last:border-b-0">
-              <td class="py-2 pr-3">{{ item.scheduledDate }}</td>
-              <td class="py-2 pr-3">{{ item.status }}</td>
-              <td class="py-2 pr-3">{{ item.remark || '-' }}</td>
-              <td class="py-2 pr-3">{{ item.followUpRemark || '-' }}</td>
-              <td class="py-2">
-                <button class="btn btn-outline btn-sm" (click)="selectLeaseFollowUp(item)">Edit</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div *ngIf="selectedLeaseFollowUp" class="mt-6 border rounded-lg p-4 bg-gray-50">
-      <div class="text-sm font-semibold mb-2">Update selected follow-up</div>
-      <div class="text-xs text-gray-500 mb-3">ID: {{ selectedLeaseFollowUp.id }}</div>
-
-      <form [formGroup]="leaseUpdateForm" (ngSubmit)="updateLeaseFollowUp()" class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-          <select formControlName="status" class="w-full px-3 py-2 border rounded-lg">
-            <option *ngFor="let s of followUpStatuses" [value]="s">{{ s }}</option>
-          </select>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <input type="checkbox" formControlName="notify" id="leaseNotifyEdit" class="h-4 w-4" />
-          <label for="leaseNotifyEdit" class="text-sm text-gray-700">Notify stakeholders</label>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Plan remark</label>
-          <textarea formControlName="remark" rows="2" class="w-full px-3 py-2 border rounded-lg"></textarea>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Follow-up remark</label>
-          <textarea formControlName="followUpRemark" rows="3" class="w-full px-3 py-2 border rounded-lg" placeholder="What happened on scheduled date?"></textarea>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Issues encountered</label>
-          <textarea formControlName="issuesEncountered" rows="2" class="w-full px-3 py-2 border rounded-lg" placeholder="Pests, weather delays, etc."></textarea>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Save Update</button>
-      </form>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr class="text-left border-b">
+            <th class="py-2 pr-3">Farm Plot</th>
+            <th class="py-2 pr-3">Start</th>
+            <th class="py-2 pr-3">End</th>
+            <th class="py-2 pr-3">Status</th>
+            <th class="py-2">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of restorationPlansForWorker" class="border-b last:border-b-0">
+            <td class="py-2 pr-3">{{ item.farmPlotId }}</td>
+            <td class="py-2 pr-3">{{ item.startDate }}</td>
+            <td class="py-2 pr-3">{{ item.endDate }}</td>
+            <td class="py-2 pr-3">{{ item.status }}</td>
+            <td class="py-2">
+              <button class="btn btn-outline btn-sm" (click)="openWorkerUpdateModal(item)">Update</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
+
+  <div *ngIf="isExtensionWorker" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white border rounded-lg shadow-sm p-5">
+      <h2 class="text-lg font-semibold mb-4">Assigned Farm Operations</h2>
+      <div class="space-y-2">
+        <div *ngFor="let op of assignedFarmOperations" class="flex items-center justify-between border rounded-lg p-3">
+          <span class="text-sm text-gray-700">{{ op.id }}</span>
+          <button class="btn btn-outline btn-sm" (click)="createQuickFarmOperationSchedule(op.id)">Create Follow-up</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white border rounded-lg shadow-sm p-5">
+      <h2 class="text-lg font-semibold mb-4">Assigned Leases</h2>
+      <div class="space-y-2">
+        <div *ngFor="let lease of assignedLeases" class="flex items-center justify-between border rounded-lg p-3">
+          <span class="text-sm text-gray-700">{{ lease.id }}</span>
+          <button class="btn btn-outline btn-sm" (click)="createQuickLeaseSchedule(lease.id)">Create Follow-up</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-restoration-plan-create-modal
+    [(visible)]="showCreateRestorationModal"
+    [farmPlots]="farmPlots"
+    [extensionWorkers]="extensionWorkers"
+    (created)="onRestorationCreated()"
+  ></app-restoration-plan-create-modal>
+
+  <app-restoration-plan-edit-modal
+    [(visible)]="showEditRestorationModal"
+    [plan]="selectedAdminPlan"
+    [farmPlots]="farmPlots"
+    [extensionWorkers]="extensionWorkers"
+    [statuses]="restorationStatuses"
+    (updated)="onRestorationUpdated()"
+  ></app-restoration-plan-edit-modal>
+
+  <app-restoration-plan-worker-update-modal
+    [(visible)]="showWorkerUpdateModal"
+    [plan]="selectedWorkerPlan"
+    [statuses]="restorationStatuses"
+    (updated)="onRestorationUpdated()"
+  ></app-restoration-plan-worker-update-modal>
 </div>
 

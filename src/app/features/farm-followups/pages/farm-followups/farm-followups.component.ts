@@ -1,10 +1,14 @@
 import {Component, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {FarmOperationFollowUp, ExtensionFollowUpStatus, LeaseFollowUp} from '../../models/farm-followups.model';
-import {FarmFollowUpsService, FollowUpCreateRequest, FollowUpUpdateRequest} from '../../services/farm-followups.service';
+import {ExtensionFollowUpStatus, FarmlandRestorationPlan, RestorationPlanStatus} from '../../models/farm-followups.model';
 import {FarmOperation} from '../../../farm-crowdfunding/models/farm-crowdfunding.model';
 import {LeaseAgreement} from '../../../farm-leases/models/farm-lease.model';
+import {AuthService} from '../../../auth/services/auth.service';
+import {UserService} from '../../../users/services/user.service';
+import {User} from '../../../users/models/user.model';
+import {FarmPlotService} from '../../../farm-plots/services/farm-plot.service';
+import {FarmPlot} from '../../../farm-plots/models/farm-plot.model';
+import {FarmFollowUpsService, FollowUpCreateRequest} from '../../services/farm-followups.service';
+import {ToastService} from '../../../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-farm-followups',
@@ -22,202 +26,128 @@ export class FarmFollowUpsComponent implements OnInit {
     'CANCELLED',
     'POSTPONED',
   ];
+  restorationStatuses: RestorationPlanStatus[] = ['SUBMITTED', 'ACTIVE', 'RESTORATION_END', 'CANCELLED'];
 
   loading = false;
+  isAdmin = false;
+  isExtensionWorker = false;
 
   assignedFarmOperations: FarmOperation[] = [];
-  farmFollowUps: FarmOperationFollowUp[] = [];
-
   assignedLeases: LeaseAgreement[] = [];
-  leaseFollowUps: LeaseFollowUp[] = [];
+  restorationPlansForAdmin: FarmlandRestorationPlan[] = [];
+  restorationPlansForWorker: FarmlandRestorationPlan[] = [];
 
-  selectedFarmFollowUp: FarmOperationFollowUp | null = null;
-  selectedLeaseFollowUp: LeaseFollowUp | null = null;
+  farmPlots: FarmPlot[] = [];
+  extensionWorkers: User[] = [];
 
-  farmScheduleForm: FormGroup;
-  farmUpdateForm: FormGroup;
-
-  leaseScheduleForm: FormGroup;
-  leaseUpdateForm: FormGroup;
+  showCreateRestorationModal = false;
+  showEditRestorationModal = false;
+  showWorkerUpdateModal = false;
+  selectedAdminPlan: FarmlandRestorationPlan | null = null;
+  selectedWorkerPlan: FarmlandRestorationPlan | null = null;
 
   constructor(
-    private fb: FormBuilder,
     private service: FarmFollowUpsService,
-  ) {
-    this.farmScheduleForm = this.fb.group({
-      operationId: ['', Validators.required],
-      scheduledDate: ['', Validators.required],
-      notify: [true, Validators.required],
-      remark: [''],
-    });
-
-    this.farmUpdateForm = this.fb.group({
-      status: ['SUBMITTED', Validators.required],
-      notify: [true],
-      remark: [''],
-      followUpRemark: [''],
-      issuesEncountered: [''],
-    });
-
-    this.leaseScheduleForm = this.fb.group({
-      leaseId: ['', Validators.required],
-      scheduledDate: ['', Validators.required],
-      notify: [true, Validators.required],
-      remark: [''],
-    });
-
-    this.leaseUpdateForm = this.fb.group({
-      status: ['SUBMITTED', Validators.required],
-      notify: [true],
-      remark: [''],
-      followUpRemark: [''],
-      issuesEncountered: [''],
-    });
-  }
+    private authService: AuthService,
+    private userService: UserService,
+    private farmPlotService: FarmPlotService,
+    private toastService: ToastService,
+  ) {}
 
   ngOnInit(): void {
+    const currentUser = this.authService.getCurrentUser();
+    this.isAdmin = currentUser?.role === 'ADMIN';
+    this.isExtensionWorker = currentUser?.role === 'EXTENSION_WORKER';
     this.loadAll();
-  }
-
-  private normalizeLocalDateTime(dt: string): string {
-    if (!dt) return dt;
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(dt)) return `${dt}:00`;
-    return dt;
   }
 
   loadAll(): void {
     this.loading = true;
-    let farmOps$ = this.service.getAssignedFarmOperations();
-    let farms$ = this.service.getFarmOperationFollowUps();
-    let leases$ = this.service.getAssignedLeases();
-    let leaseFollowUps$ = this.service.getLeaseFollowUps();
 
-    // Simple sequential loads to keep template changes smaller
-    farmOps$.subscribe({
-      next: (ops) => this.assignedFarmOperations = ops,
-      error: () => {},
-    });
-    farms$.subscribe({
-      next: (items) => {
-        this.farmFollowUps = items;
-      },
-      error: () => {},
-    });
-    leases$.subscribe({
-      next: (ls) => this.assignedLeases = ls,
-      error: () => {},
-    });
-    leaseFollowUps$.subscribe({
-      next: (items) => {
-        this.leaseFollowUps = items;
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      },
-    });
+    if (this.isExtensionWorker) {
+      this.service.getAssignedFarmOperations().subscribe({next: (ops) => this.assignedFarmOperations = ops, error: () => {}});
+      this.service.getAssignedLeases().subscribe({next: (ls) => this.assignedLeases = ls, error: () => {}});
+      this.service.getAssignedRestorationPlansForWorker().subscribe({
+        next: (items) => {
+          this.restorationPlansForWorker = items;
+          this.loading = false;
+        },
+        error: () => this.loading = false,
+      });
+      return;
+    }
+
+    if (this.isAdmin) {
+      this.userService.getUsersByRole('EXTENSION_WORKER').subscribe({next: (users) => this.extensionWorkers = users, error: () => {}});
+      this.farmPlotService.getAllFarmPlots(0, 200).subscribe({next: (page) => this.farmPlots = page.content ?? [], error: () => {}});
+      this.service.getRestorationPlansForAdmin().subscribe({
+        next: (items) => {
+          this.restorationPlansForAdmin = items;
+          this.loading = false;
+        },
+        error: () => this.loading = false,
+      });
+      return;
+    }
+
+    this.loading = false;
   }
 
-  // ---- Farm schedule ----
-  submitFarmSchedule(): void {
-    if (this.farmScheduleForm.invalid) return;
-    const v = this.farmScheduleForm.value;
+  openCreateRestorationModal(): void {
+    this.showCreateRestorationModal = true;
+  }
 
+  openEditRestorationModal(plan: FarmlandRestorationPlan): void {
+    this.selectedAdminPlan = plan;
+    this.showEditRestorationModal = true;
+  }
+
+  openWorkerUpdateModal(plan: FarmlandRestorationPlan): void {
+    this.selectedWorkerPlan = plan;
+    this.showWorkerUpdateModal = true;
+  }
+
+  onRestorationCreated(): void {
+    this.loadAll();
+  }
+
+  onRestorationUpdated(): void {
+    this.loadAll();
+  }
+
+  createQuickFarmOperationSchedule(operationId: string): void {
     const payload: FollowUpCreateRequest = {
-      scheduledDate: this.normalizeLocalDateTime(v.scheduledDate),
-      notify: v.notify,
-      remark: v.remark,
+      scheduledDate: this.nowLocalDateTimeForApi(),
+      notify: true,
+      remark: 'Initial follow-up created from follow-up list',
       status: 'SUBMITTED',
     };
 
-    this.service.createFarmOperationFollowUp(v.operationId, payload).subscribe({
-      next: () => {
-        this.selectedFarmFollowUp = null;
-        this.farmScheduleForm.reset({notify: true});
-        this.loadAll();
-      },
+    this.service.createFarmOperationFollowUp(operationId, payload).subscribe({
+      next: () => this.toastService.success('Farm operation follow-up plan created'),
+      error: (error) => this.toastService.error(error.message || 'Failed to create farm operation follow-up'),
     });
   }
 
-  selectFarmFollowUp(item: FarmOperationFollowUp): void {
-    this.selectedFarmFollowUp = item;
-    this.farmUpdateForm.patchValue({
-      status: item.status,
-      notify: item.notify,
-      remark: item.remark ?? '',
-      followUpRemark: item.followUpRemark ?? '',
-      issuesEncountered: item.issuesEncountered ?? '',
-    });
-  }
-
-  updateFarmFollowUp(): void {
-    if (!this.selectedFarmFollowUp) return;
-    const v = this.farmUpdateForm.value;
-    const payload: FollowUpUpdateRequest = {
-      status: v.status,
-      notify: v.notify,
-      remark: v.remark,
-      followUpRemark: v.followUpRemark,
-      issuesEncountered: v.issuesEncountered,
-    };
-
-    this.service.updateFarmOperationFollowUp(this.selectedFarmFollowUp.id, payload).subscribe({
-      next: () => {
-        this.selectedFarmFollowUp = null;
-        this.loadAll();
-      },
-    });
-  }
-
-  // ---- Lease schedule ----
-  submitLeaseSchedule(): void {
-    if (this.leaseScheduleForm.invalid) return;
-    const v = this.leaseScheduleForm.value;
-
-    const payload = {
-      scheduledDate: this.normalizeLocalDateTime(v.scheduledDate),
-      notify: v.notify,
-      remark: v.remark,
+  createQuickLeaseSchedule(leaseId: string): void {
+    const payload: FollowUpCreateRequest = {
+      scheduledDate: this.nowLocalDateTimeForApi(),
+      notify: true,
+      remark: 'Initial follow-up created from follow-up list',
       status: 'SUBMITTED',
-    } as FollowUpCreateRequest;
-
-    this.service.createLeaseFollowUp(v.leaseId, payload).subscribe({
-      next: () => {
-        this.selectedLeaseFollowUp = null;
-        this.leaseScheduleForm.reset({notify: true});
-        this.loadAll();
-      },
-    });
-  }
-
-  selectLeaseFollowUp(item: LeaseFollowUp): void {
-    this.selectedLeaseFollowUp = item;
-    this.leaseUpdateForm.patchValue({
-      status: item.status,
-      notify: item.notify,
-      remark: item.remark ?? '',
-      followUpRemark: item.followUpRemark ?? '',
-      issuesEncountered: item.issuesEncountered ?? '',
-    });
-  }
-
-  updateLeaseFollowUp(): void {
-    if (!this.selectedLeaseFollowUp) return;
-    const v = this.leaseUpdateForm.value;
-    const payload: FollowUpUpdateRequest = {
-      status: v.status,
-      notify: v.notify,
-      remark: v.remark,
-      followUpRemark: v.followUpRemark,
-      issuesEncountered: v.issuesEncountered,
     };
 
-    this.service.updateLeaseFollowUp(this.selectedLeaseFollowUp.id, payload).subscribe({
-      next: () => {
-        this.selectedLeaseFollowUp = null;
-        this.loadAll();
-      },
+    this.service.createLeaseFollowUp(leaseId, payload).subscribe({
+      next: () => this.toastService.success('Lease follow-up plan created'),
+      error: (error) => this.toastService.error(error.message || 'Failed to create lease follow-up'),
     });
+  }
+
+  private nowLocalDateTimeForApi(): string {
+    const now = new Date();
+    const pad = (n: number) => `${n}`.padStart(2, '0');
+    const value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:00`;
+    return value;
   }
 }
 

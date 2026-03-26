@@ -1,0 +1,60 @@
+<form [formGroup]="form" class="space-y-4">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Farm Plot <span class="text-red-500">*</span></label>
+      <select formControlName="farmPlotId" class="w-full px-3 py-2 border rounded-lg">
+        <option value="">Select farm plot</option>
+        <option *ngFor="let p of farmPlots" [value]="p.id">{{ p.title }}</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Assigned Extension Worker</label>
+      <select formControlName="assignedTo" class="w-full px-3 py-2 border rounded-lg">
+        <option value="">Unassigned</option>
+        <option *ngFor="let ew of extensionWorkers" [value]="ew.id">{{ ew.firstName }} {{ ew.lastName }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Start Date <span class="text-red-500">*</span></label>
+      <input type="datetime-local" formControlName="startDate" class="w-full px-3 py-2 border rounded-lg" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">End Date <span class="text-red-500">*</span></label>
+      <input type="datetime-local" formControlName="endDate" class="w-full px-3 py-2 border rounded-lg" />
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-2">Remark</label>
+    <textarea formControlName="remark" rows="2" class="w-full px-3 py-2 border rounded-lg"></textarea>
+  </div>
+
+  <ng-container *ngIf="mode === 'edit'">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+        <select formControlName="status" class="w-full px-3 py-2 border rounded-lg">
+          <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Report Date</label>
+        <input type="datetime-local" formControlName="reportDate" class="w-full px-3 py-2 border rounded-lg" />
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Follow-up Remark</label>
+      <textarea formControlName="followUpRemark" rows="2" class="w-full px-3 py-2 border rounded-lg"></textarea>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Issues Encountered</label>
+      <textarea formControlName="issuesEncountered" rows="2" class="w-full px-3 py-2 border rounded-lg"></textarea>
+    </div>
+  </ng-container>
+</form>
+

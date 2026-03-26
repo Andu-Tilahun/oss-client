@@ -3,11 +3,16 @@ import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {InvestmentRecord} from '../../models/farm-crowdfunding.model';
 import {FarmFollowUpsService} from '../../../farm-followups/services/farm-followups.service';
 import {FarmOperationFollowUp} from '../../../farm-followups/models/farm-followups.model';
+import {DetailCardComponent} from '../../../../shared/components/detail-field/detail-card/detail-card.component';
+import {DetailSectionComponent} from '../../../../shared/components/detail-field/detail-section/detail-section.component';
+import {DetailFieldComponent} from '../../../../shared/components/detail-field/detail-field/detail-field.component';
+import {SharedModule} from '../../../../shared/shared.module';
+import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
 
 @Component({
   selector: 'app-farm-crowdfunding-investment-view',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DetailCardComponent, DetailSectionComponent, DetailFieldComponent, SharedModule],
   templateUrl: './farm-crowdfunding-investment-view.component.html',
   styleUrl: './farm-crowdfunding-investment-view.component.css',
 })
@@ -17,6 +22,12 @@ export class FarmCrowdfundingInvestmentViewComponent implements OnChanges {
 
   followUps: FarmOperationFollowUp[] = [];
   followUpsLoading = false;
+  followUpColumns: DataTableColumn<FarmOperationFollowUp>[] = [
+    {header: 'Scheduled', value: (f) => f.scheduledDate || '-'},
+    {header: 'Status', value: (f) => f.status || '-'},
+    {header: 'Plan remark', value: (f) => f.remark || '-'},
+    {header: 'Follow-up remark', value: (f) => f.followUpRemark || '-'},
+  ];
 
   formatAmount(value: number | undefined): string {
     if (value === undefined || value === null) return '-';

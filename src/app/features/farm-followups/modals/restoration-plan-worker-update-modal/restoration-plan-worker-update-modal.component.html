@@ -1,0 +1,30 @@
+<app-modal
+  [(visible)]="visible"
+  title="Update Restoration Follow-up"
+  size="lg"
+  confirmText="Save"
+  [confirmLoading]="confirmLoading"
+  (visibleChange)="visibleChange.emit($event)"
+  (confirm)="onConfirm()"
+  (cancel)="onCancel()"
+>
+  <ng-template #modalBody>
+    <form [formGroup]="form" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+        <select formControlName="status" class="w-full px-3 py-2 border rounded-lg">
+          <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Follow-up Remark</label>
+        <textarea formControlName="followUpRemark" rows="3" class="w-full px-3 py-2 border rounded-lg"></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Issues Encountered</label>
+        <textarea formControlName="issuesEncountered" rows="2" class="w-full px-3 py-2 border rounded-lg"></textarea>
+      </div>
+    </form>
+  </ng-template>
+</app-modal>
+
