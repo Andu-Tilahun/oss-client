@@ -28,6 +28,32 @@
     <div class="text-gray-500">ROI</div>
     <div class="whitespace-pre-wrap">{{ investment.roi ?? '-' }}</div>
   </div>
+
+  <div class="text-sm pt-2">
+    <div class="text-gray-600 font-medium mb-1">Farm operation follow-up history</div>
+    <div *ngIf="followUpsLoading" class="text-gray-500">Loading follow-ups…</div>
+    <div *ngIf="!followUpsLoading && followUps.length === 0" class="text-gray-500">No follow-up rows yet.</div>
+    <div *ngIf="!followUpsLoading && followUps.length > 0" class="overflow-x-auto">
+      <table class="min-w-full text-xs">
+        <thead>
+          <tr class="text-left border-b">
+            <th class="py-2 pr-3">Scheduled</th>
+            <th class="py-2 pr-3">Status</th>
+            <th class="py-2 pr-3">Plan remark</th>
+            <th class="py-2">Follow-up remark</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let f of followUps" class="border-b last:border-b-0">
+            <td class="py-2 pr-3">{{ f.scheduledDate }}</td>
+            <td class="py-2 pr-3">{{ f.status }}</td>
+            <td class="py-2 pr-3">{{ f.remark || '-' }}</td>
+            <td class="py-2">{{ f.followUpRemark || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <ng-template #empty>

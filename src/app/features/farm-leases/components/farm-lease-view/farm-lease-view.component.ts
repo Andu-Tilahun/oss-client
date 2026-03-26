@@ -8,6 +8,8 @@ import {DetailCardComponent} from '../../../../shared/components/detail-field/de
 import {DetailSectionComponent} from '../../../../shared/components/detail-field/detail-section/detail-section.component';
 import {DetailFieldComponent} from '../../../../shared/components/detail-field/detail-field/detail-field.component';
 import {FarmPlotViewComponent} from "../../../farm-plots/components/farm-plot-view/farm-plot-view.component";
+import {FarmFollowUpsService} from '../../../farm-followups/services/farm-followups.service';
+import {LeaseFollowUp} from '../../../farm-followups/models/farm-followups.model';
 
 @Component({
   selector: 'app-farm-lease-view',
@@ -29,6 +31,8 @@ export class FarmLeaseViewComponent implements OnChanges {
   detail: LeaseAgreement | null = null;
   loading = false;
   error: string | null = null;
+  leaseFollowUps: LeaseFollowUp[] = [];
+  followUpsLoading = false;
 
   paymentColumns: DataTableColumn<LeaseTerm>[] = [
     {header: 'Due', value: (t) => t.dueDate},
@@ -36,7 +40,14 @@ export class FarmLeaseViewComponent implements OnChanges {
     {header: 'Status', value: (t) => t.status},
   ];
 
-  constructor(private farmLeaseService: FarmLeaseService) {}
+  followUpColumns: DataTableColumn<LeaseFollowUp>[] = [
+    {header: 'Scheduled', value: (u) => u.scheduledDate},
+    {header: 'Status', value: (u) => u.status},
+    {header: 'Plan remark', value: (u) => u.remark || '-'},
+    {header: 'Follow-up remark', value: (u) => u.followUpRemark || '-'},
+  ];
+
+  constructor(private farmLeaseService: FarmLeaseService, private followUpsService: FarmFollowUpsService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['lease'] || changes['refreshKey']) {
@@ -59,12 +70,28 @@ export class FarmLeaseViewComponent implements OnChanges {
     this.farmLeaseService.getLeaseById(this.lease.id).subscribe({
       next: (lease) => {
         this.detail = lease;
+        this.loadFollowUps();
         this.loading = false;
       },
       error: () => {
         this.detail = null;
         this.error = 'Failed to load lease';
         this.loading = false;
+      },
+    });
+  }
+
+  private loadFollowUps(): void {
+    if (!this.detail?.id) return;
+    this.followUpsLoading = true;
+    this.followUpsService.getLeaseFollowUpsHistory(this.detail.id).subscribe({
+      next: (items) => {
+        this.leaseFollowUps = items;
+        this.followUpsLoading = false;
+      },
+      error: () => {
+        this.leaseFollowUps = [];
+        this.followUpsLoading = false;
       },
     });
   }

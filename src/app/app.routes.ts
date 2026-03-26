@@ -182,6 +182,12 @@ export const routes: Routes = [
     data: { roles: ['INVESTOR', 'ADMIN'] },
   },
   {
+    path: 'farm-followups',
+    loadChildren: () => import('./features/farm-followups/farm-followups.module').then(m => m.FarmFollowupsModule),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['EXTENSION_WORKER'] },
+  },
+  {
     path: 'farm-crowdfunding',
     loadChildren: () =>
       import('./features/farm-crowdfunding/farm-crowdfunding.module').then((m) => m.FarmCrowdfundingModule),
