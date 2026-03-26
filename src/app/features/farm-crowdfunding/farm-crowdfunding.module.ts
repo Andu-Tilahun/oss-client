@@ -12,6 +12,8 @@ import {FarmCrowdfundingInvestmentListComponent} from './pages/farm-crowdfunding
 import {FarmCrowdfundingInvestmentViewComponent} from './components/farm-crowdfunding-investment-view/farm-crowdfunding-investment-view.component';
 import {FarmCrowdfundingSetRoiModalComponent} from './modals/farm-crowdfunding-set-roi-modal/farm-crowdfunding-set-roi-modal.component';
 import {FarmCrowdfundingInvestorDecisionModalComponent} from './modals/farm-crowdfunding-investor-decision-modal/farm-crowdfunding-investor-decision-modal.component';
+import {FarmCrowdfundingCampaignFilterComponent} from './pages/farm-crowdfunding-campaign-filter/farm-crowdfunding-campaign-filter.component';
+import {FarmCrowdfundingInvestmentFilterComponent} from './pages/farm-crowdfunding-investment-filter/farm-crowdfunding-investment-filter.component';
 
 @NgModule({
   declarations: [
@@ -25,6 +27,8 @@ import {FarmCrowdfundingInvestorDecisionModalComponent} from './modals/farm-crow
     FarmCrowdfundingRoutingModule,
     SharedModule,
     PageSplitLayoutComponent,
+    FarmCrowdfundingCampaignFilterComponent,
+    FarmCrowdfundingInvestmentFilterComponent,
     FarmCrowdfundingCampaignViewComponent,
     FarmCrowdfundingInvestmentViewComponent,
     FarmCrowdfundingCreateCampaignModalComponent,

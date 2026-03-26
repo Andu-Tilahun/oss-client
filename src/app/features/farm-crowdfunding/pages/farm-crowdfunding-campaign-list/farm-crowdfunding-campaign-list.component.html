@@ -9,28 +9,16 @@
   [rightActions]="rightActions"
 >
   <ng-template #extraTableHeader>
-    <div class="w-full flex flex-col gap-2">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-        <input
-          class="form-control"
-          type="text"
-          placeholder="Search by UUID (campaign/operation)"
-          [(ngModel)]="searchText"
-          (keyup.enter)="onSearch()"
-        />
-        <select class="form-control" [(ngModel)]="status" (change)="onFilterChange()">
-          <option value="">All statuses</option>
-          <option value="OPEN">OPEN</option>
-          <option value="CLOSED">CLOSED</option>
-          <option value="FUNDED">FUNDED</option>
-          <option value="FAILED">FAILED</option>
-        </select>
-        <div class="flex gap-2">
-          <button class="btn btn-primary w-full" (click)="onSearch()">Search</button>
-          <button class="btn btn-outline w-full" (click)="clearFilters()">Clear</button>
-        </div>
-      </div>
-      <div class="text-xs text-gray-500">
+    <div class="w-full">
+      <app-farm-crowdfunding-campaign-filter
+        [(searchText)]="searchText"
+        [(status)]="status"
+        (filterChange)="onFilterChange()"
+        (searchChange)="onFilterChange()"
+        (clearFilters)="clearFilters()"
+      ></app-farm-crowdfunding-campaign-filter>
+
+      <div class="px-3 py-2 text-xs text-slate-500">
         Tip: Investors are default-filtered to <b>OPEN</b> campaigns.
       </div>
     </div>

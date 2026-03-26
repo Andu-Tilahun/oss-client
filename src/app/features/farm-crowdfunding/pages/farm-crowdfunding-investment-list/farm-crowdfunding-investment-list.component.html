@@ -9,33 +9,15 @@
   [rightActions]="rightActions"
 >
   <ng-template #extraTableHeader>
-    <div class="w-full flex flex-col gap-2">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
-        <input
-          class="form-control"
-          type="text"
-          placeholder="Search by UUID (investment/campaign)"
-          [(ngModel)]="searchText"
-          (keyup.enter)="onSearch()"
-        />
-        <select class="form-control" [(ngModel)]="status" (change)="onFilterChange()">
-          <option value="">All statuses</option>
-          <option value="PENDING">PENDING</option>
-          <option value="ACTIVE">ACTIVE</option>
-          <option value="PAID">PAID</option>
-          <option value="FAILED">FAILED</option>
-        </select>
-        <select class="form-control" [(ngModel)]="approval" (change)="onFilterChange()">
-          <option value="">All approvals</option>
-          <option value="PENDING">PENDING</option>
-          <option value="ACCEPTED">ACCEPTED</option>
-          <option value="REJECTED">REJECTED</option>
-        </select>
-        <div class="flex gap-2">
-          <button class="btn btn-primary w-full" (click)="onSearch()">Search</button>
-          <button class="btn btn-outline w-full" (click)="clearFilters()">Clear</button>
-        </div>
-      </div>
+    <div class="w-full">
+      <app-farm-crowdfunding-investment-filter
+        [(searchText)]="searchText"
+        [(status)]="status"
+        [(approval)]="approval"
+        (filterChange)="onFilterChange()"
+        (searchChange)="onFilterChange()"
+        (clearFilters)="clearFilters()"
+      ></app-farm-crowdfunding-investment-filter>
     </div>
   </ng-template>
 
