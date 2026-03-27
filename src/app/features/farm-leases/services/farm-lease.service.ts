@@ -10,13 +10,13 @@ import {
   LeaseGenerateTermsRequest,
 } from '../models/farm-lease.model';
 import {ApiResponse, PageResponse} from '../../../shared/models/api-response.model';
-import {InvestmentRecord} from "../../farm-crowdfunding/models/farm-crowdfunding.model";
 
 @Injectable({
   providedIn: 'root',
 })
 export class FarmLeaseService {
-  constructor(private httpService: HttpService) {}
+  constructor(private httpService: HttpService) {
+  }
 
   filterLeases(request: LeaseFilterRequest): Observable<PageResponse<LeaseAgreement>> {
     return this.httpService.post<PageResponse<LeaseAgreement>>(
