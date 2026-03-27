@@ -5,8 +5,15 @@ import {ToastService} from '../../../../shared/toast/toast.service';
 import {FarmPlotService} from '../../../farm-plots/services/farm-plot.service';
 import {FarmPlot, FarmPlotFilterRequest} from '../../../farm-plots/models/farm-plot.model';
 import {FarmCrowdfundingService} from '../../services/farm-crowdfunding.service';
-import {CrowdfundingRegistrationStepperComponent} from '../../components/crowdfunding-registration-stepper/crowdfunding-registration-stepper.component';
-import {CrowdfundingCampaignCreateRequest, FarmOperationCreateRequest} from '../../models/farm-crowdfunding.model';
+import {
+  CrowdfundingRegistrationStepperComponent
+} from '../../components/crowdfunding-registration-stepper/crowdfunding-registration-stepper.component';
+import {
+  CrowdfundingCampaignCreateRequest,
+  FarmOperation,
+  FarmOperationCreateRequest
+} from '../../models/farm-crowdfunding.model';
+import {ApiResponse} from "../../../../shared/models/api-response.model";
 
 @Component({
   selector: 'app-farm-crowdfunding-create-campaign-modal',
@@ -30,7 +37,8 @@ export class FarmCrowdfundingCreateCampaignModalComponent {
     private farmPlotService: FarmPlotService,
     private crowdfundingService: FarmCrowdfundingService,
     private toastService: ToastService,
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     this.loadFarmPlots();
@@ -39,8 +47,8 @@ export class FarmCrowdfundingCreateCampaignModalComponent {
   onOperationSubmit(request: FarmOperationCreateRequest): void {
     this.isSaving = true;
     this.crowdfundingService.createOperation(request).subscribe({
-      next: (op) => {
-        this.operationId = op.id;
+      next: (op: ApiResponse<FarmOperation>) => {
+        this.operationId = op.data ? op.data.id : null;
         this.currentStep = 2;
         this.isSaving = false;
       },

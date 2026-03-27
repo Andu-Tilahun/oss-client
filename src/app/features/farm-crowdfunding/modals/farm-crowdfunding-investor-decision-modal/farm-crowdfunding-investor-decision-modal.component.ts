@@ -25,7 +25,8 @@ export class FarmCrowdfundingInvestorDecisionModalComponent {
   constructor(
     private crowdfundingService: FarmCrowdfundingService,
     private toastService: ToastService,
-  ) {}
+  ) {
+  }
 
   decide(decision: InvestorDecision): void {
     const id = this.investment?.id;

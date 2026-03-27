@@ -2,11 +2,14 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ModalComponent} from '../../../../shared/modals/modal/modal.component';
 import {ToastService} from '../../../../shared/toast/toast.service';
-import {LeaseRegistrationStepperComponent} from '../../components/lease-registration-stepper/lease-registration-stepper.component';
+import {
+  LeaseRegistrationStepperComponent
+} from '../../components/lease-registration-stepper/lease-registration-stepper.component';
 import {FarmPlotService} from '../../../farm-plots/services/farm-plot.service';
 import {FarmPlot, FarmPlotFilterRequest} from '../../../farm-plots/models/farm-plot.model';
 import {FarmLeaseService} from '../../services/farm-lease.service';
-import {LeaseCreateRequest, LeaseDefineTermsRequest} from '../../models/farm-lease.model';
+import {LeaseAgreement, LeaseCreateRequest, LeaseDefineTermsRequest} from '../../models/farm-lease.model';
+import {ApiResponse} from "../../../../shared/models/api-response.model";
 
 @Component({
   selector: 'app-farm-lease-create-modal',
@@ -21,7 +24,7 @@ export class FarmLeaseCreateModalComponent {
 
   currentStep = 1;
   farmPlots: FarmPlot[] = [];
-  leaseId: string | null = null;
+  leaseId: string | undefined;
 
   loadingFarmPlots = false;
   isSaving = false;
@@ -30,7 +33,8 @@ export class FarmLeaseCreateModalComponent {
     private farmPlotService: FarmPlotService,
     private farmLeaseService: FarmLeaseService,
     private toastService: ToastService
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     this.loadFarmPlots();
@@ -39,9 +43,9 @@ export class FarmLeaseCreateModalComponent {
   onLeaseDetailsSubmit(request: LeaseCreateRequest): void {
     this.isSaving = true;
     this.farmLeaseService.createLease(request).subscribe({
-      next: (lease) => {
+      next: (lease: ApiResponse<LeaseAgreement>) => {
         // HttpService unwraps ApiResponse.data
-        this.leaseId = lease.id;
+        this.leaseId = lease.data?.id;
         this.currentStep = 2;
         this.isSaving = false;
       },
@@ -88,7 +92,7 @@ export class FarmLeaseCreateModalComponent {
     this.visible = false;
     this.visibleChange.emit(false);
     this.currentStep = 1;
-    this.leaseId = null;
+    this.leaseId = undefined;
   }
 
   private loadFarmPlots(): void {

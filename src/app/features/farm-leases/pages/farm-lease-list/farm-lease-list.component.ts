@@ -216,7 +216,7 @@ export class FarmLeaseListComponent implements OnInit {
       next: () => {
         this.adminActionLoading = false;
         this.toastService.success(
-          decision === 'APPROVE' ? 'Lease approved successfully' : 'Lease rejected successfully',
+          decision === 'ACTIVE' ? 'Lease activated successfully' : 'Lease rejected successfully',
           'Admin Lease Action',
         );
         this.detailRefreshKey++;

@@ -9,7 +9,8 @@ import {
   LeaseFilterRequest,
   LeaseGenerateTermsRequest,
 } from '../models/farm-lease.model';
-import {PageResponse} from '../../../shared/models/api-response.model';
+import {ApiResponse, PageResponse} from '../../../shared/models/api-response.model';
+import {InvestmentRecord} from "../../farm-crowdfunding/models/farm-crowdfunding.model";
 
 @Injectable({
   providedIn: 'root',
@@ -24,44 +25,44 @@ export class FarmLeaseService {
     );
   }
 
-  getLeaseById(id: string): Observable<LeaseAgreement> {
-    return this.httpService.get<LeaseAgreement>(`${Endpoints.FARM_LEASES_ENDPOINT}/${id}`);
+  getLeaseById(id: string): Observable<ApiResponse<LeaseAgreement>> {
+    return this.httpService.get<ApiResponse<LeaseAgreement>>(`${Endpoints.FARM_LEASES_ENDPOINT}/${id}`);
   }
 
-  createLease(request: LeaseCreateRequest): Observable<LeaseAgreement> {
-    return this.httpService.post<LeaseAgreement>(Endpoints.FARM_LEASES_ENDPOINT, request);
+  createLease(request: LeaseCreateRequest): Observable<ApiResponse<LeaseAgreement>> {
+    return this.httpService.post<ApiResponse<LeaseAgreement>>(Endpoints.FARM_LEASES_ENDPOINT, request);
   }
 
-  updateLease(id: string, request: LeaseCreateRequest): Observable<LeaseAgreement> {
-    return this.httpService.put<LeaseAgreement>(`${Endpoints.FARM_LEASES_ENDPOINT}/${id}`, request);
+  updateLease(id: string, request: LeaseCreateRequest): Observable<ApiResponse<LeaseAgreement>> {
+    return this.httpService.put<ApiResponse<LeaseAgreement>>(`${Endpoints.FARM_LEASES_ENDPOINT}/${id}`, request);
   }
 
   generateTerms(
     leaseId: string,
     request: LeaseGenerateTermsRequest,
-  ): Observable<LeaseAgreement> {
-    return this.httpService.post<LeaseAgreement>(
+  ): Observable<ApiResponse<LeaseAgreement>> {
+    return this.httpService.post<ApiResponse<LeaseAgreement>>(
       `${Endpoints.FARM_LEASES_ENDPOINT}/${leaseId}/terms/generate`,
       request,
     );
   }
 
-  defineCustomTerms(leaseId: string, request: LeaseDefineTermsRequest): Observable<LeaseAgreement> {
-    return this.httpService.post<LeaseAgreement>(
+  defineCustomTerms(leaseId: string, request: LeaseDefineTermsRequest): Observable<ApiResponse<LeaseAgreement>> {
+    return this.httpService.post<ApiResponse<LeaseAgreement>>(
       `${Endpoints.FARM_LEASES_ENDPOINT}/${leaseId}/terms/define`,
       request,
     );
   }
 
-  confirmLease(leaseId: string): Observable<LeaseAgreement> {
-    return this.httpService.post<LeaseAgreement>(
+  confirmLease(leaseId: string): Observable<ApiResponse<LeaseAgreement>> {
+    return this.httpService.post<ApiResponse<LeaseAgreement>>(
       `${Endpoints.FARM_LEASES_ENDPOINT}/${leaseId}/confirm`,
       {},
     );
   }
 
-  adminDecideLease(leaseId: string, decision: 'APPROVE' | 'REJECT'): Observable<LeaseAgreement> {
-    return this.httpService.post<LeaseAgreement>(
+  adminDecideLease(leaseId: string, decision: 'ACTIVE' | 'TERMINATED'): Observable<ApiResponse<LeaseAgreement>> {
+    return this.httpService.post<ApiResponse<LeaseAgreement>>(
       `${Endpoints.FARM_LEASES_ENDPOINT}/${leaseId}/admin/decision`,
       {decision},
     );

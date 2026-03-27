@@ -4,7 +4,7 @@ import {FormsModule} from '@angular/forms';
 import {ModalComponent} from '../../../../shared/modals/modal/modal.component';
 import {LeaseAgreement} from '../../models/farm-lease.model';
 
-export type AdminLeaseDecision = 'APPROVE' | 'REJECT';
+export type AdminLeaseDecision = 'ACTIVE' | 'TERMINATED';
 
 @Component({
   selector: 'app-farm-lease-approve-modal',
@@ -21,13 +21,13 @@ export class FarmLeaseAdminActionModalComponent implements OnChanges {
 
   @Output() decisionSelected = new EventEmitter<AdminLeaseDecision>();
 
-  decision: AdminLeaseDecision = 'APPROVE';
+  decision: AdminLeaseDecision = 'ACTIVE';
 
   confirmLoading = false;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['visible']?.currentValue === true) {
-      this.decision = 'APPROVE';
+      this.decision = 'ACTIVE';
       this.confirmLoading = false;
     }
   }

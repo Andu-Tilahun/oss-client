@@ -5,11 +5,14 @@ import {DataTableColumn} from '../../../../shared/data-table/models/data-table-c
 import {SharedModule} from '../../../../shared/shared.module';
 import {FarmLeaseService} from '../../services/farm-lease.service';
 import {DetailCardComponent} from '../../../../shared/components/detail-field/detail-card/detail-card.component';
-import {DetailSectionComponent} from '../../../../shared/components/detail-field/detail-section/detail-section.component';
+import {
+  DetailSectionComponent
+} from '../../../../shared/components/detail-field/detail-section/detail-section.component';
 import {DetailFieldComponent} from '../../../../shared/components/detail-field/detail-field/detail-field.component';
 import {FarmPlotViewComponent} from "../../../farm-plots/components/farm-plot-view/farm-plot-view.component";
 import {FarmFollowUpsService} from '../../../farm-followups/services/farm-followups.service';
 import {LeaseFollowUp} from '../../../farm-followups/models/farm-followups.model';
+import {ApiResponse} from "../../../../shared/models/api-response.model";
 
 @Component({
   selector: 'app-farm-lease-view',
@@ -47,7 +50,8 @@ export class FarmLeaseViewComponent implements OnChanges {
     {header: 'Follow-up remark', value: (u) => u.followUpRemark || '-'},
   ];
 
-  constructor(private farmLeaseService: FarmLeaseService, private followUpsService: FarmFollowUpsService) {}
+  constructor(private farmLeaseService: FarmLeaseService, private followUpsService: FarmFollowUpsService) {
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['lease'] || changes['refreshKey']) {
@@ -68,8 +72,8 @@ export class FarmLeaseViewComponent implements OnChanges {
     this.detail = null;
 
     this.farmLeaseService.getLeaseById(this.lease.id).subscribe({
-      next: (lease) => {
-        this.detail = lease;
+      next: (lease: ApiResponse<LeaseAgreement>) => {
+        this.detail = lease.data ? lease.data : null;
         this.loadFollowUps();
         this.loading = false;
       },

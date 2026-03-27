@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {HttpService} from '../../../core/services/http.service';
 import {Endpoints} from '../../../core/endpoint/endpoint.model';
-import {PageResponse} from '../../../shared/models/api-response.model';
+import {ApiResponse, PageResponse} from '../../../shared/models/api-response.model';
 import {
   CrowdfundingCampaign,
   CrowdfundingCampaignCreateRequest,
@@ -27,19 +27,19 @@ export class FarmCrowdfundingService {
     );
   }
 
-  createOperation(request: FarmOperationCreateRequest): Observable<FarmOperation> {
-    return this.httpService.post<FarmOperation>(`${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/operations`, request);
+  createOperation(request: FarmOperationCreateRequest): Observable<ApiResponse<FarmOperation>> {
+    return this.httpService.post<ApiResponse<FarmOperation>>(`${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/operations`, request);
   }
 
-  updateOperation(operationId: string, request: FarmOperationCreateRequest): Observable<FarmOperation> {
-    return this.httpService.put<FarmOperation>(
+  updateOperation(operationId: string, request: FarmOperationCreateRequest): Observable<ApiResponse<FarmOperation>> {
+    return this.httpService.put<ApiResponse<FarmOperation>>(
       `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/operations/${operationId}`,
       request,
     );
   }
 
-  getOperationById(operationId: string): Observable<FarmOperation> {
-    return this.httpService.get<FarmOperation>(
+  getOperationById(operationId: string): Observable<ApiResponse<FarmOperation>> {
+    return this.httpService.get<ApiResponse<FarmOperation>>(
       `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/operations/${operationId}`,
     );
   }
@@ -52,22 +52,22 @@ export class FarmCrowdfundingService {
     );
   }
 
-  createCampaign(request: CrowdfundingCampaignCreateRequest): Observable<CrowdfundingCampaign> {
-    return this.httpService.post<CrowdfundingCampaign>(
+  createCampaign(request: CrowdfundingCampaignCreateRequest): Observable<ApiResponse<CrowdfundingCampaign>> {
+    return this.httpService.post<ApiResponse<CrowdfundingCampaign>>(
       `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/campaigns`,
       request,
     );
   }
 
-  updateCampaign(campaignId: string, request: CrowdfundingCampaignCreateRequest): Observable<CrowdfundingCampaign> {
-    return this.httpService.put<CrowdfundingCampaign>(
+  updateCampaign(campaignId: string, request: CrowdfundingCampaignCreateRequest): Observable<ApiResponse<CrowdfundingCampaign>> {
+    return this.httpService.put<ApiResponse<CrowdfundingCampaign>>(
       `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/campaigns/${campaignId}`,
       request,
     );
   }
 
-  getCampaignById(campaignId: string): Observable<CrowdfundingCampaign> {
-    return this.httpService.get<CrowdfundingCampaign>(
+  getCampaignById(campaignId: string): Observable<ApiResponse<CrowdfundingCampaign>> {
+    return this.httpService.get<ApiResponse<CrowdfundingCampaign>>(
       `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/campaigns/${campaignId}`,
     );
   }
@@ -80,22 +80,22 @@ export class FarmCrowdfundingService {
     );
   }
 
-  createInvestment(request: InvestmentCreateRequest): Observable<InvestmentRecord> {
-    return this.httpService.post<InvestmentRecord>(
+  createInvestment(request: InvestmentCreateRequest): Observable<ApiResponse<InvestmentRecord>> {
+    return this.httpService.post<ApiResponse<InvestmentRecord>>(
       `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/investments`,
       request,
     );
   }
 
-  adminSetRoi(investmentId: string, roi: string): Observable<InvestmentRecord> {
-    return this.httpService.post<InvestmentRecord>(
+  adminSetRoi(investmentId: string, roi: string): Observable<ApiResponse<InvestmentRecord>> {
+    return this.httpService.post<ApiResponse<InvestmentRecord>>(
       `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/investments/${investmentId}/admin/roi`,
       {roi},
     );
   }
 
-  investorDecision(investmentId: string, decision: 'ACCEPT' | 'REJECT'): Observable<InvestmentRecord> {
-    return this.httpService.post<InvestmentRecord>(
+  investorDecision(investmentId: string, decision: 'ACCEPT' | 'REJECT'): Observable<ApiResponse<InvestmentRecord>> {
+    return this.httpService.post<ApiResponse<InvestmentRecord>>(
       `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/investments/${investmentId}/investor/decision`,
       {decision},
     );
