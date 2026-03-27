@@ -7,75 +7,29 @@
   (searchChange)="onSearch()"
   (clearFilters)="onClearFilters()"
 >
-  <!-- Role Filter Dropdown -->
-  <div class="filter-dropdown relative">
-      <button
-        type="button"
-        (click)="toggleRoleDropdown($event)"
-        class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 min-w-[150px] justify-between text-left"
-      >
-      <span class="text-sm text-slate-700">
-        <span class="font-medium">Role:</span> {{ getSelectedLabels(roleFilters) }}
-      </span>
-        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-        <span *ngIf="getSelectedCount(roleFilters) > 0"
-              class="ml-1 px-2 py-0.5 bg-blue-500 text-white text-xs rounded-full">
-        {{ getSelectedCount(roleFilters) }}
-      </span>
-      </button>
-
-      <div *ngIf="roleDropdownOpen"
-           class="absolute z-50 mt-1 w-56 bg-white rounded-lg shadow-lg border border-slate-200 py-2">
-        <div class="space-y-1 px-2">
-          <label *ngFor="let role of roleFilters"
-                 class="flex items-center cursor-pointer hover:bg-slate-50 p-2 rounded">
-            <input
-              type="checkbox"
-              [(ngModel)]="role.checked"
-              (change)="onFilterChange()"
-              class="w-4 h-4 text-blue-500 border-slate-300 rounded focus:ring-blue-500"
-            />
-            <span class="ml-2 text-sm text-slate-700">{{ role.label }}</span>
-          </label>
-        </div>
-      </div>
+  <div class="w-[150px]">
+    <select
+      [ngModel]="selectedRole"
+      (ngModelChange)="onRoleSelectionChange($event)"
+      class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+    >
+      <option value="">Role: All</option>
+      <option *ngFor="let role of roleFilters" [value]="role.value">
+        Role: {{ role.label }}
+      </option>
+    </select>
   </div>
 
-  <!-- Gender Filter Dropdown -->
-  <div class="filter-dropdown relative">
-      <button
-        type="button"
-        (click)="toggleGenderDropdown($event)"
-        class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 min-w-[150px] justify-between"
-      >
-      <span class="text-sm text-slate-700">
-        <span class="font-medium">Gender:</span> {{ getSelectedLabels(genderFilters) }}
-      </span>
-        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-        <span *ngIf="getSelectedCount(genderFilters) > 0"
-              class="ml-1 px-2 py-0.5 bg-blue-500 text-white text-xs rounded-full">
-        {{ getSelectedCount(genderFilters) }}
-      </span>
-      </button>
-
-      <div *ngIf="genderDropdownOpen"
-           class="absolute z-50 mt-1 w-56 bg-white rounded-lg shadow-lg border border-slate-200 py-2">
-        <div class="space-y-1 px-2">
-          <label *ngFor="let gender of genderFilters"
-                 class="flex items-center cursor-pointer hover:bg-slate-50 p-2 rounded">
-            <input
-              type="checkbox"
-              [(ngModel)]="gender.checked"
-              (change)="onFilterChange()"
-              class="w-4 h-4 text-blue-500 border-slate-300 rounded focus:ring-blue-500"
-            />
-            <span class="ml-2 text-sm text-slate-700">{{ gender.label }}</span>
-          </label>
-        </div>
-      </div>
+  <div class="w-[150px]">
+    <select
+      [ngModel]="selectedGender"
+      (ngModelChange)="onGenderSelectionChange($event)"
+      class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+    >
+      <option value="">Gender: All</option>
+      <option *ngFor="let gender of genderFilters" [value]="gender.value">
+        Gender: {{ gender.label }}
+      </option>
+    </select>
   </div>
 </app-filter-bar>

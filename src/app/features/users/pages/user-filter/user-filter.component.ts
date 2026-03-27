@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, HostListener, ElementRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FilterOption } from '../../../../shared/models/filter.model';
@@ -22,11 +22,10 @@ export class UserFilterComponent implements OnInit, OnDestroy {
   @Output() searchChange = new EventEmitter<void>();
   @Output() clearFilters = new EventEmitter<void>();
 
-  // Dropdown states
-  roleDropdownOpen = false;
-  genderDropdownOpen = false;
+  selectedRole = '';
+  selectedGender = '';
 
-  constructor(private elementRef: ElementRef) {}
+  constructor() {}
 
   ngOnInit() {
     // Component initialization
@@ -34,27 +33,6 @@ export class UserFilterComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     // Cleanup if needed
-  }
-
-  @HostListener('document:click', ['$event'])
-  handleClickOutside(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    if (!this.elementRef.nativeElement.contains(target)) {
-      this.roleDropdownOpen = false;
-      this.genderDropdownOpen = false;
-    }
-  }
-
-  toggleRoleDropdown(event: Event) {
-    event.stopPropagation();
-    this.roleDropdownOpen = !this.roleDropdownOpen;
-    this.genderDropdownOpen = false;
-  }
-
-  toggleGenderDropdown(event: Event) {
-    event.stopPropagation();
-    this.genderDropdownOpen = !this.genderDropdownOpen;
-    this.roleDropdownOpen = false;
   }
 
   onFilterChange() {
@@ -71,9 +49,27 @@ export class UserFilterComponent implements OnInit, OnDestroy {
 
   onClearFilters() {
     this.searchTextChange.emit('');
+    this.selectedRole = '';
+    this.selectedGender = '';
     this.roleFilters.forEach(f => f.checked = false);
     this.genderFilters.forEach(f => f.checked = false);
     this.clearFilters.emit();
+  }
+
+  onRoleSelectionChange(value: string): void {
+    this.selectedRole = value;
+    this.roleFilters.forEach((f) => {
+      f.checked = !!value && f.value === value;
+    });
+    this.onFilterChange();
+  }
+
+  onGenderSelectionChange(value: string): void {
+    this.selectedGender = value;
+    this.genderFilters.forEach((f) => {
+      f.checked = !!value && f.value === value;
+    });
+    this.onFilterChange();
   }
 
   getSelectedCount(filters: FilterOption[]): number {
