@@ -1,37 +1,45 @@
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-  <div class="flex items-center justify-between" *ngIf="steps?.length">
+<div class="bg-white rounded-xl border border-gray-200/60 px-6 py-5 mb-6">
+  <div class="flex items-center" *ngIf="steps?.length">
     <ng-container *ngFor="let step of steps; let i = index">
-      <!-- Step circle + labels -->
-      <div class="flex items-center group">
+
+      <!-- Step -->
+      <div class="flex items-center gap-2.5 flex-shrink-0">
         <div
           (click)="onStepClick(i)"
-          [class]="
-            currentStep >= i + 1
-              ? 'bg-blue-600 text-white shadow-md'
-              : (step.clickable ? 'bg-gray-200 text-gray-500 hover:bg-gray-300 cursor-pointer' : 'bg-gray-200 text-gray-500')
-          "
-          class="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all duration-200"
-          [class.cursor-pointer]="step.clickable && i + 1 < currentStep"
+          class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 select-none"
+          [ngClass]="{
+            'bg-blue-600 text-white shadow-[0_0_0_3px_rgba(37,99,235,0.15)]': currentStep === i + 1,
+            'bg-blue-600 text-white shadow-[0_0_0_3px_rgba(37,99,235,0.12)] cursor-pointer hover:bg-blue-700': currentStep > i + 1 && step.clickable,
+            'bg-gray-100 text-gray-400 border border-gray-200': currentStep < i + 1
+          }"
         >
-          {{ i + 1 }}
+          <!-- Checkmark for completed steps -->
+          <ng-container *ngIf="currentStep > i + 1; else stepNumber">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 14 14" fill="none">
+              <path d="M2.5 7L5.5 10L11.5 4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </ng-container>
+          <ng-template #stepNumber>{{ i + 1 }}</ng-template>
         </div>
-        <div class="ml-3">
-          <p class="font-medium text-gray-900 text-sm tracking-wide">
+
+        <div>
+          <p class="text-sm font-medium leading-tight"
+             [ngClass]="currentStep >= i + 1 ? 'text-gray-900' : 'text-gray-400'">
             {{ step.label }}
           </p>
-          <p *ngIf="step.description" class="text-xs text-gray-500 mt-0.5">
+          <p *ngIf="step.description" class="text-[11px] text-gray-400 mt-0.5 leading-tight">
             {{ step.description }}
           </p>
         </div>
       </div>
 
-      <!-- Connector between steps -->
+      <!-- Connector -->
       <div
         *ngIf="i < steps.length - 1"
-        [class]="currentStep >= i + 2 ? 'bg-blue-600' : 'bg-gray-200'"
-        class="flex-1 h-0.5 mx-4 rounded-full transition-colors duration-300"
+        class="flex-1 h-px mx-3 rounded-full transition-colors duration-300 min-w-[1.5rem]"
+        [ngClass]="currentStep >= i + 2 ? 'bg-blue-600' : 'bg-gray-200'"
       ></div>
+
     </ng-container>
   </div>
 </div>
-

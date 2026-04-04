@@ -190,7 +190,7 @@ export const routes: Routes = [
   {
     path: 'farm-crowdfunding',
     loadChildren: () =>
-      import('./features/farm-crowdfunding/farm-crowdfunding.module').then((m) => m.FarmCrowdfundingModule),
+      import('./features/crowd-funding/crowd-funding.module').then((m) => m.CrowdFundingModule),
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['INVESTOR', 'ADMIN'] },
   },

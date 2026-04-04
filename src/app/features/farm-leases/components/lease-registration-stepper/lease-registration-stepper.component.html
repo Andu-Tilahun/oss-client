@@ -1,18 +1,18 @@
 <div class="bg-gray-50" [ngClass]="embedded ? 'py-4 min-h-0' : 'py-8 min-h-screen'">
   <div class="max-w-6xl mx-auto px-4">
+
     <app-stepper
       [steps]="steps"
       [currentStep]="currentStep"
       (stepChange)="goToStep($event)"
     ></app-stepper>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mt-6">
+    <div class="bg-white rounded-xl border border-gray-200/60 p-8 mt-4">
+
       <!-- STEP 1: Lease details -->
       <div [hidden]="currentStep !== 1">
-        <div class="mb-8">
-          <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Lease Details</h2>
-          <p class="text-sm text-gray-500 mt-1">Enter agreement and duration information</p>
-        </div>
+        <h2 class="text-xl font-medium text-gray-900">Lease details</h2>
+        <p class="text-sm text-gray-400 mt-1">Enter agreement and duration information</p>
 
         <app-farm-lease-form
           #farmLeaseForm
@@ -34,84 +34,76 @@
 
       <!-- STEP 3: Review -->
       <div *ngIf="currentStep === 3">
-        <div class="mb-8">
-          <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Review</h2>
-          <p class="text-sm text-gray-500 mt-1">Confirm the lease agreement and payment schedule</p>
-        </div>
+        <h2 class="text-xl font-medium text-gray-900">Review</h2>
+        <p class="text-sm text-gray-400 mt-1">Confirm the lease agreement and payment schedule</p>
 
-        <div class="space-y-6">
-          <div class="p-6 bg-gray-50 rounded-xl border border-gray-200">
-            <div class="flex items-center justify-between mb-5">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">1</div>
-                <h3 class="text-lg font-semibold text-gray-900">Lease Details</h3>
-              </div>
+        <div class="mt-6 space-y-4">
+
+          <!-- Lease details panel -->
+          <div class="rounded-lg border border-gray-200 overflow-hidden">
+            <div class="flex items-center gap-2.5 px-4 py-3 bg-gray-50 border-b border-gray-200">
+              <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-medium flex-shrink-0">1</div>
+              <h3 class="text-sm font-medium text-gray-900">Lease details</h3>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
-              <div class="space-y-1">
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Farm Plot</p>
-                <p class="font-medium text-gray-900">
-                  {{ selectedFarmPlotTitle }}
+            <div class="grid grid-cols-2">
+              <div class="px-4 py-3 border-r border-b border-gray-100">
+                <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Farm plot</p>
+                <p class="text-sm text-gray-900 mt-1">{{ selectedFarmPlotTitle }}</p>
+              </div>
+              <div class="px-4 py-3 border-b border-gray-100">
+                <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Start → End</p>
+                <p class="text-sm text-gray-900 mt-1">
+                  {{ cachedLeaseRequest?.startDate | date:'mediumDate' }} → {{ calculatedEndDate ? (calculatedEndDate | date:'mediumDate') : '-' }}
                 </p>
               </div>
-              <div class="space-y-1">
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Start → End</p>
-                <p class="font-medium text-gray-900">
-                  {{ cachedLeaseRequest?.startDate | date:'mediumDate' }} →
-                  {{ calculatedEndDate ? (calculatedEndDate | date:'mediumDate') : '-' }}
-                </p>
+              <div class="px-4 py-3 border-r border-gray-100">
+                <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Duration</p>
+                <p class="text-sm text-gray-900 mt-1">{{ cachedLeaseRequest?.totalDurationMonths }} months</p>
               </div>
-              <div class="space-y-1">
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</p>
-                <p class="font-medium text-gray-900">
-                  {{ cachedLeaseRequest?.totalDurationMonths }} months
-                </p>
-              </div>
-              <div class="space-y-1">
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</p>
-                <p class="font-medium text-gray-900">
-                  {{ cachedLeaseRequest?.totalAmount }}
-                </p>
+              <div class="px-4 py-3">
+                <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Total amount</p>
+                <p class="text-sm text-gray-900 mt-1">{{ cachedLeaseRequest?.totalAmount }}</p>
               </div>
             </div>
           </div>
 
-          <div class="p-6 bg-blue-50/50 rounded-xl border border-blue-200">
-            <div class="flex items-center justify-between mb-5">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">2</div>
-                <h3 class="text-lg font-semibold text-gray-900">Payment Schedule</h3>
+          <!-- Payment schedule panel -->
+          <div class="rounded-lg border border-gray-200 overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
+              <div class="flex items-center gap-2.5">
+                <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-medium flex-shrink-0">2</div>
+                <h3 class="text-sm font-medium text-gray-900">Payment schedule</h3>
               </div>
-              <span class="text-xs text-gray-500">
-                {{ paymentTermsPreview.length }} installment(s)
-              </span>
+              <span class="text-xs text-gray-400">{{ paymentTermsPreview.length }} installment(s)</span>
             </div>
-
-            <div class="space-y-2">
+            <div>
               <div
-                *ngFor="let term of paymentTermsPreview; let i = index"
-                class="flex items-center justify-between p-4 bg-white rounded-lg border border-blue-100"
+                *ngFor="let term of paymentTermsPreview; let i = index; let last = last"
+                class="flex items-center justify-between px-4 py-3"
+                [class.border-b]="!last"
+                [class.border-gray-100]="!last"
               >
-                <span class="text-sm font-medium text-gray-800">Installment {{ i + 1 }}</span>
-                <span class="text-sm font-medium text-gray-900">
-                  {{ term.amount }} (Due {{ term.dueDate | date:'mediumDate' }})
-                </span>
+                <span class="text-sm text-gray-500">Installment {{ i + 1 }}</span>
+                <div class="text-right">
+                  <p class="text-sm font-medium text-gray-900">{{ term.amount | number:'1.2-2' }}</p>
+                  <p class="text-xs text-gray-400 mt-0.5">Due {{ term.dueDate | date:'mediumDate' }}</p>
+                </div>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>
 
     <!-- Navigation -->
-    <div class="mt-8 flex items-center justify-between">
+    <div class="mt-6 flex items-center justify-between">
       <button
         *ngIf="currentStep > 1"
         type="button"
         (click)="previousStep()"
         [disabled]="isSaving || readOnly"
-        class="px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-xl border border-gray-300 transition-all duration-200 disabled:opacity-50 shadow-sm hover:shadow focus:ring-2 focus:ring-gray-200"
+        class="px-5 py-2.5 bg-white text-gray-600 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors duration-150 disabled:opacity-40"
       >
         ← Previous
       </button>
@@ -122,12 +114,13 @@
         type="button"
         (click)="nextStep()"
         [disabled]="isSaving || readOnly"
-        class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 flex items-center shadow-lg hover:shadow focus:ring-2 focus:ring-blue-300"
+        class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-150 disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1"
       >
         <span *ngIf="currentStep === 1">Continue →</span>
         <span *ngIf="currentStep === 2">Review →</span>
-        <span *ngIf="currentStep === 3">Confirm Lease</span>
+        <span *ngIf="currentStep === 3">Confirm lease</span>
       </button>
     </div>
+
   </div>
 </div>

@@ -1,0 +1,63 @@
+<app-page-split-layout
+  [showLeftTitle]="false"
+  [showRightTitle]="false"
+  leftTitle="Investments"
+  rightTitle="Investment Detail"
+  [rightItem]="selectedInvestment"
+  [rightEmptyMessage]="'Select a row to view details.'"
+  [showRightEditButton]="false"
+  [rightActions]="rightActions"
+>
+  <ng-template #extraTableHeader>
+    <div class="w-full">
+      <app-farm-crowdfunding-investment-filter
+        [(searchText)]="searchText"
+        [(status)]="status"
+        [(approval)]="approval"
+        (filterChange)="onFilterChange()"
+        (searchChange)="onFilterChange()"
+        (clearFilters)="clearFilters()"
+      ></app-farm-crowdfunding-investment-filter>
+    </div>
+  </ng-template>
+
+  <ng-template #leftContent>
+    <app-data-table
+      [columns]="columns"
+      [data]="investments"
+      [loading]="loading"
+      [total]="total"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [showAddButton]="false"
+      [showRefreshButton]="true"
+      [showViewButton]="true"
+      [showEditButton]="false"
+      [showDeleteButton]="false"
+      (pageChange)="onPageChange($event)"
+      (refreshClick)="onRefresh()"
+      (viewClick)="onView($event)"
+    >
+    </app-data-table>
+  </ng-template>
+
+  <ng-template #rightContent let-investment>
+    <app-farm-crowdfunding-investment-view
+      [investment]="investment"
+      [refreshKey]="detailRefreshKey"
+    ></app-farm-crowdfunding-investment-view>
+  </ng-template>
+</app-page-split-layout>
+
+<app-crowd-funding-set-roi-modal
+  [(visible)]="showSetRoiModal"
+  [investment]="selectedInvestment"
+  (roiSaved)="onRoiSaved()"
+></app-crowd-funding-set-roi-modal>
+
+<app-crowd-funding-investor-decision-modal
+  [(visible)]="showInvestorDecisionModal"
+  [investment]="selectedInvestment"
+  (decisionSaved)="onDecisionSaved()"
+></app-crowd-funding-investor-decision-modal>
+

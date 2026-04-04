@@ -2,9 +2,9 @@ import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {HttpService} from '../../../core/services/http.service';
 import {Endpoints} from '../../../core/endpoint/endpoint.model';
-import {FarmOperation} from '../../farm-crowdfunding/models/farm-crowdfunding.model';
 import {LeaseAgreement} from '../../farm-leases/models/farm-lease.model';
 import {FarmlandRestorationPlan, FarmOperationFollowUp, LeaseFollowUp, RestorationPlanStatus} from '../models/farm-followups.model';
+import {CrowdFunding} from "../../crowd-funding/models/crowd-funding.model";
 
 export interface FollowUpCreateRequest {
   scheduledDate: string; // ISO local datetime
@@ -46,8 +46,8 @@ export class FarmFollowUpsService {
   constructor(private httpService: HttpService) {}
 
   // Extension worker: assigned operations/leases
-  getAssignedFarmOperations(): Observable<FarmOperation[]> {
-    return this.httpService.get<FarmOperation[]>(`${Endpoints.FARM_FOLLOWUPS_ENDPOINT}/extension-worker/farm-operations/assigned`);
+  getAssignedFarmOperations(): Observable<CrowdFunding[]> {
+    return this.httpService.get<CrowdFunding[]>(`${Endpoints.FARM_FOLLOWUPS_ENDPOINT}/extension-worker/farm-operations/assigned`);
   }
 
   getAssignedLeases(): Observable<LeaseAgreement[]> {

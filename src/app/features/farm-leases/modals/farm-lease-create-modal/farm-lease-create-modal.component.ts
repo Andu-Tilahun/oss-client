@@ -42,18 +42,31 @@ export class FarmLeaseCreateModalComponent {
 
   onLeaseDetailsSubmit(request: LeaseCreateRequest): void {
     this.isSaving = true;
-    this.farmLeaseService.createLease(request).subscribe({
-      next: (lease: ApiResponse<LeaseAgreement>) => {
-        // HttpService unwraps ApiResponse.data
-        this.leaseId = lease.data?.id;
-        this.currentStep = 2;
-        this.isSaving = false;
-      },
-      error: (error) => {
-        this.isSaving = false;
-        this.toastService.error(error.message || 'Failed to create lease', 'Create Lease');
-      },
-    });
+    if (!this.leaseId) {
+      this.farmLeaseService.createLease(request).subscribe({
+        next: (lease: ApiResponse<LeaseAgreement>) => {
+          // HttpService unwraps ApiResponse.data
+          this.leaseId = lease.data?.id;
+          this.currentStep = 2;
+          this.isSaving = false;
+        },
+        error: (error) => {
+          this.isSaving = false;
+          this.toastService.error(error.message || 'Failed to create lease', 'Create Lease');
+        },
+      });
+    } else {
+      this.farmLeaseService.updateLease(this.leaseId, request).subscribe({
+        next: () => {
+          this.currentStep = 2;
+          this.isSaving = false;
+        },
+        error: (error) => {
+          this.isSaving = false;
+          this.toastService.error(error.message || 'Failed to update lease', 'Update Lease');
+        },
+      });
+    }
   }
 
   onPaymentSubmit(request: LeaseDefineTermsRequest): void {
@@ -105,7 +118,7 @@ export class FarmLeaseCreateModalComponent {
       sortBy: 'title',
       sortDirection: 'ASC',
       page: 0,
-      size: 1000,
+      size: 1000000000,
     };
 
     this.farmPlotService.filterFarmPlots(filterRequest).subscribe({

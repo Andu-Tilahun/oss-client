@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import {ExtensionFollowUpStatus, FarmlandRestorationPlan, RestorationPlanStatus} from '../../models/farm-followups.model';
-import {FarmOperation} from '../../../farm-crowdfunding/models/farm-crowdfunding.model';
 import {LeaseAgreement} from '../../../farm-leases/models/farm-lease.model';
 import {AuthService} from '../../../auth/services/auth.service';
 import {UserService} from '../../../users/services/user.service';
@@ -11,6 +10,7 @@ import {FarmFollowUpsService, FollowUpCreateRequest} from '../../services/farm-f
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
 import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
+import {CrowdFunding} from "../../../crowd-funding/models/crowd-funding.model";
 
 @Component({
   selector: 'app-farm-followups',
@@ -34,7 +34,7 @@ export class FarmFollowUpsComponent implements OnInit {
   isAdmin = false;
   isExtensionWorker = false;
 
-  assignedFarmOperations: FarmOperation[] = [];
+  assignedFarmOperations: CrowdFunding[] = [];
   assignedLeases: LeaseAgreement[] = [];
   restorationPlansForAdmin: FarmlandRestorationPlan[] = [];
   restorationPlansForWorker: FarmlandRestorationPlan[] = [];
