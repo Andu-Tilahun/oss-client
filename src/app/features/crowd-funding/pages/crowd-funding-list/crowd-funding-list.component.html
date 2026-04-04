@@ -2,24 +2,24 @@
   [showLeftTitle]="false"
   [showRightTitle]="false"
   leftTitle="Crowdfunding"
-  rightTitle="Campaign Detail"
-  [rightItem]="selectedCampaign"
+  rightTitle="crowdFunding Detail"
+  [rightItem]="selectedcrowdFunding"
   [rightEmptyMessage]="'Select a row to view details.'"
   [showRightEditButton]="false"
   [rightActions]="rightActions"
 >
   <ng-template #extraTableHeader>
     <div class="w-full">
-      <app-farm-crowdfunding-campaign-filter
+      <app-farm-crowdfunding-crowdFunding-filter
         [(searchText)]="searchText"
         [(status)]="status"
         (filterChange)="onFilterChange()"
         (searchChange)="onFilterChange()"
         (clearFilters)="clearFilters()"
-      ></app-farm-crowdfunding-campaign-filter>
+      ></app-farm-crowdfunding-crowdFunding-filter>
 
       <div class="px-3 py-2 text-xs text-slate-500">
-        Tip: Investors are default-filtered to <b>OPEN</b> campaigns.
+        Tip: Investors are default-filtered to <b>OPEN</b> crowdFundings.
       </div>
     </div>
   </ng-template>
@@ -27,7 +27,7 @@
   <ng-template #leftContent>
     <app-data-table
       [columns]="columns"
-      [data]="campaigns"
+      [data]="crowdFundings"
       [loading]="loading"
       [total]="total"
       [pageSize]="pageSize"
@@ -37,7 +37,7 @@
       [showViewButton]="true"
       [showEditButton]="false"
       [showDeleteButton]="false"
-      [addButtonText]="'Create campaign'"
+      [addButtonText]="'Create crowdFunding'"
       (pageChange)="onPageChange($event)"
       (addClick)="onAdd()"
       (refreshClick)="onRefresh()"
@@ -46,22 +46,22 @@
     </app-data-table>
   </ng-template>
 
-  <ng-template #rightContent let-campaign>
+  <ng-template #rightContent let-crowdFunding>
     <app-crowd-funding-view
-      [crowdFunding]="campaign"
+      [crowdFunding]="crowdFunding"
       [refreshKey]="detailRefreshKey"
     ></app-crowd-funding-view>
   </ng-template>
 </app-page-split-layout>
 
 <app-crowd-funding-create-modal
-  [(visible)]="showCreateCampaignModal"
-  (campaignCreated)="onCampaignCreated()"
+  [(visible)]="showCreatecrowdFundingModal"
+  (crowdFundingCreated)="oncrowdFundingCreated()"
 ></app-crowd-funding-create-modal>
 
 <app-crowd-funding-create-investment-modal
   [(visible)]="showCreateInvestmentModal"
-  [crowdFunding]="selectedCampaign"
+  [crowdFunding]="selectedcrowdFunding"
   (investmentCreated)="onInvestmentCreated()"
 ></app-crowd-funding-create-investment-modal>
 

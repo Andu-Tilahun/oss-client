@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {ModalComponent} from '../../../../shared/modals/modal/modal.component';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {FarmPlotService} from '../../../farm-plots/services/farm-plot.service';
@@ -14,12 +14,12 @@ import {CrowdFundingFormComponent} from "../../components/crowd-funding-form/cro
   imports: [CommonModule, ModalComponent, CrowdFundingFormComponent],
   templateUrl: './crowd-funding-create-modal.component.html',
 })
-export class CrowdFundingCreateModalComponent {
+export class CrowdFundingCreateModalComponent implements OnInit {
   @Input() visible = false;
   @Output() visibleChange = new EventEmitter<boolean>();
-  @Output() campaignCreated = new EventEmitter<void>();
+  @Output() crowdFundingCreated = new EventEmitter<void>();
 
-  @ViewChild('crowdFundingForm') form!: CrowdFundingFormComponent;
+  @ViewChild('crowdFundingForm') crowdFundingForm!: CrowdFundingFormComponent;
 
   farmPlots: FarmPlot[] = [];
   isLoading = false;
@@ -37,20 +37,20 @@ export class CrowdFundingCreateModalComponent {
   }
 
   onSubmit(): void {
-    if (!this.form.isValid()) {
-      this.form.markAllAsTouched();
+    if (!this.crowdFundingForm.isValid()) {
+      this.crowdFundingForm.markAllAsTouched();
       return;
     }
     this.isLoading = true;
-    const request: CrowdFundingCreateRequest = this.form.getValue();
+    const request: CrowdFundingCreateRequest = this.crowdFundingForm.getValue();
     this.crowdfundingService.create(request).subscribe({
       next: () => {
         this.isLoading = false;
         this.visible = false;
         this.visibleChange.emit(false);
-        this.form.reset();
+        this.crowdFundingForm.form.reset();
         this.toastService.success('Crowdfunding created successfully');
-        this.campaignCreated.emit();
+        this.crowdFundingCreated.emit();
       },
       error: (err) => {
         this.isLoading = false;
@@ -60,7 +60,7 @@ export class CrowdFundingCreateModalComponent {
   }
 
   onCancel(): void {
-    this.form.reset();
+    this.crowdFundingForm.form.reset();
   }
 
   private loadFarmPlots(): void {

@@ -12,7 +12,7 @@ import {SharedModule} from '../../../../shared/shared.module';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
 
 @Component({
-  selector: 'app-farm-crowdfunding-investment-view',
+  selector: 'app-crowd-funding-investment-view',
   standalone: true,
   imports: [CommonModule, DetailCardComponent, DetailSectionComponent, DetailFieldComponent, SharedModule],
   templateUrl: './crowd-funding-investment-view.component.html',

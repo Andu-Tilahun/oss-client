@@ -9,7 +9,7 @@
     <hr class="border-gray-200 mb-8" />
 
     <app-detail-section title="Investment">
-      <app-detail-field label="Campaign" [value]="investment.crowdFunding?.title || investment.crowdFundingId || '-'" />
+      <app-detail-field label="crowdFunding" [value]="investment.crowdFunding?.title || investment.crowdFundingId || '-'" />
       <app-detail-field label="Amount" [value]="formatAmount(investment.amount)" />
       <app-detail-field label="Payment method" [value]="investment.paymentMethod || '-'" />
       <app-detail-field label="Status" [value]="investment.status || '-'" />

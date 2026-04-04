@@ -5,7 +5,7 @@ import {FilterBarComponent} from '../../../../shared/components/filter-bar/filte
 import {FundingStatus} from '../../models/crowd-funding.model';
 
 @Component({
-  selector: 'app-farm-crowdfunding-campaign-filter',
+  selector: 'app-farm-crowdfunding-crowdFunding-filter',
   standalone: true,
   imports: [CommonModule, FormsModule, FilterBarComponent],
   templateUrl: './crowd-funding-filter.component.html',

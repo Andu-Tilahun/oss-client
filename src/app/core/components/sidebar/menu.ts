@@ -116,11 +116,11 @@ export const MENU: MenuItem[] = [
       {
         icon: '',
         label: 'Crowdfunding',
-        route: '/farm-crowdfunding/campaigns',
+        route: '/crowd-funding',
         roles: ['INVESTOR', 'ADMIN'],
         children: [
-          {icon: '', label: 'Campaigns', route: '/farm-crowdfunding/campaigns', roles: ['INVESTOR', 'ADMIN']},
-          {icon: '', label: 'Investments', route: '/farm-crowdfunding/investments', roles: ['INVESTOR', 'ADMIN']},
+          {icon: '', label: 'Campaigns', route: '/crowd-funding', roles: ['INVESTOR', 'ADMIN']},
+          {icon: '', label: 'Investments', route: '/crowd-funding/investments', roles: ['INVESTOR', 'ADMIN']},
         ],
         expanded: false,
       },

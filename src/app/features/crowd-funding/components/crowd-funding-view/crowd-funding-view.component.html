@@ -1,10 +1,10 @@
 <app-detail-card>
-  <div *ngIf="!crowdFunding" class="text-sm text-gray-500">No campaign selected.</div>
+  <div *ngIf="!crowdFunding" class="text-sm text-gray-500">No crowdFunding selected.</div>
 
   <ng-container *ngIf="crowdFunding">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
       <div>
-        <h3 class="text-2xl font-bold text-gray-900">{{ crowdFunding.title || 'Campaign' }}</h3>
+        <h3 class="text-2xl font-bold text-gray-900">{{ crowdFunding.title || 'crowdFunding' }}</h3>
       </div>
 
       <span
@@ -17,7 +17,7 @@
 
     <hr class="border-gray-200 mb-8" />
 
-    <app-detail-section title="Campaign">
+    <app-detail-section title="crowdFunding">
       <app-detail-field label="Deadline" [value]="crowdFunding.fundingDeadline || '-'" />
       <app-detail-field label="Target" [value]="formatAmount(crowdFunding.targetAmount)" />
       <app-detail-field label="Minimum" [value]="formatAmount(crowdFunding.minimumContribution)" />

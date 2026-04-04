@@ -11,14 +11,14 @@ import {PageResponse} from '../../../../shared/models/api-response.model';
 import {CrowdFunding, CrowdFundingFilterRequest, FundingStatus} from "../../models/crowd-funding.model";
 
 @Component({
-  selector: 'app-farm-crowdfunding-campaign-list',
+  selector: 'app-farm-crowdfunding-crowdFunding-list',
   standalone: false,
   templateUrl: './crowd-funding-list.component.html',
   styleUrl: './crowd-funding-list.component.css',
 })
 export class CrowdFundingListComponent implements OnInit {
-  campaigns: CrowdFunding[] = [];
-  selectedCampaign: CrowdFunding | null = null;
+  crowdFundings: CrowdFunding[] = [];
+  selectedcrowdFunding: CrowdFunding | null = null;
   detailRefreshKey = 0;
 
   loading = false;
@@ -30,7 +30,7 @@ export class CrowdFundingListComponent implements OnInit {
   searchText = '';
   status: FundingStatus | '' = '';
 
-  showCreateCampaignModal = false;
+  showCreatecrowdFundingModal = false;
   showCreateInvestmentModal = false;
 
   private isAdmin = false;
@@ -65,11 +65,11 @@ export class CrowdFundingListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Investor default: only OPEN campaigns. Admin can see all.
+    // Investor default: only OPEN crowdFundings. Admin can see all.
     if (!this.isAdmin && !this.status) {
       this.status = 'OPEN';
     }
-    this.loadCampaigns();
+    this.loadcrowdFundings();
   }
 
   get isAdminUser(): boolean {
@@ -93,36 +93,36 @@ export class CrowdFundingListComponent implements OnInit {
     };
   }
 
-  loadCampaigns(): void {
+  loadcrowdFundings(): void {
     this.loading = true;
     const request = this.buildFilterRequest();
     this.crowdfundingService.filterCrowdFunding(request).subscribe({
       next: (response: PageResponse<CrowdFunding>) => {
-        this.campaigns = response.content;
+        this.crowdFundings = response.content;
         this.total = response.totalElements;
         this.loading = false;
 
-        const previousSelectedId = this.selectedCampaign?.id;
-        if (this.campaigns.length === 0) {
-          this.selectedCampaign = null;
+        const previousSelectedId = this.selectedcrowdFunding?.id;
+        if (this.crowdFundings.length === 0) {
+          this.selectedcrowdFunding = null;
           return;
         }
         if (!previousSelectedId) {
-          this.selectedCampaign = {...this.campaigns[0]};
+          this.selectedcrowdFunding = {...this.crowdFundings[0]};
           this.detailRefreshKey++;
           return;
         }
-        const match = this.campaigns.find((c) => c.id === previousSelectedId);
+        const match = this.crowdFundings.find((c) => c.id === previousSelectedId);
         if (match) {
-          this.selectedCampaign = {...match};
+          this.selectedcrowdFunding = {...match};
           return;
         }
-        this.selectedCampaign = {...this.campaigns[0]};
+        this.selectedcrowdFunding = {...this.crowdFundings[0]};
         this.detailRefreshKey++;
       },
       error: (error) => {
         this.loading = false;
-        this.toastService.error(error.message || 'Failed to fetch campaigns', 'Fetch Campaigns');
+        this.toastService.error(error.message || 'Failed to fetch crowdFundings', 'Fetch crowdFundings');
       },
     });
   }
@@ -131,22 +131,22 @@ export class CrowdFundingListComponent implements OnInit {
     this.pageIndex = params.pageIndex;
     this.currentPage = this.pageIndex - 1;
     this.pageSize = params.pageSize;
-    this.loadCampaigns();
+    this.loadcrowdFundings();
   }
 
   onAdd(): void {
-    // Admin creates Operation + Campaign
-    this.showCreateCampaignModal = true;
+    // Admin creates Operation + crowdFunding
+    this.showCreatecrowdFundingModal = true;
   }
 
   onRefresh(): void {
-    this.loadCampaigns();
+    this.loadcrowdFundings();
   }
 
   onSearch(): void {
     this.currentPage = 0;
     this.pageIndex = 1;
-    this.loadCampaigns();
+    this.loadcrowdFundings();
   }
 
   onFilterChange(): void {
@@ -161,23 +161,23 @@ export class CrowdFundingListComponent implements OnInit {
     if (!this.isAdmin) {
       this.status = 'OPEN';
     }
-    this.loadCampaigns();
+    this.loadcrowdFundings();
   }
 
   onView(c: CrowdFunding): void {
-    this.selectedCampaign = {...c};
+    this.selectedcrowdFunding = {...c};
     this.showCreateInvestmentModal = false;
   }
 
   onInvest(c: CrowdFunding): void {
-    this.selectedCampaign = {...c};
+    this.selectedcrowdFunding = {...c};
     this.showCreateInvestmentModal = true;
   }
 
-  onCampaignCreated(): void {
-    this.showCreateCampaignModal = false;
+  oncrowdFundingCreated(): void {
+    this.showCreatecrowdFundingModal = false;
     this.detailRefreshKey++;
-    this.loadCampaigns();
+    this.loadcrowdFundings();
   }
 
   onInvestmentCreated(): void {

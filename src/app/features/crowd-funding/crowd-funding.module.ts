@@ -8,7 +8,7 @@ import {CrowdFundingListComponent} from './pages/crowd-funding-list/crowd-fundin
 import {CrowdFundingViewComponent} from './components/crowd-funding-view/crowd-funding-view.component';
 import {CrowdFundingCreateModalComponent} from './modals/crowd-funding-create-modal/crowd-funding-create-modal.component';
 import {CrowdFundingCreateInvestmentModalComponent} from './modals/crowd-funding-create-investment-modal/crowd-funding-create-investment-modal.component';
-import {FarmCrowdfundingInvestmentListComponent} from './pages/farm-crowdfunding-investment-list/farm-crowdfunding-investment-list.component';
+import {CrowdFundingInvestmentListComponent} from './pages/crowd-funding-investment-list/crowd-funding-investment-list.component';
 import {CrowdFundingInvestmentViewComponent} from './components/crowd-funding-investment-view/crowd-funding-investment-view.component';
 import {CrowdFundingSetRoiModalComponent} from './modals/crowd-funding-set-roi-modal/crowd-funding-set-roi-modal.component';
 import {CrowdFundingInvestorDecisionModalComponent} from './modals/crowd-funding-investor-decision-modal/crowd-funding-investor-decision-modal.component';
@@ -18,7 +18,7 @@ import {CrowdFundingInvestmentFilterComponent} from './pages/crowd-funding-inves
 @NgModule({
   declarations: [
     CrowdFundingListComponent,
-    FarmCrowdfundingInvestmentListComponent,
+    CrowdFundingInvestmentListComponent,
   ],
   imports: [
     CommonModule,

@@ -14,12 +14,12 @@ import {
 import {PageResponse} from '../../../../shared/models/api-response.model';
 
 @Component({
-  selector: 'app-farm-crowdfunding-investment-list',
+  selector: 'app-crowd-funding-investment-list',
   standalone: false,
-  templateUrl: './farm-crowdfunding-investment-list.component.html',
-  styleUrl: './farm-crowdfunding-investment-list.component.css',
+  templateUrl: './crowd-funding-investment-list.component.html',
+  styleUrl: './crowd-funding-investment-list.component.css',
 })
-export class FarmCrowdfundingInvestmentListComponent implements OnInit {
+export class CrowdFundingInvestmentListComponent implements OnInit {
   investments: InvestmentRecord[] = [];
   selectedInvestment: InvestmentRecord | null = null;
   detailRefreshKey = 0;

@@ -188,7 +188,7 @@ export const routes: Routes = [
     data: { roles: ['EXTENSION_WORKER', 'ADMIN'] },
   },
   {
-    path: 'farm-crowdfunding',
+    path: 'crowd-funding',
     loadChildren: () =>
       import('./features/crowd-funding/crowd-funding.module').then((m) => m.CrowdFundingModule),
     canActivate: [AuthGuard, RoleGuard],

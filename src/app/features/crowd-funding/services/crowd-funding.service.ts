@@ -17,7 +17,7 @@ export class CrowdFundingService {
   constructor(private httpService: HttpService) {
   }
 
-  // Campaigns (admin create, admin/investor view)
+  // crowdFundings (admin create, admin/investor view)
   filterCrowdFunding(request: CrowdFundingFilterRequest): Observable<PageResponse<CrowdFunding>> {
     return this.httpService.post<PageResponse<CrowdFunding>>(
       `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/filter`,
@@ -32,16 +32,16 @@ export class CrowdFundingService {
     );
   }
 
-  updateCampaign(campaignId: string, request: CrowdFundingCreateRequest): Observable<ApiResponse<CrowdFunding>> {
+  updatecrowdFunding(crowdFundingId: string, request: CrowdFundingCreateRequest): Observable<ApiResponse<CrowdFunding>> {
     return this.httpService.put<ApiResponse<CrowdFunding>>(
-      `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/${campaignId}`,
+      `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/${crowdFundingId}`,
       request,
     );
   }
 
-  getCampaignById(campaignId: string): Observable<ApiResponse<CrowdFunding>> {
+  getcrowdFundingById(crowdFundingId: string): Observable<ApiResponse<CrowdFunding>> {
     return this.httpService.get<ApiResponse<CrowdFunding>>(
-      `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/${campaignId}`,
+      `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/${crowdFundingId}`,
     );
   }
 

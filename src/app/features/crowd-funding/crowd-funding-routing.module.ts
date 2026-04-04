@@ -1,21 +1,17 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {CrowdFundingListComponent} from './pages/crowd-funding-list/crowd-funding-list.component';
-import {FarmCrowdfundingInvestmentListComponent} from './pages/farm-crowdfunding-investment-list/farm-crowdfunding-investment-list.component';
+import {CrowdFundingInvestmentListComponent} from './pages/crowd-funding-investment-list/crowd-funding-investment-list.component';
 
 const routes: Routes = [
+
   {
     path: '',
-    redirectTo: 'campaigns',
-    pathMatch: 'full',
-  },
-  {
-    path: 'campaigns',
     component: CrowdFundingListComponent,
   },
   {
     path: 'investments',
-    component: FarmCrowdfundingInvestmentListComponent,
+    component: CrowdFundingInvestmentListComponent,
   },
 ];
 
