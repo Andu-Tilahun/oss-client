@@ -1,17 +1,19 @@
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {FarmPlot} from '../../../farm-plots/models/farm-plot.model';
 import {LeaseAgreement, LeaseCreateRequest} from '../../models/farm-lease.model';
+import {RepeaterComponent} from "../../../../shared/repeater/repeater/repeater.component";
 
 @Component({
   selector: 'app-farm-lease-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RepeaterComponent],
   templateUrl: './farm-lease-form.component.html',
   styleUrls: ['./farm-lease-form.component.css'],
 })
-export class FarmLeaseFormComponent implements OnChanges {
+export class FarmLeaseFormComponent implements OnInit, OnChanges {
+  @Input() mode: 'create' | 'edit' = 'create';
   @Input() lease: LeaseAgreement | null = null;
   @Input() farmPlots: FarmPlot[] = [];
   @Input() readOnly = false;
@@ -24,7 +26,14 @@ export class FarmLeaseFormComponent implements OnChanges {
       startDate: ['', Validators.required],
       totalDurationMonths: [1, [Validators.required, Validators.min(1)]],
       totalAmount: [0, [Validators.required, Validators.min(0.01)]],
+      leasePaymentLineRequests: this.fb.array([]),
     });
+  }
+
+  ngOnInit() {
+    if (this.mode === 'edit' && this.lease) {
+      this.patchFromLease(this.lease);
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -68,6 +77,7 @@ export class FarmLeaseFormComponent implements OnChanges {
       startDate: v.startDate,
       totalDurationMonths: Number(v.totalDurationMonths),
       totalAmount: Number(v.totalAmount),
+      leasePaymentLineRequests: v.leasePaymentLineRequests
     };
   }
 
@@ -101,6 +111,23 @@ export class FarmLeaseFormComponent implements OnChanges {
       },
       {emitEvent: false},
     );
+    this.payments.clear();
+    lease.terms?.forEach(transition => {
+      const paymentGroup = this.createPayments();
+      paymentGroup.patchValue(transition);
+      this.payments.push(paymentGroup);
+    });
+  }
+
+  get hasPayments(): boolean {
+    return this.payments.length > 0;
+  }
+
+  createPayments(): FormGroup {
+    return this.fb.group({
+      dueDate: ['', Validators.required],
+      amount: ['', [Validators.required, Validators.min(0.0001)]],
+    });
   }
 
   private applyReadOnly(): void {
@@ -109,5 +136,23 @@ export class FarmLeaseFormComponent implements OnChanges {
     } else {
       this.form.enable({emitEvent: false});
     }
+  }
+
+  get payments(): FormArray {
+    return this.form.get('leasePaymentLineRequests') as FormArray;
+  }
+
+  addPayment(): void {
+    this.payments.push(this.createPayments());
+  }
+
+
+  removePayment(index: number): void {
+    this.payments.removeAt(index);
+  }
+
+  hasValidationErrors(): boolean {
+    return this.form.invalid;
+
   }
 }

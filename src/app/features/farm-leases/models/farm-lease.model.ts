@@ -30,6 +30,7 @@ export interface LeaseCreateRequest {
   totalDurationMonths: number;
   endDate?: string; // optional
   totalAmount: number;
+  leasePaymentLineRequests: FarmLeasePaymentLine;
 }
 
 export interface LeaseGenerateTermsRequest {

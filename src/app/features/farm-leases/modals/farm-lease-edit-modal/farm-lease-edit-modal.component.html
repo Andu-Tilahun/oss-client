@@ -1,29 +1,20 @@
 <app-modal
   [(visible)]="visible"
   title="Edit Lease Agreement"
-  size="xxl"
-  [showFooter]="false"
-  [maskClosable]="false"
+  size="xl"
+  [confirmText]="'Update Lease Agreement'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
   (visibleChange)="visibleChange.emit($event)"
 >
   <ng-template #modalBody>
-    <div
-      *ngIf="lease && lease.status !== 'PENDING'"
-      class="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-900"
-    >
-      Only <strong>PENDING</strong> leases can be edited. Active or terminated agreements cannot be changed here.
-    </div>
-
-    <app-lease-registration-stepper
-      [(currentStep)]="currentStep"
-      [farmPlots]="farmPlots"
+    <app-farm-lease-form
+      #farmLeaseForm
+      mode="edit"
       [lease]="lease"
-      [embedded]="true"
-      [readOnly]="!lease || lease.status !== 'PENDING'"
-      [isSaving]="isSaving"
-      (leaseDetailsSubmit)="onLeaseDetailsSubmit($event)"
-      (paymentSubmit)="onPaymentSubmit($event)"
-      (completed)="onConfirm()"
-    ></app-lease-registration-stepper>
+    ></app-farm-lease-form>
   </ng-template>
 </app-modal>
+
+

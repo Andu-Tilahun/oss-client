@@ -31,7 +31,7 @@ export class FarmLeaseListComponent implements OnInit {
   selectedLease: LeaseAgreement | null = null;
   detailRefreshKey = 0;
 
-  private isAdmin = false;
+
   showAdminActionModal = false;
   private adminActionLoading = false;
 
@@ -51,14 +51,13 @@ export class FarmLeaseListComponent implements OnInit {
     private authService: AuthService,
   ) {
     const role = (this.authService.getCurrentUser()?.role ?? '').toString().trim().toUpperCase();
-    this.isAdmin = role === 'ADMIN';
 
     this.rightActions = [
       {
         id: 'approve',
         icon: 'check',
         title: 'Approve lease',
-        visible: (l) => this.shouldShowApproveLeaseAction(l),
+        visible: (l) => this.authService.isAdmin() && l.status=="PENDING",
         action: (l) => this.onApproveLease(l),
       },
     ];
@@ -78,26 +77,26 @@ export class FarmLeaseListComponent implements OnInit {
 
   public shouldShowLeaseEditButton(lease: LeaseAgreement | null | undefined): boolean {
     if (!lease) return false;
-    if (this.isAdmin) return false; // Admins can approve but not edit
+    if (this.authService.isAdmin()) return false; // Admins can approve but not edit
     return !this.isLeaseActive(lease); // Hide edit when lease is active
   }
 
   private shouldShowApproveLeaseAction(lease: LeaseAgreement | null | undefined): boolean {
     if (!lease) return false;
     // Admin approves/rejects leases that are registered but not yet active.
-    return this.isAdmin && this.isLeasePending(lease);
+    return this.authService.isAdmin() && this.isLeasePending(lease);
   }
 
   ngOnInit(): void {
     // Admin should start on "needs decision" leases.
-    if (this.isAdmin && !this.status) {
+    if (this.authService.isAdmin() && !this.status) {
       this.status = 'PENDING';
     }
     this.loadLeases();
   }
 
   public get isAdminUser(): boolean {
-    return this.isAdmin;
+    return this.authService.isAdmin();
   }
 
   private buildFilterRequest(): LeaseFilterRequest {

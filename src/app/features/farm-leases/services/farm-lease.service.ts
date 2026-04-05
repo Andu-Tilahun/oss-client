@@ -33,32 +33,8 @@ export class FarmLeaseService {
     return this.httpService.post<ApiResponse<LeaseAgreement>>(Endpoints.FARM_LEASES_ENDPOINT, request);
   }
 
-  updateLease(id: string, request: LeaseCreateRequest): Observable<ApiResponse<LeaseAgreement>> {
+  update(id: string, request: LeaseCreateRequest): Observable<ApiResponse<LeaseAgreement>> {
     return this.httpService.put<ApiResponse<LeaseAgreement>>(`${Endpoints.FARM_LEASES_ENDPOINT}/${id}`, request);
-  }
-
-  generateTerms(
-    leaseId: string,
-    request: LeaseGenerateTermsRequest,
-  ): Observable<ApiResponse<LeaseAgreement>> {
-    return this.httpService.post<ApiResponse<LeaseAgreement>>(
-      `${Endpoints.FARM_LEASES_ENDPOINT}/${leaseId}/terms/generate`,
-      request,
-    );
-  }
-
-  defineCustomTerms(leaseId: string, request: LeaseDefineTermsRequest): Observable<ApiResponse<LeaseAgreement>> {
-    return this.httpService.post<ApiResponse<LeaseAgreement>>(
-      `${Endpoints.FARM_LEASES_ENDPOINT}/${leaseId}/terms/define`,
-      request,
-    );
-  }
-
-  confirmLease(leaseId: string): Observable<ApiResponse<LeaseAgreement>> {
-    return this.httpService.post<ApiResponse<LeaseAgreement>>(
-      `${Endpoints.FARM_LEASES_ENDPOINT}/${leaseId}/confirm`,
-      {},
-    );
   }
 
   adminDecideLease(leaseId: string, decision: 'ACTIVE' | 'TERMINATED'): Observable<ApiResponse<LeaseAgreement>> {

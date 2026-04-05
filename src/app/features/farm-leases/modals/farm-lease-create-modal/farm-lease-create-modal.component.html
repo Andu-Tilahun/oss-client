@@ -2,19 +2,19 @@
   [(visible)]="visible"
   title="Create Lease Agreement"
   size="xl"
-  [showFooter]="false"
-  [maskClosable]="false"
+  [confirmText]="'Create Lease Agreement'"
+  [confirmLoading]="isLoading"
+  [confirmDisabled]="!farmLeaseForm || !farmLeaseForm.hasPayments || farmLeaseForm.hasValidationErrors()"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
   (visibleChange)="visibleChange.emit($event)"
 >
   <ng-template #modalBody>
-    <app-lease-registration-stepper
-      [(currentStep)]="currentStep"
+    <app-farm-lease-form
       [farmPlots]="farmPlots"
-      [isSaving]="isSaving"
-      (leaseDetailsSubmit)="onLeaseDetailsSubmit($event)"
-      (paymentSubmit)="onPaymentSubmit($event)"
-      (completed)="onConfirm()"
-    ></app-lease-registration-stepper>
+      #farmLeaseForm
+      mode="create"
+    ></app-farm-lease-form>
   </ng-template>
 </app-modal>
 

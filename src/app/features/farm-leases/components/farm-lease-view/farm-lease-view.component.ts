@@ -12,7 +12,6 @@ import {DetailFieldComponent} from '../../../../shared/components/detail-field/d
 import {FarmPlotViewComponent} from "../../../farm-plots/components/farm-plot-view/farm-plot-view.component";
 import {FarmFollowUpsService} from '../../../farm-followups/services/farm-followups.service';
 import {LeaseFollowUp} from '../../../farm-followups/models/farm-followups.model';
-import {ApiResponse} from "../../../../shared/models/api-response.model";
 
 @Component({
   selector: 'app-farm-lease-view',
@@ -56,7 +55,7 @@ export class FarmLeaseViewComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['lease'] || changes['refreshKey']) {
       if (this.lease?.id) {
-        this.loadDetail();
+        this.detail = this.lease;
       } else {
         this.detail = null;
         this.error = null;
@@ -64,41 +63,6 @@ export class FarmLeaseViewComponent implements OnChanges {
     }
   }
 
-  private loadDetail(): void {
-    if (!this.lease?.id) return;
-
-    this.loading = true;
-    this.error = null;
-    this.detail = null;
-
-    this.farmLeaseService.getLeaseById(this.lease.id).subscribe({
-      next: (lease: ApiResponse<LeaseAgreement>) => {
-        this.detail = lease.data ? lease.data : null;
-        this.loadFollowUps();
-        this.loading = false;
-      },
-      error: () => {
-        this.detail = null;
-        this.error = 'Failed to load lease';
-        this.loading = false;
-      },
-    });
-  }
-
-  private loadFollowUps(): void {
-    if (!this.detail?.id) return;
-    this.followUpsLoading = true;
-    this.followUpsService.getLeaseFollowUpsHistory(this.detail.id).subscribe({
-      next: (items) => {
-        this.leaseFollowUps = items;
-        this.followUpsLoading = false;
-      },
-      error: () => {
-        this.leaseFollowUps = [];
-        this.followUpsLoading = false;
-      },
-    });
-  }
 
   statusPillClass(status: LeaseStatus): string {
     switch (status) {

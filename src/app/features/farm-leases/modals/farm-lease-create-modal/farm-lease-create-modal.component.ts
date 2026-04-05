@@ -1,20 +1,17 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ModalComponent} from '../../../../shared/modals/modal/modal.component';
 import {ToastService} from '../../../../shared/toast/toast.service';
-import {
-  LeaseRegistrationStepperComponent
-} from '../../components/lease-registration-stepper/lease-registration-stepper.component';
 import {FarmPlotService} from '../../../farm-plots/services/farm-plot.service';
 import {FarmPlot, FarmPlotFilterRequest} from '../../../farm-plots/models/farm-plot.model';
 import {FarmLeaseService} from '../../services/farm-lease.service';
-import {LeaseAgreement, LeaseCreateRequest, LeaseDefineTermsRequest} from '../../models/farm-lease.model';
-import {ApiResponse} from "../../../../shared/models/api-response.model";
+import {LeaseCreateRequest} from '../../models/farm-lease.model';
+import {FarmLeaseFormComponent} from "../../components/farm-lease-form/farm-lease-form.component";
 
 @Component({
   selector: 'app-farm-lease-create-modal',
   standalone: true,
-  imports: [CommonModule, ModalComponent, LeaseRegistrationStepperComponent],
+  imports: [CommonModule, ModalComponent, FarmLeaseFormComponent],
   templateUrl: './farm-lease-create-modal.component.html',
 })
 export class FarmLeaseCreateModalComponent {
@@ -22,12 +19,11 @@ export class FarmLeaseCreateModalComponent {
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() leaseCreated = new EventEmitter<void>();
 
-  currentStep = 1;
-  farmPlots: FarmPlot[] = [];
-  leaseId: string | undefined;
+  @ViewChild('farmLeaseForm') farmLeaseForm!: FarmLeaseFormComponent;
 
-  loadingFarmPlots = false;
-  isSaving = false;
+  isLoading = false;
+
+  farmPlots: FarmPlot[] = [];
 
   constructor(
     private farmPlotService: FarmPlotService,
@@ -40,76 +36,39 @@ export class FarmLeaseCreateModalComponent {
     this.loadFarmPlots();
   }
 
-  onLeaseDetailsSubmit(request: LeaseCreateRequest): void {
-    this.isSaving = true;
-    if (!this.leaseId) {
-      this.farmLeaseService.createLease(request).subscribe({
-        next: (lease: ApiResponse<LeaseAgreement>) => {
-          // HttpService unwraps ApiResponse.data
-          this.leaseId = lease.data?.id;
-          this.currentStep = 2;
-          this.isSaving = false;
-        },
-        error: (error) => {
-          this.isSaving = false;
-          this.toastService.error(error.message || 'Failed to create lease', 'Create Lease');
-        },
-      });
-    } else {
-      this.farmLeaseService.updateLease(this.leaseId, request).subscribe({
-        next: () => {
-          this.currentStep = 2;
-          this.isSaving = false;
-        },
-        error: (error) => {
-          this.isSaving = false;
-          this.toastService.error(error.message || 'Failed to update lease', 'Update Lease');
-        },
-      });
+  onSubmit(): void {
+    if (!this.farmLeaseForm.isValid()) {
+      this.farmLeaseForm.markAllAsTouched();
+      return;
     }
-  }
 
-  onPaymentSubmit(request: LeaseDefineTermsRequest): void {
-    if (!this.leaseId) return;
-    this.isSaving = true;
-    this.farmLeaseService.defineCustomTerms(this.leaseId, request).subscribe({
-      next: (lease) => {
-        this.currentStep = 3;
-        this.isSaving = false;
-      },
-      error: (error) => {
-        this.isSaving = false;
-        this.toastService.error(error.message || 'Failed to generate terms', 'Generate Terms');
-      },
-    });
-  }
+    this.isLoading = true;
+    const request: LeaseCreateRequest = this.farmLeaseForm.getValue();
 
-  onConfirm(): void {
-    if (!this.leaseId) return;
-    this.isSaving = true;
-    this.farmLeaseService.confirmLease(this.leaseId).subscribe({
+    this.farmLeaseService.createLease(request).subscribe({
       next: () => {
-        this.isSaving = false;
-        this.toastService.success('Lease activated successfully');
-        this.onCompleted();
+        this.isLoading = false;
+        this.visible = false;
+        this.visibleChange.emit(false);
+        this.farmLeaseForm.reset();
+        this.toastService.success(`Farm Lease created successfully`);
         this.leaseCreated.emit();
+        this.loadFarmPlots();
       },
       error: (error) => {
-        this.isSaving = false;
-        this.toastService.error(error.message || 'Failed to confirm lease', 'Confirm Lease');
-      },
+        this.isLoading = false;
+        this.toastService.error(
+          error.message || 'Failed to create farm lease',
+          'Create Workflow'
+        );
+      }
     });
+
   }
 
-  onCompleted(): void {
-    this.visible = false;
-    this.visibleChange.emit(false);
-    this.currentStep = 1;
-    this.leaseId = undefined;
-  }
 
   private loadFarmPlots(): void {
-    this.loadingFarmPlots = true;
+    this.isLoading = true;
     const filterRequest: FarmPlotFilterRequest = {
       searchText: undefined,
       statuses: ['ACTIVE'],
@@ -124,13 +83,16 @@ export class FarmLeaseCreateModalComponent {
     this.farmPlotService.filterFarmPlots(filterRequest).subscribe({
       next: (response) => {
         this.farmPlots = response.content;
-        this.loadingFarmPlots = false;
+        this.isLoading = false;
       },
       error: (error) => {
-        this.loadingFarmPlots = false;
+        this.isLoading = false;
         this.toastService.error(error.message || 'Failed to fetch farm plots', 'Load Farm Plots');
       },
     });
+  }
+  onCancel(): void {
+    // Form will reset to loaded workflow via binding on next open
   }
 }
 
