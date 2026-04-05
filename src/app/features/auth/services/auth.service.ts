@@ -167,4 +167,14 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
+  isAdmin(): boolean {
+    const role = (this.getCurrentUser()?.role ?? '').toString().trim().toUpperCase();
+    return role === 'ADMIN';
+  }
+
+  isInvestor(): boolean {
+    const role = (this.getCurrentUser()?.role ?? '').toString().trim().toUpperCase();
+    return role === 'INVESTOR';
+  }
+
 }

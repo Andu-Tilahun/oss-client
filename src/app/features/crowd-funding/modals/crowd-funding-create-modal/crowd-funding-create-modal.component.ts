@@ -51,6 +51,7 @@ export class CrowdFundingCreateModalComponent implements OnInit {
         this.crowdFundingForm.form.reset();
         this.toastService.success('Crowdfunding created successfully');
         this.crowdFundingCreated.emit();
+        this.loadFarmPlots();
       },
       error: (err) => {
         this.isLoading = false;

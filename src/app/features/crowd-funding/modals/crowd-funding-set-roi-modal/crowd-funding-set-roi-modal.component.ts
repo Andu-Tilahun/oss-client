@@ -36,7 +36,7 @@ export class CrowdFundingSetRoiModalComponent {
     this.form.patchValue({roi: this.investment?.roi ?? ''}, {emitEvent: false});
   }
 
-  submit(): void {
+  onSubmit(): void {
     const id = this.investment?.id;
     if (!id) return;
     if (this.form.invalid) {
@@ -59,6 +59,9 @@ export class CrowdFundingSetRoiModalComponent {
         this.toastService.error(error.message || 'Failed to save ROI', 'Set ROI');
       },
     });
+  }
+  onCancel(): void {
+    this.form.reset();
   }
 }
 

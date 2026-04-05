@@ -113,6 +113,7 @@ export const MENU: MenuItem[] = [
       { icon: '', label: 'Farm Plots', route: '/farm-plots', roles: ['ADMIN', 'OPERATOR'] },
       { icon: '', label: 'Leases', route: '/farm-leases', roles: ['INVESTOR', 'ADMIN'] },
       { icon: '', label: 'Restoration & Follow-ups', route: '/farm-followups', roles: ['EXTENSION_WORKER', 'ADMIN'] },
+      {icon: '', label: 'Investments', route: '/crowd-funding/investments', roles: ['INVESTOR', 'ADMIN']},
       {
         icon: '',
         label: 'Crowdfunding',

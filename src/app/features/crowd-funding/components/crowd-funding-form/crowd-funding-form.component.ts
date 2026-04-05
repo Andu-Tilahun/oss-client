@@ -47,12 +47,12 @@ export class CrowdFundingFormComponent {
   getValue(): CrowdFundingCreateRequest {
     const v = this.form.value;
     return {
-      description: "",
-      fundingDeadline: "",
+      description: v.fundingDeadline,
+      fundingDeadline: v.fundingDeadline,
       fundingStatus: undefined,
-      minimumContribution: 0,
-      targetAmount: 0,
-      title: "",
+      minimumContribution: v.minimumContribution,
+      targetAmount: v.targetAmount,
+      title: v.fundingDeadline,
       farmPlotId: v.farmPlotId,
       startDate: v.startDate,
       endDate: v.endDate,

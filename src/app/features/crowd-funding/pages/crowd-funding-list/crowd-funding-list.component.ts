@@ -33,8 +33,6 @@ export class CrowdFundingListComponent implements OnInit {
   showCreatecrowdFundingModal = false;
   showCreateInvestmentModal = false;
 
-  private isAdmin = false;
-
   columns: DataTableColumn<CrowdFunding>[] = [
     {header: 'Title', value: (c) => c.title},
     {header: 'Status', value: (c) => c.fundingStatus},
@@ -50,37 +48,29 @@ export class CrowdFundingListComponent implements OnInit {
     private toastService: ToastService,
     private authService: AuthService,
   ) {
-    const role = (this.authService.getCurrentUser()?.role ?? '').toString().trim().toUpperCase();
-    this.isAdmin = role === 'ADMIN';
 
     this.rightActions = [
       {
         id: 'invest',
         icon: 'plus',
         title: 'Invest',
-        visible: (c) => this.shouldShowInvestAction(c),
+        visible: (c) => this.authService.isInvestor() && c.fundingStatus == 'OPEN',
         action: (c) => this.onInvest(c),
       },
     ];
   }
 
+  get isAdmin(): boolean {
+    return this.authService.isAdmin();
+  }
+
   ngOnInit(): void {
-    // Investor default: only OPEN crowdFundings. Admin can see all.
-    if (!this.isAdmin && !this.status) {
+    if (!this.authService.isInvestor()) {
       this.status = 'OPEN';
     }
-    this.loadcrowdFundings();
+    this.loadCrowdFundings();
   }
 
-  get isAdminUser(): boolean {
-    return this.isAdmin;
-  }
-
-  private shouldShowInvestAction(c: CrowdFunding | null | undefined): boolean {
-    if (!c) return false;
-    if (this.isAdmin) return false;
-    return (c.fundingStatus ?? '').toString().trim().toUpperCase() === 'OPEN';
-  }
 
   private buildFilterRequest(): CrowdFundingFilterRequest {
     return {
@@ -93,7 +83,7 @@ export class CrowdFundingListComponent implements OnInit {
     };
   }
 
-  loadcrowdFundings(): void {
+  loadCrowdFundings(): void {
     this.loading = true;
     const request = this.buildFilterRequest();
     this.crowdfundingService.filterCrowdFunding(request).subscribe({
@@ -131,7 +121,7 @@ export class CrowdFundingListComponent implements OnInit {
     this.pageIndex = params.pageIndex;
     this.currentPage = this.pageIndex - 1;
     this.pageSize = params.pageSize;
-    this.loadcrowdFundings();
+    this.loadCrowdFundings();
   }
 
   onAdd(): void {
@@ -140,13 +130,13 @@ export class CrowdFundingListComponent implements OnInit {
   }
 
   onRefresh(): void {
-    this.loadcrowdFundings();
+    this.loadCrowdFundings();
   }
 
   onSearch(): void {
     this.currentPage = 0;
     this.pageIndex = 1;
-    this.loadcrowdFundings();
+    this.loadCrowdFundings();
   }
 
   onFilterChange(): void {
@@ -158,10 +148,7 @@ export class CrowdFundingListComponent implements OnInit {
     this.status = '';
     this.currentPage = 0;
     this.pageIndex = 1;
-    if (!this.isAdmin) {
-      this.status = 'OPEN';
-    }
-    this.loadcrowdFundings();
+    this.loadCrowdFundings();
   }
 
   onView(c: CrowdFunding): void {
@@ -174,10 +161,10 @@ export class CrowdFundingListComponent implements OnInit {
     this.showCreateInvestmentModal = true;
   }
 
-  oncrowdFundingCreated(): void {
+  onCrowdFundingCreated(): void {
     this.showCreatecrowdFundingModal = false;
     this.detailRefreshKey++;
-    this.loadcrowdFundings();
+    this.loadCrowdFundings();
   }
 
   onInvestmentCreated(): void {

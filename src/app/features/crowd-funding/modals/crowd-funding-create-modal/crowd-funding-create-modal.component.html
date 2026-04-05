@@ -9,7 +9,10 @@
   (visibleChange)="visibleChange.emit($event)"
 >
   <ng-template #modalBody>
-    <app-crowd-funding-form #crowdFundingForm mode="create"></app-crowd-funding-form>
+    <app-crowd-funding-form
+      [farmPlots]="farmPlots"
+      #crowdFundingForm mode="create">
+    </app-crowd-funding-form>
   </ng-template>
 </app-modal>
 

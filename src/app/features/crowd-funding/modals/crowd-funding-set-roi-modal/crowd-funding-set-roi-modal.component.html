@@ -4,28 +4,27 @@
   size="md"
   [maskClosable]="false"
   (visibleChange)="visibleChange.emit($event)"
+
+  [(visible)]="visible"
+  title="Set ROI"
+  size="md"
+  [confirmText]="'Set ROI'"
+  [showCancelButton]="true"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
 >
   <ng-template #modalBody>
     <div class="space-y-3">
-      <div class="text-sm">
-        <div class="text-gray-500">Investment</div>
-        <div class="font-semibold">{{ investment?.id ?? '-' }}</div>
-      </div>
-
       <form [formGroup]="form" class="space-y-2">
-        <label class="form-label">ROI terms</label>
-        <textarea class="form-control" rows="5" formControlName="roi"></textarea>
+        <label class="block text-sm font-medium text-gray-700 mb-2">ROI terms</label>
+        <textarea
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+          rows="4"
+          formControlName="roi"
+        ></textarea>
       </form>
     </div>
-  </ng-template>
-
-  <ng-template #modalFooter>
-    <button class="btn btn-outline" type="button" [disabled]="isSaving" (click)="visibleChange.emit(false)">
-      Cancel
-    </button>
-    <button class="btn btn-primary" type="button" [disabled]="isSaving" (click)="submit()">
-      Save
-    </button>
   </ng-template>
 </app-modal>
 

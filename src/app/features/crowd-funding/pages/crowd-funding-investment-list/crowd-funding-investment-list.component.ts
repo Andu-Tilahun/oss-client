@@ -3,7 +3,9 @@ import {DataTableColumn} from '../../../../shared/data-table/models/data-table-c
 import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {AuthService} from '../../../auth/services/auth.service';
-import {PageSplitRightAction} from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
+import {
+  PageSplitRightAction
+} from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
 import {CrowdFundingService} from '../../services/crowd-funding.service';
 import {
   InvestmentApprovalStatus,
@@ -37,8 +39,6 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
   showSetRoiModal = false;
   showInvestorDecisionModal = false;
 
-  private isAdmin = false;
-
   columns: DataTableColumn<InvestmentRecord>[] = [
     {header: 'Amount', value: (r) => this.formatAmount(r.amount)},
     {header: 'Method', value: (r) => r.paymentMethod},
@@ -53,56 +53,29 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
     private toastService: ToastService,
     private authService: AuthService,
   ) {
-    const role = (this.authService.getCurrentUser()?.role ?? '').toString().trim().toUpperCase();
-    this.isAdmin = role === 'ADMIN';
+
 
     this.rightActions = [
       {
         id: 'set-roi',
         icon: 'edit',
         title: 'Set ROI',
-        visible: (r) => this.shouldShowSetRoi(r),
+        visible: (r) => this.authService.isAdmin() && r.status == "PENDING",
         action: (r) => this.onSetRoi(r),
       },
       {
         id: 'decide',
         icon: 'check',
         title: 'Approve / Reject',
-        visible: (r) => this.shouldShowInvestorDecision(r),
+        visible: (r) => this.authService.isAdmin() && r.status == "PENDING",
         action: (r) => this.onInvestorDecision(r),
       },
     ];
   }
 
   ngOnInit(): void {
-    // Admin default: show items needing ROI/decision
-    if (this.isAdmin && !this.approval) {
-      this.approval = 'PENDING';
-    }
-    if (!this.isAdmin && !this.approval) {
-      this.approval = 'PENDING';
-    }
+    this.approval = 'PENDING';
     this.loadInvestments();
-  }
-
-  get isAdminUser(): boolean {
-    return this.isAdmin;
-  }
-
-  private normalize(v: unknown): string {
-    return (v ?? '').toString().trim().toUpperCase();
-  }
-
-  private shouldShowSetRoi(r: InvestmentRecord | null | undefined): boolean {
-    if (!r) return false;
-    if (!this.isAdmin) return false;
-    return !r.roi || this.normalize(r.approvalStatus) === 'PENDING';
-  }
-
-  private shouldShowInvestorDecision(r: InvestmentRecord | null | undefined): boolean {
-    if (!r) return false;
-    if (this.isAdmin) return false;
-    return !!r.roi && this.normalize(r.approvalStatus) === 'PENDING';
   }
 
   private buildFilterRequest(): InvestmentFilterRequest {
@@ -110,7 +83,7 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
       searchText: this.searchText || undefined,
       statuses: this.status ? [this.status] : undefined,
       approvalStatuses: this.approval ? [this.approval] : undefined,
-      sortBy: 'createdAt',
+      sortBy: 'createdDate',
       sortDirection: 'DESC',
       page: this.currentPage,
       size: this.pageSize,

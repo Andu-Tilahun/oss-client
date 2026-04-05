@@ -41,7 +41,7 @@ export class CrowdFundingInvestmentViewComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['investment'] || changes['refreshKey']) {
-      this.loadFollowUps();
+     // this.loadFollowUps();
     }
   }
 

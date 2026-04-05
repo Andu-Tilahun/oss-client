@@ -5,7 +5,7 @@
   rightTitle="crowdFunding Detail"
   [rightItem]="selectedcrowdFunding"
   [rightEmptyMessage]="'Select a row to view details.'"
-  [showRightEditButton]="false"
+  [showRightEditButton]="isAdmin"
   [rightActions]="rightActions"
 >
   <ng-template #extraTableHeader>
@@ -32,7 +32,7 @@
       [total]="total"
       [pageSize]="pageSize"
       [pageIndex]="pageIndex"
-      [showAddButton]="isAdminUser"
+      [showAddButton]="isAdmin"
       [showRefreshButton]="true"
       [showViewButton]="true"
       [showEditButton]="false"
@@ -56,7 +56,7 @@
 
 <app-crowd-funding-create-modal
   [(visible)]="showCreatecrowdFundingModal"
-  (crowdFundingCreated)="oncrowdFundingCreated()"
+  (crowdFundingCreated)="onCrowdFundingCreated()"
 ></app-crowd-funding-create-modal>
 
 <app-crowd-funding-create-investment-modal
