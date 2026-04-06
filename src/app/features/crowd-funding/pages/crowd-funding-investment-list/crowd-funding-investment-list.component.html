@@ -61,3 +61,14 @@
   (decisionSaved)="onDecisionSaved()"
 ></app-crowd-funding-investor-decision-modal>
 
+<!-- Lock User Confirmation Modal -->
+<app-confirmation-modal
+  [(visible)]="showConfirmationModal"
+  title="Send Investment"
+  [message]="'Are you sure you want to send ' + selectedInvestment?.crowdFunding?.title + '?'"
+  type="warning"
+  confirmText="Send Investment"
+  [confirmLoading]="lockSend"
+  (confirm)="handleSendConfirmation()"
+></app-confirmation-modal>
+

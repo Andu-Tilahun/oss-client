@@ -8,6 +8,9 @@ export type ActionIconType =
   | 'save'
   | 'refresh'
   | 'export'
+  | 'send'
+  | 'assign'
+  | 'download'
   | 'check';
 
 @Component({
@@ -61,6 +64,12 @@ export class ActionIconButtonComponent {
         return 'M6 18L18 6M6 6l12 12';
       case 'refresh':
         return 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15';
+      case 'send':
+        return 'M2.01 21L23 12 2.01 3 2 10l15 2-15 2z';
+      case 'assign':
+        return 'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8M17 13.5l2 2 4-4';
+      case 'download':
+        return 'M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 3v12m-4-4l4 4 4-4';
       case 'export':
         return 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4';
       case 'save':

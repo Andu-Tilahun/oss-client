@@ -38,6 +38,8 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
 
   showSetRoiModal = false;
   showInvestorDecisionModal = false;
+  lockSend = false;
+  showConfirmationModal = false;
 
   columns: DataTableColumn<InvestmentRecord>[] = [
     {header: 'Amount', value: (r) => this.formatAmount(r.amount)},
@@ -57,31 +59,53 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
 
     this.rightActions = [
       {
+        id: 'sent',
+        icon: 'send',
+        title: 'Send',
+        visible: (r) => this.authService.isInvestor() && r.status == "PENDING",
+        action: (r) => this.onSend(r),
+      },
+
+      {
+        id: 'download',
+        icon: 'download',
+        title: 'Download',
+        visible: (r) => this.authService.isInvestor() && r.status == "ACTIVE",
+        action: (r) => this.onDownload(r),
+      },
+
+      {
+        id: 'assign',
+        icon: 'assign',
+        title: 'Assign Extension Worker',
+        visible: (r) => this.authService.isInvestor() && r.status == "ACTIVE",
+        action: (r) => this.onAssignExtensionWorker(r),
+      },
+
+      {
         id: 'set-roi',
         icon: 'edit',
         title: 'Set ROI',
-        visible: (r) => this.authService.isAdmin() && r.status == "PENDING",
+        visible: (r) => this.authService.isAdmin() && r.status == "SENT",
         action: (r) => this.onSetRoi(r),
       },
       {
         id: 'decide',
         icon: 'check',
         title: 'Approve / Reject',
-        visible: (r) => this.authService.isAdmin() && r.status == "PENDING",
+        visible: (r) => this.authService.isAdmin() && r.status == "SENT",
         action: (r) => this.onInvestorDecision(r),
       },
     ];
   }
 
   ngOnInit(): void {
-    this.approval = 'PENDING';
     this.loadInvestments();
   }
 
   private buildFilterRequest(): InvestmentFilterRequest {
     return {
       searchText: this.searchText || undefined,
-      statuses: this.status ? [this.status] : undefined,
       approvalStatuses: this.approval ? [this.approval] : undefined,
       sortBy: 'createdDate',
       sortDirection: 'DESC',
@@ -165,6 +189,12 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
     this.showSetRoiModal = true;
   }
 
+  onSend(r: InvestmentRecord): void {
+    this.selectedInvestment = {...r};
+    this.showConfirmationModal = true;
+    this.lockSend = false;
+  }
+
   onInvestorDecision(r: InvestmentRecord): void {
     this.selectedInvestment = {...r};
     this.showInvestorDecisionModal = true;
@@ -187,6 +217,38 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
     return new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(
       value,
     );
+  }
+
+  handleSendConfirmation() {
+    if (!this.selectedInvestment) return;
+
+    this.lockSend = true;
+
+    this.crowdfundingService.send(this.selectedInvestment.id).subscribe({
+      next: () => {
+        this.lockSend = false;
+        this.showConfirmationModal = false;
+        this.toastService.success(`Investment sent successfully`);
+
+        this.loadInvestments();
+      },
+      error: (error) => {
+        this.lockSend = false;
+        this.toastService.error(
+          error.message || 'Failed to send Investment',
+          'Send Investment'
+        );
+      }
+    });
+
+  }
+
+  private onDownload(r: InvestmentRecord) {
+
+  }
+
+  private onAssignExtensionWorker(r: InvestmentRecord) {
+
   }
 }
 

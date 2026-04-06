@@ -14,28 +14,30 @@ import {CrowdFundingSetRoiModalComponent} from './modals/crowd-funding-set-roi-m
 import {CrowdFundingInvestorDecisionModalComponent} from './modals/crowd-funding-investor-decision-modal/crowd-funding-investor-decision-modal.component';
 import {CrowdFundingFilterComponent} from './pages/crowd-funding-filter/crowd-funding-filter.component';
 import {CrowdFundingInvestmentFilterComponent} from './pages/crowd-funding-investment-filter/crowd-funding-investment-filter.component';
+import {ConfirmationModalComponent} from "../../shared/modals/confirmation-modal/confirmation-modal.component";
 
 @NgModule({
   declarations: [
     CrowdFundingListComponent,
     CrowdFundingInvestmentListComponent,
   ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    CrowdFundingRoutingModule,
-    SharedModule,
-    PageSplitLayoutComponent,
-    CrowdFundingFilterComponent,
-    CrowdFundingInvestmentFilterComponent,
-    CrowdFundingViewComponent,
-    CrowdFundingInvestmentViewComponent,
-    CrowdFundingCreateModalComponent,
-    CrowdFundingCreateInvestmentModalComponent,
-    CrowdFundingSetRoiModalComponent,
-    CrowdFundingInvestorDecisionModalComponent,
-  ],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        CrowdFundingRoutingModule,
+        SharedModule,
+        PageSplitLayoutComponent,
+        CrowdFundingFilterComponent,
+        CrowdFundingInvestmentFilterComponent,
+        CrowdFundingViewComponent,
+        CrowdFundingInvestmentViewComponent,
+        CrowdFundingCreateModalComponent,
+        CrowdFundingCreateInvestmentModalComponent,
+        CrowdFundingSetRoiModalComponent,
+        CrowdFundingInvestorDecisionModalComponent,
+        ConfirmationModalComponent,
+    ],
 })
 export class CrowdFundingModule {}
 
