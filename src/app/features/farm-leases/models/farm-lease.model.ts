@@ -1,3 +1,6 @@
+import {User} from "../../users/models/user.model";
+import {FarmPlot} from "../../farm-plots/models/farm-plot.model";
+
 export type LeaseStatus = 'ACTIVE' | 'PENDING' | 'TERMINATED';
 export type LeaseTermStatus = 'ACTIVE' | 'PAID' | 'PASSED';
 
@@ -14,13 +17,13 @@ export interface LeaseAgreement {
   id: string;
   farmPlotId: string;
   investorId: string;
-
   startDate: string;
   endDate: string;
   totalDurationMonths: number;
   status: LeaseStatus;
   totalAmount: number;
-
+  investorUser: User;
+  farmPlot: FarmPlot;
   terms?: LeaseTerm[];
 }
 

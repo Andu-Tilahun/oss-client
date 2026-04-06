@@ -21,6 +21,7 @@
           <span
             class="mt-2 inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
             [ngClass]="statusPillClass(user.accountNonLocked)"
+            *ngIf="isAdmin"
           >
             {{ user.accountNonLocked ? 'Active' : 'Locked' }}
           </span>
@@ -38,13 +39,13 @@
       <app-detail-field label="Gender" [value]="user.gender" />
     </app-detail-section>
 
-    <app-detail-section title="Account">
+    <app-detail-section title="Account" *ngIf="isAdmin">
       <app-detail-field label="Username" [value]="user.username" />
       <app-detail-field label="Role" [value]="user.role" />
       <app-detail-field label="Status" [value]="user.accountNonLocked ? 'Active' : 'Locked'" />
     </app-detail-section>
 
-    <app-detail-section title="Record">
+    <app-detail-section title="Record" *ngIf="isAdmin">
       <app-detail-field
         label="Created At"
         [value]="user.createdAt ? (user.createdAt | date:'medium') : '-'"

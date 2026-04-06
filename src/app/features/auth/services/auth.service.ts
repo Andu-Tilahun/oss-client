@@ -177,4 +177,9 @@ export class AuthService {
     return role === 'INVESTOR';
   }
 
+  isExtensionWorker(): boolean {
+    const role = (this.getCurrentUser()?.role ?? '').toString().trim().toUpperCase();
+    return role === 'EXTENSION_WORKER';
+  }
+
 }

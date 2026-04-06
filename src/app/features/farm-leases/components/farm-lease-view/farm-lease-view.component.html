@@ -17,19 +17,18 @@
       </span>
     </div>
 
-    <hr class="border-gray-200 mb-8" />
+    <hr class="border-gray-200 mb-8"/>
 
     <app-detail-section title="Lease terms">
-      <app-detail-field label="Start date" [value]="detail.startDate" />
-      <app-detail-field label="End date" [value]="detail.endDate" />
+      <app-detail-field label="Start date" [value]="detail.startDate"/>
+      <app-detail-field label="End date" [value]="detail.endDate"/>
       <app-detail-field
         label="Duration (months)"
         [value]="detail.totalDurationMonths != null ? detail.totalDurationMonths.toString() : '-'"
       />
-      <app-detail-field label="Total amount" [value]="formatAmount(detail.totalAmount)" />
+      <app-detail-field label="Total amount" [value]="formatAmount(detail.totalAmount)"/>
     </app-detail-section>
 
-    <app-farm-plot-view></app-farm-plot-view>
 
     <app-detail-section *ngIf="detail.terms?.length" title="Payment schedule">
       <div class="col-span-full overflow-x-auto">
@@ -68,3 +67,6 @@
     </app-detail-section>
   </ng-container>
 </app-detail-card>
+<app-farm-plot-view *ngIf="detail" [plot]="detail.farmPlot"></app-farm-plot-view>
+<app-user-view *ngIf="detail" [user]="detail.investorUser"></app-user-view>
+

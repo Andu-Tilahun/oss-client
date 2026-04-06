@@ -1,3 +1,6 @@
+import {User} from "../../users/models/user.model";
+import {FarmPlot} from "../../farm-plots/models/farm-plot.model";
+
 export type FarmActivity = 'CROPS' | 'LIVE_STOCKS' | 'AGRO_FORESTRY';
 export type WaterSource = 'IRRIGATION' | 'RIVER_ACCESS' | 'RAIN_FED';
 
@@ -17,8 +20,9 @@ export interface CrowdFunding {
   title: string;
   targetAmount: number;
   minimumContribution: number;
-  fundingDeadline: string; // ISO date-time
+  fundingDeadline: string;
   fundingStatus: FundingStatus;
+  farmPlot: FarmPlot;
   description?: string;
 }
 
@@ -55,6 +59,7 @@ export interface InvestmentRecord {
   status: InvestmentStatus;
   approvalStatus: InvestmentApprovalStatus;
   crowdFunding?: CrowdFunding;
+  investorUser: User;
 }
 
 export interface InvestmentCreateRequest {

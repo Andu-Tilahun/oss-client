@@ -15,24 +15,29 @@
       </span>
     </div>
 
-    <hr class="border-gray-200 mb-8" />
+    <hr class="border-gray-200 mb-8"/>
 
     <app-detail-section title="crowdFunding">
-      <app-detail-field label="Deadline" [value]="crowdFunding.fundingDeadline || '-'" />
-      <app-detail-field label="Target" [value]="formatAmount(crowdFunding.targetAmount)" />
-      <app-detail-field label="Minimum" [value]="formatAmount(crowdFunding.minimumContribution)" />
+      <app-detail-field label="Deadline" [value]="crowdFunding.fundingDeadline || '-'"/>
+      <app-detail-field label="Target" [value]="formatAmount(crowdFunding.targetAmount)"/>
+      <app-detail-field label="Minimum" [value]="formatAmount(crowdFunding.minimumContribution)"/>
     </app-detail-section>
 
     <app-detail-section title="Farm operation">
-      <app-detail-field label="Farm activity" [value]="crowdFunding.farmActivity ?? '-'" />
-      <app-detail-field label="Water source" [value]="crowdFunding.waterSource ?? '-'" />
-      <app-detail-field label="Operation start" [value]="crowdFunding.startDate ?? '-'" />
-      <app-detail-field label="Operation end" [value]="crowdFunding.endDate ?? '-'" />
+      <app-detail-field label="Farm activity" [value]="crowdFunding.farmActivity ?? '-'"/>
+      <app-detail-field label="Water source" [value]="crowdFunding.waterSource ?? '-'"/>
+      <app-detail-field label="Operation start" [value]="crowdFunding.startDate ?? '-'"/>
+      <app-detail-field label="Operation end" [value]="crowdFunding.endDate ?? '-'"/>
     </app-detail-section>
 
     <app-detail-section *ngIf="crowdFunding.description" title="Description">
       <div class="col-span-full text-sm text-slate-800 whitespace-pre-wrap">{{ crowdFunding.description }}</div>
     </app-detail-section>
+
+
   </ng-container>
 </app-detail-card>
-
+<app-farm-plot-view
+  *ngIf="crowdFunding"
+  [plot]="crowdFunding.farmPlot">
+</app-farm-plot-view>

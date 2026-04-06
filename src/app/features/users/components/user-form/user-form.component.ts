@@ -15,7 +15,7 @@ import {
 import {DocumentUploadComponent} from "../../../../shared/file-upload/document-upload/document-upload.component";
 import {RoleService} from "../../services/role.service";
 import {Employee} from "../../../employees/models/employee.model";
-import {EmployeeService} from "../../../employees/services/employee.service";
+import {AuthService} from "../../../auth/services/auth.service";
 
 @Component({
   selector: 'app-user-form',
@@ -51,7 +51,7 @@ export class UserFormComponent implements OnInit, OnChanges, ControlValueAccesso
   constructor(
     private fb: FormBuilder,
     private roleService: RoleService,
-    private employeeService: EmployeeService
+    private authService: AuthService
   ) {
     this.userForm = this.createForm();
   }
@@ -62,7 +62,9 @@ export class UserFormComponent implements OnInit, OnChanges, ControlValueAccesso
       this.onChange(value);
     });
 
-    this.loadRoles();
+    if (this.authService.isAdmin()) {
+      this.loadRoles();
+    }
 
     this.userForm.get('roleId')?.valueChanges.subscribe((roleId) => {
       this.onRoleChange(roleId);

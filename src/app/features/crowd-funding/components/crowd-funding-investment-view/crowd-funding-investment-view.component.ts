@@ -10,11 +10,12 @@ import {
 import {DetailFieldComponent} from '../../../../shared/components/detail-field/detail-field/detail-field.component';
 import {SharedModule} from '../../../../shared/shared.module';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
+import {UserViewComponent} from "../../../users/components/user-view/user-view.component";
 
 @Component({
   selector: 'app-crowd-funding-investment-view',
   standalone: true,
-  imports: [CommonModule, DetailCardComponent, DetailSectionComponent, DetailFieldComponent, SharedModule],
+    imports: [CommonModule, DetailCardComponent, DetailSectionComponent, DetailFieldComponent, SharedModule, UserViewComponent],
   templateUrl: './crowd-funding-investment-view.component.html',
   styleUrl: './crowd-funding-investment-view.component.css',
 })

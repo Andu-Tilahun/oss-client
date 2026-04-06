@@ -12,18 +12,20 @@ import {DetailFieldComponent} from '../../../../shared/components/detail-field/d
 import {FarmPlotViewComponent} from "../../../farm-plots/components/farm-plot-view/farm-plot-view.component";
 import {FarmFollowUpsService} from '../../../farm-followups/services/farm-followups.service';
 import {LeaseFollowUp} from '../../../farm-followups/models/farm-followups.model';
+import {UserViewComponent} from "../../../users/components/user-view/user-view.component";
 
 @Component({
   selector: 'app-farm-lease-view',
   standalone: true,
-  imports: [
-    CommonModule,
-    SharedModule,
-    DetailCardComponent,
-    DetailSectionComponent,
-    DetailFieldComponent,
-    FarmPlotViewComponent,
-  ],
+    imports: [
+        CommonModule,
+        SharedModule,
+        DetailCardComponent,
+        DetailSectionComponent,
+        DetailFieldComponent,
+        FarmPlotViewComponent,
+        UserViewComponent,
+    ],
   templateUrl: './farm-lease-view.component.html',
 })
 export class FarmLeaseViewComponent implements OnChanges {
