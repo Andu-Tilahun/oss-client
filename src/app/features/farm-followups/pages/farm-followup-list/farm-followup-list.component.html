@@ -1,0 +1,36 @@
+<app-page-header
+  pageTitle="Follow-ups"
+  [showBackButton]="false"
+  [loading]="loading"
+>
+  <ng-template #mainContent>
+    <app-data-table
+      [columns]="columns"
+      [data]="followUps"
+      [loading]="loading"
+      [total]="followUps.length"
+      [showPagination]="false"
+      [showAddButton]="showCreateButton"
+      [showRefreshButton]="false"
+      [showViewButton]="showViewButton"
+      [showEditButton]="showEditButton"
+      [showDeleteButton]="false"
+      (addClick)="onAdd()"
+      (refreshClick)="onRefresh()"
+      (viewClick)="onView($event)"
+      (editClick)="onEdit($event)"
+    ></app-data-table>
+  </ng-template>
+</app-page-header>
+
+<app-farm-followup-create-modal
+  [(visible)]="showCreateModal"
+  [externalId]="externalId"
+  (followUpCreated)="onFollowUpCreated()"
+></app-farm-followup-create-modal>
+
+<app-farm-followup-view-modal
+  [(visible)]="showViewModal"
+  [followUp]="selectedFollowUp"
+></app-farm-followup-view-modal>
+

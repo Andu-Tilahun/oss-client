@@ -1,0 +1,16 @@
+<app-modal
+  [(visible)]="visible"
+  title="Create Follow Up"
+  size="lg"
+  [confirmText]="'Save Follow Up'"
+  [confirmLoading]="isLoading"
+  [showCancelButton]="true"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-farm-followup-form #followUpForm [externalId]="externalId"></app-farm-followup-form>
+  </ng-template>
+</app-modal>
+

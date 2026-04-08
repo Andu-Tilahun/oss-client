@@ -1,0 +1,21 @@
+<app-detail-card>
+
+  <ng-container *ngIf="followUp">
+
+    <app-detail-section title="Follow-up">
+      <app-detail-field label="Remark" [value]="followUp.remark || '-'"/>
+    </app-detail-section>
+
+    <app-detail-section title="Attachment">
+      <app-detail-field label="Attachment" [value]="followUp.attachment || '-'"/>
+    </app-detail-section>
+
+    <app-detail-section title="Audit">
+      <app-detail-field label="Created By" [value]="followUp.createdBy || '-'"/>
+      <app-detail-field label="Created At" [value]="followUp.createdAt || '-'"/>
+      <app-detail-field label="Updated By" [value]="followUp.updatedBy || '-'"/>
+      <app-detail-field label="Updated At" [value]="followUp.updatedAt || '-'"/>
+    </app-detail-section>
+  </ng-container>
+</app-detail-card>
+

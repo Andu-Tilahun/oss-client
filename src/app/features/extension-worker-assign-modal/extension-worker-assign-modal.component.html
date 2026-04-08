@@ -1,0 +1,35 @@
+<app-modal
+  [visible]="visible"
+  (visibleChange)="visibleChange.emit($event)"
+  title="Assign Officer"
+  confirmText="Assign"
+  cancelText="Cancel"
+  [confirmLoading]="processing"
+  [confirmDisabled]="!selectedUserId || loadingUsers"
+  (confirm)="confirm.emit()"
+>
+  <div class="space-y-4">
+
+    <ng-container>
+      <div>
+        <label class="text-sm font-medium text-gray-700">Assign to <span class="text-red-500">*</span></label>
+        <select
+          class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+          [ngModel]="selectedUserId"
+          (ngModelChange)="selectedUserIdChange.emit($event)"
+          [disabled]="loadingUsers"
+        >
+          <option [ngValue]="null">Select user...</option>
+          <option *ngFor="let u of assignableUsers" [ngValue]="u.id">
+            {{ getDisplayName(u) }}
+          </option>
+        </select>
+        <div *ngIf="loadingUsers" class="mt-1 text-xs text-slate-500">Loading users...</div>
+        <div *ngIf="!loadingUsers && assignableUsers.length === 0 && roleForRequest"
+             class="mt-1 text-xs text-amber-600">
+          No users found for role {{ roleForRequest }}.
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</app-modal>

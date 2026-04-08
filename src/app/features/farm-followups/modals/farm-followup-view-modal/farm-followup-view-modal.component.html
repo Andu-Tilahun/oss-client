@@ -1,0 +1,12 @@
+<app-modal
+  [(visible)]="visible"
+  title="Follow-up detail"
+  size="lg"
+  [showFooter]="false"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-farm-followup-view [followUp]="followUp"></app-farm-followup-view>
+  </ng-template>
+</app-modal>
+
