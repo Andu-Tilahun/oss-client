@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {FilterBarComponent} from '../../../../shared/components/filter-bar/filter-bar.component';
-import {InvestmentApprovalStatus, InvestmentStatus} from '../../models/crowd-funding.model';
+import { InvestmentStatus} from '../../models/crowd-funding.model';
 
 @Component({
   selector: 'app-crowd-funding-investment-filter',
@@ -18,15 +18,12 @@ export class CrowdFundingInvestmentFilterComponent {
   @Input() status: InvestmentStatus | '' = '';
   @Output() statusChange = new EventEmitter<InvestmentStatus | ''>();
 
-  @Input() approval: InvestmentApprovalStatus | '' = '';
-  @Output() approvalChange = new EventEmitter<InvestmentApprovalStatus | ''>();
 
   @Output() searchChange = new EventEmitter<void>();
   @Output() clearFilters = new EventEmitter<void>();
   @Output() filterChange = new EventEmitter<void>();
 
   readonly statuses: InvestmentStatus[] = ['PENDING', 'ACTIVE', 'PAID', 'FAILED'];
-  readonly approvals: InvestmentApprovalStatus[] = ['PENDING', 'ACCEPTED', 'REJECTED'];
 
   onSearchTextChange(value: string) {
     this.searchTextChange.emit(value);
@@ -41,15 +38,10 @@ export class CrowdFundingInvestmentFilterComponent {
     this.filterChange.emit();
   }
 
-  onApprovalChange(value: InvestmentApprovalStatus | '') {
-    this.approvalChange.emit(value);
-    this.filterChange.emit();
-  }
 
   onClearFilters() {
     this.searchTextChange.emit('');
     this.statusChange.emit('');
-    this.approvalChange.emit('');
     this.clearFilters.emit();
   }
 }

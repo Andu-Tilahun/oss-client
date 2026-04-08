@@ -8,7 +8,6 @@ import {
 } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
 import {CrowdFundingService} from '../../services/crowd-funding.service';
 import {
-  InvestmentApprovalStatus,
   InvestmentFilterRequest,
   InvestmentRecord,
   InvestmentStatus,
@@ -34,7 +33,6 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
 
   searchText = '';
   status: InvestmentStatus | '' = '';
-  approval: InvestmentApprovalStatus | '' = '';
 
   showSetRoiModal = false;
   showInvestorDecisionModal = false;
@@ -45,7 +43,6 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
     {header: 'Amount', value: (r) => this.formatAmount(r.amount)},
     {header: 'Method', value: (r) => r.paymentMethod},
     {header: 'Status', value: (r) => r.status},
-    {header: 'Approval', value: (r) => r.approvalStatus},
   ];
 
   rightActions: PageSplitRightAction<InvestmentRecord>[];
@@ -106,7 +103,6 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
   private buildFilterRequest(): InvestmentFilterRequest {
     return {
       searchText: this.searchText || undefined,
-      approvalStatuses: this.approval ? [this.approval] : undefined,
       sortBy: 'createdDate',
       sortDirection: 'DESC',
       page: this.currentPage,
@@ -172,7 +168,6 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
   clearFilters(): void {
     this.searchText = '';
     this.status = '';
-    this.approval = 'PENDING';
     this.currentPage = 0;
     this.pageIndex = 1;
     this.loadInvestments();

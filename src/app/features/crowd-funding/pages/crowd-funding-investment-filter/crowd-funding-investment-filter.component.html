@@ -18,17 +18,5 @@
       <option *ngFor="let s of statuses" [ngValue]="s">{{ s }}</option>
     </select>
   </div>
-
-  <div class="w-full">
-    <label class="block text-xs font-medium text-slate-600 mb-1">Approval</label>
-    <select
-      [(ngModel)]="approval"
-      (ngModelChange)="onApprovalChange($event)"
-      class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
-    >
-      <option [ngValue]="''">All</option>
-      <option *ngFor="let a of approvals" [ngValue]="a">{{ a }}</option>
-    </select>
-  </div>
 </app-filter-bar>
 

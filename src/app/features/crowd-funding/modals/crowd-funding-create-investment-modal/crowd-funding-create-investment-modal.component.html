@@ -2,8 +2,8 @@
   [(visible)]="visible"
   title="Create Investment"
   size="md"
-  [confirmText]="'Create Investment'"
-  [confirmLoading]="isLoading"
+  [maskClosable]="false"
+  (visibleChange)="visibleChange.emit($event)"
   [showCancelButton]="true"
   (confirm)="onSubmit()"
   (cancel)="onCancel()"
@@ -11,23 +11,13 @@
 >
   <ng-template #modalBody>
     <div class="space-y-3">
-      <div class="text-sm">
-        <div class="text-gray-500">crowdFunding</div>
-        <div class="font-semibold">{{ crowdFunding?.title ?? '-' }}</div>
-      </div>
 
-      <form [formGroup]="form" class="space-y-3">
-        <div>
-          <label class="form-label">Amount</label>
-          <input class="form-control" type="number" step="0.01" formControlName="amount"/>
-        </div>
-
-        <div>
-          <label class="form-label">Payment method</label>
-          <select class="form-control" formControlName="paymentMethod">
-            <option *ngFor="let m of paymentMethods" [value]="m">{{ m }}</option>
-          </select>
-        </div>
+      <form [formGroup]="form" class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+        <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900" type="number" step="0.01" formControlName="amount"/>
+        <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900" formControlName="paymentMethod">
+          <option *ngFor="let m of paymentMethods" [value]="m">{{ m }}</option>
+        </select>
       </form>
     </div>
   </ng-template>

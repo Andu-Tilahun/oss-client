@@ -8,7 +8,6 @@ export type FundingStatus = 'OPEN' | 'CLOSED' | 'FUNDED' | 'FAILED';
 
 export type InvestmentPaymentMethod = 'CREDIT' | 'BANK_TRANSFER' | 'CRYPTO';
 export type InvestmentStatus = 'PAID' | 'SENT' | 'ACTIVE' | 'PENDING' | 'FAILED';
-export type InvestmentApprovalStatus = 'PENDING' | 'SENT' | 'REVIEW' | 'ACCEPTED' | 'REJECTED';
 
 export interface CrowdFunding {
   id: string;
@@ -57,7 +56,6 @@ export interface InvestmentRecord {
   paymentMethod: InvestmentPaymentMethod;
   roi?: string;
   status: InvestmentStatus;
-  approvalStatus: InvestmentApprovalStatus;
   crowdFunding?: CrowdFunding;
   investorUser: User;
 }
@@ -71,7 +69,6 @@ export interface InvestmentCreateRequest {
 export interface InvestmentFilterRequest {
   searchText?: string;
   statuses?: InvestmentStatus[];
-  approvalStatuses?: InvestmentApprovalStatus[];
   sortBy?: string;
   sortDirection?: 'ASC' | 'DESC';
   page: number;
