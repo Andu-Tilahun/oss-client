@@ -7,11 +7,7 @@ import {
   PageSplitRightAction
 } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
 import {CrowdFundingService} from '../../services/crowd-funding.service';
-import {
-  InvestmentFilterRequest,
-  InvestmentRecord,
-  InvestmentStatus,
-} from '../../models/crowd-funding.model';
+import {InvestmentFilterRequest, InvestmentRecord, InvestmentStatus,} from '../../models/crowd-funding.model';
 import {PageResponse} from '../../../../shared/models/api-response.model';
 
 @Component({
@@ -69,14 +65,6 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
         title: 'Download',
         visible: (r) => this.authService.isInvestor() && r.status == "ACTIVE",
         action: (r) => this.onDownload(r),
-      },
-
-      {
-        id: 'assign',
-        icon: 'assign',
-        title: 'Assign Extension Worker',
-        visible: (r) => this.authService.isInvestor() && r.status == "ACTIVE",
-        action: (r) => this.onAssignExtensionWorker(r),
       },
 
       {

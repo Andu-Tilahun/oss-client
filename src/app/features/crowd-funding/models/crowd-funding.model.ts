@@ -1,10 +1,11 @@
 import {User} from "../../users/models/user.model";
 import {FarmPlot} from "../../farm-plots/models/farm-plot.model";
+import {FarmFollowUp} from "../../farm-followups/models/farm-followup.model";
 
 export type FarmActivity = 'CROPS' | 'LIVE_STOCKS' | 'AGRO_FORESTRY';
 export type WaterSource = 'IRRIGATION' | 'RIVER_ACCESS' | 'RAIN_FED';
 
-export type FundingStatus = 'OPEN' | 'CLOSED' | 'FUNDED' | 'FAILED';
+export type FundingStatus = 'OPEN' | 'ACTIVE' | 'CLOSED' | 'FUNDED' | 'FAILED';
 
 export type InvestmentPaymentMethod = 'CREDIT' | 'BANK_TRANSFER' | 'CRYPTO';
 export type InvestmentStatus = 'PAID' | 'SENT' | 'ACTIVE' | 'PENDING' | 'FAILED';
@@ -22,6 +23,7 @@ export interface CrowdFunding {
   fundingDeadline: string;
   fundingStatus: FundingStatus;
   farmPlot: FarmPlot;
+  followUpDtoList: FarmFollowUp[];
   description?: string;
 }
 

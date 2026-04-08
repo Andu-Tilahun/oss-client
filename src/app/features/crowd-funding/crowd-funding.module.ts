@@ -15,6 +15,9 @@ import {CrowdFundingInvestorDecisionModalComponent} from './modals/crowd-funding
 import {CrowdFundingFilterComponent} from './pages/crowd-funding-filter/crowd-funding-filter.component';
 import {CrowdFundingInvestmentFilterComponent} from './pages/crowd-funding-investment-filter/crowd-funding-investment-filter.component';
 import {ConfirmationModalComponent} from "../../shared/modals/confirmation-modal/confirmation-modal.component";
+import {
+    ExtensionWorkerAssignModalComponent
+} from "../extension-worker-assign-modal/extension-worker-assign-modal.component";
 
 @NgModule({
   declarations: [
@@ -37,6 +40,7 @@ import {ConfirmationModalComponent} from "../../shared/modals/confirmation-modal
         CrowdFundingSetRoiModalComponent,
         CrowdFundingInvestorDecisionModalComponent,
         ConfirmationModalComponent,
+        ExtensionWorkerAssignModalComponent,
     ],
 })
 export class CrowdFundingModule {}

@@ -32,6 +32,7 @@ export class CrowdFundingListComponent implements OnInit {
 
   showCreatecrowdFundingModal = false;
   showCreateInvestmentModal = false;
+  showAssignExtenstionWorkerModal = false;
 
   columns: DataTableColumn<CrowdFunding>[] = [
     {header: 'Title', value: (c) => c.title},
@@ -56,6 +57,13 @@ export class CrowdFundingListComponent implements OnInit {
         title: 'Invest',
         visible: (c) => this.authService.isInvestor() && c.fundingStatus == 'OPEN',
         action: (c) => this.onInvest(c),
+      },
+      {
+        id: 'assign',
+        icon: 'assign',
+        title: 'Assign Extension Worker',
+        visible: (r) => this.authService.isAdmin() && r.fundingStatus == "OPEN",
+        action: (r) => this.onAssignExtensionWorker(r),
       },
     ];
   }
@@ -177,6 +185,10 @@ export class CrowdFundingListComponent implements OnInit {
     return new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(
       value,
     );
+  }
+
+  private onAssignExtensionWorker(r: CrowdFunding) {
+    this.showAssignExtenstionWorkerModal = true;
   }
 }
 

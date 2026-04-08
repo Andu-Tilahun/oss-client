@@ -5,11 +5,12 @@ import {DetailCardComponent} from '../../../../shared/components/detail-field/de
 import {DetailSectionComponent} from '../../../../shared/components/detail-field/detail-section/detail-section.component';
 import {DetailFieldComponent} from '../../../../shared/components/detail-field/detail-field/detail-field.component';
 import {FarmPlotViewComponent} from "../../../farm-plots/components/farm-plot-view/farm-plot-view.component";
+import {FarmFollowupsModule} from "../../../farm-followups/farm-followups.module";
 
 @Component({
   selector: 'app-crowd-funding-view',
   standalone: true,
-    imports: [CommonModule, DetailCardComponent, DetailSectionComponent, DetailFieldComponent, FarmPlotViewComponent],
+    imports: [CommonModule, DetailCardComponent, DetailSectionComponent, DetailFieldComponent, FarmPlotViewComponent, FarmFollowupsModule],
   templateUrl: './crowd-funding-view.component.html',
   styleUrl: './crowd-funding-view.component.css',
 })

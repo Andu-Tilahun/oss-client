@@ -10,22 +10,22 @@ import {
 } from '../../../../shared/components/detail-field/detail-section/detail-section.component';
 import {DetailFieldComponent} from '../../../../shared/components/detail-field/detail-field/detail-field.component';
 import {FarmPlotViewComponent} from "../../../farm-plots/components/farm-plot-view/farm-plot-view.component";
-import {FarmFollowUpsService} from '../../../farm-followups/services/farm-followups.service';
-import {LeaseFollowUp} from '../../../farm-followups/models/farm-followups.model';
 import {UserViewComponent} from "../../../users/components/user-view/user-view.component";
+import {FarmFollowupsModule} from "../../../farm-followups/farm-followups.module";
 
 @Component({
   selector: 'app-farm-lease-view',
   standalone: true,
-    imports: [
-        CommonModule,
-        SharedModule,
-        DetailCardComponent,
-        DetailSectionComponent,
-        DetailFieldComponent,
-        FarmPlotViewComponent,
-        UserViewComponent,
-    ],
+  imports: [
+    CommonModule,
+    SharedModule,
+    DetailCardComponent,
+    DetailSectionComponent,
+    DetailFieldComponent,
+    FarmPlotViewComponent,
+    UserViewComponent,
+    FarmFollowupsModule,
+  ],
   templateUrl: './farm-lease-view.component.html',
 })
 export class FarmLeaseViewComponent implements OnChanges {
@@ -35,7 +35,6 @@ export class FarmLeaseViewComponent implements OnChanges {
   detail: LeaseAgreement | null = null;
   loading = false;
   error: string | null = null;
-  leaseFollowUps: LeaseFollowUp[] = [];
   followUpsLoading = false;
 
   paymentColumns: DataTableColumn<LeaseTerm>[] = [
@@ -44,14 +43,8 @@ export class FarmLeaseViewComponent implements OnChanges {
     {header: 'Status', value: (t) => t.status},
   ];
 
-  followUpColumns: DataTableColumn<LeaseFollowUp>[] = [
-    {header: 'Scheduled', value: (u) => u.scheduledDate},
-    {header: 'Status', value: (u) => u.status},
-    {header: 'Plan remark', value: (u) => u.remark || '-'},
-    {header: 'Follow-up remark', value: (u) => u.followUpRemark || '-'},
-  ];
 
-  constructor(private farmLeaseService: FarmLeaseService, private followUpsService: FarmFollowUpsService) {
+  constructor(private farmLeaseService: FarmLeaseService) {
   }
 
   ngOnChanges(changes: SimpleChanges): void {

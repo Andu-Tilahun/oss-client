@@ -24,10 +24,10 @@
     </app-detail-section>
 
     <app-detail-section title="Farm operation">
-      <app-detail-field label="Farm activity" [value]="crowdFunding.farmActivity ?? '-'"/>
-      <app-detail-field label="Water source" [value]="crowdFunding.waterSource ?? '-'"/>
-      <app-detail-field label="Operation start" [value]="crowdFunding.startDate ?? '-'"/>
-      <app-detail-field label="Operation end" [value]="crowdFunding.endDate ?? '-'"/>
+      <app-detail-field label="Farm activity" [value]="crowdFunding.farmActivity"/>
+      <app-detail-field label="Water source" [value]="crowdFunding.waterSource"/>
+      <app-detail-field label="Operation start" [value]="crowdFunding.startDate"/>
+      <app-detail-field label="Operation end" [value]="crowdFunding.endDate"/>
     </app-detail-section>
 
     <app-detail-section *ngIf="crowdFunding.description" title="Description">
@@ -41,3 +41,8 @@
   *ngIf="crowdFunding"
   [plot]="crowdFunding.farmPlot">
 </app-farm-plot-view>
+
+<app-farm-followup-list
+  [followUps]="crowdFunding?.followUpDtoList ?? []"
+  [externalId]="crowdFunding?.id ?? ''"
+></app-farm-followup-list>
