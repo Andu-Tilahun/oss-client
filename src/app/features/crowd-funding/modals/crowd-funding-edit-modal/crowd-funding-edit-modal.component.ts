@@ -5,57 +5,58 @@ import {ToastService} from '../../../../shared/toast/toast.service';
 import {FarmPlotService} from '../../../farm-plots/services/farm-plot.service';
 import {FarmPlot, FarmPlotFilterRequest} from '../../../farm-plots/models/farm-plot.model';
 import {CrowdFundingService} from '../../services/crowd-funding.service';
-import {CrowdFundingCreateRequest} from '../../models/crowd-funding.model';
-import {CrowdFundingFormComponent} from "../../components/crowd-funding-form/crowd-funding-form.component";
+import {CrowdFunding, CrowdFundingCreateRequest} from '../../models/crowd-funding.model';
+import {CrowdFundingFormComponent} from '../../components/crowd-funding-form/crowd-funding-form.component';
 
 @Component({
-  selector: 'app-crowd-funding-create-modal',
+  selector: 'app-crowd-funding-edit-modal',
   standalone: true,
   imports: [CommonModule, ModalComponent, CrowdFundingFormComponent],
-  templateUrl: './crowd-funding-create-modal.component.html',
+  templateUrl: './crowd-funding-edit-modal.component.html',
 })
-export class CrowdFundingCreateModalComponent implements OnInit {
+export class CrowdFundingEditModalComponent implements OnInit {
   @Input() visible = false;
   @Output() visibleChange = new EventEmitter<boolean>();
-  @Output() crowdFundingCreated = new EventEmitter<void>();
+
+  @Input() crowdFunding: CrowdFunding | null = null;
+  @Output() crowdFundingUpdated = new EventEmitter<void>();
 
   @ViewChild('crowdFundingForm') crowdFundingForm!: CrowdFundingFormComponent;
 
   farmPlots: FarmPlot[] = [];
   isLoading = false;
 
-
   constructor(
     private farmPlotService: FarmPlotService,
     private crowdfundingService: CrowdFundingService,
     private toastService: ToastService,
-  ) {
-  }
+  ) {}
 
   ngOnInit(): void {
     this.loadFarmPlots();
   }
 
   onSubmit(): void {
+    if (!this.crowdFunding) return;
     if (!this.crowdFundingForm.isValid()) {
       this.crowdFundingForm.markAllAsTouched();
       return;
     }
+
     this.isLoading = true;
     const request: CrowdFundingCreateRequest = this.crowdFundingForm.getValue();
-    this.crowdfundingService.create(request).subscribe({
+
+    this.crowdfundingService.updatecrowdFunding(this.crowdFunding.id, request).subscribe({
       next: () => {
         this.isLoading = false;
         this.visible = false;
         this.visibleChange.emit(false);
-        this.crowdFundingForm.reset();
-        this.toastService.success('Crowdfunding created successfully');
-        this.crowdFundingCreated.emit();
-        this.loadFarmPlots();
+        this.toastService.success('Crowdfunding updated successfully');
+        this.crowdFundingUpdated.emit();
       },
       error: (err) => {
         this.isLoading = false;
-        this.toastService.error(err.message || 'Failed to create crowd funding', 'Create Crowdfunding');
+        this.toastService.error(err.message || 'Failed to update crowd funding', 'Update Crowdfunding');
       },
     });
   }
@@ -65,7 +66,6 @@ export class CrowdFundingCreateModalComponent implements OnInit {
   }
 
   private loadFarmPlots(): void {
-    this.isLoading = true;
     const filterRequest: FarmPlotFilterRequest = {
       searchText: undefined,
       statuses: ['ACTIVE'],
@@ -80,10 +80,8 @@ export class CrowdFundingCreateModalComponent implements OnInit {
     this.farmPlotService.filterFarmPlots(filterRequest).subscribe({
       next: (response) => {
         this.farmPlots = response.content;
-        this.isLoading = false;
       },
       error: (error) => {
-        this.isLoading = false;
         this.toastService.error(error.message || 'Failed to fetch farm plots', 'Load Farm Plots');
       },
     });

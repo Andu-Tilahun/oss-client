@@ -31,6 +31,7 @@ export class CrowdFundingListComponent implements OnInit {
   status: FundingStatus | '' = '';
 
   showCreatecrowdFundingModal = false;
+  showEditcrowdFundingModal = false;
   showCreateInvestmentModal = false;
   showAssignExtenstionWorkerModal = false;
 
@@ -164,6 +165,11 @@ export class CrowdFundingListComponent implements OnInit {
     this.showCreateInvestmentModal = false;
   }
 
+  onEdit(c: CrowdFunding): void {
+    this.selectedcrowdFunding = {...c};
+    this.showEditcrowdFundingModal = true;
+  }
+
   onInvest(c: CrowdFunding): void {
     this.selectedcrowdFunding = {...c};
     this.showCreateInvestmentModal = true;
@@ -171,6 +177,12 @@ export class CrowdFundingListComponent implements OnInit {
 
   onCrowdFundingCreated(): void {
     this.showCreatecrowdFundingModal = false;
+    this.detailRefreshKey++;
+    this.loadCrowdFundings();
+  }
+
+  onCrowdFundingUpdated(): void {
+    this.showEditcrowdFundingModal = false;
     this.detailRefreshKey++;
     this.loadCrowdFundings();
   }

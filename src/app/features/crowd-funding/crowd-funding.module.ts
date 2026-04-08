@@ -7,6 +7,7 @@ import {CrowdFundingRoutingModule} from './crowd-funding-routing.module';
 import {CrowdFundingListComponent} from './pages/crowd-funding-list/crowd-funding-list.component';
 import {CrowdFundingViewComponent} from './components/crowd-funding-view/crowd-funding-view.component';
 import {CrowdFundingCreateModalComponent} from './modals/crowd-funding-create-modal/crowd-funding-create-modal.component';
+import {CrowdFundingEditModalComponent} from './modals/crowd-funding-edit-modal/crowd-funding-edit-modal.component';
 import {CrowdFundingCreateInvestmentModalComponent} from './modals/crowd-funding-create-investment-modal/crowd-funding-create-investment-modal.component';
 import {CrowdFundingInvestmentListComponent} from './pages/crowd-funding-investment-list/crowd-funding-investment-list.component';
 import {CrowdFundingInvestmentViewComponent} from './components/crowd-funding-investment-view/crowd-funding-investment-view.component';
@@ -36,6 +37,7 @@ import {
         CrowdFundingViewComponent,
         CrowdFundingInvestmentViewComponent,
         CrowdFundingCreateModalComponent,
+        CrowdFundingEditModalComponent,
         CrowdFundingCreateInvestmentModalComponent,
         CrowdFundingSetRoiModalComponent,
         CrowdFundingInvestorDecisionModalComponent,

@@ -7,6 +7,7 @@
   [rightEmptyMessage]="'Select a row to view details.'"
   [showRightEditButton]="isAdmin"
   [rightActions]="rightActions"
+  (rightEdit)="onEdit($event)"
 >
   <ng-template #extraTableHeader>
     <div class="w-full">
@@ -35,13 +36,14 @@
       [showAddButton]="isAdmin"
       [showRefreshButton]="true"
       [showViewButton]="true"
-      [showEditButton]="false"
+      [showEditButton]="isAdmin"
       [showDeleteButton]="false"
       [addButtonText]="'Create crowdFunding'"
       (pageChange)="onPageChange($event)"
       (addClick)="onAdd()"
       (refreshClick)="onRefresh()"
       (viewClick)="onView($event)"
+      (editClick)="onEdit($event)"
     >
     </app-data-table>
   </ng-template>
@@ -58,6 +60,12 @@
   [(visible)]="showCreatecrowdFundingModal"
   (crowdFundingCreated)="onCrowdFundingCreated()"
 ></app-crowd-funding-create-modal>
+
+<app-crowd-funding-edit-modal
+  [(visible)]="showEditcrowdFundingModal"
+  [crowdFunding]="selectedcrowdFunding"
+  (crowdFundingUpdated)="onCrowdFundingUpdated()"
+></app-crowd-funding-edit-modal>
 
 <app-crowd-funding-create-investment-modal
   [(visible)]="showCreateInvestmentModal"
