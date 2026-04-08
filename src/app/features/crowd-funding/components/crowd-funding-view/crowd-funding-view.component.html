@@ -37,12 +37,4 @@
 
   </ng-container>
 </app-detail-card>
-<app-farm-plot-view
-  *ngIf="crowdFunding"
-  [plot]="crowdFunding.farmPlot">
-</app-farm-plot-view>
 
-<app-farm-followup-list
-  [followUps]="crowdFunding?.followUpDtoList ?? []"
-  [externalId]="crowdFunding?.id ?? ''"
-></app-farm-followup-list>

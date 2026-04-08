@@ -47,11 +47,5 @@
     </app-detail-section>
   </ng-container>
 </app-detail-card>
-<app-farm-plot-view *ngIf="detail" [plot]="detail.farmPlot"></app-farm-plot-view>
-<app-user-view *ngIf="detail" [user]="detail.investorUser"></app-user-view>
-<app-farm-followup-list
-  [followUps]="detail?.followUpDtoList ?? []"
-  [externalId]="detail?.id ?? ''"
-></app-farm-followup-list>
 
 

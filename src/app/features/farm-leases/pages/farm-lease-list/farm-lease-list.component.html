@@ -45,7 +45,27 @@
   </ng-template>
 
   <ng-template #rightContent let-lease>
-    <app-farm-lease-view [lease]="lease" [refreshKey]="detailRefreshKey"></app-farm-lease-view>
+    <app-tabs
+      [tabs]="tabs"
+      [activeTab]="activeTab"
+      (activeTabChange)="activeTab = $event">
+      <!-- Request Tab -->
+      <div *ngIf="activeTab === 'detail'">
+        <app-farm-lease-view [lease]="lease" [refreshKey]="detailRefreshKey"></app-farm-lease-view>
+      </div>
+      <div *ngIf="activeTab === 'farm-plot'">
+        <app-farm-plot-view *ngIf="lease" [plot]="lease.farmPlot"></app-farm-plot-view>
+      </div>
+      <div *ngIf="activeTab === 'user'">
+        <app-user-view *ngIf="lease" [user]="lease.investorUser"></app-user-view>
+      </div>
+      <div *ngIf="activeTab === 'follow-up'">
+        <app-farm-followup-list
+          [followUps]="lease?.followUpDtoList ?? []"
+          [externalId]="lease?.id ?? ''"
+        ></app-farm-followup-list>
+      </div>
+    </app-tabs>
   </ng-template>
 </app-page-split-layout>
 

@@ -14,7 +14,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   // Visibility
   @Input() visible = false;
   @Input() closable = true;
-  @Input() maskClosable = true;
+  @Input() maskClosable = false;
   @Input() keyboard = true; // Close on ESC key
 
   // Content

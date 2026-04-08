@@ -8,6 +8,7 @@ import {TableQueryParams} from '../../../../shared/data-table/models/table-query
 import {PageSplitRightAction} from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
 import {AuthService} from '../../../auth/services/auth.service';
 import {AdminLeaseDecision} from '../../modals/farm-lease-approve-modal/farm-lease-approve-modal.component';
+import {TabItem} from "../../../../shared/tabs/models/tab-item.model";
 
 @Component({
   selector: 'app-farm-lease-list',
@@ -41,6 +42,15 @@ export class FarmLeaseListComponent implements OnInit {
     {header: 'Duration (mo)', value: (l) => String(l.totalDurationMonths)},
     {header: 'Status', value: (l) => l.status},
     {header: 'Amount', value: (l) => this.formatAmount(l.totalAmount)},
+  ];
+
+  activeTab = 'detail';
+
+  tabs: TabItem[] = [
+    {key: 'detail', label: 'Detail'},
+    {key: 'farm-plot', label: 'FarmPlot'},
+    {key: 'user', label: 'User'},
+    {key: 'follow-up', label: 'FollowUp'},
   ];
 
   rightActions: PageSplitRightAction<LeaseAgreement>[];

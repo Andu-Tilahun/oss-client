@@ -9,6 +9,7 @@ import {
 import {CrowdFundingService} from '../../services/crowd-funding.service';
 import {PageResponse} from '../../../../shared/models/api-response.model';
 import {CrowdFunding, CrowdFundingFilterRequest, FundingStatus} from "../../models/crowd-funding.model";
+import {TabItem} from "../../../../shared/tabs/models/tab-item.model";
 
 @Component({
   selector: 'app-farm-crowdfunding-crowdFunding-list',
@@ -41,6 +42,14 @@ export class CrowdFundingListComponent implements OnInit {
     {header: 'Deadline', value: (c) => c.fundingDeadline},
     {header: 'Target', value: (c) => this.formatAmount(c.targetAmount)},
     {header: 'Minimum', value: (c) => this.formatAmount(c.minimumContribution)},
+  ];
+
+  activeTab = 'detail';
+
+  tabs: TabItem[] = [
+    {key: 'detail', label: 'Detail'},
+    {key: 'farm-plot', label: 'FarmPlot'},
+    {key: 'follow-up', label: 'FollowUp'},
   ];
 
   rightActions: PageSplitRightAction<CrowdFunding>[];

@@ -9,6 +9,10 @@ import {FarmLeaseAdminActionModalComponent} from './modals/farm-lease-approve-mo
 import {PageSplitLayoutComponent} from '../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
 import {FarmLeaseFilterComponent} from './pages/farm-lease-filter/farm-lease-filter.component';
 import {FarmLeaseViewComponent} from './components/farm-lease-view/farm-lease-view.component';
+import {TabsComponent} from "../../shared/tabs/app-tabs/app-tabs.component";
+import {FarmPlotViewComponent} from "../farm-plots/components/farm-plot-view/farm-plot-view.component";
+import {UserViewComponent} from "../users/components/user-view/user-view.component";
+import {FarmFollowupsModule} from "../farm-followups/farm-followups.module";
 
 @NgModule({
   declarations: [FarmLeaseListComponent],
@@ -22,6 +26,10 @@ import {FarmLeaseViewComponent} from './components/farm-lease-view/farm-lease-vi
     FarmLeaseCreateModalComponent,
     FarmLeaseEditModalComponent,
     FarmLeaseAdminActionModalComponent,
+    TabsComponent,
+    FarmPlotViewComponent,
+    UserViewComponent,
+    FarmFollowupsModule,
   ],
 })
 export class FarmLeasesModule {}

@@ -49,10 +49,30 @@
   </ng-template>
 
   <ng-template #rightContent let-crowdFunding>
-    <app-crowd-funding-view
-      [crowdFunding]="crowdFunding"
-      [refreshKey]="detailRefreshKey"
-    ></app-crowd-funding-view>
+    <app-tabs
+      [tabs]="tabs"
+      [activeTab]="activeTab"
+      (activeTabChange)="activeTab = $event">
+      <!-- Request Tab -->
+      <div *ngIf="activeTab === 'detail'">
+        <app-crowd-funding-view
+          [crowdFunding]="crowdFunding"
+          [refreshKey]="detailRefreshKey"
+        ></app-crowd-funding-view>
+      </div>
+      <div *ngIf="activeTab === 'farm-plot'">
+        <app-farm-plot-view
+          *ngIf="crowdFunding"
+          [plot]="crowdFunding.farmPlot">
+        </app-farm-plot-view>
+      </div>
+      <div *ngIf="activeTab === 'follow-up'">
+        <app-farm-followup-list
+          [followUps]="crowdFunding?.followUpDtoList ?? []"
+          [externalId]="crowdFunding?.id ?? ''"
+        ></app-farm-followup-list>
+      </div>
+    </app-tabs>
   </ng-template>
 </app-page-split-layout>
 
