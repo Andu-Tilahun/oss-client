@@ -93,6 +93,9 @@
   (investmentCreated)="onInvestmentCreated()"
 ></app-crowd-funding-create-investment-modal>
 
-<app-extension-worker-assign-modal [(visible)]="showAssignExtenstionWorkerModal">
+
+<app-extension-worker-assign-modal [(visible)]="showAssignExtenstionWorkerModal"
+                                   (selectedUserIdChange)="onSelectedUser($event)"
+                                   (confirm)="onConfirm($event)">
 </app-extension-worker-assign-modal>
 

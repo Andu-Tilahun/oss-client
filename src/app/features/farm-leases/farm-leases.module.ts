@@ -13,24 +13,28 @@ import {TabsComponent} from "../../shared/tabs/app-tabs/app-tabs.component";
 import {FarmPlotViewComponent} from "../farm-plots/components/farm-plot-view/farm-plot-view.component";
 import {UserViewComponent} from "../users/components/user-view/user-view.component";
 import {FarmFollowupsModule} from "../farm-followups/farm-followups.module";
+import {
+    ExtensionWorkerAssignModalComponent
+} from "../extension-worker-assign-modal/extension-worker-assign-modal.component";
 
 @NgModule({
   declarations: [FarmLeaseListComponent],
-  imports: [
-    CommonModule,
-    FarmLeasesRoutingModule,
-    SharedModule,
-    PageSplitLayoutComponent,
-    FarmLeaseFilterComponent,
-    FarmLeaseViewComponent,
-    FarmLeaseCreateModalComponent,
-    FarmLeaseEditModalComponent,
-    FarmLeaseAdminActionModalComponent,
-    TabsComponent,
-    FarmPlotViewComponent,
-    UserViewComponent,
-    FarmFollowupsModule,
-  ],
+    imports: [
+        CommonModule,
+        FarmLeasesRoutingModule,
+        SharedModule,
+        PageSplitLayoutComponent,
+        FarmLeaseFilterComponent,
+        FarmLeaseViewComponent,
+        FarmLeaseCreateModalComponent,
+        FarmLeaseEditModalComponent,
+        FarmLeaseAdminActionModalComponent,
+        TabsComponent,
+        FarmPlotViewComponent,
+        UserViewComponent,
+        FarmFollowupsModule,
+        ExtensionWorkerAssignModalComponent,
+    ],
 })
 export class FarmLeasesModule {}
 

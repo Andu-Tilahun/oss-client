@@ -28,21 +28,15 @@ export class ExtensionWorkerAssignModalComponent {
   @Input() visible = false;
   @Output() visibleChange = new EventEmitter<boolean>();
 
-  @Input() processing = false;
 
-  @Input() selectedUserId: string | number | null = null;
-  @Output() selectedUserIdChange = new EventEmitter<string | number | null>();
 
-  @Input() remark = '';
-  @Output() remarkChange = new EventEmitter<string>();
+  @Input() selectedUserId: string | string | null = null;
+  @Output() selectedUserIdChange = new EventEmitter<string | string | null>();
 
   @Output() confirm = new EventEmitter<void>();
-  @Output() fileUploaded = new EventEmitter<string>();
-  @Output() fileRemoved = new EventEmitter<void>();
 
   assignableUsers: User[] = [];
   loadingUsers = false;
-  roleForRequest: string | null = null;
 
   constructor(private userService: UserService) {}
 
@@ -52,7 +46,6 @@ export class ExtensionWorkerAssignModalComponent {
     }
     if (changes['visible']?.currentValue === false) {
       this.assignableUsers = [];
-      this.roleForRequest = null;
     }
   }
 

@@ -2,14 +2,9 @@ import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {HttpService} from '../../../core/services/http.service';
 import {Endpoints} from '../../../core/endpoint/endpoint.model';
-import {
-  LeaseAgreement,
-  LeaseCreateRequest,
-  LeaseDefineTermsRequest,
-  LeaseFilterRequest,
-  LeaseGenerateTermsRequest,
-} from '../models/farm-lease.model';
+import {LeaseAgreement, LeaseCreateRequest, LeaseFilterRequest,} from '../models/farm-lease.model';
 import {ApiResponse, PageResponse} from '../../../shared/models/api-response.model';
+import {AssignExtensionWorkerRequest} from "../../assign-extension-worker-request";
 
 @Injectable({
   providedIn: 'root',
@@ -41,6 +36,13 @@ export class FarmLeaseService {
     return this.httpService.post<ApiResponse<LeaseAgreement>>(
       `${Endpoints.FARM_LEASES_ENDPOINT}/${leaseId}/admin/decision`,
       {decision},
+    );
+  }
+
+  assignExtensionWorker(request: AssignExtensionWorkerRequest): Observable<ApiResponse<LeaseAgreement>> {
+    return this.httpService.post<ApiResponse<LeaseAgreement>>(
+      `${Endpoints.FARM_LEASES_ENDPOINT}/assign-extension-worker`,
+      request,
     );
   }
 }

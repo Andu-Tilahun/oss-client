@@ -85,3 +85,8 @@
   [lease]="selectedLease"
   (decisionSelected)="onAdminDecision($event)"
 ></app-farm-lease-approve-modal>
+
+<app-extension-worker-assign-modal [(visible)]="showAssignExtenstionWorkerModal"
+                                   (selectedUserIdChange)="onSelectedUser($event)"
+                                   (confirm)="onConfirm($event)">
+</app-extension-worker-assign-modal>

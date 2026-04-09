@@ -25,6 +25,7 @@ export interface LeaseAgreement {
   totalAmount: number;
   investorUser: User;
   farmPlot: FarmPlot;
+  extensionWorker: User;
   followUpDtoList: FarmFollowUp[];
   terms?: LeaseTerm[];
 }

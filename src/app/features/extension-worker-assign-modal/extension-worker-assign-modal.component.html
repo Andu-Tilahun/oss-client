@@ -4,8 +4,6 @@
   title="Assign Officer"
   confirmText="Assign"
   cancelText="Cancel"
-  [confirmLoading]="processing"
-  [confirmDisabled]="!selectedUserId || loadingUsers"
   (confirm)="confirm.emit()"
 >
   <div class="space-y-4">
@@ -24,11 +22,6 @@
             {{ getDisplayName(u) }}
           </option>
         </select>
-        <div *ngIf="loadingUsers" class="mt-1 text-xs text-slate-500">Loading users...</div>
-        <div *ngIf="!loadingUsers && assignableUsers.length === 0 && roleForRequest"
-             class="mt-1 text-xs text-amber-600">
-          No users found for role {{ roleForRequest }}.
-        </div>
       </div>
     </ng-container>
   </div>

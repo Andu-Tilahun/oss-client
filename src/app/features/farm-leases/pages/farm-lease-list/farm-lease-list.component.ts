@@ -2,13 +2,16 @@ import {Component, OnInit} from '@angular/core';
 import {LeaseAgreement, LeaseFilterRequest, LeaseStatus} from '../../models/farm-lease.model';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
 import {FarmLeaseService} from '../../services/farm-lease.service';
-import {PageResponse} from '../../../../shared/models/api-response.model';
+import {ApiResponse, PageResponse} from '../../../../shared/models/api-response.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
-import {PageSplitRightAction} from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
+import {
+  PageSplitRightAction
+} from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
 import {AuthService} from '../../../auth/services/auth.service';
 import {AdminLeaseDecision} from '../../modals/farm-lease-approve-modal/farm-lease-approve-modal.component';
 import {TabItem} from "../../../../shared/tabs/models/tab-item.model";
+import {AssignExtensionWorkerRequest} from "../../../assign-extension-worker-request";
 
 @Component({
   selector: 'app-farm-lease-list',
@@ -31,9 +34,11 @@ export class FarmLeaseListComponent implements OnInit {
   showEditModal = false;
   selectedLease: LeaseAgreement | null = null;
   detailRefreshKey = 0;
+  assignExtensionWorkerRequest = {} as AssignExtensionWorkerRequest;
 
 
   showAdminActionModal = false;
+  showAssignExtenstionWorkerModal = false;
   private adminActionLoading = false;
 
   columns: DataTableColumn<LeaseAgreement>[] = [
@@ -67,8 +72,15 @@ export class FarmLeaseListComponent implements OnInit {
         id: 'approve',
         icon: 'check',
         title: 'Approve lease',
-        visible: (l) => this.authService.isAdmin() && l.status=="PENDING",
+        visible: (l) => this.authService.isAdmin() && l.status == "PENDING",
         action: (l) => this.onApproveLease(l),
+      },
+      {
+        id: 'assign',
+        icon: 'assign',
+        title: 'Assign Extension Worker',
+        visible: (r) => this.authService.isInvestor() && r.status == "PENDING" && !r.extensionWorker,
+        action: (r) => this.onAssignExtensionWorker(r),
       },
     ];
   }
@@ -256,8 +268,27 @@ export class FarmLeaseListComponent implements OnInit {
     );
   }
 
-  private shortId(id: string): string {
-    if (!id || id.length <= 16) return id;
-    return `${id.slice(0, 8)}…${id.slice(-6)}`;
+  private onAssignExtensionWorker(r: LeaseAgreement) {
+    this.showAssignExtenstionWorkerModal = true;
+  }
+
+  onSelectedUser(id: any) {
+    this.assignExtensionWorkerRequest.externalId = this.selectedLease!.id;
+    this.assignExtensionWorkerRequest.extensionWorkerId = id;
+    console.log(this.assignExtensionWorkerRequest)
+  }
+
+  onConfirm($event: void) {
+    this.farmLeaseService.assignExtensionWorker(this.assignExtensionWorkerRequest).subscribe({
+      next: (res: ApiResponse<LeaseAgreement>) => {
+        this.selectedLease = res?.data ?? null;
+        this.loading = false;
+        this.toastService.success('Extension Worker Assigned successfully');
+      },
+      error: () => {
+        this.toastService.error('Failed to assign Extension Worker');
+        this.loading = false;
+      },
+    });
   }
 }

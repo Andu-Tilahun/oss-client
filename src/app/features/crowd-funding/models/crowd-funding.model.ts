@@ -25,6 +25,7 @@ export interface CrowdFunding {
   farmPlot: FarmPlot;
   followUpDtoList: FarmFollowUp[];
   description?: string;
+  extensionWorker: User;
 }
 
 export interface CrowdFundingCreateRequest {

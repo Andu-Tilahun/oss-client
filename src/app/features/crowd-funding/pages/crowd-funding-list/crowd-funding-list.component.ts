@@ -7,9 +7,11 @@ import {
   PageSplitRightAction
 } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
 import {CrowdFundingService} from '../../services/crowd-funding.service';
-import {PageResponse} from '../../../../shared/models/api-response.model';
+import {ApiResponse, PageResponse} from '../../../../shared/models/api-response.model';
 import {CrowdFunding, CrowdFundingFilterRequest, FundingStatus} from "../../models/crowd-funding.model";
 import {TabItem} from "../../../../shared/tabs/models/tab-item.model";
+import {LeaseAgreement} from "../../../farm-leases/models/farm-lease.model";
+import {AssignExtensionWorkerRequest} from "../../../assign-extension-worker-request";
 
 @Component({
   selector: 'app-farm-crowdfunding-crowdFunding-list',
@@ -21,6 +23,8 @@ export class CrowdFundingListComponent implements OnInit {
   crowdFundings: CrowdFunding[] = [];
   selectedcrowdFunding: CrowdFunding | null = null;
   detailRefreshKey = 0;
+
+  assignExtensionWorkerRequest = {} as AssignExtensionWorkerRequest;
 
   loading = false;
   total = 0;
@@ -72,7 +76,7 @@ export class CrowdFundingListComponent implements OnInit {
         id: 'assign',
         icon: 'assign',
         title: 'Assign Extension Worker',
-        visible: (r) => this.authService.isAdmin() && r.fundingStatus == "OPEN",
+        visible: (r) => this.authService.isAdmin() && r.fundingStatus == "OPEN" && !r.extensionWorker,
         action: (r) => this.onAssignExtensionWorker(r),
       },
     ];
@@ -210,6 +214,25 @@ export class CrowdFundingListComponent implements OnInit {
 
   private onAssignExtensionWorker(r: CrowdFunding) {
     this.showAssignExtenstionWorkerModal = true;
+  }
+
+  onSelectedUser(id: any) {
+    this.assignExtensionWorkerRequest.externalId = this.selectedcrowdFunding!.id;
+    this.assignExtensionWorkerRequest.extensionWorkerId = id;
+  }
+
+  onConfirm($event: void) {
+    this.crowdfundingService.assignExtensionWorker(this.assignExtensionWorkerRequest).subscribe({
+      next: (res: ApiResponse<CrowdFunding>) => {
+        this.selectedcrowdFunding = res?.data ?? null;
+        this.loading = false;
+        this.toastService.success('Extension Worker Assigned successfully');
+      },
+      error: () => {
+        this.toastService.error('Failed to assign Extension Worker');
+        this.loading = false;
+      },
+    });
   }
 }
 

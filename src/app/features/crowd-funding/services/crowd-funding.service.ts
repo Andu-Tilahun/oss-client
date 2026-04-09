@@ -11,6 +11,8 @@ import {
   InvestmentFilterRequest,
   InvestmentRecord,
 } from '../models/crowd-funding.model';
+import {AssignExtensionWorkerRequest} from "../../assign-extension-worker-request";
+import {LeaseAgreement} from "../../farm-leases/models/farm-lease.model";
 
 @Injectable({providedIn: 'root'})
 export class CrowdFundingService {
@@ -79,6 +81,13 @@ export class CrowdFundingService {
     return this.httpService.post<ApiResponse<InvestmentRecord>>(
       `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/investments/${investmentId}/investor/decision`,
       {decision},
+    );
+  }
+
+  assignExtensionWorker(request: AssignExtensionWorkerRequest): Observable<ApiResponse<CrowdFunding>> {
+    return this.httpService.post<ApiResponse<CrowdFunding>>(
+      `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/assign-extension-worker`,
+      request,
     );
   }
 }
