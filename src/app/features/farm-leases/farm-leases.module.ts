@@ -16,25 +16,27 @@ import {FarmFollowupsModule} from "../farm-followups/farm-followups.module";
 import {
     ExtensionWorkerAssignModalComponent
 } from "../extension-worker-assign-modal/extension-worker-assign-modal.component";
+import {ConfirmationModalComponent} from "../../shared/modals/confirmation-modal/confirmation-modal.component";
 
 @NgModule({
   declarations: [FarmLeaseListComponent],
-    imports: [
-        CommonModule,
-        FarmLeasesRoutingModule,
-        SharedModule,
-        PageSplitLayoutComponent,
-        FarmLeaseFilterComponent,
-        FarmLeaseViewComponent,
-        FarmLeaseCreateModalComponent,
-        FarmLeaseEditModalComponent,
-        FarmLeaseAdminActionModalComponent,
-        TabsComponent,
-        FarmPlotViewComponent,
-        UserViewComponent,
-        FarmFollowupsModule,
-        ExtensionWorkerAssignModalComponent,
-    ],
+  imports: [
+    CommonModule,
+    FarmLeasesRoutingModule,
+    SharedModule,
+    PageSplitLayoutComponent,
+    FarmLeaseFilterComponent,
+    FarmLeaseViewComponent,
+    FarmLeaseCreateModalComponent,
+    FarmLeaseEditModalComponent,
+    FarmLeaseAdminActionModalComponent,
+    TabsComponent,
+    FarmPlotViewComponent,
+    UserViewComponent,
+    FarmFollowupsModule,
+    ExtensionWorkerAssignModalComponent,
+    ConfirmationModalComponent,
+  ],
 })
 export class FarmLeasesModule {}
 

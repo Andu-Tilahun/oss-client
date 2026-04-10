@@ -35,10 +35,10 @@ export class FarmLeaseListComponent implements OnInit {
   selectedLease: LeaseAgreement | null = null;
   detailRefreshKey = 0;
   assignExtensionWorkerRequest = {} as AssignExtensionWorkerRequest;
-
-
   showAdminActionModal = false;
   showAssignExtenstionWorkerModal = false;
+  lockSend = false;
+  showConfirmationModal = false;
   private adminActionLoading = false;
 
   columns: DataTableColumn<LeaseAgreement>[] = [
@@ -69,17 +69,32 @@ export class FarmLeaseListComponent implements OnInit {
 
     this.rightActions = [
       {
+        id: 'sent',
+        icon: 'send',
+        title: 'Send',
+        visible: (r) => this.authService.isInvestor() && r.status == "PENDING",
+        action: (r) => this.onSend(r),
+      },
+
+      {
+        id: 'download',
+        icon: 'download',
+        title: 'Download',
+        visible: (r) => this.authService.isInvestor() && r.status == "ACCEPTED",
+        action: (r) => this.onDownload(r),
+      },
+      {
         id: 'approve',
         icon: 'check',
         title: 'Approve lease',
-        visible: (l) => this.authService.isAdmin() && l.status == "PENDING",
+        visible: (l) => this.authService.isAdmin() && l.status == "SENT",
         action: (l) => this.onApproveLease(l),
       },
       {
         id: 'assign',
         icon: 'assign',
         title: 'Assign Extension Worker',
-        visible: (r) => this.authService.isInvestor() && r.status == "PENDING" && !r.extensionWorker,
+        visible: (r) => this.authService.isInvestor() && r.status == "ACCEPTED" && !r.extensionWorker,
         action: (r) => this.onAssignExtensionWorker(r),
       },
     ];
@@ -98,9 +113,7 @@ export class FarmLeaseListComponent implements OnInit {
   }
 
   public shouldShowLeaseEditButton(lease: LeaseAgreement | null | undefined): boolean {
-    if (!lease) return false;
-    if (this.authService.isAdmin()) return false; // Admins can approve but not edit
-    return !this.isLeaseActive(lease); // Hide edit when lease is active
+    return this.authService.isInvestor() && lease?.status == 'PENDING';
   }
 
   private shouldShowApproveLeaseAction(lease: LeaseAgreement | null | undefined): boolean {
@@ -117,8 +130,8 @@ export class FarmLeaseListComponent implements OnInit {
     this.loadLeases();
   }
 
-  public get isAdminUser(): boolean {
-    return this.authService.isAdmin();
+  public get isInvestorUser(): boolean {
+    return this.authService.isInvestor();
   }
 
   private buildFilterRequest(): LeaseFilterRequest {
@@ -234,14 +247,14 @@ export class FarmLeaseListComponent implements OnInit {
     const request$ = this.farmLeaseService.adminDecideLease(leaseId, decision);
 
     request$.subscribe({
-      next: () => {
+      next: (res: ApiResponse<LeaseAgreement>) => {
         this.adminActionLoading = false;
         this.toastService.success(
-          decision === 'ACTIVE' ? 'Lease activated successfully' : 'Lease rejected successfully',
+          decision === 'ACCEPTED' ? 'Lease activated successfully' : 'Lease rejected successfully',
           'Admin Lease Action',
         );
         this.detailRefreshKey++;
-        this.loadLeases();
+        this.selectedLease = res?.data ?? null;
       },
       error: () => {
         this.adminActionLoading = false;
@@ -290,5 +303,40 @@ export class FarmLeaseListComponent implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  onSend(leaseAgreement: LeaseAgreement): void {
+    this.selectedLease = {...leaseAgreement};
+    this.showConfirmationModal = true;
+    this.lockSend = false;
+  }
+
+
+  private onDownload(r: LeaseAgreement) {
+    return undefined;
+  }
+
+  handleSendConfirmation() {
+    if (!this.selectedLease) return;
+
+    this.lockSend = true;
+
+    this.farmLeaseService.send(this.selectedLease.id).subscribe({
+      next: (res: ApiResponse<LeaseAgreement>) => {
+        this.selectedLease = res?.data ?? null;
+        this.lockSend = false;
+        this.showConfirmationModal = false;
+        this.toastService.success(`Lease Agreement sent successfully`);
+
+      },
+      error: (error) => {
+        this.lockSend = false;
+        this.toastService.error(
+          error.message || 'Failed to send Lease Agreementt',
+          'Send Agreement'
+        );
+      }
+    });
+
   }
 }

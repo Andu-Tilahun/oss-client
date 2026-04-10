@@ -2,7 +2,7 @@ import {User} from "../../users/models/user.model";
 import {FarmPlot} from "../../farm-plots/models/farm-plot.model";
 import {FarmFollowUp} from "../../farm-followups/models/farm-followup.model";
 
-export type LeaseStatus = 'ACTIVE' | 'PENDING' | 'TERMINATED';
+export type LeaseStatus = 'ACTIVE' | 'PENDING' | 'TERMINATED' | 'ACCEPTED' | 'SENT';
 export type LeaseTermStatus = 'ACTIVE' | 'PAID' | 'PASSED';
 
 export interface LeaseTerm {

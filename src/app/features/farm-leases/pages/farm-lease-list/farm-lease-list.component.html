@@ -29,7 +29,7 @@
       [total]="total"
       [pageSize]="pageSize"
       [pageIndex]="pageIndex"
-      [showAddButton]="!isAdminUser"
+      [showAddButton]="isInvestorUser"
       [showRefreshButton]="true"
       [showViewButton]="true"
       [showEditButton]="false"
@@ -90,3 +90,13 @@
                                    (selectedUserIdChange)="onSelectedUser($event)"
                                    (confirm)="onConfirm($event)">
 </app-extension-worker-assign-modal>
+
+<app-confirmation-modal
+  [(visible)]="showConfirmationModal"
+  title="Send Lease Agreement"
+  [message]="'Are you sure you want to send ?'"
+  type="warning"
+  confirmText="Send Lease Agreement"
+  [confirmLoading]="lockSend"
+  (confirm)="handleSendConfirmation()"
+></app-confirmation-modal>

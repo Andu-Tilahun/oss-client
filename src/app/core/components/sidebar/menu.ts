@@ -108,10 +108,10 @@ export const MENU: MenuItem[] = [
     icon: 'M20 7l-8-4-8 4m16 0v10a2 2 0 01-2 2H6a2 2 0 01-2-2V7m14 0L12 10 2 7',
     label: 'Farm',
     route: '/farm-plots',
-    roles: ['ADMIN', 'OPERATOR', 'INVESTOR'],
+    roles: ['ADMIN', 'OPERATOR', 'INVESTOR','EXTENSION_WORKER'],
     children: [
-      { icon: '', label: 'Farm Plots', route: '/farm-plots', roles: ['ADMIN', 'OPERATOR'] },
-      { icon: '', label: 'Leases', route: '/farm-leases', roles: ['INVESTOR', 'ADMIN'] },
+      { icon: '', label: 'Farm Plots', route: '/farm-plots', roles: ['ADMIN', 'EXTENSION_WORKER'] },
+      { icon: '', label: 'Leases', route: '/farm-leases', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
       { icon: '', label: 'Restoration & Follow-ups', route: '/farm-followups', roles: ['EXTENSION_WORKER', 'ADMIN'] },
       {icon: '', label: 'Investments', route: '/crowd-funding/investments', roles: ['INVESTOR', 'ADMIN']},
       {

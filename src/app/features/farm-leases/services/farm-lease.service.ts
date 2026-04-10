@@ -5,6 +5,7 @@ import {Endpoints} from '../../../core/endpoint/endpoint.model';
 import {LeaseAgreement, LeaseCreateRequest, LeaseFilterRequest,} from '../models/farm-lease.model';
 import {ApiResponse, PageResponse} from '../../../shared/models/api-response.model';
 import {AssignExtensionWorkerRequest} from "../../assign-extension-worker-request";
+import {InvestmentRecord} from "../../crowd-funding/models/crowd-funding.model";
 
 @Injectable({
   providedIn: 'root',
@@ -32,10 +33,10 @@ export class FarmLeaseService {
     return this.httpService.put<ApiResponse<LeaseAgreement>>(`${Endpoints.FARM_LEASES_ENDPOINT}/${id}`, request);
   }
 
-  adminDecideLease(leaseId: string, decision: 'ACTIVE' | 'TERMINATED'): Observable<ApiResponse<LeaseAgreement>> {
+  adminDecideLease(leaseId: string, decision: 'ACCEPTED' | 'REJECTED'): Observable<ApiResponse<LeaseAgreement>> {
     return this.httpService.post<ApiResponse<LeaseAgreement>>(
       `${Endpoints.FARM_LEASES_ENDPOINT}/${leaseId}/admin/decision`,
-      {decision},
+      { leaseStatus: decision },
     );
   }
 
@@ -43,6 +44,13 @@ export class FarmLeaseService {
     return this.httpService.post<ApiResponse<LeaseAgreement>>(
       `${Endpoints.FARM_LEASES_ENDPOINT}/assign-extension-worker`,
       request,
+    );
+  }
+
+  send(leaseId: string): Observable<ApiResponse<LeaseAgreement>> {
+    return this.httpService.put<ApiResponse<LeaseAgreement>>(
+      `${Endpoints.FARM_LEASES_ENDPOINT}/${leaseId}/send`,
+      null,
     );
   }
 }
