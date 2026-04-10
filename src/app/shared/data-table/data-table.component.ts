@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  Output
+} from '@angular/core';
 import {DataTableColumn} from './models/data-table-column.model';
 import {ColumnType} from './models/column-types.model';
 import {TableQueryParams} from './models/table-query-params.model';
@@ -12,7 +20,17 @@ const DEFAULT_PAGE_SIZE = 10;
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DataTableComponent<T> {
-  @Input() columns: DataTableColumn<T>[] = [];
+  private _columns: DataTableColumn<T>[] = [];
+  @Input()
+  set columns(value: DataTableColumn<T>[]) {
+    this._columns = value ?? [];
+    // Default: all columns visible when columns input changes.
+    this.columnVisibility = this._columns.map(() => true);
+  }
+  get columns(): DataTableColumn<T>[] {
+    return this._columns;
+  }
+
   @Input() data: T[] = [];
   @Input() loading = false;
   @Input() total = 0;
@@ -56,8 +74,36 @@ export class DataTableComponent<T> {
 
   columnType = ColumnType;
 
+  // Column visibility
+  columnVisibility: boolean[] = [];
+  showColumnPicker = false;
+  @Input() showColumnPickerControl = true;
+
   // Pagination
   pageSizeOptions = [10, 20, 50, 100];
+
+  constructor(private readonly elRef: ElementRef<HTMLElement>) {}
+
+  get visibleColumns(): DataTableColumn<T>[] {
+    return this._columns.filter((_, idx) => this.columnVisibility[idx] !== false);
+  }
+
+  toggleColumnPicker(event?: MouseEvent): void {
+    event?.stopPropagation();
+    this.showColumnPicker = !this.showColumnPicker;
+  }
+
+  setColumnVisible(index: number, visible: boolean): void {
+    this.columnVisibility[index] = visible;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.showColumnPicker) return;
+    const target = event.target as Node | null;
+    if (target && this.elRef.nativeElement.contains(target)) return;
+    this.showColumnPicker = false;
+  }
 
   get totalPages(): number {
     return Math.ceil(this.total / this.pageSize);

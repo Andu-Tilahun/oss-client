@@ -7,6 +7,7 @@
   [rightEmptyMessage]="'Select a row to view details.'"
   (rightEdit)="onEdit($event)"
   (rightClose)="onCloseDetail()"
+  [showRightEditButton]="checkIfPlotIsNotAssigned"
 
 >
   <ng-template #extraTableHeader>
@@ -34,8 +35,8 @@
       [showAddButton]="true"
       [showRefreshButton]="true"
       [showViewButton]="true"
-      [showEditButton]="true"
-      [showDeleteButton]="true"
+      [showEditButton]="checkIfPlotIsNotAssigned"
+      [showDeleteButton]="checkIfPlotIsNotAssigned"
       (pageChange)="onPageChange($event)"
       (addClick)="onAdd()"
       (refreshClick)="onRefresh()"

@@ -1,4 +1,4 @@
-export type FarmPlotStatus = 'ACTIVE' | 'INACTIVE' | 'UNDER_MAINTENANCE';
+export type FarmPlotStatus = 'ACTIVE' | 'INACTIVE' | 'UNDER_MAINTENANCE' | 'ASSIGNED_TO_LEASE';
 export type FarmPlotSizeType = 'ACRES' | 'HECTARES';
 export type FarmPlotSoilType = 'SANDY' | 'CLAY' | 'LOAMY';
 

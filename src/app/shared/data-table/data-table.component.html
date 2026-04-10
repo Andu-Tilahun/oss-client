@@ -26,6 +26,45 @@
         title="Export"
         (click)="exportClick.emit()"
       ></app-action-icon-button>
+
+      <!-- Column Picker -->
+      <div class="relative" *ngIf="showColumnPickerControl && columns.length > 0">
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+          (click)="toggleColumnPicker($event)"
+          [attr.aria-expanded]="showColumnPicker"
+        >
+          Columns
+          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+
+        <div
+          *ngIf="showColumnPicker"
+          class="absolute left-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-lg p-2 z-20"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="px-2 py-1 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            Show columns
+          </div>
+          <div class="max-h-64 overflow-auto">
+            <label
+              *ngFor="let column of columns; let colIndex = index"
+              class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-50 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                class="w-4 h-4 text-blue-500 border-slate-300 rounded focus:ring-blue-500"
+                [checked]="columnVisibility[colIndex] !== false"
+                (change)="setColumnVisible(colIndex, ($any($event.target).checked))"
+              />
+              <span class="text-sm text-slate-700">{{ column.header }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Extra Content Projection -->
@@ -59,7 +98,7 @@
           <th *ngIf="showIndex" class="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
             #
           </th>
-          <th *ngFor="let column of columns" class="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+          <th *ngFor="let column of visibleColumns" class="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
             {{ column.header }}
           </th>
           <th *ngIf="showActionColumn" class="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
@@ -82,7 +121,7 @@
           </td>
 
           <!-- Data Columns -->
-          <td *ngFor="let column of columns" class="px-5 py-3.5 whitespace-nowrap text-sm text-slate-700">
+          <td *ngFor="let column of visibleColumns" class="px-5 py-3.5 whitespace-nowrap text-sm text-slate-700">
             <ng-container [ngSwitch]="column.columnType">
               <!-- Button Type -->
               <ng-container *ngSwitchCase="columnType.BUTTON">
@@ -168,7 +207,7 @@
 
         <!-- Empty State -->
         <tr *ngIf="data.length === 0 && !loading">
-          <td [attr.colspan]="columns.length + (showIndex ? 1 : 0) + (showActionColumn ? 1 : 0)" class="px-6 py-16">
+          <td [attr.colspan]="visibleColumns.length + (showIndex ? 1 : 0) + (showActionColumn ? 1 : 0)" class="px-6 py-16">
             <div class="flex flex-col items-center justify-center text-slate-500">
               <svg class="w-14 h-14 mb-3 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>

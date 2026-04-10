@@ -51,6 +51,10 @@ export class FarmPlotListComponent {
     {header: 'Status', value: (p) => p.status},
   ];
 
+  get checkIfPlotIsNotAssigned() {
+    return this.selectedPlot?.status != 'ASSIGNED_TO_LEASE'
+  }
+
   constructor(
     private farmPlotService: FarmPlotService,
     private toastService: ToastService
