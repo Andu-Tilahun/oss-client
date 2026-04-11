@@ -9,18 +9,6 @@
   [rightActions]="rightActions"
   (rightEdit)="onEdit($event)"
 >
-  <ng-template #extraTableHeader>
-    <div class="w-full">
-      <app-farm-lease-filter
-        [(searchText)]="searchText"
-        [(status)]="status"
-        (filterChange)="onFilterChange()"
-        (searchChange)="onFilterChange()"
-        (clearFilters)="clearFilters()"
-      ></app-farm-lease-filter>
-    </div>
-  </ng-template>
-
   <ng-template #leftContent>
     <app-data-table
       [columns]="columns"
@@ -41,6 +29,15 @@
       (viewClick)="onView($event)"
       (editClick)="onEdit($event)"
     >
+      <div extraTableHeader class="w-full min-w-0">
+        <app-farm-lease-filter
+          [(searchText)]="searchText"
+          [(status)]="status"
+          (filterChange)="onFilterChange()"
+          (searchChange)="onFilterChange()"
+          (clearFilters)="clearFilters()"
+        ></app-farm-lease-filter>
+      </div>
     </app-data-table>
   </ng-template>
 

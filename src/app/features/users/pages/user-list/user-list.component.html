@@ -8,18 +8,6 @@
   (rightEdit)="onEdit($event)"
   (rightClose)="onCloseDetail()"
 >
-  <ng-template #extraTableHeader>
-    <div class="w-full">
-      <app-user-filter
-        [(searchText)]="searchText"
-        [roleFilters]="roleFilters"
-        [genderFilters]="genderFilters"
-        (filterChange)="onFilterChange()"
-        (searchChange)="onSearch()"
-        (clearFilters)="clearFilters()"
-      ></app-user-filter>
-    </div>
-  </ng-template>
   <ng-template #leftContent>
     <app-data-table
       [columns]="columns"
@@ -43,6 +31,16 @@
       (editClick)="onEdit($event)"
       (deleteClick)="onDelete($event)"
     >
+      <div extraTableHeader class="w-full min-w-0">
+        <app-user-filter
+          [(searchText)]="searchText"
+          [roleFilters]="roleFilters"
+          [genderFilters]="genderFilters"
+          (filterChange)="onFilterChange()"
+          (searchChange)="onSearch()"
+          (clearFilters)="clearFilters()"
+        ></app-user-filter>
+      </div>
     </app-data-table>
   </ng-template>
 

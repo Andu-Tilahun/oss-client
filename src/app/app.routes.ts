@@ -192,7 +192,7 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./features/crowd-funding/crowd-funding.module').then((m) => m.CrowdFundingModule),
     canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['INVESTOR', 'ADMIN'] },
+    data: { roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
   },
   {
     path: 'my-borrows',

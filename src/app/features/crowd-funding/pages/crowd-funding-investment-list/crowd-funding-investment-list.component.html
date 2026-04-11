@@ -8,18 +8,6 @@
   [showRightEditButton]="false"
   [rightActions]="rightActions"
 >
-  <ng-template #extraTableHeader>
-    <div class="w-full">
-      <app-crowd-funding-investment-filter
-        [(searchText)]="searchText"
-        [(status)]="status"
-        (filterChange)="onFilterChange()"
-        (searchChange)="onFilterChange()"
-        (clearFilters)="clearFilters()"
-      ></app-crowd-funding-investment-filter>
-    </div>
-  </ng-template>
-
   <ng-template #leftContent>
     <app-data-table
       [columns]="columns"
@@ -37,14 +25,37 @@
       (refreshClick)="onRefresh()"
       (viewClick)="onView($event)"
     >
+      <div extraTableHeader class="w-full min-w-0">
+        <app-crowd-funding-investment-filter
+          [(searchText)]="searchText"
+          [(status)]="status"
+          (filterChange)="onFilterChange()"
+          (searchChange)="onFilterChange()"
+          (clearFilters)="clearFilters()"
+        ></app-crowd-funding-investment-filter>
+      </div>
     </app-data-table>
   </ng-template>
 
   <ng-template #rightContent let-investment>
-    <app-crowd-funding-investment-view
-      [investment]="investment"
-      [refreshKey]="detailRefreshKey"
-    ></app-crowd-funding-investment-view>
+    <app-tabs
+      [tabs]="tabs"
+      [activeTab]="activeTab"
+      (activeTabChange)="activeTab = $event">
+      <!-- Request Tab -->
+      <div *ngIf="activeTab === 'detail'">
+        <app-crowd-funding-investment-view
+          [investment]="investment"
+          [refreshKey]="detailRefreshKey"
+        ></app-crowd-funding-investment-view>
+      </div>
+      <div *ngIf="activeTab === 'user'">
+        <app-user-view *ngIf="investment"
+                       [user]="investment.investorUser"></app-user-view>
+
+      </div>
+    </app-tabs>
+
   </ng-template>
 </app-page-split-layout>
 

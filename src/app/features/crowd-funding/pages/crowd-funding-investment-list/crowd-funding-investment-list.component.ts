@@ -9,6 +9,7 @@ import {
 import {CrowdFundingService} from '../../services/crowd-funding.service';
 import {InvestmentFilterRequest, InvestmentRecord, InvestmentStatus,} from '../../models/crowd-funding.model';
 import {PageResponse} from '../../../../shared/models/api-response.model';
+import {TabItem} from "../../../../shared/tabs/models/tab-item.model";
 
 @Component({
   selector: 'app-crowd-funding-investment-list',
@@ -40,6 +41,12 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
     {header: 'Method', value: (r) => r.paymentMethod},
     {header: 'Status', value: (r) => r.status},
   ];
+  activeTab = 'detail';
+
+  tabs: TabItem[] = [
+    {key: 'detail', label: 'Detail'},
+    {key: 'user', label: 'User'}
+  ];
 
   rightActions: PageSplitRightAction<InvestmentRecord>[];
 
@@ -70,7 +77,7 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
         id: 'decide',
         icon: 'check',
         title: 'Accept / Reject',
-        visible: (r) => this.authService.isAdmin() && r.status == "ACCEPTED",
+        visible: (r) => this.authService.isAdmin() && r.status == "SENT",
         action: (r) => this.onInvestorDecision(r),
       },
     ];

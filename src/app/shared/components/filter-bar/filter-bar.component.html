@@ -1,4 +1,4 @@
-<div class="bg-white px-3 py-2 border-b border-slate-100">
+<div class="border-b border-slate-100">
   <div class="flex items-end gap-2 w-full overflow-x-auto scrollbar-hide">
 
     <!-- Search Input -->
@@ -48,8 +48,8 @@
     <button
       type="button"
       (click)="onClear()"
-      class="flex-shrink-0 px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-slate-600
-             font-medium hover:bg-slate-50 transition-colors"
+      class="flex-shrink-0 px-3 py-1.5 bg-red-500 text-white rounded-lg text-sm font-medium
+             hover:bg-red-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
     >
       {{ clearLabel }}
     </button>

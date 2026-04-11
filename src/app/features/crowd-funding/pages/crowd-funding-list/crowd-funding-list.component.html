@@ -9,22 +9,6 @@
   [rightActions]="rightActions"
   (rightEdit)="onEdit($event)"
 >
-  <ng-template #extraTableHeader>
-    <div class="w-full">
-      <app-farm-crowdfunding-crowdFunding-filter
-        [(searchText)]="searchText"
-        [(status)]="status"
-        (filterChange)="onFilterChange()"
-        (searchChange)="onFilterChange()"
-        (clearFilters)="clearFilters()"
-      ></app-farm-crowdfunding-crowdFunding-filter>
-
-      <div class="px-3 py-2 text-xs text-slate-500">
-        Tip: Investors are default-filtered to <b>OPEN</b> crowdFundings.
-      </div>
-    </div>
-  </ng-template>
-
   <ng-template #leftContent>
     <app-data-table
       [columns]="columns"
@@ -45,6 +29,17 @@
       (viewClick)="onView($event)"
       (editClick)="onEdit($event)"
     >
+
+      <div extraTableHeader class="w-full min-w-0">
+        <app-farm-crowdfunding-crowdFunding-filter
+          [(searchText)]="searchText"
+          [(status)]="status"
+          (filterChange)="onFilterChange()"
+          (searchChange)="onFilterChange()"
+          (clearFilters)="clearFilters()"
+        ></app-farm-crowdfunding-crowdFunding-filter>
+      </div>
+
     </app-data-table>
   </ng-template>
 

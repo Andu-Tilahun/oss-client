@@ -22,34 +22,36 @@ import {
 import {TabsComponent} from "../../shared/tabs/app-tabs/app-tabs.component";
 import {FarmPlotViewComponent} from "../farm-plots/components/farm-plot-view/farm-plot-view.component";
 import {FarmFollowupsModule} from "../farm-followups/farm-followups.module";
+import {UserViewComponent} from "../users/components/user-view/user-view.component";
 
 @NgModule({
   declarations: [
     CrowdFundingListComponent,
     CrowdFundingInvestmentListComponent,
   ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    CrowdFundingRoutingModule,
-    SharedModule,
-    PageSplitLayoutComponent,
-    CrowdFundingFilterComponent,
-    CrowdFundingInvestmentFilterComponent,
-    CrowdFundingViewComponent,
-    CrowdFundingInvestmentViewComponent,
-    CrowdFundingCreateModalComponent,
-    CrowdFundingEditModalComponent,
-    CrowdFundingCreateInvestmentModalComponent,
-    CrowdFundingSetRoiModalComponent,
-    CrowdFundingInvestorDecisionModalComponent,
-    ConfirmationModalComponent,
-    ExtensionWorkerAssignModalComponent,
-    TabsComponent,
-    FarmPlotViewComponent,
-    FarmFollowupsModule,
-  ],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        CrowdFundingRoutingModule,
+        SharedModule,
+        PageSplitLayoutComponent,
+        CrowdFundingFilterComponent,
+        CrowdFundingInvestmentFilterComponent,
+        CrowdFundingViewComponent,
+        CrowdFundingInvestmentViewComponent,
+        CrowdFundingCreateModalComponent,
+        CrowdFundingEditModalComponent,
+        CrowdFundingCreateInvestmentModalComponent,
+        CrowdFundingSetRoiModalComponent,
+        CrowdFundingInvestorDecisionModalComponent,
+        ConfirmationModalComponent,
+        ExtensionWorkerAssignModalComponent,
+        TabsComponent,
+        FarmPlotViewComponent,
+        FarmFollowupsModule,
+        UserViewComponent,
+    ],
 })
 export class CrowdFundingModule {}
 

@@ -7,12 +7,15 @@
   (searchChange)="onSearch()"
   (clearFilters)="onClearFilters()"
 >
-  <div class="w-full">
-    <label class="block text-xs font-medium text-slate-600 mb-1">Status</label>
+  <div class="flex items-center gap-2 flex-shrink-0 min-w-0">
+    <label class="text-sm font-medium text-slate-600 whitespace-nowrap shrink-0" for="crowd-funding-investment-status">
+      Status
+    </label>
     <select
+      id="crowd-funding-investment-status"
       [(ngModel)]="status"
       (ngModelChange)="onStatusChange($event)"
-      class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+      class="min-w-[7rem] w-40 max-w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700 bg-white"
     >
       <option [ngValue]="''">All</option>
       <option *ngFor="let s of statuses" [ngValue]="s">{{ s }}</option>
