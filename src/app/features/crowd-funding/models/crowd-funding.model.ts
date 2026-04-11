@@ -8,7 +8,7 @@ export type WaterSource = 'IRRIGATION' | 'RIVER_ACCESS' | 'RAIN_FED';
 export type FundingStatus = 'OPEN' | 'ACTIVE' | 'CLOSED' | 'FUNDED' | 'FAILED';
 
 export type InvestmentPaymentMethod = 'CREDIT' | 'BANK_TRANSFER' | 'CRYPTO';
-export type InvestmentStatus = 'PAID' | 'SENT' | 'ACTIVE' | 'PENDING' | 'FAILED';
+export type InvestmentStatus = 'PAID' | 'SENT' | 'ACTIVE' | 'PENDING' | 'FAILED' | 'ACCEPTED'| 'REJECTED';
 
 export interface CrowdFunding {
   id: string;

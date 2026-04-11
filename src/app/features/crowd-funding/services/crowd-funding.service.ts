@@ -77,7 +77,7 @@ export class CrowdFundingService {
   }
 
 
-  investorDecision(investmentId: string, decision: 'ACCEPT' | 'REJECT'): Observable<ApiResponse<InvestmentRecord>> {
+  investorDecision(investmentId: string, decision: 'ACCEPTED' | 'REJECTED'): Observable<ApiResponse<InvestmentRecord>> {
     return this.httpService.post<ApiResponse<InvestmentRecord>>(
       `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/investments/${investmentId}/investor/decision`,
       {decision},

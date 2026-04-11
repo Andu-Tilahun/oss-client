@@ -63,22 +63,14 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
         id: 'download',
         icon: 'download',
         title: 'Download',
-        visible: (r) => this.authService.isInvestor() && r.status == "ACTIVE",
+        visible: (r) => this.authService.isInvestor() && r.status == "ACCEPTED",
         action: (r) => this.onDownload(r),
-      },
-
-      {
-        id: 'set-roi',
-        icon: 'edit',
-        title: 'Set ROI',
-        visible: (r) => this.authService.isAdmin() && r.status == "SENT",
-        action: (r) => this.onSetRoi(r),
       },
       {
         id: 'decide',
         icon: 'check',
-        title: 'Approve / Reject',
-        visible: (r) => this.authService.isAdmin() && r.status == "SENT",
+        title: 'Accept / Reject',
+        visible: (r) => this.authService.isAdmin() && r.status == "ACCEPTED",
         action: (r) => this.onInvestorDecision(r),
       },
     ];
