@@ -82,16 +82,6 @@
 ></app-confirmation-modal>
 
 <app-confirmation-modal
-  [(visible)]="showConfirmationModal"
-  title="Send Investment"
-  [message]="'Are you sure you want to send ?'"
-  type="warning"
-  confirmText="Send Investment"
-  [confirmLoading]="lockSend"
-  (confirm)="handleSendConfirmation()"
-></app-confirmation-modal>
-
-<app-confirmation-modal
   [(visible)]="showCancelModal"
   title="Cancel Investment"
   [message]="'Are you sure you want to cancel ?'"
