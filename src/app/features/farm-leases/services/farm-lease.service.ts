@@ -60,5 +60,11 @@ export class FarmLeaseService {
       null,
     );
   }
+
+  getContractHtml(leaseId: string): Observable<string> {
+    return this.httpService.get<string>(
+      `${Endpoints.FARM_LEASES_ENDPOINT}/${leaseId}/contract`,
+    );
+  }
 }
 

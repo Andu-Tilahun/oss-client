@@ -1,4 +1,5 @@
 import {Component, OnInit} from '@angular/core';
+import {jsPDF} from 'jspdf';
 import {LeaseAgreement, LeaseFilterRequest, LeaseStatus} from '../../models/farm-lease.model';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
 import {FarmLeaseService} from '../../services/farm-lease.service';
@@ -42,6 +43,10 @@ export class FarmLeaseListComponent implements OnInit {
   showConfirmationModal = false;
   showCancelModal = false;
   private adminActionLoading = false;
+  showContractModal = false;
+  contractLoading = false;
+  contractHtml = '';
+  contractFileName = 'lease-contract.html';
 
   columns: DataTableColumn<LeaseAgreement>[] = [
     {header: 'Start', value: (l) => l.startDate},
@@ -305,6 +310,7 @@ export class FarmLeaseListComponent implements OnInit {
       next: (res: ApiResponse<LeaseAgreement>) => {
         this.selectedLease = res?.data ?? null;
         this.loading = false;
+        this.showAssignExtenstionWorkerModal = false;
         this.toastService.success('Extension Worker Assigned successfully');
       },
       error: () => {
@@ -328,7 +334,70 @@ export class FarmLeaseListComponent implements OnInit {
 
 
   private onDownload(r: LeaseAgreement) {
-    return undefined;
+    this.contractLoading = true;
+    this.contractHtml = '';
+    this.contractFileName = `lease-contract-${r.id}.pdf`;
+    this.farmLeaseService.getContractHtml(r.id).subscribe({
+      next: (html) => {
+        this.contractHtml = html;
+        this.showContractModal = true;
+        this.contractLoading = false;
+      },
+      error: (error) => {
+        this.contractLoading = false;
+        this.toastService.error(
+          error.message || 'Failed to load contract document',
+          'Lease Contract'
+        );
+      }
+    });
+  }
+
+  async onDownloadContractFile(): Promise<void> {
+    if (!this.contractHtml) {
+      this.toastService.error('No contract content available to download', 'Lease Contract');
+      return;
+    }
+
+    this.contractLoading = true;
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.left = '-10000px';
+    iframe.style.top = '0';
+    iframe.style.width = '1024px';
+    iframe.style.height = '1400px';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        iframe.onload = () => resolve();
+        iframe.onerror = () => reject(new Error('Failed to load contract frame'));
+        iframe.srcdoc = this.contractHtml;
+      });
+
+      const contentBody = iframe.contentDocument?.body;
+      if (!contentBody) {
+        throw new Error('Unable to access contract content');
+      }
+
+      const pdf = new jsPDF('p', 'pt', 'a4');
+      await pdf.html(contentBody, {
+        margin: [20, 20, 20, 20],
+        autoPaging: 'text',
+        html2canvas: {
+          scale: 0.7,
+          useCORS: true,
+          logging: false,
+        },
+      });
+      pdf.save(this.contractFileName);
+    } catch (error) {
+      this.toastService.error('Failed to generate PDF contract', 'Lease Contract');
+    } finally {
+      this.contractLoading = false;
+      iframe.remove();
+    }
   }
 
   handleSendConfirmation() {
@@ -364,7 +433,7 @@ export class FarmLeaseListComponent implements OnInit {
       next: (res: ApiResponse<LeaseAgreement>) => {
         this.selectedLease = res?.data ?? null;
         this.lockCancel = false;
-        this.showConfirmationModal = false;
+        this.showCancelModal = false;
         this.toastService.success(`Lease Agreement cancelled successfully`);
 
       },

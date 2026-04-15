@@ -107,3 +107,26 @@
   [confirmLoading]="lockCancel"
   (confirm)="handleCancelConfirmation()"
 ></app-confirmation-modal>
+
+<app-modal
+  [(visible)]="showContractModal"
+  title="Lease Contract Preview"
+  [size]="'xxl'"
+  [confirmText]="'Download PDF'"
+  [cancelText]="'Close'"
+  [confirmLoading]="contractLoading"
+  [confirmDisabled]="contractLoading || !contractHtml"
+  (confirm)="onDownloadContractFile()"
+>
+  <ng-template #modalBody>
+    <div *ngIf="contractLoading" class="text-center py-8 text-gray-600">
+      Loading contract...
+    </div>
+    <iframe
+      *ngIf="!contractLoading"
+      class="w-full h-[70vh] border border-gray-200 rounded-md bg-white"
+      [attr.srcdoc]="contractHtml"
+      title="Lease Contract Preview"
+    ></iframe>
+  </ng-template>
+</app-modal>

@@ -17,6 +17,7 @@ import {
     ExtensionWorkerAssignModalComponent
 } from "../extension-worker-assign-modal/extension-worker-assign-modal.component";
 import {ConfirmationModalComponent} from "../../shared/modals/confirmation-modal/confirmation-modal.component";
+import {ModalComponent} from "../../shared/modals/modal/modal.component";
 
 @NgModule({
   declarations: [FarmLeaseListComponent],
@@ -36,6 +37,7 @@ import {ConfirmationModalComponent} from "../../shared/modals/confirmation-modal
     FarmFollowupsModule,
     ExtensionWorkerAssignModalComponent,
     ConfirmationModalComponent,
+    ModalComponent,
   ],
 })
 export class FarmLeasesModule {}
