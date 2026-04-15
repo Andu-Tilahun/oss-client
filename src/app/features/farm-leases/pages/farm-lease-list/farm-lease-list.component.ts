@@ -38,7 +38,9 @@ export class FarmLeaseListComponent implements OnInit {
   showAdminActionModal = false;
   showAssignExtenstionWorkerModal = false;
   lockSend = false;
+  lockCancel = false;
   showConfirmationModal = false;
+  showCancelModal = false;
   private adminActionLoading = false;
 
   columns: DataTableColumn<LeaseAgreement>[] = [
@@ -74,6 +76,13 @@ export class FarmLeaseListComponent implements OnInit {
         title: 'Send',
         visible: (r) => this.authService.isInvestor() && r.status == "PENDING",
         action: (r) => this.onSend(r),
+      },
+      {
+        id: 'cancel',
+        icon: 'cancel',
+        title: 'Cancel',
+        visible: (r) => this.authService.isInvestor() && r.status == "PENDING",
+        action: (r) => this.onCancel(r),
       },
 
       {
@@ -311,6 +320,12 @@ export class FarmLeaseListComponent implements OnInit {
     this.lockSend = false;
   }
 
+  onCancel(leaseAgreement: LeaseAgreement): void {
+    this.selectedLease = {...leaseAgreement};
+    this.showCancelModal = true;
+    this.lockCancel = false;
+  }
+
 
   private onDownload(r: LeaseAgreement) {
     return undefined;
@@ -332,11 +347,34 @@ export class FarmLeaseListComponent implements OnInit {
       error: (error) => {
         this.lockSend = false;
         this.toastService.error(
-          error.message || 'Failed to send Lease Agreementt',
+          error.message || 'Failed to send Lease Agreement',
           'Send Agreement'
         );
       }
     });
 
+  }
+
+  handleCancelConfirmation() {
+    if (!this.selectedLease) return;
+
+    this.lockCancel = true;
+
+    this.farmLeaseService.cancel(this.selectedLease.id).subscribe({
+      next: (res: ApiResponse<LeaseAgreement>) => {
+        this.selectedLease = res?.data ?? null;
+        this.lockCancel = false;
+        this.showConfirmationModal = false;
+        this.toastService.success(`Lease Agreement cancelled successfully`);
+
+      },
+      error: (error) => {
+        this.lockCancel = false;
+        this.toastService.error(
+          error.message || 'Failed to cancel Lease Agreement',
+          'Cancel Agreement'
+        );
+      }
+    });
   }
 }

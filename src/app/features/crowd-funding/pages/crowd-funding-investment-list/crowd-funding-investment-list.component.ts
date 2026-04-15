@@ -35,7 +35,8 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
   showInvestorDecisionModal = false;
   lockSend = false;
   showConfirmationModal = false;
-
+  lockCancel = false;
+  showCancelModal = false;
   columns: DataTableColumn<InvestmentRecord>[] = [
     {header: 'Amount', value: (r) => this.formatAmount(r.amount)},
     {header: 'Method', value: (r) => r.paymentMethod},
@@ -64,6 +65,14 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
         title: 'Send',
         visible: (r) => this.authService.isInvestor() && r.status == "PENDING",
         action: (r) => this.onSend(r),
+      },
+
+      {
+        id: 'cancel',
+        icon: 'cancel',
+        title: 'Cancel',
+        visible: (r) => this.authService.isInvestor() && r.status == "PENDING",
+        action: (r) => this.onCancel(r),
       },
 
       {
@@ -166,15 +175,16 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
     this.showInvestorDecisionModal = false;
   }
 
-  onSetRoi(r: InvestmentRecord): void {
-    this.selectedInvestment = {...r};
-    this.showSetRoiModal = true;
-  }
-
   onSend(r: InvestmentRecord): void {
     this.selectedInvestment = {...r};
     this.showConfirmationModal = true;
     this.lockSend = false;
+  }
+
+  onCancel(r: InvestmentRecord): void {
+    this.selectedInvestment = {...r};
+    this.showCancelModal = true;
+    this.lockCancel = false;
   }
 
   onInvestorDecision(r: InvestmentRecord): void {
@@ -229,8 +239,26 @@ export class CrowdFundingInvestmentListComponent implements OnInit {
 
   }
 
-  private onAssignExtensionWorker(r: InvestmentRecord) {
+  handleCancelConfirmation() {
+    if (!this.selectedInvestment) return;
 
+    this.lockCancel = true;
+
+    this.crowdfundingService.cancel(this.selectedInvestment.id).subscribe({
+      next: () => {
+        this.lockCancel = false;
+        this.showCancelModal = false;
+        this.toastService.success(`Investment cancelled successfully`);
+        this.loadInvestments();
+      },
+      error: (error) => {
+        this.lockCancel = false;
+        this.toastService.error(
+          error.message || 'Failed to cancel Investment',
+          'Cancel Investment'
+        );
+      }
+    });
   }
 }
 

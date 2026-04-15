@@ -97,3 +97,13 @@
   [confirmLoading]="lockSend"
   (confirm)="handleSendConfirmation()"
 ></app-confirmation-modal>
+
+<app-confirmation-modal
+  [(visible)]="showCancelModal"
+  title="Cancel Lease Agreement"
+  [message]="'Are you sure you want to cancel ?'"
+  type="warning"
+  confirmText="Cancel Lease Agreement"
+  [confirmLoading]="lockCancel"
+  (confirm)="handleCancelConfirmation()"
+></app-confirmation-modal>

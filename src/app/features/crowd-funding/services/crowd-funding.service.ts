@@ -76,6 +76,13 @@ export class CrowdFundingService {
     );
   }
 
+  cancel(investmentId: string): Observable<ApiResponse<InvestmentRecord>> {
+    return this.httpService.put<ApiResponse<InvestmentRecord>>(
+      `${Endpoints.FARM_CROWDFUNDING_ENDPOINT}/investments/${investmentId}/cancel`,
+      null,
+    );
+  }
+
 
   investorDecision(investmentId: string, decision: 'ACCEPTED' | 'REJECTED'): Observable<ApiResponse<InvestmentRecord>> {
     return this.httpService.post<ApiResponse<InvestmentRecord>>(

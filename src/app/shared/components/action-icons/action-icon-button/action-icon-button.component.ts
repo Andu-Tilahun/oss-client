@@ -11,7 +11,8 @@ export type ActionIconType =
   | 'send'
   | 'assign'
   | 'download'
-  | 'check';
+  | 'check'
+  | 'cancel';
 
 @Component({
   selector: 'app-action-icon-button',
@@ -78,9 +79,10 @@ export class ActionIconButtonComponent {
         return 'M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2zM17 21v-8H7v8h10zM7 5h8v4H7V5z';
       case 'check':
         return 'M5 13l4 4L19 7';
+      case 'cancel':
+        return 'M18 6L6 18M6 6l12 12';  // Circle with X (close/cancel style)
       default:
         return 'M12 4v16m8-8H4';
     }
   }
 }
-

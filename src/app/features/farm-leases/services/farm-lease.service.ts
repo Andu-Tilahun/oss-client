@@ -53,5 +53,12 @@ export class FarmLeaseService {
       null,
     );
   }
+
+  cancel(leaseId: string): Observable<ApiResponse<LeaseAgreement>> {
+    return this.httpService.put<ApiResponse<LeaseAgreement>>(
+      `${Endpoints.FARM_LEASES_ENDPOINT}/${leaseId}/cancel`,
+      null,
+    );
+  }
 }
 
