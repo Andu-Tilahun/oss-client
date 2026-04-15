@@ -5,6 +5,8 @@ import { NotificationListComponent } from './pages/notification-list/notificatio
 import { NotificationFilterComponent } from './pages/notification-filter/notification-filter.component';
 import { SharedModule } from '../../shared/shared.module';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { PageSplitLayoutComponent } from '../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
+import { NotificationViewComponent } from './components/notification-view/notification-view.component';
 
 @NgModule({
   declarations: [NotificationListComponent],
@@ -13,7 +15,9 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
     SharedModule,
     NotificationRoutingModule,
     PageHeaderComponent,
-    NotificationFilterComponent
+    NotificationFilterComponent,
+    PageSplitLayoutComponent,
+    NotificationViewComponent
   ]
 })
 export class NotificationModule {

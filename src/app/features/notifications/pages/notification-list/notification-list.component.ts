@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { NotificationLogService } from '../../services/notification.service';
 import { NotificationLog } from '../../models/notification.model';
 import { DataTableColumn } from '../../../../shared/data-table/models/data-table-column.model';
@@ -14,10 +13,12 @@ import {ToastService} from "../../../../shared/toast/toast.service";
 })
 export class NotificationListComponent implements OnInit {
   notifications: NotificationLog[] = [];
+  selectedNotification: NotificationLog | null = null;
   loading = false;
   total = 0;
   pageSize = 10;
   pageIndex = 1;
+  searchText = '';
   status = '';
   priority = '';
 
@@ -31,12 +32,15 @@ export class NotificationListComponent implements OnInit {
 
   constructor(
     private notificationService: NotificationLogService,
-    private toastService: ToastService,
-    private router: Router
+    private toastService: ToastService
   ) {}
 
   onView(notification: NotificationLog): void {
-    this.router.navigate(['/notifications', notification.id]);
+    this.selectedNotification = { ...notification };
+  }
+
+  onCloseDetail(): void {
+    this.selectedNotification = null;
   }
 
   ngOnInit(): void {
@@ -56,6 +60,16 @@ export class NotificationListComponent implements OnInit {
           this.toastService.success(`Notification retrieved successfully`);
           this.notifications = response.content;
           this.total = response.totalElements;
+          const previousSelectedId = this.selectedNotification?.id;
+
+          if (this.notifications.length === 0) {
+            this.selectedNotification = null;
+          } else if (!previousSelectedId) {
+            this.selectedNotification = { ...this.notifications[0] };
+          } else {
+            const match = this.notifications.find((n) => n.id === previousSelectedId);
+            this.selectedNotification = match ? { ...match } : { ...this.notifications[0] };
+          }
         }
         this.loading = false;
       },
@@ -81,6 +95,7 @@ export class NotificationListComponent implements OnInit {
   }
 
   clearFilters(): void {
+    this.searchText = '';
     this.status = '';
     this.priority = '';
     this.pageIndex = 1;

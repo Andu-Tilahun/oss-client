@@ -1,39 +1,48 @@
-<app-page-header
-  pageTitle="Notifications"
-  subTitle="View notification logs"
-  [showBackButton]="false"
-  [loading]="loading"
+<app-page-split-layout
+  [showLeftTitle]="true"
+  [showRightTitle]="true"
+  leftTitle="Notification Management"
+  rightTitle="Notification Detail"
+  [rightItem]="selectedNotification"
+  [rightEmptyMessage]="'Select a row to view details.'"
+  [showRightEditButton]="false"
+  (rightClose)="onCloseDetail()"
 >
-  <ng-template #mainContent>
-    <div class="p-6">
-      <h2 class="text-base font-semibold text-slate-700 mb-4">Notification list</h2>
-      <app-data-table
-        [columns]="columns"
-        [data]="notifications"
-        [loading]="loading"
-        [total]="total"
-        [pageSize]="pageSize"
-        [pageIndex]="pageIndex"
-        [showIndex]="true"
-        [showAddButton]="false"
-        [showRefreshButton]="true"
-        [showViewButton]="true"
-        [showEditButton]="false"
-        [showDeleteButton]="false"
-        (pageChange)="onPageChange($event)"
-        (refreshClick)="loadNotifications()"
-        (viewClick)="onView($event)"
-      >
-        <div extraTableHeader class="w-full flex justify-end">
-          <app-notification-filter
-            [(status)]="status"
-            [(priority)]="priority"
-            (searchChange)="onSearch()"
-            (clearFilters)="clearFilters()"
-          ></app-notification-filter>
-        </div>
-      </app-data-table>
-    </div>
+  <ng-template #leftContent>
+    <app-data-table
+      [columns]="columns"
+      [data]="notifications"
+      [loading]="loading"
+      [total]="total"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [showIndex]="true"
+      [showAddButton]="false"
+      [showRefreshButton]="true"
+      [showViewButton]="true"
+      [showEditButton]="false"
+      [showDeleteButton]="false"
+      (pageChange)="onPageChange($event)"
+      (refreshClick)="loadNotifications()"
+      (viewClick)="onView($event)"
+    >
+      <div extraTableHeader class="w-full min-w-0">
+        <app-notification-filter
+          [(searchText)]="searchText"
+          [(status)]="status"
+          [(priority)]="priority"
+          (filterChange)="onSearch()"
+          (searchChange)="onSearch()"
+          (clearFilters)="clearFilters()"
+        ></app-notification-filter>
+      </div>
+    </app-data-table>
   </ng-template>
-</app-page-header>
+
+  <ng-template #rightContent let-notification>
+    <app-notification-view
+      [id]="notification?.id"
+    ></app-notification-view>
+  </ng-template>
+</app-page-split-layout>
 

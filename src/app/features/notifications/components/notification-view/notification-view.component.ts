@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NotificationLog } from '../../models/notification.model';
 import { NotificationLogService } from '../../services/notification.service';
@@ -12,7 +12,7 @@ import { DetailFieldComponent } from '../../../../shared/components/detail-field
   imports: [CommonModule, DetailCardComponent, DetailSectionComponent, DetailFieldComponent],
   templateUrl: './notification-view.component.html',
 })
-export class NotificationViewComponent implements OnInit {
+export class NotificationViewComponent implements OnInit, OnChanges {
   @Input() id?: number;
 
   notification: NotificationLog | null = null;
@@ -23,6 +23,12 @@ export class NotificationViewComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['id'] && !changes['id'].firstChange) {
+      this.load();
+    }
   }
 
   load(): void {

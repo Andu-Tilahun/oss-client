@@ -1,30 +1,31 @@
-<div class="flex items-center space-x-2 flex-wrap gap-2 justify-end">
-  <select
-    class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-    [ngModel]="status"
-    (ngModelChange)="onStatusChange($event)"
-  >
-    <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
-  </select>
+<app-filter-bar
+  [(searchText)]="searchText"
+  (searchTextChange)="onSearchTextChange($event)"
+  searchPlaceholder="Search notifications..."
+  applyLabel="Search"
+  clearLabel="Clear Filters"
+  (searchChange)="onSearch()"
+  (clearFilters)="onClearFilters()"
+>
+  <div class="w-full">
+    <label class="block text-xs font-medium text-slate-600 mb-1">Status</label>
+    <select
+      [ngModel]="status"
+      (ngModelChange)="onStatusChange($event)"
+      class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+    >
+      <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
+    </select>
+  </div>
 
-  <select
-    class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-    [ngModel]="priority"
-    (ngModelChange)="onPriorityChange($event)"
-  >
-    <option *ngFor="let opt of priorityOptions" [value]="opt.value">{{ opt.label }}</option>
-  </select>
-
-  <button
-    class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-    (click)="onSearch()"
-  >
-    Search
-  </button>
-  <button
-    class="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-    (click)="onClearFilters()"
-  >
-    Clear
-  </button>
-</div>
+  <div class="w-full">
+    <label class="block text-xs font-medium text-slate-600 mb-1">Priority</label>
+    <select
+      [ngModel]="priority"
+      (ngModelChange)="onPriorityChange($event)"
+      class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+    >
+      <option *ngFor="let opt of priorityOptions" [value]="opt.value">{{ opt.label }}</option>
+    </select>
+  </div>
+</app-filter-bar>
