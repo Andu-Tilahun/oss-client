@@ -7,7 +7,14 @@
     </app-detail-section>
 
     <app-detail-section title="Attachment">
-      <app-detail-field label="Attachment" [value]="followUp.attachment || '-'"/>
+      <div class="col-span-full">
+        <app-document-upload
+          label="Image"
+          [currentFileId]="followUp.attachment"
+          [viewOnly]="true"
+          [required]="false"
+        ></app-document-upload>
+      </div>
     </app-detail-section>
 
     <app-detail-section title="Audit">

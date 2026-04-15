@@ -2,7 +2,7 @@ export interface FarmFollowUp {
   id: string;
   externalId: string;
   remark: string;
-  attachment?: string | null;
+  attachment: string;
   createdBy?: string | null;
   createdAt?: string | null;
   updatedBy?: string | null;

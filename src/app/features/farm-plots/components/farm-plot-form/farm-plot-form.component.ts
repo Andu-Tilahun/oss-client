@@ -37,7 +37,7 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
 
   readonly sizeTypes: Array<FarmPlotSizeType> = ['ACRES', 'HECTARES'];
   readonly soilTypes: Array<FarmPlotSoilType> = ['SANDY', 'CLAY', 'LOAMY'];
-  readonly statuses: Array<FarmPlotStatus> = ['ACTIVE', 'INACTIVE', 'UNDER_MAINTENANCE'];
+  readonly statuses: Array<FarmPlotStatus> = ['ACTIVE', 'INACTIVE', 'UNDER_MAINTENANCE','ASSIGNED_TO_LEASE'];
 
   // Track image file id locally since ProfilePictureUploadComponent controls its preview
   profileImageUuid?: string;

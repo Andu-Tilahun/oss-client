@@ -52,7 +52,8 @@ export class FarmPlotListComponent {
   ];
 
   get checkIfPlotIsNotAssigned() {
-    return this.selectedPlot?.status != 'ASSIGNED_TO_LEASE'
+    return true;
+    // return this.selectedPlot?.status != 'ASSIGNED_TO_LEASE'
   }
 
   constructor(
