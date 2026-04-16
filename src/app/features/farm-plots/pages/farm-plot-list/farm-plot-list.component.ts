@@ -6,7 +6,6 @@ import {
   FarmPlotSoilType,
   FarmPlotStatus
 } from '../../models/farm-plot.model';
-import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
 import {FarmPlotService} from '../../services/farm-plot.service';
 import {PageResponse} from '../../../../shared/models/api-response.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
@@ -19,6 +18,8 @@ import {TableQueryParams} from '../../../../shared/data-table/models/table-query
   styleUrl: './farm-plot-list.component.css',
 })
 export class FarmPlotListComponent {
+  private readonly storageApiUrl = 'http://localhost:8080/api/files';
+
   plots: FarmPlot[] = [];
   loading = false;
   total = 0;
@@ -41,15 +42,11 @@ export class FarmPlotListComponent {
   // Forces the right-side detail component to reload after updates.
   detailRefreshKey = 0;
 
-  columns: DataTableColumn<FarmPlot>[] = [
-    {header: 'Title', value: (p) => p.title},
-    {
-      header: 'Size',
-      value: (p) => `${p.size} ${p.sizeType}`,
-    },
-    {header: 'Soil Type', value: (p) => p.soilType},
-    {header: 'Status', value: (p) => p.status},
-  ];
+  readonly getPlotCardTitle = (plot: FarmPlot): string => plot.title;
+  readonly getPlotCreatedDate = (plot: FarmPlot): Date | undefined => plot.createdAt;
+  readonly getPlotThumbnailAlt = (plot: FarmPlot): string => `${plot.title} thumbnail`;
+  readonly getPlotThumbnailUrl = (plot: FarmPlot): string | null =>
+    plot.imageUuid ? `${this.storageApiUrl}/${plot.imageUuid}` : null;
 
   get checkIfPlotIsNotAssigned() {
     return true;
@@ -134,6 +131,10 @@ export class FarmPlotListComponent {
 
   onRefresh(): void {
     this.loadPlots();
+  }
+
+  onDownload(): void {
+    this.toastService.info('Farm plot download is not implemented yet', 'Download Farm Plots');
   }
 
   onSearch(): void {

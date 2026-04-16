@@ -1,0 +1,203 @@
+<div class="w-full">
+  <div class="mb-4 flex flex-wrap items-center gap-3">
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <app-action-icon-button
+        *ngIf="showAddButton"
+        icon="plus"
+        title="Add"
+        (click)="addClick.emit()"
+      ></app-action-icon-button>
+
+      <app-action-icon-button
+        *ngIf="showRefreshButton"
+        icon="refresh"
+        title="Refresh"
+        (click)="refreshClick.emit()"
+      ></app-action-icon-button>
+
+      <app-action-icon-button
+        *ngIf="showDownloadButton"
+        icon="export"
+        title="Download"
+        (click)="downloadClick.emit()"
+      ></app-action-icon-button>
+    </div>
+
+    <div class="min-w-0 flex-1">
+      <ng-content select="[extraHeader]"></ng-content>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+    <div *ngIf="loading" class="relative min-h-[120px]">
+      <div class="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10">
+        <div class="flex items-center space-x-2">
+          <svg class="animate-spin h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span class="text-sm text-gray-600">Loading...</span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="data.length === 0 && !loading" class="px-6 py-16">
+      <div class="flex flex-col items-center justify-center text-slate-500">
+        <svg class="w-14 h-14 mb-3 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+        </svg>
+        <p class="text-sm font-medium">{{ noDataMessage }}</p>
+      </div>
+    </div>
+
+    <div *ngIf="data.length > 0" class="p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div
+        *ngFor="let item of data; trackBy: trackByIndex"
+        class="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden"
+      >
+        <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-3">
+          <h3 class="text-sm font-semibold text-slate-800 truncate">
+            {{ getCardTitle(item) }}
+          </h3>
+          <span class="text-xs text-slate-500 whitespace-nowrap">
+            {{ getCreatedDate(item) ? (getCreatedDate(item) | date:'mediumDate') : '-' }}
+          </span>
+        </div>
+
+        <div class="p-3 card-body">
+          <ng-container *ngIf="bodyTemplate; else defaultBody">
+            <ng-container
+              [ngTemplateOutlet]="bodyTemplate.templateRef"
+              [ngTemplateOutletContext]="{ $implicit: item }"
+            ></ng-container>
+          </ng-container>
+
+          <ng-template #defaultBody>
+            <div class="thumbnail-wrap" *ngIf="getThumbnailUrl(item); else noThumb">
+              <img
+                [src]="getThumbnailUrl(item)"
+                [alt]="thumbnailAltAccessor(item)"
+                class="thumbnail-image"
+              />
+            </div>
+            <ng-template #noThumb>
+              <div class="thumbnail-empty">No image available</div>
+            </ng-template>
+          </ng-template>
+        </div>
+
+        <div class="px-4 py-3 border-t border-slate-200 bg-white">
+          <ng-container *ngIf="footerTemplate; else defaultFooter">
+            <ng-container
+              [ngTemplateOutlet]="footerTemplate.templateRef"
+              [ngTemplateOutletContext]="{ $implicit: item }"
+            ></ng-container>
+          </ng-container>
+
+          <ng-template #defaultFooter>
+            <div class="flex items-center gap-4 text-sm">
+              <button
+                *ngIf="showViewButton"
+                type="button"
+                class="action-link action-link--view"
+                (click)="viewClick.emit(item)"
+              >
+                View
+              </button>
+              <button
+                *ngIf="showEditButton"
+                type="button"
+                class="action-link action-link--edit"
+                (click)="editClick.emit(item)"
+              >
+                Edit
+              </button>
+              <button
+                *ngIf="showDeleteButton"
+                type="button"
+                class="action-link action-link--delete"
+                (click)="deleteClick.emit(item)"
+              >
+                Delete
+              </button>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="showPagination && data.length > 0" class="bg-slate-50/60 px-5 py-3 border-t border-slate-100">
+      <div class="flex items-center justify-between flex-wrap gap-4">
+        <div class="flex items-center space-x-2">
+          <label class="text-sm text-slate-600">Show</label>
+          <select
+            [value]="pageSize"
+            (change)="onPageSizeChange($event)"
+            class="border border-slate-200 rounded-lg px-2.5 py-1 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white"
+          >
+            <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+          </select>
+          <span class="text-sm text-slate-600">entries</span>
+        </div>
+
+        <div class="text-sm text-slate-600">
+          Showing <span class="font-medium">{{ startIndex }}</span> to <span class="font-medium">{{ endIndex }}</span> of <span class="font-medium">{{ total }}</span> results
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <button
+            (click)="onPageChange(1)"
+            [disabled]="pageIndex === 1"
+            class="px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+            </svg>
+          </button>
+
+          <button
+            (click)="onPageChange(pageIndex - 1)"
+            [disabled]="pageIndex === 1"
+            class="px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+          </button>
+
+          <button
+            *ngFor="let page of visiblePages"
+            (click)="onPageChange(page)"
+            [class.bg-blue-500]="page === pageIndex"
+            [class.text-white]="page === pageIndex"
+            [class.border-blue-500]="page === pageIndex"
+            [class.hover:bg-slate-100]="page !== pageIndex"
+            class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 transition-colors"
+          >
+            {{ page }}
+          </button>
+
+          <button
+            (click)="onPageChange(pageIndex + 1)"
+            [disabled]="pageIndex === totalPages"
+            class="px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+
+          <button
+            (click)="onPageChange(totalPages)"
+            [disabled]="pageIndex === totalPages"
+            class="px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

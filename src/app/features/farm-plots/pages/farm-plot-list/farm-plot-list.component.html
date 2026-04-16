@@ -11,7 +11,7 @@
 
 >
   <ng-template #extraTableHeader>
-    <div class="w-full">
+    <div class="w-full" extraHeader>
       <app-farm-plot-filter
         [(searchText)]="searchText"
         [(status)]="status"
@@ -25,8 +25,7 @@
   </ng-template>
 
   <ng-template #leftContent>
-    <app-data-table
-      [columns]="columns"
+    <app-data-card-layout
       [data]="plots"
       [loading]="loading"
       [total]="total"
@@ -34,17 +33,24 @@
       [pageIndex]="pageIndex"
       [showAddButton]="true"
       [showRefreshButton]="true"
+      [showDownloadButton]="true"
       [showViewButton]="true"
       [showEditButton]="checkIfPlotIsNotAssigned"
       [showDeleteButton]="checkIfPlotIsNotAssigned"
+      [titleAccessor]="getPlotCardTitle"
+      [createdDateAccessor]="getPlotCreatedDate"
+      [thumbnailUrlAccessor]="getPlotThumbnailUrl"
+      [thumbnailAltAccessor]="getPlotThumbnailAlt"
       (pageChange)="onPageChange($event)"
       (addClick)="onAdd()"
       (refreshClick)="onRefresh()"
+      (downloadClick)="onDownload()"
       (viewClick)="onView($event)"
       (editClick)="onEdit($event)"
       (deleteClick)="onDelete($event)"
     >
-    </app-data-table>
+      <ng-container *ngTemplateOutlet="extraTableHeader"></ng-container>
+    </app-data-card-layout>
   </ng-template>
 
   <ng-template #rightContent let-plot>
