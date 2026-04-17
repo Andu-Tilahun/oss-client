@@ -13,6 +13,7 @@ import {AuthService} from '../../../auth/services/auth.service';
 import {AdminLeaseDecision} from '../../modals/farm-lease-approve-modal/farm-lease-approve-modal.component';
 import {TabItem} from "../../../../shared/tabs/models/tab-item.model";
 import {AssignExtensionWorkerRequest} from "../../../assign-extension-worker-request";
+import {FarmPlot} from "../../../farm-plots/models/farm-plot.model";
 
 @Component({
   selector: 'app-farm-lease-list',
@@ -66,6 +67,8 @@ export class FarmLeaseListComponent implements OnInit {
   ];
 
   rightActions: PageSplitRightAction<LeaseAgreement>[];
+  plot: FarmPlot | null = null;
+  myRequest = true;
 
   constructor(
     private farmLeaseService: FarmLeaseService,

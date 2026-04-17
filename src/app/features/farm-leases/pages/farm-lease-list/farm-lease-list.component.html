@@ -31,6 +31,7 @@
     >
       <div extraTableHeader class="w-full min-w-0">
         <app-farm-lease-filter
+          *ngIf="myRequest"
           [(searchText)]="searchText"
           [(status)]="status"
           (filterChange)="onFilterChange()"
@@ -43,6 +44,7 @@
 
   <ng-template #rightContent let-lease>
     <app-tabs
+      *ngIf="myRequest"
       [tabs]="tabs"
       [activeTab]="activeTab"
       (activeTabChange)="activeTab = $event">
@@ -63,6 +65,7 @@
         ></app-farm-followup-list>
       </div>
     </app-tabs>
+<!--    <app-farm-plot-view *ngIf="!myRequest" [plot]="plot" [refreshKey]="detailRefreshKey"></app-farm-plot-view>-->
   </ng-template>
 </app-page-split-layout>
 
