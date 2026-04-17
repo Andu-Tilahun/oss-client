@@ -1,0 +1,179 @@
+/* ─── Container ──────────────────────────────────────────────────── */
+.ag-table-container {
+  @apply bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100 relative;
+}
+
+/* ─── Loading ─────────────────────────────────────────────────────── */
+.ag-loading-overlay {
+  @apply absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10;
+}
+.ag-loading-spinner {
+  @apply flex flex-col items-center gap-2;
+}
+
+/* ─── Toolbar Buttons ─────────────────────────────────────────────── */
+.ag-btn {
+  @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150;
+}
+.ag-btn-primary {
+  @apply bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-indigo-200;
+}
+.ag-btn-ghost {
+  @apply border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300;
+}
+
+/* ─── Parent Table ────────────────────────────────────────────────── */
+.ag-table {
+  @apply divide-y divide-slate-100;
+}
+.ag-thead-row {
+  @apply bg-gradient-to-r from-slate-50 to-slate-50/60;
+}
+.ag-th {
+  @apply px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap;
+}
+.ag-th-expand {
+  @apply w-10 px-3;
+}
+.ag-th-actions {
+  @apply text-right;
+}
+
+/* ─── Parent Rows ─────────────────────────────────────────────────── */
+.ag-parent-row {
+  @apply cursor-pointer transition-all duration-150 border-b border-slate-100;
+}
+.ag-parent-row:hover {
+  @apply bg-indigo-50/40;
+}
+.ag-parent-row--expanded {
+  @apply bg-indigo-50/60 border-b-0;
+}
+.ag-td {
+  @apply px-5 py-3.5 text-sm text-slate-700 whitespace-nowrap;
+}
+.ag-td-expand {
+  @apply px-3 py-3.5 w-10;
+}
+.ag-td-index {
+  @apply text-slate-400 font-mono text-xs;
+}
+
+/* ─── Expand Button ───────────────────────────────────────────────── */
+.ag-expand-btn {
+  @apply w-7 h-7 inline-flex items-center justify-center rounded-lg text-slate-400
+    hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-150;
+}
+.ag-expand-btn--open {
+  @apply text-indigo-600 bg-indigo-50;
+}
+
+/* ─── Cell types ──────────────────────────────────────────────────── */
+.ag-cell-text {
+  @apply text-slate-700;
+}
+.ag-cell-btn {
+  @apply text-indigo-600 hover:text-indigo-800 font-medium text-sm transition-colors;
+}
+.ag-cell-link {
+  @apply text-indigo-600 hover:text-indigo-800 hover:underline font-medium text-sm transition-colors;
+}
+
+/* ─── Parent action buttons ───────────────────────────────────────── */
+.ag-action-btn {
+  @apply inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-all duration-150;
+}
+.ag-action-btn--sm {
+  @apply px-1.5 py-0.5 text-[11px];
+}
+.ag-action-btn--view {
+  @apply text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700;
+}
+.ag-action-btn--edit {
+  @apply text-slate-600 hover:bg-slate-100 hover:text-slate-800;
+}
+.ag-action-btn--delete {
+  @apply text-rose-500 hover:bg-rose-50 hover:text-rose-600;
+}
+
+/* ─── Child Panel ─────────────────────────────────────────────────── */
+.ag-child-panel-row {
+  @apply bg-transparent;
+}
+.ag-child-panel-cell {
+  @apply border-b border-slate-100;
+}
+.ag-child-panel {
+  @apply mx-5 my-3 rounded-xl border border-indigo-100 bg-indigo-50/30 overflow-hidden
+    shadow-sm;
+  animation: childSlideIn 0.2s ease-out;
+}
+
+@keyframes childSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Child header bar */
+.ag-child-header {
+  @apply flex items-center justify-between px-4 py-2.5 border-b border-indigo-100 bg-indigo-50/60;
+}
+.ag-child-header-label {
+  @apply flex items-center gap-2 text-sm font-semibold text-indigo-700;
+}
+.ag-child-count {
+  @apply ml-1 px-1.5 py-0.5 rounded-full text-xs bg-indigo-100 text-indigo-600 font-mono;
+}
+
+/* ─── Child Table ─────────────────────────────────────────────────── */
+.ag-child-table {
+  @apply w-full;
+}
+.ag-child-thead-row {
+  @apply bg-white/70 border-b border-indigo-100;
+}
+.ag-child-th {
+  @apply px-4 py-2.5 text-left text-[11px] font-semibold text-indigo-500 uppercase tracking-wider whitespace-nowrap;
+}
+.ag-child-row {
+  @apply transition-colors duration-100 border-b border-indigo-50 last:border-0;
+}
+.ag-child-row:hover {
+  @apply bg-white/60;
+}
+.ag-child-td {
+  @apply px-4 py-2.5 text-xs text-slate-600 whitespace-nowrap;
+}
+.ag-child-cell-text {
+  @apply text-slate-600;
+}
+
+/* ─── Child Pagination ────────────────────────────────────────────── */
+.ag-child-pagination {
+  @apply flex items-center justify-between flex-wrap gap-3 px-4 py-2 bg-white/40 border-t border-indigo-100;
+}
+
+/* ─── Parent Pagination ───────────────────────────────────────────── */
+.ag-pagination {
+  @apply flex items-center justify-between flex-wrap gap-4 px-5 py-3.5
+    bg-slate-50/60 border-t border-slate-100;
+}
+
+/* ─── Page Buttons ────────────────────────────────────────────────── */
+.ag-page-btn {
+  @apply w-7 h-7 inline-flex items-center justify-center rounded-md border border-slate-200
+    text-xs font-medium text-slate-600 bg-white transition-all duration-100
+    hover:bg-slate-100 hover:border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed;
+}
+.ag-page-btn--lg {
+  @apply w-8 h-8 text-sm;
+}
+.ag-page-btn--active {
+  @apply bg-indigo-600 border-indigo-600 text-white hover:bg-indigo-700 hover:border-indigo-700;
+}
