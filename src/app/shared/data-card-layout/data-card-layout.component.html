@@ -51,20 +51,15 @@
     </div>
 
     <div *ngIf="data.length > 0" class="p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      <div
+      <app-card-item-layout
         *ngFor="let item of data; trackBy: trackByIndex"
-        class="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden"
+        [headerLeft]="getCardTitle(item)"
       >
-        <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-3">
-          <h3 class="text-sm font-semibold text-slate-800 truncate">
-            {{ getCardTitle(item) }}
-          </h3>
-          <span class="text-xs text-slate-500 whitespace-nowrap">
-            {{ getCreatedDate(item) ? (getCreatedDate(item) | date:'mediumDate') : '-' }}
-          </span>
-        </div>
+        <span cardHeaderRight class="text-xs text-slate-500 whitespace-nowrap">
+          {{ getCreatedDate(item) ? (getCreatedDate(item) | date:'mediumDate') : '-' }}
+        </span>
 
-        <div class="p-3 card-body">
+        <div cardBody class="card-body">
           <ng-container *ngIf="bodyTemplate; else defaultBody">
             <ng-container
               [ngTemplateOutlet]="bodyTemplate.templateRef"
@@ -86,7 +81,7 @@
           </ng-template>
         </div>
 
-        <div class="px-4 py-3 border-t border-slate-200 bg-white">
+        <div cardFooter>
           <ng-container *ngIf="footerTemplate; else defaultFooter">
             <ng-container
               [ngTemplateOutlet]="footerTemplate.templateRef"
@@ -123,7 +118,7 @@
             </div>
           </ng-template>
         </div>
-      </div>
+      </app-card-item-layout>
     </div>
 
     <div *ngIf="showPagination && data.length > 0" class="bg-slate-50/60 px-5 py-3 border-t border-slate-100">

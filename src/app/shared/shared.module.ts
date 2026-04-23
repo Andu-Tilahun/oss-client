@@ -9,18 +9,21 @@ import {
   CardBodyTemplateDirective,
   CardFooterTemplateDirective
 } from './data-card-layout/data-card-layout-templates.directive';
+import { CardItemLayoutComponent } from './card-item-layout/card-item-layout.component';
 
 
 @NgModule({
     declarations: [
         DataTableComponent,
         DataCardLayoutComponent,
+        CardItemLayoutComponent,
         CardBodyTemplateDirective,
         CardFooterTemplateDirective
     ],
     exports: [
         DataTableComponent,
         DataCardLayoutComponent,
+        CardItemLayoutComponent,
         CardBodyTemplateDirective,
         CardFooterTemplateDirective
     ],

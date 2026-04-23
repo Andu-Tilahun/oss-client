@@ -1,0 +1,21 @@
+<article class="card-item-layout">
+  <header class="card-item-layout__header">
+    <div class="card-item-layout__header-left">
+      <ng-content select="[cardHeaderLeft]"></ng-content>
+      <ng-container *ngIf="headerLeft">{{ headerLeft }}</ng-container>
+    </div>
+    <div class="card-item-layout__header-right">
+      <ng-content select="[cardHeaderRight]"></ng-content>
+      <ng-container *ngIf="headerRight">{{ headerRight }}</ng-container>
+    </div>
+  </header>
+
+  <section class="card-item-layout__body">
+    <ng-content select="[cardBody]"></ng-content>
+    <ng-content></ng-content>
+  </section>
+
+  <footer class="card-item-layout__footer">
+    <ng-content select="[cardFooter]"></ng-content>
+  </footer>
+</article>
