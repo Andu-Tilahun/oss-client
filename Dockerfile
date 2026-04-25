@@ -27,7 +27,7 @@ COPY nginx.conf /etc/nginx/nginx.conf
 RUN rm -rf /usr/share/nginx/html/*
 
 # Copy built application from build stage
-COPY --from=build /app/dist/inventory/browser /usr/share/nginx/html
+COPY --from=build /app/dist/oss-client/browser /usr/share/nginx/html
 
 # Expose port 80
 EXPOSE 80
