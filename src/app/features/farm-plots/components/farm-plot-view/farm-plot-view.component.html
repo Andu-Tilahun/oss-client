@@ -21,13 +21,16 @@
     <hr class="border-gray-200 mb-8" />
 
     <app-detail-section title="Farm Plot Information">
-      <app-detail-field label="Title" [value]="plot.title" />
-      <app-detail-field label="Status" [value]="plot.status" />
-      <app-detail-field label="Size" [value]="sizeText(plot)" />
+      <!-- <app-detail-field label="Title" [value]="plot.title" /> -->
+      <!-- <app-detail-field label="Status" [value]="plot.status" /> -->
+      <app-detail-field
+        label="Size"
+        [value]="plot.size + ' ' + (plot.sizeType === 'HECTARES' ? 'H' : (plot.sizeType === 'ACRES' ? 'A' : plot.sizeType))"
+      />
       <app-detail-field label="Soil Type" [value]="plot.soilType" />
       <app-detail-field label="Latitude" [value]="plot.latitude" />
       <app-detail-field label="Longitude" [value]="plot.longitude" />
-      <app-detail-field label="Description" [value]="plot.description || '-'" />
+      <!-- <app-detail-field label="Description" [value]="plot.description || '-'" /> -->
     </app-detail-section>
 
     <app-detail-section title="Media">

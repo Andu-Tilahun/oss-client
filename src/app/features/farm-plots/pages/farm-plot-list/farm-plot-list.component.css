@@ -1,1 +1,31 @@
+:host {
+  display: block;
+}
+
+.farm-plot-list-hero {
+  border-radius: 1rem;
+  padding: 1px;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 52%, #ec4899 100%);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
+}
+
+.farm-plot-list-hero__surface {
+  border-radius: calc(1rem - 1px);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(6px);
+  padding: 0.75rem 1rem;
+}
+
+/* Keep cards neutral while reserving green for metadata accents. */
+:host ::ng-deep app-data-card-layout .bg-white.rounded-xl {
+  background: #ffffff;
+}
+
+:host ::ng-deep app-data-card-layout [cardheaderright] {
+  color: #166534 !important;
+}
+
+:host ::ng-deep app-farm-plot-view .text-gray-500 {
+  color: #166534;
+}
 

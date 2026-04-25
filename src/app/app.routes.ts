@@ -6,8 +6,13 @@ import {GuestGuard} from "./core/guards/guest.guard";
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/login',
+    redirectTo: '/public',
     pathMatch: 'full'
+  },
+  {
+    path: 'public',
+    loadComponent: () =>
+      import('./public/pages/public-website/public-website.component').then((m) => m.PublicWebsiteComponent),
   },
   {
     path: 'login',

@@ -1,0 +1,46 @@
+:host {
+  display: block;
+}
+
+.card-item-layout {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 8%);
+  overflow: hidden;
+}
+
+.card-item-layout__header {
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.card-item-layout__header-left {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-item-layout__header-right {
+  font-size: 0.75rem;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.card-item-layout__body {
+  padding: 0.75rem;
+}
+
+.card-item-layout__footer {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
+}

@@ -1,0 +1,466 @@
+<div class="w-full app-grid-wrapper">
+
+  <!-- ── Toolbar ─────────────────────────────────────────────────────── -->
+  <div class="mb-4 flex flex-wrap items-center gap-3">
+
+    <!-- Action Buttons -->
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <button
+        *ngIf="showAddButton"
+        type="button"
+        class="ag-btn ag-btn-primary"
+        (click)="addClick.emit()"
+        title="Add"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Add
+      </button>
+
+      <button
+        *ngIf="showRefreshButton"
+        type="button"
+        class="ag-btn ag-btn-ghost"
+        (click)="refreshClick.emit()"
+        title="Refresh"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        Refresh
+      </button>
+
+      <button
+        *ngIf="showExportButton"
+        type="button"
+        class="ag-btn ag-btn-ghost"
+        (click)="exportClick.emit()"
+        title="Export"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        Export
+      </button>
+    </div>
+
+    <!-- Column Picker -->
+    <div class="relative flex-shrink-0" *ngIf="showColumnPickerControl && config?.parentColumns?.length > 0">
+      <button
+        type="button"
+        class="ag-btn ag-btn-ghost"
+        (click)="toggleColumnPicker($event)"
+        [attr.aria-expanded]="showColumnPicker"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+        Columns
+        <svg class="w-3.5 h-3.5 ml-1 transition-transform" [class.rotate-180]="showColumnPicker"
+          fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+
+      <div
+        *ngIf="showColumnPicker"
+        class="absolute left-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-xl p-2 z-20"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="px-2 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">
+          Visible Columns
+        </div>
+        <label
+          *ngFor="let column of config?.parentColumns; let colIndex = index"
+          class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-slate-50 cursor-pointer"
+        >
+          <input
+            type="checkbox"
+            class="w-4 h-4 text-indigo-500 border-slate-300 rounded focus:ring-indigo-500"
+            [checked]="parentColumnVisibility[colIndex] !== false"
+            (change)="setColumnVisible(colIndex, $any($event.target).checked)"
+          />
+          <span class="text-sm text-slate-700">{{ column.header }}</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Extra projected content (e.g. search/filters) -->
+    <div class="min-w-0 flex-1">
+      <ng-content select="[extraTableHeader]"></ng-content>
+    </div>
+  </div>
+
+  <!-- ── Main Table Container ─────────────────────────────────────────── -->
+  <div class="ag-table-container">
+
+    <!-- Loading overlay -->
+    <div *ngIf="loading" class="ag-loading-overlay">
+      <div class="ag-loading-spinner">
+        <svg class="animate-spin h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+        </svg>
+        <span class="text-sm text-slate-500 mt-2">Loading…</span>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full ag-table">
+
+        <!-- ── Parent Header ─────────────────────────────────────────── -->
+        <thead>
+          <tr class="ag-thead-row">
+            <!-- Expand toggle header -->
+            <th class="ag-th ag-th-expand"></th>
+
+            <!-- Index -->
+            <th *ngIf="showIndex" class="ag-th">#</th>
+
+            <!-- Parent columns -->
+            <th *ngFor="let col of visibleParentColumns" class="ag-th">
+              {{ col.header }}
+            </th>
+
+            <!-- Actions -->
+            <th *ngIf="showActionColumn" class="ag-th ag-th-actions">Actions</th>
+          </tr>
+        </thead>
+
+        <!-- ── Parent Body ────────────────────────────────────────────── -->
+        <tbody>
+          <ng-container *ngFor="let item of data; let i = index; trackBy: trackParent">
+
+            <!-- Parent Row -->
+            <tr
+              class="ag-parent-row"
+              [class.ag-parent-row--expanded]="isExpanded(item)"
+              (click)="toggleRow(item)"
+            >
+              <!-- Expand Toggle -->
+              <td class="ag-td ag-td-expand">
+                <button
+                  type="button"
+                  class="ag-expand-btn"
+                  [class.ag-expand-btn--open]="isExpanded(item)"
+                  (click)="$event.stopPropagation(); toggleRow(item)"
+                  [attr.aria-label]="isExpanded(item) ? 'Collapse' : 'Expand'"
+                >
+                  <svg class="w-4 h-4 transition-transform duration-200"
+                    [class.rotate-90]="isExpanded(item)"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </button>
+              </td>
+
+              <!-- Index -->
+              <td *ngIf="showIndex" class="ag-td ag-td-index">
+                {{ (pageIndex - 1) * pageSize + i + 1 }}
+              </td>
+
+              <!-- Parent Data Columns -->
+              <td *ngFor="let col of visibleParentColumns" class="ag-td">
+                <ng-container [ngSwitch]="col.columnType">
+                  <ng-container *ngSwitchCase="columnType.BUTTON">
+                    <button
+                      class="ag-cell-btn"
+                      (click)="$event.stopPropagation(); col.columnAction?.(item)"
+                    >{{ col.value ? col.value(item) : '' }}</button>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="columnType.LINK">
+                    <a
+                      href="javascript:void(0)"
+                      class="ag-cell-link"
+                      (click)="$event.stopPropagation(); col.columnAction?.(item)"
+                    >{{ col.value ? col.value(item) : '' }}</a>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="columnType.CHECK_BOX">
+                    <input
+                      type="checkbox"
+                      class="w-4 h-4 text-indigo-500 border-slate-300 rounded focus:ring-indigo-500"
+                      [checked]="col?.defaultValue || false"
+                      [disabled]="col?.disabled"
+                      (change)="col.columnAction?.(item)"
+                    />
+                  </ng-container>
+                  <ng-container *ngSwitchDefault>
+                    <span class="ag-cell-text">{{ col.value ? col.value(item) : '' }}</span>
+                  </ng-container>
+                </ng-container>
+              </td>
+
+              <!-- Parent Action Column -->
+              <td *ngIf="showActionColumn" class="ag-td" (click)="$event.stopPropagation()">
+                <div class="flex items-center gap-1.5">
+                  <button
+                    *ngIf="showViewButton"
+                    class="ag-action-btn ag-action-btn--view"
+                    (click)="viewClick.emit(item)"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    View
+                  </button>
+                  <button
+                    *ngIf="showEditButton"
+                    class="ag-action-btn ag-action-btn--edit"
+                    (click)="editClick.emit(item)"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    Edit
+                  </button>
+                  <button
+                    *ngIf="showDeleteButton"
+                    class="ag-action-btn ag-action-btn--delete"
+                    (click)="deleteClick.emit(item)"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- ── Child Panel ─────────────────────────────────────── -->
+            <tr *ngIf="isExpanded(item)" class="ag-child-panel-row">
+              <td [attr.colspan]="parentColspan" class="ag-child-panel-cell p-0">
+                <div class="ag-child-panel">
+
+                  <!-- Child Header Bar -->
+                  <div class="ag-child-header">
+                    <div class="ag-child-header-label">
+                      <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                      </svg>
+                      <span>
+                        {{ config.childSectionLabel ? config.childSectionLabel(item) : 'Child Records' }}
+                        <span class="ag-child-count">{{ getAllChildren(item).length }}</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Child Table -->
+                  <div class="overflow-x-auto">
+                    <table class="min-w-full ag-child-table">
+                      <thead>
+                        <tr class="ag-child-thead-row">
+                          <th *ngFor="let col of config.childColumns" class="ag-child-th">
+                            {{ col.header }}
+                          </th>
+                          <th *ngIf="showActionColumn" class="ag-child-th ag-th-actions">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr
+                          *ngFor="let child of getPagedChildren(item); trackBy: trackChild"
+                          class="ag-child-row"
+                        >
+                          <td *ngFor="let col of config.childColumns" class="ag-child-td">
+                            <ng-container [ngSwitch]="col.columnType">
+                              <ng-container *ngSwitchCase="columnType.BUTTON">
+                                <button
+                                  class="ag-cell-btn"
+                                  (click)="col.columnAction?.(child)"
+                                >{{ col.value ? col.value(child) : '' }}</button>
+                              </ng-container>
+                              <ng-container *ngSwitchCase="columnType.LINK">
+                                <a href="javascript:void(0)" class="ag-cell-link"
+                                  (click)="col.columnAction?.(child)"
+                                >{{ col.value ? col.value(child) : '' }}</a>
+                              </ng-container>
+                              <ng-container *ngSwitchCase="columnType.CHECK_BOX">
+                                <input type="checkbox"
+                                  class="w-4 h-4 text-indigo-500 border-slate-300 rounded"
+                                  [checked]="col?.defaultValue || false"
+                                  [disabled]="col?.disabled"
+                                  (change)="col.columnAction?.(child)"
+                                />
+                              </ng-container>
+                              <ng-container *ngSwitchDefault>
+                                <span class="ag-child-cell-text">{{ col.value ? col.value(child) : '' }}</span>
+                              </ng-container>
+                            </ng-container>
+                          </td>
+
+                          <!-- Child Actions -->
+                          <td *ngIf="showActionColumn" class="ag-child-td">
+                            <div class="flex items-center gap-1.5">
+                              <button
+                                *ngIf="showViewButton"
+                                class="ag-action-btn ag-action-btn--view ag-action-btn--sm"
+                                (click)="childViewClick.emit({ parent: item, child: child })"
+                              >
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                View
+                              </button>
+                              <button
+                                *ngIf="showEditButton"
+                                class="ag-action-btn ag-action-btn--edit ag-action-btn--sm"
+                                (click)="childEditClick.emit({ parent: item, child: child })"
+                              >
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                Edit
+                              </button>
+                              <button
+                                *ngIf="showDeleteButton"
+                                class="ag-action-btn ag-action-btn--delete ag-action-btn--sm"
+                                (click)="childDeleteClick.emit({ parent: item, child: child })"
+                              >
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+
+                        <!-- Child empty state -->
+                        <tr *ngIf="getAllChildren(item).length === 0">
+                          <td
+                            [attr.colspan]="childColspan(config.childColumns)"
+                            class="ag-child-td text-center py-8"
+                          >
+                            <div class="flex flex-col items-center text-slate-400">
+                              <svg class="w-10 h-10 mb-2 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                              </svg>
+                              <p class="text-sm">{{ noChildDataMessage }}</p>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <!-- Child Pagination -->
+                  <div *ngIf="getAllChildren(item).length > 0" class="ag-child-pagination">
+                    <div class="flex items-center space-x-2">
+                      <label class="text-xs text-slate-500">Show</label>
+                      <select
+                        [value]="getChildPageState(item).pageSize"
+                        (change)="onChildPageSizeChange(item, $event)"
+                        class="border border-slate-200 rounded-md px-2 py-1 text-xs text-slate-600 bg-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+                      >
+                        <option *ngFor="let size of childPageSizeOptions" [value]="size">{{ size }}</option>
+                      </select>
+                      <span class="text-xs text-slate-500">entries</span>
+                    </div>
+
+                    <div class="text-xs text-slate-500">
+                      {{ childStartIndex(item) }}–{{ childEndIndex(item) }} of {{ getAllChildren(item).length }}
+                    </div>
+
+                    <div class="flex items-center space-x-1">
+                      <button
+                        class="ag-page-btn"
+                        (click)="onChildPageChange(item, 1)"
+                        [disabled]="getChildPageState(item).pageIndex === 1"
+                      >«</button>
+                      <button
+                        class="ag-page-btn"
+                        (click)="onChildPageChange(item, getChildPageState(item).pageIndex - 1)"
+                        [disabled]="getChildPageState(item).pageIndex === 1"
+                      >‹</button>
+                      <button
+                        *ngFor="let page of childVisiblePages(item)"
+                        class="ag-page-btn"
+                        [class.ag-page-btn--active]="page === getChildPageState(item).pageIndex"
+                        (click)="onChildPageChange(item, page)"
+                      >{{ page }}</button>
+                      <button
+                        class="ag-page-btn"
+                        (click)="onChildPageChange(item, getChildPageState(item).pageIndex + 1)"
+                        [disabled]="getChildPageState(item).pageIndex === childTotalPages(item)"
+                      >›</button>
+                      <button
+                        class="ag-page-btn"
+                        (click)="onChildPageChange(item, childTotalPages(item))"
+                        [disabled]="getChildPageState(item).pageIndex === childTotalPages(item)"
+                      >»</button>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+          </ng-container>
+
+          <!-- Parent empty state -->
+          <tr *ngIf="data.length === 0 && !loading">
+            <td [attr.colspan]="parentColspan" class="px-6 py-16">
+              <div class="flex flex-col items-center justify-center text-slate-400">
+                <svg class="w-14 h-14 mb-3 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                </svg>
+                <p class="text-sm font-medium">{{ noDataMessage }}</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Parent Pagination ─────────────────────────────────────────── -->
+    <div *ngIf="showPagination && data.length > 0" class="ag-pagination">
+      <div class="flex items-center space-x-2">
+        <label class="text-sm text-slate-500">Show</label>
+        <select
+          [value]="pageSize"
+          (change)="onPageSizeChange($event)"
+          class="border border-slate-200 rounded-lg px-2.5 py-1 text-sm text-slate-600 bg-white focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400"
+        >
+          <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+        </select>
+        <span class="text-sm text-slate-500">entries</span>
+      </div>
+
+      <div class="text-sm text-slate-500">
+        Showing <span class="font-semibold text-slate-700">{{ startIndex }}</span> to
+        <span class="font-semibold text-slate-700">{{ endIndex }}</span> of
+        <span class="font-semibold text-slate-700">{{ total }}</span> results
+      </div>
+
+      <div class="flex items-center space-x-1.5">
+        <button class="ag-page-btn ag-page-btn--lg" (click)="onPageChange(1)" [disabled]="pageIndex === 1">«</button>
+        <button class="ag-page-btn ag-page-btn--lg" (click)="onPageChange(pageIndex - 1)" [disabled]="pageIndex === 1">‹</button>
+        <button
+          *ngFor="let page of visiblePages"
+          class="ag-page-btn ag-page-btn--lg"
+          [class.ag-page-btn--active]="page === pageIndex"
+          (click)="onPageChange(page)"
+        >{{ page }}</button>
+        <button class="ag-page-btn ag-page-btn--lg" (click)="onPageChange(pageIndex + 1)" [disabled]="pageIndex === totalPages">›</button>
+        <button class="ag-page-btn ag-page-btn--lg" (click)="onPageChange(totalPages)" [disabled]="pageIndex === totalPages">»</button>
+      </div>
+    </div>
+  </div>
+</div>
