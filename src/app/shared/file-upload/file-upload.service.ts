@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpEvent, HttpEventType} from '@angular/common/http';
 import {map, Observable} from 'rxjs';
+import {environment} from '../../../environments/environment';
 
 export interface FileMetadata {
   id: string;
@@ -21,7 +22,7 @@ export interface UploadProgress {
   providedIn: 'root'
 })
 export class FileUploadService {
-  private readonly STORAGE_API_URL = 'http://localhost:8080/api/files';
+  private readonly STORAGE_API_URL = `${environment.apiUrl}/files`;
 
   constructor(private http: HttpClient) {
   }

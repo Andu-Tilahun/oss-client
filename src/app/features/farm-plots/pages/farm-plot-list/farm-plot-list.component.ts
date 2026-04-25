@@ -10,6 +10,7 @@ import {FarmPlotService} from '../../services/farm-plot.service';
 import {PageResponse} from '../../../../shared/models/api-response.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
+import {environment} from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-farm-plot-list',
@@ -18,7 +19,7 @@ import {TableQueryParams} from '../../../../shared/data-table/models/table-query
   styleUrl: './farm-plot-list.component.css',
 })
 export class FarmPlotListComponent {
-  private readonly storageApiUrl = 'http://localhost:8080/api/files';
+  private readonly storageApiUrl = `${environment.apiUrl}/files`;
 
   plots: FarmPlot[] = [];
   loading = false;

@@ -6,12 +6,17 @@ import {GuestGuard} from "./core/guards/guest.guard";
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/login',
+    redirectTo: '/public',
     pathMatch: 'full'
   },
   {
     path: 'login',
     loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent),
+    canActivate: [GuestGuard]
+  },
+  {
+    path: 'signup',
+    loadComponent: () => import('./features/auth/signup/signup.component').then(m => m.SignupComponent),
     canActivate: [GuestGuard]
   },
   {
@@ -34,6 +39,31 @@ export const routes: Routes = [
   {
     path: 'reset-password',
     loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
+    canActivate: [GuestGuard]
+  },
+  {
+    path: 'public',
+    loadComponent: () => import('./public/public-landing/public-landing.component').then(m => m.PublicLandingComponent),
+    canActivate: [GuestGuard]
+  },
+  {
+    path: 'public/about-us',
+    loadComponent: () => import('./public/public-about-us/public-about-us.component').then(m => m.PublicAboutUsComponent),
+    canActivate: [GuestGuard]
+  },
+  {
+    path: 'public/contact',
+    loadComponent: () => import('./public/public-contact/public-contact.component').then(m => m.PublicContactComponent),
+    canActivate: [GuestGuard]
+  },
+  {
+    path: 'public/terms-of-service',
+    loadComponent: () => import('./public/public-terms/public-terms.component').then(m => m.PublicTermsComponent),
+    canActivate: [GuestGuard]
+  },
+  {
+    path: 'public/privacy-policy',
+    loadComponent: () => import('./public/public-privacy/public-privacy.component').then(m => m.PublicPrivacyComponent),
     canActivate: [GuestGuard]
   },
   {

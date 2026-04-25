@@ -1,0 +1,274 @@
+.contact-page {
+  background: #f4f6f7;
+  color: #1f1f1f;
+  min-height: 100vh;
+}
+
+.contact-hero {
+  background: linear-gradient(90deg, #16522f, #1f6c3f);
+  color: #fff;
+  text-align: center;
+  padding: 42px 16px;
+}
+
+.contact-hero h1 {
+  margin: 0;
+  font-size: clamp(30px, 3.6vw, 46px);
+}
+
+.contact-hero p {
+  margin: 12px auto 0;
+  max-width: 720px;
+  color: rgba(238, 246, 240, 0.9);
+  font-size: 14px;
+}
+
+.contact-content {
+  width: min(980px, 92vw);
+  margin: 0 auto;
+  padding: 38px 0 48px;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 16px;
+}
+
+.panel {
+  background: #fff;
+  border: 1px solid #e7eaec;
+  border-radius: 10px;
+  padding: 22px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+}
+
+.panel h2 {
+  margin: 0 0 12px;
+  color: #2f4f36;
+  text-align: center;
+  font-size: 30px;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+label span {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #3d3d3d;
+  margin-bottom: 4px;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid #dce2e7;
+  border-radius: 6px;
+  padding: 9px 10px;
+  font-size: 12px;
+  color: #222;
+  background: #fafcfd;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.message-field {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.full {
+  width: 100%;
+}
+
+.info-item {
+  background: #f4f7fa;
+  border: 1px solid #e3e8ee;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+
+.info-item strong {
+  display: block;
+  font-size: 11px;
+  color: #2f4f36;
+}
+
+.info-item span {
+  font-size: 12px;
+  color: #4d4d4d;
+}
+
+.info-panel h3 {
+  margin: 14px 0 8px;
+  font-size: 14px;
+  color: #2f4f36;
+  text-align: center;
+}
+
+.social-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.social-grid a {
+  text-decoration: none;
+  background: #1985d7;
+  color: #fff;
+  border-radius: 6px;
+  text-align: center;
+  padding: 8px 6px;
+  font-size: 12px;
+}
+
+.primary-btn {
+  display: inline-block;
+  background: #143723;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border: 0;
+  cursor: pointer;
+}
+
+.hq-section {
+  background: linear-gradient(90deg, #16522f, #1f6c3f);
+  padding: 40px 16px 52px;
+}
+
+.hq-section h2 {
+  margin: 0 0 16px;
+  text-align: center;
+  color: #fff;
+  font-size: clamp(30px, 3.4vw, 44px);
+}
+
+.hq-card {
+  width: min(980px, 92vw);
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid #e7eaec;
+  border-radius: 10px;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 14px;
+}
+
+.hq-details h3 {
+  margin: 0 0 8px;
+  color: #2f4f36;
+}
+
+.hq-details p {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #505050;
+}
+
+.hours {
+  margin-top: 8px !important;
+  font-size: 12px !important;
+  color: #6a6a6a !important;
+}
+
+.hq-map {
+  border-radius: 8px;
+  background: #f2f5f7;
+  border: 1px solid #e2e8ec;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 140px;
+}
+
+.hq-map p {
+  margin: 0;
+  color: #4f5b65;
+}
+
+.hq-map button {
+  border: 1px solid #3f525f;
+  background: #fff;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+.faq-section {
+  width: min(980px, 92vw);
+  margin: 0 auto;
+  padding: 42px 0 52px;
+}
+
+.faq-section h2 {
+  margin: 0 0 16px;
+  text-align: center;
+  color: #2f4f36;
+  font-size: clamp(30px, 3.4vw, 44px);
+}
+
+.faq-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.faq-card {
+  background: #fff;
+  border: 1px solid #e7eaec;
+  border-left: 3px solid #2f6a3f;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.faq-card h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #334;
+}
+
+.faq-card p {
+  margin: 0;
+  color: #5b5b5b;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+@media (max-width: 900px) {
+  .contact-grid,
+  .hq-card {
+    grid-template-columns: 1fr;
+  }
+
+  .faq-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .faq-grid,
+  .social-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
