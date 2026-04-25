@@ -17,6 +17,11 @@ export class FarmPlotService {
     return this.httpService.get<PageResponse<FarmPlot>>(Endpoints.FARM_PLOTS_ENDPOINT, undefined, params);
   }
 
+  getPublicActiveFarmPlots(page: number = 0, size: number = 10): Observable<PageResponse<FarmPlot>> {
+    const params = new HttpParams().set('page', page.toString()).set('size', size.toString());
+    return this.httpService.get<PageResponse<FarmPlot>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/public/active`, undefined, params);
+  }
+
   filterFarmPlots(request: FarmPlotFilterRequest): Observable<PageResponse<FarmPlot>> {
     return this.httpService.post<PageResponse<FarmPlot>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/filter`, request);
   }

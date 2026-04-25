@@ -11,21 +11,24 @@
 
 >
   <ng-template #extraTableHeader>
-    <div class="w-full" extraHeader>
-      <app-farm-plot-filter
-        [(searchText)]="searchText"
-        [(status)]="status"
-        [(soilType)]="soilType"
-        [(sizeType)]="sizeType"
-        (filterChange)="onFilterChange()"
-        (searchChange)="onFilterChange()"
-        (clearFilters)="clearFilters()"
-      ></app-farm-plot-filter>
+    <div class="w-full farm-plot-list-hero" extraHeader>
+      <div class="farm-plot-list-hero__surface">
+        <app-farm-plot-filter
+          [(searchText)]="searchText"
+          [(status)]="status"
+          [(soilType)]="soilType"
+          [(sizeType)]="sizeType"
+          (filterChange)="onFilterChange()"
+          (searchChange)="onFilterChange()"
+          (clearFilters)="clearFilters()"
+        ></app-farm-plot-filter>
+      </div>
     </div>
   </ng-template>
 
   <ng-template #leftContent>
-    <app-data-card-layout
+    <app-data-table
+      [columns]="columns"
       [data]="plots"
       [loading]="loading"
       [total]="total"
@@ -33,24 +36,17 @@
       [pageIndex]="pageIndex"
       [showAddButton]="true"
       [showRefreshButton]="true"
-      [showDownloadButton]="true"
       [showViewButton]="true"
       [showEditButton]="checkIfPlotIsNotAssigned"
       [showDeleteButton]="checkIfPlotIsNotAssigned"
-      [titleAccessor]="getPlotCardTitle"
-      [createdDateAccessor]="getPlotCreatedDate"
-      [thumbnailUrlAccessor]="getPlotThumbnailUrl"
-      [thumbnailAltAccessor]="getPlotThumbnailAlt"
       (pageChange)="onPageChange($event)"
       (addClick)="onAdd()"
       (refreshClick)="onRefresh()"
-      (downloadClick)="onDownload()"
       (viewClick)="onView($event)"
       (editClick)="onEdit($event)"
       (deleteClick)="onDelete($event)"
     >
-      <ng-container *ngTemplateOutlet="extraTableHeader"></ng-container>
-    </app-data-card-layout>
+    </app-data-table>
   </ng-template>
 
   <ng-template #rightContent let-plot>

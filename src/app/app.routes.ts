@@ -10,6 +10,11 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   {
+    path: 'public',
+    loadComponent: () =>
+      import('./public/pages/public-website/public-website.component').then((m) => m.PublicWebsiteComponent),
+  },
+  {
     path: 'login',
     loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent),
     canActivate: [GuestGuard]
@@ -196,6 +201,12 @@ export const routes: Routes = [
       },
       // keep other inventory sub-features here if needed later (items, departments, etc.)
     ],
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] },
+  },
+  {
+    path: 'farm-company',
+    loadChildren: () => import('./features/farm-company/farm-company.module').then(m => m.FarmCompanyModule),
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['ADMIN'] },
   },

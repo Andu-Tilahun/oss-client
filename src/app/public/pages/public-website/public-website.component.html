@@ -1,0 +1,188 @@
+<div class="public-page">
+  <header class="site-header">
+    <div class="container header-content">
+      <button type="button" class="brand" (click)="scrollTo('home')">AgriVest</button>
+      <nav class="nav-links flex items-center gap-2 rounded-full bg-slate-100/90 p-1.5 shadow-inner shadow-slate-200/70">
+        <button
+          type="button"
+          (click)="scrollTo('home')"
+          class="rounded-full px-4 py-2 text-sm font-semibold text-slate-700 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-emerald-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
+        >
+          Home
+        </button>
+        <button
+          type="button"
+          (click)="scrollTo('about')"
+          class="rounded-full px-4 py-2 text-sm font-semibold text-slate-700 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-emerald-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
+        >
+          About Us
+        </button>
+        <button
+          type="button"
+          (click)="scrollTo('contact')"
+          class="rounded-full px-4 py-2 text-sm font-semibold text-slate-700 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-emerald-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
+        >
+          Contact
+        </button>
+      </nav>
+      <button type="button" class="signin-btn" (click)="goToLogin()">Sign in</button>
+    </div>
+  </header>
+
+  <section id="home" class="hero">
+    <div class="container hero-inner">
+      <h1>Invest in the Future of Farming</h1>
+      <p>
+        Discover sustainable farm opportunities, explore active plots, and start your agricultural investment
+        journey.
+      </p>
+      <button type="button" class="primary-btn" (click)="scrollTo('plots')">Explore Opportunities</button>
+    </div>
+  </section>
+
+  <section id="plots" class="plots-section">
+    <div class="container">
+      <div class="section-title-wrap">
+        <h2>Available Plots</h2>
+        <p>Browse active farm plots ready for development and investment.</p>
+      </div>
+
+      <app-data-card-layout
+        [data]="pagedPlots"
+        [loading]="loadingPlots"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showAddButton]="false"
+        [showRefreshButton]="true"
+        [showDownloadButton]="false"
+        [showViewButton]="true"
+        [showEditButton]="false"
+        [showDeleteButton]="false"
+        [titleAccessor]="getPlotCardTitle"
+        [createdDateAccessor]="getPlotCreatedDate"
+        [thumbnailUrlAccessor]="getPlotThumbnailUrl"
+        [thumbnailAltAccessor]="getPlotThumbnailAlt"
+        [noDataMessage]="'No active farm plots found'"
+        (pageChange)="onPageChange($event)"
+        (refreshClick)="loadPlots()"
+        (viewClick)="openPlotDetail($event)"
+      >
+        <div class="w-full" extraHeader>
+          <app-farm-plot-filter
+            [(searchText)]="searchText"
+            [(status)]="status"
+            [(soilType)]="soilType"
+            [(sizeType)]="sizeType"
+            (filterChange)="onFilterChange()"
+            (searchChange)="onFilterChange()"
+            (clearFilters)="clearFilters()"
+          ></app-farm-plot-filter>
+        </div>
+      </app-data-card-layout>
+    </div>
+  </section>
+
+  <section id="about" class="about-section">
+    <div class="container">
+      <div class="section-title-wrap">
+        <h2>About Us</h2>
+        <p>Learn where we operate and how we connect investors with sustainable farms.</p>
+      </div>
+
+      <div class="about-grid">
+        <div class="about-card">
+          <h3>{{ company?.name || 'AgriVest Farming' }}</h3>
+          <p>
+            We build trusted bridges between farmers and investors through transparent data, active field management,
+            and measurable outcomes.
+          </p>
+        </div>
+        <div class="map-wrap">
+          <app-oss-map
+            [latitude]="company?.latitude || 9.145"
+            [longitude]="company?.longitude || 40.4897"
+            [locations]="company ? [{ lat: company.latitude, lng: company.longitude, name: company.name }] : []"
+            [zoom]="7"
+            [height]="'320px'"
+            [fitBounds]="true"
+          ></app-oss-map>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact-section">
+    <div class="container">
+      <div class="section-title-wrap">
+        <h2>Contact Us</h2>
+        <p>Reach out for partnerships, investment details, and support.</p>
+      </div>
+
+      <div class="contact-card" *ngIf="company; else contactLoading">
+        <div>
+          <span class="label">Company</span>
+          <p>{{ company.name }}</p>
+        </div>
+        <div>
+          <span class="label">Email</span>
+          <p>{{ company.email || '-' }}</p>
+        </div>
+        <div>
+          <span class="label">Mobile</span>
+          <p>{{ company.contactMobilePhone || '-' }}</p>
+        </div>
+        <div>
+          <span class="label">Office</span>
+          <p>{{ company.officePhone || '-' }}</p>
+        </div>
+      </div>
+
+      <ng-template #contactLoading>
+        <div class="contact-card muted">
+          <p>{{ loadingCompany ? 'Loading contact information...' : 'Contact information unavailable.' }}</p>
+        </div>
+      </ng-template>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <div>
+        <h4>AgriVest</h4>
+        <p>Smart agricultural investment opportunities for sustainable growth.</p>
+      </div>
+      <div>
+        <h5>Quick Links</h5>
+        <button type="button" (click)="scrollTo('home')">Home</button>
+        <button type="button" (click)="scrollTo('about')">About Us</button>
+        <button type="button" (click)="scrollTo('contact')">Contact</button>
+      </div>
+      <div>
+        <h5>Contact</h5>
+        <p>{{ company?.email || 'N/A' }}</p>
+        <p>{{ company?.contactMobilePhone || company?.officePhone || 'N/A' }}</p>
+      </div>
+    </div>
+  </footer>
+
+  <div class="drawer-backdrop" *ngIf="selectedPlot" (click)="closePlotDetail()"></div>
+  <aside class="plot-drawer" [class.open]="!!selectedPlot">
+    <button type="button" class="close-btn" (click)="closePlotDetail()">×</button>
+    <ng-container *ngIf="selectedPlot as plot">
+      <h3>{{ plot.title }}</h3>
+      <img
+        *ngIf="getPlotThumbnailUrl(plot) as imageUrl"
+        [src]="imageUrl"
+        [alt]="getPlotThumbnailAlt(plot)"
+        class="drawer-image"
+      />
+      <p class="drawer-description">{{ plot.description || 'No description available.' }}</p>
+      <div class="drawer-meta">
+        <p><strong>Size:</strong> {{ plot.size }} {{ plot.sizeType }}</p>
+        <p><strong>Soil Type:</strong> {{ plot.soilType }}</p>
+        <p><strong>Status:</strong> {{ plot.status }}</p>
+      </div>
+    </ng-container>
+  </aside>
+</div>
