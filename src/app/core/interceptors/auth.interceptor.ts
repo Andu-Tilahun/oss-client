@@ -4,6 +4,7 @@ import {Observable, throwError} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 import {AuthService} from '../../features/auth/services/auth.service';
 import {Router} from '@angular/router';
+import {SKIP_AUTH_REDIRECT} from '../services/http.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -27,10 +28,14 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401 || error.status === 403) {
-          // Token is invalid or expired - logout user
-          localStorage.clear();
-          this.router.navigate(['/login']);
+        const isAuthError = error.status === 401 || error.status === 403;
+        const hasSessionToken = !!token;
+        const skipAuthRedirect = request.context.get(SKIP_AUTH_REDIRECT);
+
+        // Allow selected public requests to fail without forcing login.
+        // Keep auth redirect behavior for all other protected requests.
+        if (isAuthError && hasSessionToken && !skipAuthRedirect) {
+          this.authService.forceLogout();
         }
         return throwError(() => error);
       })

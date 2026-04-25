@@ -70,10 +70,13 @@
       >
         <div class="w-full" extraHeader>
           <app-farm-plot-filter
+            [showSearch]="false"
+            [showStatus]="false"
             [(searchText)]="searchText"
             [(status)]="status"
             [(soilType)]="soilType"
             [(sizeType)]="sizeType"
+            (searchTextChange)="onFilterChange()"
             (filterChange)="onFilterChange()"
             (searchChange)="onFilterChange()"
             (clearFilters)="clearFilters()"

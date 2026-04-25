@@ -2,7 +2,7 @@
   <div class="flex items-end gap-2 w-full overflow-x-auto scrollbar-hide">
 
     <!-- Search Input -->
-    <div class="relative flex-shrink-0 w-56">
+    <div *ngIf="showSearch" class="relative flex-shrink-0 w-56">
       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -24,6 +24,7 @@
 
     <!-- Apply Button -->
     <button
+      *ngIf="showSearch"
       type="button"
       (click)="onSearch()"
       [disabled]="!hasValidSearchText"
@@ -34,7 +35,7 @@
     </button>
 
     <!-- Divider -->
-    <div class="flex-shrink-0 w-px h-5 bg-slate-200 self-center"></div>
+    <div *ngIf="showSearch" class="flex-shrink-0 w-px h-5 bg-slate-200 self-center"></div>
 
     <!-- Projected filter controls (dropdowns, ranges, etc.) -->
     <div class="flex items-end gap-2 flex-1 min-w-0">

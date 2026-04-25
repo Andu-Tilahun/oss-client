@@ -10,6 +10,7 @@ import { CompanyProfileService } from '../../../features/farm-company/services/c
 import { TableQueryParams } from '../../../shared/data-table/models/table-query-params.model';
 import { OssMapComponent } from '../../../shared/oss-map/oss-map.component';
 import { environment } from '../../../../environments/environment';
+import { RequestType } from '../../../core/services/http.service';
 
 @Component({
   selector: 'app-public-website',
@@ -77,7 +78,10 @@ export class PublicWebsiteComponent implements OnInit {
 
   loadCompany(): void {
     this.loadingCompany = true;
-    this.companyProfileService.getCompanyProfile().subscribe({
+    this.companyProfileService.getCompanyProfile({
+      requestType: RequestType.LOCAL,
+      skipAuthRedirect: true,
+    }).subscribe({
       next: (company) => {
         this.company = company;
         this.loadingCompany = false;

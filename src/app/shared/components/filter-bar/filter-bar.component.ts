@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 export class FilterBarComponent implements OnChanges {
   @Input() searchText = '';
   @Output() searchTextChange = new EventEmitter<string>();
+  @Input() showSearch = true;
 
   @Input() searchPlaceholder = 'Search...';
   @Input() applyLabel = 'Search';
@@ -35,6 +36,7 @@ export class FilterBarComponent implements OnChanges {
   }
 
   get hasValidSearchText(): boolean {
+    if (!this.showSearch) return true;
     return this.searchText.trim().length > 0;
   }
 
@@ -43,6 +45,7 @@ export class FilterBarComponent implements OnChanges {
   }
 
   onSearch(): void {
+    if (!this.showSearch) return;
     if (!this.hasValidSearchText) return;
     this.searchChange.emit();
   }

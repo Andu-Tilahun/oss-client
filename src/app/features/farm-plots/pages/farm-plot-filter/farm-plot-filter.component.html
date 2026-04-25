@@ -1,4 +1,5 @@
 <app-filter-bar
+  [showSearch]="showSearch"
   [(searchText)]="searchText"
   (searchTextChange)="onSearchTextChange($event)"
   searchPlaceholder="Search farm plots..."
@@ -8,7 +9,7 @@
   (clearFilters)="onClearFilters()"
 >
   <!-- Status -->
-  <div class="w-full">
+  <div *ngIf="showStatus" class="w-full">
     <label class="block text-xs font-medium text-slate-600 mb-1">Status</label>
     <select
       [(ngModel)]="status"

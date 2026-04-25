@@ -22,13 +22,16 @@ export enum RequestType {
 
 export interface RequestOption {
   requestType: RequestType;
+  skipAuthRedirect?: boolean;
 }
 
 const defaultRequestOption: RequestOption = {
   requestType: RequestType.BLOCKING,
+  skipAuthRedirect: false,
 };
 
 export const REQUEST_TYPE = new HttpContextToken(() => RequestType.BLOCKING);
+export const SKIP_AUTH_REDIRECT = new HttpContextToken(() => false);
 
 export enum HttpStatus {
   OK = 200,
@@ -162,6 +165,7 @@ export class HttpService {
   ): Observable<HttpContext> {
     const httpContext: HttpContext = new HttpContext();
     httpContext.set(REQUEST_TYPE, requestOption.requestType);
+    httpContext.set(SKIP_AUTH_REDIRECT, !!requestOption.skipAuthRedirect);
     return of(httpContext);
   }
 
@@ -189,7 +193,8 @@ export class HttpService {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      if (error.status === HttpStatus.UNAUTHORIZED) {
+      const skipAuthRedirect = httpContext.get(SKIP_AUTH_REDIRECT);
+      if (error.status === HttpStatus.UNAUTHORIZED && !skipAuthRedirect) {
         this.authService.forceLogout();
         return throwError(() => new Error('Session expired. Please log in again.'));
       }
