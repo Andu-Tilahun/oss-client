@@ -1,0 +1,293 @@
+.about-page {
+  background: #f4f6f7;
+  color: #1f1f1f;
+}
+
+.top-nav {
+  height: 48px;
+  background: #f4f4f4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 11%;
+  color: #1e1e1e;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.logo {
+  font-size: 18px;
+}
+
+.brand-text {
+  font-size: 22px;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.menu-link {
+  font-size: 12px;
+  color: #1f1f1f;
+  text-decoration: none;
+}
+
+.menu-link.active {
+  border-bottom: 1px solid #1f1f1f;
+  padding-bottom: 2px;
+}
+
+.sign-in-btn {
+  background: #163f28;
+  color: #fff;
+  font-size: 12px;
+  text-decoration: none;
+  padding: 7px 15px;
+  border-radius: 3px;
+}
+
+.hero {
+  background: linear-gradient(90deg, #16522f, #1f6c3f);
+  color: #fff;
+  text-align: center;
+  padding: 36px 16px;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(34px, 4vw, 56px);
+}
+
+.hero p {
+  margin: 12px auto 0;
+  max-width: 760px;
+  font-size: 14px;
+  color: rgba(238, 246, 240, 0.9);
+}
+
+.section {
+  width: min(1080px, 92vw);
+  margin: 0 auto;
+  padding: 36px 0;
+}
+
+.section h2 {
+  margin: 0 0 20px;
+  text-align: center;
+  color: #2f4f36;
+  font-size: clamp(28px, 3.2vw, 44px);
+}
+
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.impact-card {
+  background: linear-gradient(135deg, #1a5a34, #2d7a4a);
+  color: #fff;
+  border-radius: 10px;
+  text-align: center;
+  padding: 22px 10px;
+}
+
+.impact-card h3 {
+  margin: 0;
+  font-size: 34px;
+}
+
+.impact-card p {
+  margin: 8px 0 0;
+  font-size: 12px;
+}
+
+.compact {
+  padding-top: 8px;
+}
+
+.cards-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.info-card,
+.office-card {
+  background: #fff;
+  border: 1px solid #e7eaec;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.info-card h3,
+.office-card h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: #2f4f36;
+}
+
+.info-card p,
+.office-card p {
+  margin: 0;
+  font-size: 13px;
+  color: #5b5b5b;
+  line-height: 1.5;
+}
+
+.green {
+  background: linear-gradient(90deg, #16522f, #1f6c3f);
+  width: 100%;
+  padding: 38px 0 44px;
+}
+
+.green h2 {
+  color: #fff;
+}
+
+.hq-card {
+  width: min(980px, 92vw);
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e8ece9;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 16px;
+}
+
+.hq-left h3 {
+  margin: 0 0 8px;
+  color: #2f4f36;
+}
+
+.hq-left p {
+  margin: 0 0 6px;
+  color: #5b5b5b;
+  font-size: 13px;
+}
+
+.hq-map {
+  border-radius: 8px;
+  background: #f1f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #75818a;
+  min-height: 110px;
+}
+
+.office-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.cta {
+  background: linear-gradient(90deg, #16522f, #1f6c3f);
+  width: 100%;
+  text-align: center;
+  padding: 46px 16px 52px;
+}
+
+.cta h2 {
+  color: #fff;
+}
+
+.cta p {
+  margin: 0 auto 20px;
+  max-width: 760px;
+  color: rgba(238, 246, 240, 0.9);
+  font-size: 14px;
+}
+
+.cta-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-dark,
+.btn-outline {
+  text-decoration: none;
+  font-size: 12px;
+  border-radius: 4px;
+  padding: 10px 16px;
+}
+
+.btn-dark {
+  background: #143723;
+  color: #fff;
+}
+
+.btn-outline {
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  color: #fff;
+}
+
+.landing-footer {
+  background: #154529;
+  color: #f3f7f2;
+  text-align: center;
+  padding: 20px 12px 18px;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.footer-links a {
+  color: #f1f6ef;
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.footer-copy {
+  margin: 0;
+  font-size: 11px;
+  color: rgba(241, 246, 239, 0.86);
+}
+
+@media (max-width: 900px) {
+  .top-nav {
+    padding: 0 20px;
+  }
+
+  .impact-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cards-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .hq-card {
+    grid-template-columns: 1fr;
+  }
+
+  .office-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .office-grid,
+  .impact-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

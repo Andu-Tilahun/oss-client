@@ -1,0 +1,76 @@
+<div class="terms-page">
+  <app-public-header [activePage]="'home'"></app-public-header>
+
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>Terms of Service</h1>
+      <p>Terms and conditions for using AgriVest agricultural investment platform</p>
+      <div class="last-updated">
+        <span>Last updated: today</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="container">
+      <div class="terms-content">
+        <div class="intro-section">
+          <h2>Introduction</h2>
+          <p>
+            Welcome to AgriVest. These Terms of Service ("Terms") govern your use of our agricultural investment
+            platform and services. By accessing or using our service, you agree to be bound by these Terms.
+          </p>
+          <p>
+            Please read these Terms carefully before using our service. If you disagree with any part of these terms,
+            then you may not access the service.
+          </p>
+        </div>
+
+        <div class="terms-sections">
+          <div class="terms-section" *ngFor="let section of sections">
+            <h3>{{ section.title }}</h3>
+            <ul>
+              <li *ngFor="let item of section.content">{{ item }}</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="changes-section">
+          <h2>Changes to Terms</h2>
+          <p>
+            We reserve the right, at our sole discretion, to modify or replace these Terms at any time.
+            If a revision is material, we will try to provide at least 30 days notice prior to any new terms taking effect.
+          </p>
+          <p>
+            By continuing to access or use our service after those revisions become effective, you agree to be bound
+            by the revised terms.
+          </p>
+        </div>
+
+        <div class="contact-section">
+          <h2>Contact Information</h2>
+          <p>
+            If you have any questions about these Terms of Service, please contact us:
+          </p>
+          <div class="contact-details">
+            <div class="contact-item">
+              <span class="contact-icon">✉️</span>
+              <span>{{ contactInfo.email }}</span>
+            </div>
+            <div class="contact-item">
+              <span class="contact-icon">📞</span>
+              <span>{{ contactInfo.phone }}</span>
+            </div>
+            <div class="contact-item">
+              <span class="contact-icon">📍</span>
+              <span>{{ contactInfo.address }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <app-public-footer></app-public-footer>
+</div>
+

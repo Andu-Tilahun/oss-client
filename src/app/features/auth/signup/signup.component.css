@@ -1,0 +1,213 @@
+.signup-page {
+  min-height: 100vh;
+  background: linear-gradient(90deg, #0e4129 0%, #0e4129 50%, #eeeff2 50%, #eeeff2 100%);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.signup-shell {
+  width: min(1120px, 100%);
+  min-height: 620px;
+  border-radius: 20px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  background: #f7f7f8;
+  box-shadow: 0 25px 45px rgba(0, 0, 0, 0.18);
+}
+
+.form-panel {
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+}
+
+.form-wrap {
+  width: min(500px, 86%);
+  margin: 0 auto;
+}
+
+.form-wrap h2 {
+  margin: 0;
+  font-size: 46px;
+  color: #214f3a;
+}
+
+.subtitle {
+  margin: 8px 0 26px;
+  color: #68746d;
+  font-size: 20px;
+}
+
+.field {
+  margin-bottom: 12px;
+}
+
+input {
+  width: 100%;
+  border: 1px solid #d8e2da;
+  background: #e9f0ea;
+  color: #2b2b2b;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 16px;
+  outline: none;
+}
+
+input.invalid {
+  border-color: #d56c6c;
+}
+
+input::placeholder {
+  color: #8d9891;
+}
+
+.password-field {
+  position: relative;
+}
+
+.eye-btn {
+  position: absolute;
+  right: 12px;
+  top: 8px;
+  border: 0;
+  background: transparent;
+  color: #5f6963;
+  cursor: pointer;
+  padding: 6px;
+}
+
+.eye-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+}
+
+small {
+  display: block;
+  margin-top: 6px;
+  color: #c64949;
+  font-size: 12px;
+}
+
+.submit-btn {
+  margin-top: 6px;
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  background: #0f5d3a;
+  color: #fff;
+  font-weight: 700;
+  font-size: 24px;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.signup-links {
+  margin-top: 12px;
+  text-align: right;
+}
+
+.signup-links a {
+  font-size: 14px;
+  color: #1f5f42;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.signup-links a:hover {
+  text-decoration: underline;
+}
+
+.brand-panel {
+  position: relative;
+  background: linear-gradient(145deg, #164e36, #1d6141);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-overlay {
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.brand-overlay.one {
+  width: 520px;
+  height: 520px;
+  right: -190px;
+  top: 80px;
+}
+
+.brand-overlay.two {
+  width: 420px;
+  height: 420px;
+  right: -120px;
+  bottom: -80px;
+}
+
+.brand-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 300px;
+}
+
+.brand-logo {
+  width: 92px;
+  height: 92px;
+  margin: 0 auto 18px;
+  border-radius: 999px;
+  border: 8px solid #efbc2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  line-height: 1;
+}
+
+.brand-content h1 {
+  margin: 0;
+  font-size: 52px;
+  font-weight: 700;
+}
+
+.brand-content p {
+  margin: 12px 0 24px;
+  font-size: 18px;
+  color: rgba(243, 249, 245, 0.92);
+}
+
+.brand-chip {
+  border: 1px solid rgba(230, 240, 235, 0.45);
+  background: transparent;
+  color: #eaf5ee;
+  border-radius: 999px;
+  padding: 10px 24px;
+  font-size: 16px;
+}
+
+@media (max-width: 960px) {
+  .signup-page {
+    background: #0e4129;
+  }
+
+  .signup-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-panel {
+    min-height: 280px;
+    order: -1;
+  }
+}
+

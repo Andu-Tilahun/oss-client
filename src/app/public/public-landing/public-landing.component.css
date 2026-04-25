@@ -1,0 +1,632 @@
+.landing-page {
+  background:
+    radial-gradient(140% 90% at 50% 10%, rgba(47, 127, 64, 0.55) 0%, rgba(20, 87, 43, 0.18) 40%, rgba(14, 62, 35, 0) 60%),
+    radial-gradient(110% 90% at 50% 100%, #0f4a2e 0%, #0e4128 45%, #0c3622 100%);
+  color: #fff;
+}
+
+.top-nav {
+  height: 48px;
+  background: #f4f4f4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 11%;
+  color: #1e1e1e;
+  position: relative;
+  z-index: 3;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.logo {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.brand-text {
+  font-size: 22px;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.menu-link {
+  font-size: 12px;
+  color: #1f1f1f;
+  text-decoration: none;
+}
+
+.menu-link.active {
+  border-bottom: 1px solid #1f1f1f;
+  padding-bottom: 2px;
+}
+
+.sign-in-btn {
+  background: #163f28;
+  color: #fff;
+  font-size: 12px;
+  text-decoration: none;
+  padding: 7px 15px;
+  border-radius: 3px;
+}
+
+.hero {
+  min-height: calc(100vh - 48px);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero::before,
+.hero::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160%;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.hero::before {
+  top: -155px;
+  height: 240px;
+  background: rgba(55, 146, 67, 0.28);
+}
+
+.hero::after {
+  top: -198px;
+  height: 290px;
+  background: rgba(40, 117, 55, 0.18);
+}
+
+.hero-content {
+  width: min(760px, 88vw);
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  margin-top: -48px;
+}
+
+.hero-content h1 {
+  margin: 0;
+  font-size: clamp(36px, 4.6vw, 62px);
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.hero-content p {
+  margin: 22px auto 30px;
+  max-width: 760px;
+  font-size: clamp(12px, 1.2vw, 16px);
+  line-height: 1.7;
+  color: rgba(236, 244, 238, 0.86);
+}
+
+.hero-btn {
+  display: inline-block;
+  background: #143723;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 13px 32px;
+}
+
+.content-section {
+  padding: 44px 0 20px;
+}
+
+.plots-section {
+  background: #ffffff;
+  color: #1a1a1a;
+}
+
+.section-wrap {
+  width: min(1220px, 90vw);
+  margin: 0 auto;
+}
+
+.section-title {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 700;
+}
+
+.section-subtitle {
+  margin: 12px auto 28px;
+  text-align: center;
+  max-width: 760px;
+  color: rgba(236, 244, 238, 0.82);
+  font-size: 14px;
+}
+
+.plots-section .section-subtitle {
+  color: #4a4a4a;
+}
+
+.plots-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.plot-card {
+  border-radius: 10px;
+  aspect-ratio: 4 / 3;
+  min-height: 210px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  background-size: cover;
+  background-position: center;
+}
+
+.plot-1 { background-image: url('/assets/farm/48f6a9ff1a36d9475a93e0e0ce543e8d.0000000.jpg'); }
+.plot-2 { background-image: url('/assets/farm/0428T1-2641-1800x1012-Recovered.jpeg'); }
+.plot-3 { background-image: url('/assets/farm/asdfht.jpeg'); }
+.plot-4 { background-image: url('/assets/farm/asfd.jpeg'); }
+.plot-5 { background-image: url('/assets/farm/Blog-featured-image-900x500-25.jpeg'); }
+.plot-6 { background-image: url('/assets/farm/Crops on Regenerative Farm Being Watered.jpeg'); }
+.plot-7 { background-image: url('/assets/farm/Farm-land-for-sale.jpg'); }
+.plot-8 { background-image: url('/assets/farm/photo-1464226184884-fa280b87c399.jpeg'); }
+.plot-9 { background-image: url('/assets/farm/photo-1465379944081-7f47de8d74ac.jpg'); }
+.plot-10 { background-image: url('/assets/farm/photo-1471193945509-9ad0617afabf.jpg'); }
+.plot-11 { background-image: url('/assets/farm/photo-1492496913980-501348b61469.jpg'); }
+.plot-12 { background-image: url('/assets/farm/photo-1500382017468-9049fed747ef.jpg'); }
+
+.campaigns {
+  padding-top: 56px;
+  padding-bottom: 72px;
+}
+
+.campaigns-header {
+  padding-bottom: 14px;
+}
+
+.campaigns-gallery {
+  background: transparent;
+  color: #ffffff;
+  padding-top: 22px;
+}
+
+.campaign-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.campaign-photo {
+  border-radius: 10px;
+  height: 320px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
+}
+
+.campaign-image-a { background-image: url('/assets/farm/photo-1500651230702-0e2d8a49d4ad.jpg'); background-size: cover; background-position: center; }
+.campaign-image-b { background-image: url('/assets/farm/photo-1500937386664-56d1dfef3854.jpg'); background-size: cover; background-position: center; }
+.campaign-image-c { background-image: url('/assets/farm/sdaf.jpeg'); background-size: cover; background-position: center; }
+.campaign-image-d { background-image: url('/assets/farm/sdfvsd.jpeg'); background-size: cover; background-position: center; }
+.campaign-image-e { background-image: url('/assets/farm/walking by fields is nice and peaceful.jpeg'); background-size: cover; background-position: center; }
+.campaign-image-f { background-image: url('/assets/farm/xcb.jpeg'); background-size: cover; background-position: center; }
+.campaign-image-g { background-image: url('/assets/farm/zdxvsd].jpeg'); background-size: cover; background-position: center; }
+.campaign-image-h { background-image: url('/assets/farm/Гидравлические системы в современном сельском….jpeg'); background-size: cover; background-position: center; }
+
+.image-a {
+  background-image: url('https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+}
+
+.image-b {
+  background-image: url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+}
+
+.image-c {
+  background-image: url('https://images.unsplash.com/photo-1492496913980-501348b61469?auto=format&fit=crop&w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+}
+
+.image-d {
+  background-image: url('https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+}
+
+.image-e {
+  background-image: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+}
+
+.image-f {
+  background-image: url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+}
+
+.image-g {
+  background-image: url('https://images.unsplash.com/photo-1471193945509-9ad0617afabf?auto=format&fit=crop&w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+}
+
+.image-h {
+  background-image: url('https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+}
+
+.campaign-action {
+  text-align: center;
+  margin-top: 22px;
+}
+
+.campaigns-gallery .hero-btn {
+  background: #143723;
+}
+
+.opportunity-section {
+  padding-top: 24px;
+  padding-bottom: 72px;
+}
+
+.opportunity-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.opportunity-card {
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f2f4f1;
+  color: #1f1f1f;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+}
+
+.opportunity-text {
+  padding: 12px 12px 10px;
+  min-height: 116px;
+}
+
+.opportunity-text h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.opportunity-text p {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.45;
+  color: #4b4b4b;
+}
+
+.opportunity-image {
+  height: 84px;
+  background-size: cover;
+  background-position: center;
+}
+
+.farm-locations {
+  background: #ffffff;
+  color: #1f1f1f;
+  padding-top: 56px;
+  padding-bottom: 78px;
+}
+
+.farm-locations-wrap {
+  width: min(1060px, 90vw);
+}
+
+.farm-locations-title {
+  margin: 0;
+  text-align: center;
+  color: #2f4f36;
+  font-size: clamp(32px, 3vw, 46px);
+  font-weight: 700;
+}
+
+.farm-locations-subtitle {
+  margin: 10px 0 26px;
+  text-align: center;
+  color: #666;
+  font-size: 13px;
+}
+
+.farm-locations-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 14px;
+  align-items: start;
+}
+
+.farm-map-panel {
+  min-height: 420px;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  background: #f5f7f8;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.farm-map-empty {
+  color: #8b8b8b;
+  font-size: 14px;
+}
+
+.farm-list-panel {
+  border-radius: 8px;
+  border: 1px solid #ececec;
+  background: #ffffff;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  padding: 12px;
+}
+
+.farm-list-panel h3 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: #2f4f36;
+}
+
+.farm-list-items {
+  display: grid;
+  gap: 8px;
+}
+
+.farm-list-item {
+  border: 1px solid #efefef;
+  border-radius: 6px;
+  padding: 8px;
+  background: #fafafa;
+}
+
+.farm-name {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2f2f2f;
+}
+
+.farm-meta {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: #727272;
+}
+
+.ready-invest {
+  padding-top: 68px;
+  padding-bottom: 82px;
+}
+
+.ready-invest-wrap {
+  width: min(760px, 88vw);
+  text-align: center;
+}
+
+.ready-invest-title {
+  margin: 0;
+  font-size: clamp(38px, 4.2vw, 62px);
+  line-height: 1.15;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.ready-invest-subtitle {
+  margin: 20px auto 30px;
+  max-width: 640px;
+  color: rgba(236, 244, 238, 0.88);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.ready-invest-btn {
+  display: inline-block;
+  background: #143723;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 12px 30px;
+}
+
+.questions-section {
+  background: #ffffff;
+  color: #1f1f1f;
+  padding-top: 72px;
+  padding-bottom: 82px;
+}
+
+.questions-wrap {
+  width: min(760px, 88vw);
+  text-align: center;
+}
+
+.questions-title {
+  margin: 0;
+  font-size: clamp(36px, 4vw, 58px);
+  line-height: 1.15;
+  font-weight: 700;
+  color: #2f4f36;
+}
+
+.questions-subtitle {
+  margin: 20px auto 28px;
+  max-width: 620px;
+  color: #4f4f4f;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.questions-btn {
+  display: inline-block;
+  background: #143723;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 12px 26px;
+}
+
+.landing-footer {
+  background: #154529;
+  color: #f3f7f2;
+  text-align: center;
+  padding: 20px 12px 18px;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.footer-links a {
+  color: #f1f6ef;
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.footer-copy {
+  margin: 0;
+  font-size: 11px;
+  color: rgba(241, 246, 239, 0.86);
+}
+
+.investment-types {
+  background: #ffffff;
+  color: #1b1b1b;
+  padding-top: 52px;
+  padding-bottom: 64px;
+}
+
+.investment-wrap {
+  width: min(980px, 88vw);
+}
+
+.investment-title {
+  margin: 0 0 28px;
+  text-align: center;
+  color: #2b4f37;
+  font-size: clamp(34px, 3vw, 48px);
+  font-weight: 700;
+}
+
+.investment-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 20px;
+  align-items: stretch;
+  margin-bottom: 26px;
+}
+
+.investment-text h3 {
+  margin: 8px 0 8px;
+  font-size: 32px;
+  line-height: 1.15;
+  color: #2f4f36;
+}
+
+.investment-text p {
+  margin: 0 0 14px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #545454;
+}
+
+.learn-more-btn {
+  display: inline-block;
+  width: 100%;
+  border: 1px solid #5f8f6f;
+  border-radius: 4px;
+  color: #385c44;
+  text-align: center;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 10px;
+}
+
+.investment-image {
+  border-radius: 6px;
+  min-height: 118px;
+  background-size: cover;
+  background-position: center;
+}
+
+@media (max-width: 900px) {
+  .top-nav {
+    padding: 0 20px;
+  }
+
+  .menu {
+    gap: 12px;
+  }
+
+  .plots-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .campaign-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .opportunity-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .farm-locations-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .farm-map-panel {
+    min-height: 340px;
+  }
+
+  .investment-row {
+    grid-template-columns: 1fr;
+  }
+
+  .investment-text h3 {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 560px) {
+  .plots-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .campaign-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .opportunity-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

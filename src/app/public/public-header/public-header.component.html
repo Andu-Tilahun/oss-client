@@ -1,0 +1,14 @@
+<header class="top-nav">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">🌱</span>
+    <span class="brand-text">AgriVest</span>
+  </div>
+
+  <nav class="menu">
+    <a class="menu-link" [class.active]="activePage === 'home'" routerLink="/public">Home</a>
+    <a class="menu-link" [class.active]="activePage === 'about'" routerLink="/public/about-us">About Us</a>
+    <a class="menu-link" [class.active]="activePage === 'contact'" routerLink="/public/contact">Contact</a>
+    <a class="sign-in-btn" routerLink="/login">Sign in</a>
+  </nav>
+</header>
+
