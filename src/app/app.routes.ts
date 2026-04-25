@@ -170,6 +170,12 @@ export const routes: Routes = [
     data: { roles: ['ADMIN'] },
   },
   {
+    path: 'farm-company',
+    loadChildren: () => import('./features/farm-company/farm-company.module').then(m => m.FarmCompanyModule),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] },
+  },
+  {
     path: 'farm-plots',
     loadChildren: () => import('./features/farm-plots/farm-plots.module').then(m => m.FarmPlotsModule),
     canActivate: [AuthGuard, RoleGuard],

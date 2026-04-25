@@ -1,0 +1,39 @@
+<app-detail-card>
+  <div *ngIf="loading" class="text-sm text-gray-600">Loading company profile...</div>
+  <div *ngIf="!companyProfile && !loading" class="text-sm text-gray-500">Company profile is not available.</div>
+
+  <ng-container *ngIf="companyProfile && !loading">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
+      <div>
+        <h3 class="text-2xl font-bold text-gray-900">{{ companyProfile.name }}</h3>
+        <p class="mt-1 text-sm text-gray-500">Default Ethiopian company profile</p>
+      </div>
+    </div>
+
+    <hr class="border-gray-200 mb-8" />
+
+    <app-detail-section title="Company Information">
+      <app-detail-field label="Name" [value]="companyProfile.name" />
+      <app-detail-field label="Email" [value]="companyProfile.email" />
+      <app-detail-field label="Contact Mobile" [value]="companyProfile.contactMobilePhone" />
+      <app-detail-field label="Office Phone" [value]="companyProfile.officePhone" />
+      <app-detail-field label="Bank Account" [value]="companyProfile.bankAccount" />
+      <app-detail-field label="Latitude" [value]="companyProfile.latitude" />
+      <app-detail-field label="Longitude" [value]="companyProfile.longitude" />
+    </app-detail-section>
+
+    <app-detail-section title="Office Location">
+      <div class="col-span-full">
+        <app-oss-map
+          [interactive]="false"
+          [height]="'300px'"
+          [zoom]="14"
+          [latitude]="companyProfile.latitude"
+          [longitude]="companyProfile.longitude"
+          [locations]="[{ lat: companyProfile.latitude, lng: companyProfile.longitude, name: companyProfile.name }]"
+          [fitBounds]="true"
+        ></app-oss-map>
+      </div>
+    </app-detail-section>
+  </ng-container>
+</app-detail-card>

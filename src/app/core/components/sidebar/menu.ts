@@ -110,6 +110,7 @@ export const MENU: MenuItem[] = [
     route: '/farm-plots',
     roles: ['ADMIN', 'OPERATOR', 'INVESTOR','EXTENSION_WORKER'],
     children: [
+      { icon: '', label: 'Company', route: '/farm-company', roles: ['ADMIN'] },
       { icon: '', label: 'Farm Plots', route: '/farm-plots', roles: ['ADMIN', 'EXTENSION_WORKER'] },
       { icon: '', label: 'Leases', route: '/farm-leases', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
       { icon: '', label: 'Restoration & Follow-ups', route: '/farm-followups', roles: ['EXTENSION_WORKER', 'ADMIN'] },
