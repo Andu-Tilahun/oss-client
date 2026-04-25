@@ -1,68 +1,24 @@
 <div class="signup-page">
   <div class="signup-shell">
     <section class="form-panel">
-      <div class="form-wrap">
+      <div class="form-wrap frozen">
         <h2>Sign up</h2>
         <p class="subtitle">Create your account to start investing.</p>
 
-        <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
-          <div class="field">
-            <input type="text" formControlName="fullName" placeholder="Full name" [class.invalid]="submitted && f['fullName'].errors" />
-            <small *ngIf="submitted && f['fullName'].errors">Full name is required</small>
-          </div>
+        <div class="frozen-form">
+          <div class="fake-field"></div>
+          <div class="fake-field"></div>
+          <div class="fake-field"></div>
+          <div class="fake-field"></div>
+          <div class="fake-field"></div>
+          <div class="fake-button"></div>
+        </div>
 
-          <div class="field">
-            <input type="text" formControlName="username" placeholder="Username" [class.invalid]="submitted && f['username'].errors" />
-            <small *ngIf="submitted && f['username'].errors">Username is required</small>
-          </div>
-
-          <div class="field">
-            <input type="email" formControlName="email" placeholder="Email address" [class.invalid]="submitted && f['email'].errors" />
-            <small *ngIf="submitted && f['email'].errors?.['required']">Email is required</small>
-            <small *ngIf="submitted && f['email'].errors?.['email']">Please enter a valid email</small>
-          </div>
-
-          <div class="field password-field">
-            <input
-              [type]="showPassword ? 'text' : 'password'"
-              formControlName="password"
-              placeholder="Password"
-              [class.invalid]="submitted && f['password'].errors"
-            />
-            <button type="button" class="eye-btn" (click)="togglePassword()" aria-label="Toggle password visibility">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            </button>
-            <small *ngIf="submitted && f['password'].errors?.['required']">Password is required</small>
-            <small *ngIf="submitted && f['password'].errors?.['minlength']">Password must be at least 6 characters</small>
-          </div>
-
-          <div class="field password-field">
-            <input
-              [type]="showConfirmPassword ? 'text' : 'password'"
-              formControlName="confirmPassword"
-              placeholder="Confirm password"
-              [class.invalid]="submitted && f['confirmPassword'].errors"
-            />
-            <button type="button" class="eye-btn" (click)="toggleConfirmPassword()" aria-label="Toggle confirm password visibility">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            </button>
-            <small *ngIf="submitted && f['confirmPassword'].errors">Confirm password is required</small>
-          </div>
-
-          <button type="submit" [disabled]="isLoading" class="submit-btn">
-            {{ isLoading ? 'Creating...' : 'Create Account' }}
-          </button>
-
-          <div class="signup-links">
-            <a routerLink="/login">Already have an account? Sign in</a>
-          </div>
-        </form>
+        <div class="coming-soon-card">
+          <h3>Coming soon</h3>
+          <p>Signup is currently frozen while we finish the new onboarding flow.</p>
+          <a routerLink="/login">Back to login</a>
+        </div>
       </div>
     </section>
 
