@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {HttpService, RequestType} from '../../../core/services/http.service';
+import {HttpService} from '../../../core/services/http.service';
 import {ApiResponse, PageResponse} from '../../../shared/models/api-response.model';
 import {Endpoints} from '../../../core/endpoint/endpoint.model';
 import {FarmPlot, FarmPlotFilterRequest, FarmPlotRequest} from '../models/farm-plot.model';
@@ -15,16 +15,6 @@ export class FarmPlotService {
   getAllFarmPlots(page: number = 0, size: number = 10): Observable<PageResponse<FarmPlot>> {
     const params = new HttpParams().set('page', page.toString()).set('size', size.toString());
     return this.httpService.get<PageResponse<FarmPlot>>(Endpoints.FARM_PLOTS_ENDPOINT, undefined, params);
-  }
-
-  getPublicActiveFarmPlots(page: number = 0, size: number = 10): Observable<PageResponse<FarmPlot>> {
-    const params = new HttpParams().set('page', page.toString()).set('size', size.toString());
-    return this.httpService.get<PageResponse<FarmPlot>>(
-      `${Endpoints.FARM_PLOTS_ENDPOINT}/public/active`,
-      undefined,
-      params,
-      {requestType: RequestType.LOCAL, skipAuthRedirect: true}
-    );
   }
 
   filterFarmPlots(request: FarmPlotFilterRequest): Observable<PageResponse<FarmPlot>> {

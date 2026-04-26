@@ -12,9 +12,6 @@ import {FilterBarComponent} from '../../../../shared/components/filter-bar/filte
   styleUrls: ['./farm-plot-filter.component.css'],
 })
 export class FarmPlotFilterComponent {
-  @Input() showSearch = true;
-  @Input() showStatus = true;
-
   @Input() searchText = '';
   @Output() searchTextChange = new EventEmitter<string>();
 

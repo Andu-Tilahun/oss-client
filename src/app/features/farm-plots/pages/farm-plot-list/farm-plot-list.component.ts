@@ -10,7 +10,6 @@ import {FarmPlotService} from '../../services/farm-plot.service';
 import {PageResponse} from '../../../../shared/models/api-response.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
-import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
 import {environment} from '../../../../../environments/environment';
 
 @Component({
@@ -40,12 +39,6 @@ export class FarmPlotListComponent {
   showDeleteModal = false;
 
   selectedPlot: FarmPlot | null = null;
-  columns: DataTableColumn<FarmPlot>[] = [
-    {header: 'Title', value: (plot) => plot.title},
-    {header: 'Size', value: (plot) => `${plot.size} ${plot.sizeType}`},
-    {header: 'Soil Type', value: (plot) => plot.soilType},
-    {header: 'Status', value: (plot) => plot.status},
-  ];
 
   // Forces the right-side detail component to reload after updates.
   detailRefreshKey = 0;
