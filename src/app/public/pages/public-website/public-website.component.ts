@@ -8,6 +8,7 @@ import { FarmPlotService } from '../../../features/farm-plots/services/farm-plot
 import { CompanyProfile } from '../../../features/farm-company/models/company-profile.model';
 import { CompanyProfileService } from '../../../features/farm-company/services/company-profile.service';
 import { TableQueryParams } from '../../../shared/data-table/models/table-query-params.model';
+import { PageResponse } from '../../../shared/models/api-response.model';
 import { OssMapComponent } from '../../../shared/oss-map/oss-map.component';
 import { environment } from '../../../../environments/environment';
 import { RequestType } from '../../../core/services/http.service';
@@ -61,7 +62,7 @@ export class PublicWebsiteComponent implements OnInit {
   loadPlots(): void {
     this.loadingPlots = true;
     this.farmPlotService.getPublicActiveFarmPlots(0, this.initialLoadSize).subscribe({
-      next: (response) => {
+      next: (response: PageResponse<FarmPlot>) => {
         this.plots = response.content ?? [];
         this.applyClientFilters();
         this.loadingPlots = false;
