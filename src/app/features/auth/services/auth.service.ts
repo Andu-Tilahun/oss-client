@@ -63,13 +63,13 @@ export class AuthService {
       tap(() => {
         this.clearSession();
         this.currentUserSubject.next(null);
-        this.router.navigate(['/login']);
+        this.router.navigate(['/public']);
       }),
       catchError(error => {
         // Even if logout fails on server, clear local session
         this.clearSession();
         this.currentUserSubject.next(null);
-        this.router.navigate(['/login']);
+        this.router.navigate(['/public']);
         return throwError(() => error);
       })
     );
@@ -164,7 +164,7 @@ export class AuthService {
   forceLogout(): void {
     this.clearSession();
     this.currentUserSubject.next(null);
-    this.router.navigate(['/login']);
+    this.router.navigate(['/public']);
   }
 
   isAdmin(): boolean {

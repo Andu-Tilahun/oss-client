@@ -1,5 +1,8 @@
 .public-page {
-  background: #f3f4f6;
+  background:
+    radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 48%),
+    radial-gradient(circle at left 20%, rgba(5, 150, 105, 0.1), transparent 42%),
+    #f8fafc;
   color: #0f172a;
 }
 
@@ -12,8 +15,9 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  backdrop-filter: blur(10px);
 }
 
 .header-content {
@@ -27,8 +31,9 @@
 .brand {
   border: none;
   background: transparent;
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
   color: #065f46;
   cursor: pointer;
 }
@@ -47,28 +52,45 @@
   font-size: 0.9rem;
 }
 
-.site-footer button:hover {
-  color: #065f46;
-}
-
 .signin-btn,
 .primary-btn {
   border: none;
-  border-radius: 0.65rem;
+  border-radius: 999px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
+  transition: all 0.25s ease;
 }
 
 .signin-btn {
-  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+  background: linear-gradient(90deg, #059669, #047857);
   color: #ffffff;
-  padding: 0.5rem 1rem;
+  padding: 0.55rem 1.15rem;
+  box-shadow: 0 10px 24px rgba(4, 120, 87, 0.24);
+}
+
+.signin-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(4, 120, 87, 0.3);
 }
 
 .hero {
-  background: linear-gradient(100deg, #064e3b, #166534, #065f46);
+  background:
+    linear-gradient(115deg, rgba(4, 120, 87, 0.94), rgba(6, 95, 70, 0.9)),
+    radial-gradient(circle at 18% 22%, rgba(52, 211, 153, 0.42), transparent 48%),
+    radial-gradient(circle at 82% 78%, rgba(167, 243, 208, 0.22), transparent 45%);
   color: #ffffff;
   padding: 6rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: auto -10% -120px -10%;
+  height: 260px;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.2), transparent);
+  pointer-events: none;
 }
 
 .hero-inner {
@@ -84,20 +106,44 @@
 }
 
 .hero p {
-  color: #dcfce7;
+  color: #ecfdf5;
   margin-bottom: 1.5rem;
+  font-size: 1.05rem;
 }
 
 .primary-btn {
-  background: #111827;
-  color: white;
-  padding: 0.75rem 1.2rem;
+  background: #ffffff;
+  color: #065f46;
+  padding: 0.78rem 1.35rem;
+  box-shadow: 0 10px 24px rgba(2, 44, 34, 0.2);
 }
 
-.plots-section,
+.primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(2, 44, 34, 0.28);
+}
+
+.plots-section {
+  padding: 4.25rem 0;
+}
+
 .about-section,
 .contact-section {
   padding: 4rem 0;
+}
+
+.about-section {
+  background: linear-gradient(180deg, rgba(236, 253, 245, 0.68), rgba(255, 255, 255, 0));
+}
+
+.contact-section {
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0), rgba(220, 252, 231, 0.45));
+}
+
+.plots-section .container,
+.about-section .container,
+.contact-section .container {
+  border-radius: 1.25rem;
 }
 
 .section-title-wrap {
@@ -106,29 +152,32 @@
 }
 
 .section-title-wrap h2 {
-  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  font-size: clamp(1.85rem, 3vw, 2.55rem);
   font-weight: 800;
-  color: #0f172a;
+  color: #052e2b;
+  letter-spacing: -0.02em;
 }
 
 .section-title-wrap p {
-  color: #475569;
+  color: #334155;
+  max-width: 650px;
+  margin-inline: auto;
 }
 
 .about-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
+  gap: 1.2rem;
 }
 
 .about-card,
 .map-wrap,
 .contact-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(16, 185, 129, 0.18);
   border-radius: 1rem;
-  padding: 1rem;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+  padding: 1.15rem;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
 }
 
 .about-card h3 {
@@ -136,6 +185,11 @@
   margin-bottom: 0.75rem;
   color: #065f46;
   font-weight: 700;
+}
+
+.about-card p {
+  color: #334155;
+  line-height: 1.65;
 }
 
 .contact-card {
@@ -146,12 +200,15 @@
 
 .contact-card .label {
   font-size: 0.75rem;
-  color: #64748b;
+  color: #475569;
   display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .contact-card p {
   font-weight: 600;
+  color: #0f172a;
 }
 
 .contact-card.muted {
@@ -160,9 +217,9 @@
 }
 
 .site-footer {
-  background: #065f46;
+  background: linear-gradient(105deg, #064e3b, #065f46, #047857);
   color: #e2e8f0;
-  padding: 2rem 0;
+  padding: 2.2rem 0;
 }
 
 .footer-content {
@@ -184,6 +241,10 @@
   margin-bottom: 0.3rem;
 }
 
+.site-footer button:hover {
+  color: #ffffff;
+}
+
 .drawer-backdrop {
   position: fixed;
   inset: 0;
@@ -199,7 +260,7 @@
   height: 100vh;
   background: #ffffff;
   z-index: 100;
-  box-shadow: -4px 0 24px rgba(2, 6, 23, 0.2);
+  box-shadow: -8px 0 28px rgba(2, 6, 23, 0.2);
   padding: 1.5rem;
   overflow-y: auto;
   transition: right 0.25s ease-in-out;
@@ -223,7 +284,7 @@
   margin: 1.2rem 0 0.8rem;
   font-size: 1.4rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #065f46;
 }
 
 .drawer-image {
