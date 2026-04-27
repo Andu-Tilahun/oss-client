@@ -15,6 +15,7 @@ import {
   ActionIconButtonComponent
 } from "../../shared/components/action-icons/action-icon-button/action-icon-button.component";
 import {FarmPlotViewComponent} from './components/farm-plot-view/farm-plot-view.component';
+import {ImageGalleryModalComponent} from '../../shared/modals/image-gallery-modal/image-gallery-modal.component';
 
 @NgModule({
   declarations: [FarmPlotListComponent],
@@ -27,6 +28,7 @@ import {FarmPlotViewComponent} from './components/farm-plot-view/farm-plot-view.
     FarmPlotFilterComponent,
     FarmPlotCreateModalComponent,
     FarmPlotEditModalComponent,
+    ImageGalleryModalComponent,
     PageSplitLayoutComponent,
     FarmPlotViewComponent,
   ],

@@ -2,6 +2,16 @@ export type FarmPlotStatus = 'ACTIVE' | 'INACTIVE' | 'UNDER_MAINTENANCE' | 'ASSI
 export type FarmPlotSizeType = 'ACRES' | 'HECTARES';
 export type FarmPlotSoilType = 'SANDY' | 'CLAY' | 'LOAMY';
 
+export interface FarmGallery {
+  id: string;
+  imageUuid: string;
+  sortOrder: number;
+}
+
+export interface FarmGalleryCreateRequest {
+  imageUuid: string;
+}
+
 export interface FarmPlot {
   id: string;
   title: string;
@@ -13,6 +23,7 @@ export interface FarmPlot {
   soilType: FarmPlotSoilType;
   status: FarmPlotStatus;
   imageUuid?: string;
+  gallery?: FarmGallery[];
 
   createdBy?: string;
   createdAt?: Date;

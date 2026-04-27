@@ -5,6 +5,7 @@ import {FarmPlotFormComponent} from '../../components/farm-plot-form/farm-plot-f
 import {FarmPlot, FarmPlotRequest} from '../../models/farm-plot.model';
 import {FarmPlotService} from '../../services/farm-plot.service';
 import {ToastService} from '../../../../shared/toast/toast.service';
+import {forkJoin, of} from 'rxjs';
 
 @Component({
   selector: 'app-farm-plot-edit-modal',
@@ -41,12 +42,44 @@ export class FarmPlotEditModalComponent {
     const request: FarmPlotRequest = this.farmPlotForm.getValue();
 
     this.farmPlotService.updateFarmPlot(this.farmPlot.id, request).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this.visible = false;
-        this.visibleChange.emit(false);
-        this.toastService.success('Farm plot updated successfully');
-        this.farmPlotUpdated.emit();
+      next: (updatedPlot) => {
+        const desiredImageUuids = this.farmPlotForm.getGalleryImageUuids();
+
+        this.farmPlotService.getFarmPlotGallery(updatedPlot.id).subscribe({
+          next: (existingGallery) => {
+            const existingMap = new Map(existingGallery.map((item) => [item.imageUuid, item]));
+            const desiredSet = new Set(desiredImageUuids);
+
+            const addCalls = desiredImageUuids
+              .filter((imageUuid) => !existingMap.has(imageUuid))
+              .map((imageUuid) => this.farmPlotService.addFarmPlotGalleryImage(updatedPlot.id, {imageUuid}));
+
+            const removeCalls = existingGallery
+              .filter((item) => !desiredSet.has(item.imageUuid))
+              .map((item) => this.farmPlotService.deleteFarmPlotGalleryImage(updatedPlot.id, item.id));
+
+            const syncCalls = [...addCalls, ...removeCalls];
+            const syncGallery$ = syncCalls.length ? forkJoin(syncCalls) : of([]);
+
+            syncGallery$.subscribe({
+              next: () => {
+                this.isLoading = false;
+                this.visible = false;
+                this.visibleChange.emit(false);
+                this.toastService.success('Farm plot updated successfully');
+                this.farmPlotUpdated.emit();
+              },
+              error: (galleryError) => {
+                this.isLoading = false;
+                this.toastService.error(galleryError.message || 'Farm plot updated, but gallery sync failed', 'Update Farm Plot Gallery');
+              },
+            });
+          },
+          error: (galleryError) => {
+            this.isLoading = false;
+            this.toastService.error(galleryError.message || 'Failed to load existing gallery', 'Update Farm Plot');
+          },
+        });
       },
       error: (error) => {
         this.isLoading = false;

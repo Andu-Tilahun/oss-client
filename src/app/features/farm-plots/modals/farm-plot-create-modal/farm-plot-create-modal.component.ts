@@ -5,6 +5,7 @@ import {FarmPlotFormComponent} from '../../components/farm-plot-form/farm-plot-f
 import {FarmPlotRequest} from '../../models/farm-plot.model';
 import {FarmPlotService} from '../../services/farm-plot.service';
 import {ToastService} from '../../../../shared/toast/toast.service';
+import {forkJoin, of} from 'rxjs';
 
 @Component({
   selector: 'app-farm-plot-create-modal',
@@ -36,13 +37,27 @@ export class FarmPlotCreateModalComponent {
     const request: FarmPlotRequest = this.farmPlotForm.getValue();
 
     this.farmPlotService.createFarmPlot(request).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this.visible = false;
-        this.visibleChange.emit(false);
-        this.farmPlotForm.reset();
-        this.toastService.success('Farm plot created successfully');
-        this.farmPlotCreated.emit();
+      next: (createdPlot) => {
+        const galleryImageUuids = this.farmPlotForm.getGalleryImageUuids();
+        const createGalleryCalls = galleryImageUuids.map((imageUuid) =>
+          this.farmPlotService.addFarmPlotGalleryImage(createdPlot.id, {imageUuid}),
+        );
+        const syncGallery$ = createGalleryCalls.length ? forkJoin(createGalleryCalls) : of([]);
+
+        syncGallery$.subscribe({
+          next: () => {
+            this.isLoading = false;
+            this.visible = false;
+            this.visibleChange.emit(false);
+            this.farmPlotForm.reset();
+            this.toastService.success('Farm plot created successfully');
+            this.farmPlotCreated.emit();
+          },
+          error: (galleryError) => {
+            this.isLoading = false;
+            this.toastService.error(galleryError.message || 'Farm plot created, but gallery upload failed', 'Create Farm Plot Gallery');
+          },
+        });
       },
       error: (error) => {
         this.isLoading = false;

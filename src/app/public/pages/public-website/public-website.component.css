@@ -302,6 +302,19 @@
   margin-bottom: 0.4rem;
 }
 
+.action-link {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.action-link--view {
+  color: #2563eb;
+}
+
 @media (max-width: 768px) {
   .header-content {
     flex-wrap: wrap;

@@ -41,6 +41,7 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
 
   // Track image file id locally since ProfilePictureUploadComponent controls its preview
   profileImageUuid?: string;
+  galleryImageUuids: string[] = [''];
 
   constructor(private fb: FormBuilder) {
     this.farmPlotForm = this.createForm();
@@ -77,6 +78,13 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
 
   private patchFormValues(plot: FarmPlot): void {
     this.profileImageUuid = plot.imageUuid;
+    this.galleryImageUuids = (plot.gallery ?? [])
+      .slice()
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((item) => item.imageUuid);
+    if (this.galleryImageUuids.length === 0) {
+      this.galleryImageUuids = [''];
+    }
     this.farmPlotForm.patchValue({
       title: plot.title,
       description: plot.description ?? '',
@@ -127,6 +135,7 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
   reset(): void {
     this.farmPlotForm.reset({status: 'ACTIVE'});
     this.profileImageUuid = undefined;
+    this.galleryImageUuids = [''];
   }
 
   onImageUploaded(fileId: string): void {
@@ -136,6 +145,34 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
   onImageRemoved(): void {
     this.farmPlotForm.patchValue({imageUuid: ''});
     this.profileImageUuid = undefined;
+  }
+
+  addGallerySlot(): void {
+    this.galleryImageUuids = [...this.galleryImageUuids, ''];
+  }
+
+  onGalleryImageUploaded(index: number, fileId: string): void {
+    const copy = [...this.galleryImageUuids];
+    copy[index] = fileId;
+    this.galleryImageUuids = copy;
+  }
+
+  onGalleryImageRemoved(index: number): void {
+    const copy = [...this.galleryImageUuids];
+    copy[index] = '';
+    this.galleryImageUuids = copy;
+  }
+
+  removeGallerySlot(index: number): void {
+    if (this.galleryImageUuids.length === 1) {
+      this.galleryImageUuids = [''];
+      return;
+    }
+    this.galleryImageUuids = this.galleryImageUuids.filter((_, idx) => idx !== index);
+  }
+
+  getGalleryImageUuids(): string[] {
+    return [...new Set(this.galleryImageUuids.filter((id) => !!id))];
   }
 }
 

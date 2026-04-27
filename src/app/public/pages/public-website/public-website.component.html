@@ -82,6 +82,13 @@
             (clearFilters)="clearFilters()"
           ></app-farm-plot-filter>
         </div>
+
+        <ng-template cardFooterTemplate let-plot>
+          <div class="flex items-center gap-4 text-sm">
+            <button type="button" class="action-link action-link--view" (click)="openPlotDetail(plot)">View</button>
+            <button type="button" class="action-link action-link--view" (click)="openPublicGallery(plot)">Gallery</button>
+          </div>
+        </ng-template>
       </app-data-card-layout>
     </div>
   </section>
@@ -188,4 +195,12 @@
       </div>
     </ng-container>
   </aside>
+
+  <app-image-gallery-modal
+    [(visible)]="showGalleryModal"
+    [loading]="galleryLoading"
+    [title]="galleryTitle"
+    [imageUrls]="galleryImageUrls"
+    (visibleChange)="onGalleryVisibilityChange($event)"
+  ></app-image-gallery-modal>
 </div>

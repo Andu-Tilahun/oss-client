@@ -50,6 +50,15 @@
       (deleteClick)="onDelete($event)"
     >
       <ng-container *ngTemplateOutlet="extraTableHeader"></ng-container>
+
+      <ng-template cardFooterTemplate let-plot>
+        <div class="flex items-center gap-4 text-sm">
+          <button type="button" class="action-link action-link--view" (click)="onView(plot)">View</button>
+          <button type="button" class="action-link action-link--edit" *ngIf="checkIfPlotIsNotAssigned" (click)="onEdit(plot)">Edit</button>
+          <button type="button" class="action-link action-link--delete" *ngIf="checkIfPlotIsNotAssigned" (click)="onDelete(plot)">Delete</button>
+          <button type="button" class="action-link action-link--view" (click)="onOpenGallery(plot)">Gallery</button>
+        </div>
+      </ng-template>
     </app-data-card-layout>
   </ng-template>
 
@@ -79,6 +88,14 @@
   confirmText="Deactivate"
   (confirm)="confirmDelete()"
 ></app-confirmation-modal>
+
+<app-image-gallery-modal
+  [(visible)]="showGalleryModal"
+  [loading]="galleryLoading"
+  [title]="galleryTitle"
+  [imageUrls]="galleryImageUrls"
+  (visibleChange)="onGalleryVisibilityChange($event)"
+></app-image-gallery-modal>
 
 
 

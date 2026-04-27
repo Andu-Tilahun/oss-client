@@ -12,11 +12,12 @@ import { PageResponse } from '../../../shared/models/api-response.model';
 import { OssMapComponent } from '../../../shared/oss-map/oss-map.component';
 import { environment } from '../../../../environments/environment';
 import { RequestType } from '../../../core/services/http.service';
+import { ImageGalleryModalComponent } from '../../../shared/modals/image-gallery-modal/image-gallery-modal.component';
 
 @Component({
   selector: 'app-public-website',
   standalone: true,
-  imports: [CommonModule, RouterModule, FarmPlotFilterComponent, SharedModule, OssMapComponent],
+  imports: [CommonModule, RouterModule, FarmPlotFilterComponent, SharedModule, OssMapComponent, ImageGalleryModalComponent],
   templateUrl: './public-website.component.html',
   styleUrls: ['./public-website.component.css'],
 })
@@ -32,6 +33,10 @@ export class PublicWebsiteComponent implements OnInit {
 
   loadingPlots = false;
   loadingCompany = false;
+  galleryLoading = false;
+  showGalleryModal = false;
+  galleryImageUrls: string[] = [];
+  galleryTitle = 'Farm Plot Gallery';
 
   total = 0;
   pageIndex = 1;
@@ -116,6 +121,34 @@ export class PublicWebsiteComponent implements OnInit {
 
   openPlotDetail(plot: FarmPlot): void {
     this.selectedPlot = plot;
+  }
+
+  openPublicGallery(plot: FarmPlot): void {
+    this.galleryTitle = `${plot.title} Gallery`;
+    this.showGalleryModal = true;
+    this.galleryLoading = true;
+    this.galleryImageUrls = [];
+
+    this.farmPlotService.getPublicFarmPlotGallery(plot.id).subscribe({
+      next: (gallery) => {
+        this.galleryImageUrls = gallery
+          .map((item) => (item.imageUuid ? `${this.storageApiUrl}/${item.imageUuid}` : null))
+          .filter((url): url is string => !!url);
+        this.galleryLoading = false;
+      },
+      error: () => {
+        this.galleryLoading = false;
+        this.galleryImageUrls = [];
+      },
+    });
+  }
+
+  onGalleryVisibilityChange(visible: boolean): void {
+    this.showGalleryModal = visible;
+    if (!visible) {
+      this.galleryLoading = false;
+      this.galleryImageUrls = [];
+    }
   }
 
   closePlotDetail(): void {

@@ -1,1 +1,21 @@
+.action-link {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.action-link--view {
+  color: #2563eb;
+}
+
+.action-link--edit {
+  color: #334155;
+}
+
+.action-link--delete {
+  color: #e11d48;
+}
 

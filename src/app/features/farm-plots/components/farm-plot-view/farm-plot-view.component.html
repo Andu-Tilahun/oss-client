@@ -1,5 +1,47 @@
 <app-detail-card>
-  <div *ngIf="loading" class="text-sm text-gray-600">Loading farm plot…</div>
+  <div *ngIf="loading" class="animate-pulse space-y-8" aria-label="Loading farm plot">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div class="space-y-2">
+        <div class="h-7 w-64 rounded bg-gray-200"></div>
+        <div class="h-4 w-80 rounded bg-gray-100"></div>
+      </div>
+      <div class="h-6 w-28 rounded-full bg-gray-200"></div>
+    </div>
+
+    <hr class="border-gray-200" />
+
+    <div class="space-y-4">
+      <div class="h-5 w-52 rounded bg-gray-200"></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-2">
+          <div class="h-3 w-24 rounded bg-gray-100"></div>
+          <div class="h-4 w-40 rounded bg-gray-200"></div>
+        </div>
+        <div class="space-y-2">
+          <div class="h-3 w-24 rounded bg-gray-100"></div>
+          <div class="h-4 w-40 rounded bg-gray-200"></div>
+        </div>
+        <div class="space-y-2">
+          <div class="h-3 w-24 rounded bg-gray-100"></div>
+          <div class="h-4 w-40 rounded bg-gray-200"></div>
+        </div>
+        <div class="space-y-2">
+          <div class="h-3 w-24 rounded bg-gray-100"></div>
+          <div class="h-4 w-40 rounded bg-gray-200"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div class="h-5 w-20 rounded bg-gray-200"></div>
+      <div class="h-28 w-full rounded bg-gray-100"></div>
+    </div>
+
+    <div class="space-y-4">
+      <div class="h-5 w-28 rounded bg-gray-200"></div>
+      <div class="h-[300px] w-full rounded bg-gray-100"></div>
+    </div>
+  </div>
   <div *ngIf="error && !loading" class="text-sm text-red-600">{{ error }}</div>
   <div *ngIf="!plot && !loading" class="text-sm text-gray-500">No farm plot selected.</div>
 

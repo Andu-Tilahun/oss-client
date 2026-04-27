@@ -1,5 +1,6 @@
 import {Component} from '@angular/core';
 import {
+  FarmGallery,
   FarmPlot,
   FarmPlotFilterRequest,
   FarmPlotSizeType,
@@ -37,6 +38,10 @@ export class FarmPlotListComponent {
   showCreateModal = false;
   showEditModal = false;
   showDeleteModal = false;
+  showGalleryModal = false;
+  galleryLoading = false;
+  galleryImageUrls: string[] = [];
+  galleryTitle = 'Farm Plot Gallery';
 
   selectedPlot: FarmPlot | null = null;
 
@@ -159,9 +164,16 @@ export class FarmPlotListComponent {
   }
 
   onEdit(plot: FarmPlot): void {
-    this.selectedPlot = plot;
-    this.showDeleteModal = false;
-    this.showEditModal = true;
+    this.farmPlotService.getFarmPlotGallery(plot.id).subscribe({
+      next: (gallery) => {
+        this.selectedPlot = {...plot, gallery};
+        this.showDeleteModal = false;
+        this.showEditModal = true;
+      },
+      error: (error) => {
+        this.toastService.error(error.message || 'Failed to load plot gallery for editing', 'Edit Farm Plot');
+      },
+    });
   }
 
   onView(plot: FarmPlot): void {
@@ -207,6 +219,38 @@ export class FarmPlotListComponent {
   onFarmPlotUpdated(): void {
     this.detailRefreshKey++;
     this.loadPlots();
+  }
+
+  onOpenGallery(plot: FarmPlot): void {
+    this.galleryTitle = `${plot.title} Gallery`;
+    this.showGalleryModal = true;
+    this.galleryLoading = true;
+    this.galleryImageUrls = [];
+
+    this.farmPlotService.getFarmPlotGallery(plot.id).subscribe({
+      next: (gallery: FarmGallery[]) => {
+        this.galleryImageUrls = gallery
+          .map((item) => this.toStorageUrl(item.imageUuid))
+          .filter((url): url is string => !!url);
+        this.galleryLoading = false;
+      },
+      error: (error) => {
+        this.galleryLoading = false;
+        this.toastService.error(error.message || 'Failed to load farm plot gallery', 'Farm Plot Gallery');
+      },
+    });
+  }
+
+  onGalleryVisibilityChange(visible: boolean): void {
+    this.showGalleryModal = visible;
+    if (!visible) {
+      this.galleryImageUrls = [];
+      this.galleryLoading = false;
+    }
+  }
+
+  private toStorageUrl(imageUuid?: string): string | null {
+    return imageUuid ? `${this.storageApiUrl}/${imageUuid}` : null;
   }
 }
 

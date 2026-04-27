@@ -1,0 +1,46 @@
+<app-modal
+  [(visible)]="visible"
+  [title]="title"
+  [showFooter]="false"
+  size="xl"
+  [centered]="true"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <div *ngIf="loading" class="flex min-h-[320px] items-center justify-center text-slate-600">
+    Loading gallery...
+  </div>
+
+  <div *ngIf="!loading && !hasImages" class="flex min-h-[320px] items-center justify-center text-slate-500">
+    No gallery images available.
+  </div>
+
+  <div *ngIf="!loading && hasImages" class="space-y-4">
+    <div class="relative rounded-lg bg-slate-50 p-2">
+      <img [src]="activeImageUrl" alt="Gallery image" class="max-h-[60vh] w-full rounded object-contain" />
+
+      <button type="button" class="gallery-nav left-2" (click)="goPrevious()" aria-label="Previous image">
+        &#10094;
+      </button>
+      <button type="button" class="gallery-nav right-2" (click)="goNext()" aria-label="Next image">
+        &#10095;
+      </button>
+    </div>
+
+    <div class="flex items-center justify-between text-xs text-slate-500">
+      <span>Image {{ activeIndex + 1 }} of {{ imageUrls.length }}</span>
+    </div>
+
+    <div class="grid grid-cols-5 gap-2 md:grid-cols-8">
+      <button
+        *ngFor="let imageUrl of imageUrls; index as idx"
+        type="button"
+        class="overflow-hidden rounded border-2"
+        [class.border-blue-500]="idx === activeIndex"
+        [class.border-transparent]="idx !== activeIndex"
+        (click)="setActiveIndex(idx)"
+      >
+        <img [src]="imageUrl" [alt]="'Gallery image ' + (idx + 1)" class="h-14 w-full object-cover" />
+      </button>
+    </div>
+  </div>
+</app-modal>

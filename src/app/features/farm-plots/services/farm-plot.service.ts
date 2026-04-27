@@ -4,7 +4,7 @@ import {Observable} from 'rxjs';
 import {HttpService, RequestType} from '../../../core/services/http.service';
 import {ApiResponse, PageResponse} from '../../../shared/models/api-response.model';
 import {Endpoints} from '../../../core/endpoint/endpoint.model';
-import {FarmPlot, FarmPlotFilterRequest, FarmPlotRequest} from '../models/farm-plot.model';
+import {FarmGallery, FarmGalleryCreateRequest, FarmPlot, FarmPlotFilterRequest, FarmPlotRequest} from '../models/farm-plot.model';
 
 @Injectable({
   providedIn: 'root',
@@ -36,12 +36,33 @@ export class FarmPlotService {
     return this.httpService.get<FarmPlot>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}`);
   }
 
-  createFarmPlot(request: FarmPlotRequest): Observable<ApiResponse<FarmPlot>> {
-    return this.httpService.post<ApiResponse<FarmPlot>>(Endpoints.FARM_PLOTS_ENDPOINT, request);
+  getFarmPlotGallery(id: string): Observable<FarmGallery[]> {
+    return this.httpService.get<FarmGallery[]>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/gallery`);
   }
 
-  updateFarmPlot(id: string, request: FarmPlotRequest): Observable<ApiResponse<FarmPlot>> {
-    return this.httpService.put<ApiResponse<FarmPlot>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}`, request);
+  getPublicFarmPlotGallery(id: string): Observable<FarmGallery[]> {
+    return this.httpService.get<FarmGallery[]>(
+      `${Endpoints.FARM_PLOTS_ENDPOINT}/public/gallery/${id}`,
+      undefined,
+      undefined,
+      {requestType: RequestType.LOCAL, skipAuthRedirect: true},
+    );
+  }
+
+  addFarmPlotGalleryImage(id: string, request: FarmGalleryCreateRequest): Observable<FarmGallery> {
+    return this.httpService.post<FarmGallery>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/gallery`, request);
+  }
+
+  deleteFarmPlotGalleryImage(id: string, galleryId: string): Observable<void> {
+    return this.httpService.delete<void>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/gallery/${galleryId}`);
+  }
+
+  createFarmPlot(request: FarmPlotRequest): Observable<FarmPlot> {
+    return this.httpService.post<FarmPlot>(Endpoints.FARM_PLOTS_ENDPOINT, request);
+  }
+
+  updateFarmPlot(id: string, request: FarmPlotRequest): Observable<FarmPlot> {
+    return this.httpService.put<FarmPlot>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}`, request);
   }
 
   deleteFarmPlot(id: string): Observable<ApiResponse<void>> {
