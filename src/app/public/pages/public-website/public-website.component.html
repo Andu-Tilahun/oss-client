@@ -47,26 +47,27 @@
         <p>Browse active farm plots ready for development and investment.</p>
       </div>
 
-      <app-data-card-layout
+      <app-public-card-layout
         [data]="pagedPlots"
         [loading]="loadingPlots"
         [total]="total"
         [pageSize]="pageSize"
         [pageIndex]="pageIndex"
-        [showAddButton]="false"
         [showRefreshButton]="true"
-        [showDownloadButton]="false"
-        [showViewButton]="true"
-        [showEditButton]="false"
-        [showDeleteButton]="false"
         [titleAccessor]="getPlotCardTitle"
-        [createdDateAccessor]="getPlotCreatedDate"
-        [thumbnailUrlAccessor]="getPlotThumbnailUrl"
-        [thumbnailAltAccessor]="getPlotThumbnailAlt"
+        [subtitleAccessor]="getPublicCardSubtitle"
+        [descriptionAccessor]="getPublicCardDescription"
+        [imageUrlAccessor]="getPlotThumbnailUrl"
+        [imageAltAccessor]="getPlotThumbnailAlt"
+        [badgesAccessor]="getPublicCardBadges"
+        [primaryActionLabel]="'Reserve now'"
+        [secondaryActionLabel]="'Open Gallery'"
+        [showSecondaryAction]="true"
         [noDataMessage]="'No active farm plots found'"
         (pageChange)="onPageChange($event)"
         (refreshClick)="loadPlots()"
-        (viewClick)="openPlotDetail($event)"
+        (primaryActionClick)="openPlotDetail($event)"
+        (secondaryActionClick)="openPublicGallery($event)"
       >
         <div class="w-full" extraHeader>
           <app-farm-plot-filter
@@ -82,14 +83,7 @@
             (clearFilters)="clearFilters()"
           ></app-farm-plot-filter>
         </div>
-
-        <ng-template cardFooterTemplate let-plot>
-          <div class="flex items-center gap-4 text-sm">
-            <button type="button" class="action-link action-link--view" (click)="openPlotDetail(plot)">View</button>
-            <button type="button" class="action-link action-link--view" (click)="openPublicGallery(plot)">Gallery</button>
-          </div>
-        </ng-template>
-      </app-data-card-layout>
+      </app-public-card-layout>
     </div>
   </section>
 

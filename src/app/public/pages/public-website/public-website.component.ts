@@ -48,10 +48,17 @@ export class PublicWebsiteComponent implements OnInit {
   sizeType: FarmPlotSizeType | '' = '';
 
   readonly getPlotCardTitle = (plot: FarmPlot): string => plot.title;
-  readonly getPlotCreatedDate = (plot: FarmPlot): Date | undefined => plot.createdAt;
   readonly getPlotThumbnailAlt = (plot: FarmPlot): string => `${plot.title} thumbnail`;
   readonly getPlotThumbnailUrl = (plot: FarmPlot): string | null =>
     plot.imageUuid ? `${this.storageApiUrl}/${plot.imageUuid}` : null;
+  readonly getPublicCardSubtitle = (plot: FarmPlot): string =>
+    `${plot.size} ${plot.sizeType} • ${plot.soilType.toLowerCase()} soil`;
+  readonly getPublicCardDescription = (plot: FarmPlot): string =>
+    plot.description || 'Discover this scenic farm plot and reserve your visit today.';
+  readonly getPublicCardBadges = (plot: FarmPlot): string[] => [
+    plot.status === 'ACTIVE' ? 'Guest Favorite' : plot.status.replaceAll('_', ' '),
+    `${plot.sizeType === 'HECTARES' ? 'H' : 'A'} ${plot.size}`,
+  ];
 
   constructor(
     private farmPlotService: FarmPlotService,
