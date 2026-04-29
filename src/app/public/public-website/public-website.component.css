@@ -11,39 +11,6 @@
   margin: 0 auto;
 }
 
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  background: rgba(255, 255, 255, 0.92);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-  backdrop-filter: blur(10px);
-}
-
-.header-content {
-  min-height: 70px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.brand {
-  border: none;
-  background: transparent;
-  font-size: 1.25rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  color: #065f46;
-  cursor: pointer;
-}
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
 .site-footer button {
   border: none;
   background: transparent;
@@ -52,25 +19,12 @@
   font-size: 0.9rem;
 }
 
-.signin-btn,
 .primary-btn {
   border: none;
   border-radius: 999px;
   cursor: pointer;
   font-weight: 700;
   transition: all 0.25s ease;
-}
-
-.signin-btn {
-  background: linear-gradient(90deg, #059669, #047857);
-  color: #ffffff;
-  padding: 0.55rem 1.15rem;
-  box-shadow: 0 10px 24px rgba(4, 120, 87, 0.24);
-}
-
-.signin-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 26px rgba(4, 120, 87, 0.3);
 }
 
 .hero {
@@ -315,15 +269,3 @@
   color: #2563eb;
 }
 
-@media (max-width: 768px) {
-  .header-content {
-    flex-wrap: wrap;
-    padding: 0.5rem 0;
-  }
-
-  .nav-links {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-  }
-}

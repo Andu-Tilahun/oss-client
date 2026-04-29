@@ -12,7 +12,7 @@ export const routes: Routes = [
   {
     path: 'public',
     loadComponent: () =>
-      import('./public/pages/public-website/public-website.component').then((m) => m.PublicWebsiteComponent),
+      import('./public/public-website/public-website.component').then((m) => m.PublicWebsiteComponent),
   },
   {
     path: 'login',

@@ -1,33 +1,5 @@
 <div class="public-page">
-  <header class="site-header">
-    <div class="container header-content">
-      <button type="button" class="brand" (click)="scrollTo('home')">AgriVest</button>
-      <nav class="nav-links flex items-center gap-2 rounded-full bg-slate-100/90 p-1.5 shadow-inner shadow-slate-200/70">
-        <button
-          type="button"
-          (click)="scrollTo('home')"
-          class="rounded-full px-4 py-2 text-sm font-semibold text-slate-700 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-emerald-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
-        >
-          Home
-        </button>
-        <button
-          type="button"
-          (click)="scrollTo('about')"
-          class="rounded-full px-4 py-2 text-sm font-semibold text-slate-700 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-emerald-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
-        >
-          About Us
-        </button>
-        <button
-          type="button"
-          (click)="scrollTo('contact')"
-          class="rounded-full px-4 py-2 text-sm font-semibold text-slate-700 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-emerald-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
-        >
-          Contact
-        </button>
-      </nav>
-      <button type="button" class="signin-btn" (click)="goToLogin()">Sign in</button>
-    </div>
-  </header>
+  <app-public-header></app-public-header>
 
   <section id="home" class="hero">
     <div class="container hero-inner">
