@@ -16,6 +16,11 @@ export class FarmLeaseFormComponent implements OnInit, OnChanges {
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() lease: LeaseAgreement | null = null;
   @Input() farmPlots: FarmPlot[] = [];
+  /**
+   * When provided (investor selecting a plot from cards), the farm plot selector is hidden
+   * and `farmPlotId` is pre-filled.
+   */
+  @Input() selectedFarmPlot: FarmPlot | null = null;
   @Input() readOnly = false;
 
   readonly form: FormGroup;
@@ -42,7 +47,19 @@ export class FarmLeaseFormComponent implements OnInit, OnChanges {
         this.patchFromLease(this.lease);
       }
     }
-    if (changes['farmPlots'] && this.farmPlots?.length && !this.form.get('farmPlotId')?.value) {
+
+    // Investor flow: pre-fill the selected plot and hide the selector.
+    if (changes['selectedFarmPlot'] && this.selectedFarmPlot && this.mode !== 'edit') {
+      this.form.patchValue({farmPlotId: this.selectedFarmPlot.id}, {emitEvent: false});
+    }
+
+    // If no plot was pre-selected, default to the first plot (only for create mode).
+    if (
+      changes['farmPlots'] &&
+      this.farmPlots?.length &&
+      !this.selectedFarmPlot &&
+      !this.form.get('farmPlotId')?.value
+    ) {
       this.form.patchValue({farmPlotId: this.farmPlots[0].id}, {emitEvent: false});
     }
     if (changes['readOnly'] || changes['lease']) {

@@ -59,7 +59,12 @@
           {{ getCreatedDate(item) ? (getCreatedDate(item) | date:'mediumDate') : '-' }}
         </span>
 
-        <div cardBody class="card-body">
+        <div
+          cardBody
+          class="card-body"
+          [class.cursor-pointer]="cardClickEnabled"
+          (click)="cardClickEnabled && cardClick.emit(item)"
+        >
           <ng-container *ngIf="bodyTemplate; else defaultBody">
             <ng-container
               [ngTemplateOutlet]="bodyTemplate.templateRef"

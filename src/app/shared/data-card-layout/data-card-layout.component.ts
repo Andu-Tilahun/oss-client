@@ -37,6 +37,12 @@ export class DataCardLayoutComponent<T> {
   @Input() showEditButton = false;
   @Input() showDeleteButton = false;
 
+  /**
+   * When enabled, clicking the card body (thumbnail area) emits `cardClick`.
+   * Footer buttons are not affected because they live outside the body wrapper.
+   */
+  @Input() cardClickEnabled = false;
+
   @Input() titleAccessor: (item: T) => string = () => '';
   @Input() createdDateAccessor?: (item: T) => Date | string | null | undefined;
   @Input() thumbnailUrlAccessor?: (item: T) => string | null | undefined;
@@ -49,6 +55,7 @@ export class DataCardLayoutComponent<T> {
   @Output() viewClick = new EventEmitter<T>();
   @Output() editClick = new EventEmitter<T>();
   @Output() deleteClick = new EventEmitter<T>();
+  @Output() cardClick = new EventEmitter<T>();
 
   @ContentChild(CardBodyTemplateDirective) bodyTemplate?: CardBodyTemplateDirective<T>;
   @ContentChild(CardFooterTemplateDirective) footerTemplate?: CardFooterTemplateDirective<T>;

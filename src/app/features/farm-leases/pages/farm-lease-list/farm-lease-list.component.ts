@@ -13,7 +13,9 @@ import {AuthService} from '../../../auth/services/auth.service';
 import {AdminLeaseDecision} from '../../modals/farm-lease-approve-modal/farm-lease-approve-modal.component';
 import {TabItem} from "../../../../shared/tabs/models/tab-item.model";
 import {AssignExtensionWorkerRequest} from "../../../assign-extension-worker-request";
-import {FarmPlot} from "../../../farm-plots/models/farm-plot.model";
+import {FarmPlot, FarmPlotFilterRequest, FarmPlotSizeType, FarmPlotSoilType, FarmPlotStatus} from "../../../farm-plots/models/farm-plot.model";
+import {FarmPlotService} from "../../../farm-plots/services/farm-plot.service";
+import {environment} from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-farm-lease-list',
@@ -22,6 +24,8 @@ import {FarmPlot} from "../../../farm-plots/models/farm-plot.model";
   styleUrl: './farm-lease-list.component.css',
 })
 export class FarmLeaseListComponent implements OnInit {
+  private readonly storageApiUrl = `${environment.apiUrl}/files`;
+
   leases: LeaseAgreement[] = [];
   loading = false;
   total = 0;
@@ -67,13 +71,30 @@ export class FarmLeaseListComponent implements OnInit {
   ];
 
   rightActions: PageSplitRightAction<LeaseAgreement>[];
+  plotSelectionRightActions: PageSplitRightAction<LeaseAgreement>[] = [];
   plot: FarmPlot | null = null;
+  showInvestorPlotSelect = false;
+  investorFarmPlots: FarmPlot[] = [];
+  investorPlotsLoading = false;
+
+  investorPlotSearchText = '';
+  investorPlotStatus: FarmPlotStatus | '' = '';
+  investorPlotSoilType: FarmPlotSoilType | '' = '';
+  investorPlotSizeType: FarmPlotSizeType | '' = '';
+
+  readonly getInvestorPlotCardTitle = (plot: FarmPlot): string => plot.title;
+  readonly getInvestorPlotCreatedDate = (plot: FarmPlot): Date | undefined => plot.createdAt;
+  readonly getInvestorPlotThumbnailAlt = (plot: FarmPlot): string => `${plot.title} thumbnail`;
+  readonly getInvestorPlotThumbnailUrl = (plot: FarmPlot): string | null =>
+    plot.imageUuid ? `${this.storageApiUrl}/${plot.imageUuid}` : null;
+
   myRequest = true;
 
   constructor(
     private farmLeaseService: FarmLeaseService,
     private toastService: ToastService,
     private authService: AuthService,
+    private farmPlotService: FarmPlotService,
   ) {
     const role = (this.authService.getCurrentUser()?.role ?? '').toString().trim().toUpperCase();
 
@@ -209,7 +230,7 @@ export class FarmLeaseListComponent implements OnInit {
   }
 
   onAdd(): void {
-    this.showCreateModal = true;
+    this.openInvestorPlotPicker();
   }
 
   onRefresh(): void {
@@ -281,6 +302,8 @@ export class FarmLeaseListComponent implements OnInit {
 
   onLeaseCreated(): void {
     this.showCreateModal = false;
+    this.showInvestorPlotSelect = false;
+    this.plot = null;
     this.detailRefreshKey++;
     this.loadLeases();
   }
@@ -289,6 +312,93 @@ export class FarmLeaseListComponent implements OnInit {
     this.showEditModal = false;
     this.detailRefreshKey++;
     this.loadLeases();
+  }
+
+  private openInvestorPlotPicker(): void {
+    this.showInvestorPlotSelect = true;
+    this.plot = null;
+    this.investorPlotSearchText = '';
+    this.investorPlotStatus = '';
+    this.investorPlotSoilType = '';
+    this.investorPlotSizeType = '';
+    this.loadInvestorPlots();
+  }
+
+  private loadInvestorPlots(): void {
+    if (!this.authService.isInvestor()) return;
+
+    this.investorPlotsLoading = true;
+    const filterRequest: FarmPlotFilterRequest = {
+      searchText: this.investorPlotSearchText || undefined,
+      statuses: ['ACTIVE'],
+      soilTypes: this.investorPlotSoilType ? [this.investorPlotSoilType] : undefined,
+      sizeTypes: this.investorPlotSizeType ? [this.investorPlotSizeType] : undefined,
+      sortBy: 'title',
+      sortDirection: 'ASC',
+      page: 0,
+      size: 1000000000,
+    };
+
+    this.farmPlotService.filterFarmPlots(filterRequest).subscribe({
+      next: (response) => {
+        this.investorFarmPlots = response.content;
+        this.investorPlotsLoading = false;
+      },
+      error: (error) => {
+        this.investorPlotsLoading = false;
+        this.toastService.error(error.message || 'Failed to fetch farm plots', 'Load Farm Plots');
+      },
+    });
+  }
+
+  public closeInvestorPlotPicker(): void {
+    this.showInvestorPlotSelect = false;
+    this.investorFarmPlots = [];
+    this.investorPlotsLoading = false;
+    this.plot = null;
+    this.investorPlotSearchText = '';
+    this.investorPlotStatus = '';
+    this.investorPlotSoilType = '';
+    this.investorPlotSizeType = '';
+  }
+
+  public onInvestorPlotSearch(): void {
+    // Called from the filter bar apply/enter actions.
+    this.loadInvestorPlots();
+  }
+
+  public onInvestorPlotClearFilters(): void {
+    this.investorPlotSearchText = '';
+    this.investorPlotStatus = '';
+    this.investorPlotSoilType = '';
+    this.investorPlotSizeType = '';
+    this.loadInvestorPlots();
+  }
+
+  public plotStatusPillClass(status: FarmPlot['status']): string {
+    switch (status) {
+      case 'ACTIVE':
+        return 'bg-green-50 text-green-700 border-green-200';
+      case 'INACTIVE':
+        return 'bg-slate-50 text-slate-700 border-slate-200';
+      case 'UNDER_MAINTENANCE':
+        return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+      case 'ASSIGNED_TO_LEASE':
+        return 'bg-gray-50 text-gray-700 border-gray-200';
+      default:
+        return 'bg-slate-50 text-slate-700 border-slate-200';
+    }
+  }
+
+  public onViewPlot(plot: FarmPlot, event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.plot = {...plot};
+  }
+
+  public onChoosePlot(plot: FarmPlot): void {
+    this.plot = {...plot};
+    this.showCreateModal = true;
   }
 
   private formatAmount(value: number | undefined): string {

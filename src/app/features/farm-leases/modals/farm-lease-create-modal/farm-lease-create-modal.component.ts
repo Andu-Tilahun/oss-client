@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ModalComponent} from '../../../../shared/modals/modal/modal.component';
 import {ToastService} from '../../../../shared/toast/toast.service';
@@ -14,10 +14,16 @@ import {FarmLeaseFormComponent} from "../../components/farm-lease-form/farm-leas
   imports: [CommonModule, ModalComponent, FarmLeaseFormComponent],
   templateUrl: './farm-lease-create-modal.component.html',
 })
-export class FarmLeaseCreateModalComponent {
+export class FarmLeaseCreateModalComponent implements OnChanges {
   @Input() visible = false;
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() leaseCreated = new EventEmitter<void>();
+
+  /**
+   * Optional: when investor picked a plot from cards, we pre-fill the form
+   * and hide the combobox.
+   */
+  @Input() selectedFarmPlot: FarmPlot | null = null;
 
   @ViewChild('farmLeaseForm') farmLeaseForm!: FarmLeaseFormComponent;
 
@@ -33,7 +39,20 @@ export class FarmLeaseCreateModalComponent {
   }
 
   ngOnInit(): void {
-    this.loadFarmPlots();
+    if (this.visible && !this.selectedFarmPlot) {
+      this.loadFarmPlots();
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['visible']?.currentValue === true) {
+      if (!this.selectedFarmPlot) {
+        this.loadFarmPlots();
+      } else {
+        // We don't need the selector options when a plot is already chosen.
+        this.farmPlots = [];
+      }
+    }
   }
 
   onSubmit(): void {

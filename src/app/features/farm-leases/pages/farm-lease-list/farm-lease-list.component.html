@@ -2,53 +2,110 @@
   [showLeftTitle]="true"
   [showRightTitle]="true"
   leftTitle="Farm Lease Management"
-  rightTitle="Lease Detail"
-  [rightItem]="selectedLease"
-  [rightEmptyMessage]="'Select a row to view details.'"
-  [showRightEditButton]="shouldShowLeaseEditButton(selectedLease)"
-  [rightActions]="rightActions"
+  [rightTitle]="showInvestorPlotSelect ? 'Farm Plot Detail' : 'Lease Detail'"
+  [rightItem]="showInvestorPlotSelect ? null : selectedLease"
+  [rightEmptyMessage]="showInvestorPlotSelect ? 'Select a plot to view details.' : 'Select a row to view details.'"
+  [showRightEditButton]="!showInvestorPlotSelect && shouldShowLeaseEditButton(selectedLease)"
+  [rightActions]="showInvestorPlotSelect ? plotSelectionRightActions : rightActions"
   (rightEdit)="onEdit($event)"
 >
   <ng-template #leftContent>
-    <app-data-table
-      [columns]="columns"
-      [data]="leases"
-      [loading]="loading"
-      [total]="total"
-      [pageSize]="pageSize"
-      [pageIndex]="pageIndex"
-      [showAddButton]="isInvestorUser"
-      [showRefreshButton]="true"
-      [showViewButton]="true"
-      [showEditButton]="false"
-      [showDeleteButton]="false"
-      [addButtonText]="'Register'"
-      (pageChange)="onPageChange($event)"
-      (addClick)="onAdd()"
-      (refreshClick)="onRefresh()"
-      (viewClick)="onView($event)"
-      (editClick)="onEdit($event)"
-    >
-      <div extraTableHeader class="w-full min-w-0">
-        <app-farm-lease-filter
-          *ngIf="myRequest"
-          [(searchText)]="searchText"
-          [(status)]="status"
-          (filterChange)="onFilterChange()"
-          (searchChange)="onFilterChange()"
-          (clearFilters)="clearFilters()"
-        ></app-farm-lease-filter>
+    <div *ngIf="!showInvestorPlotSelect">
+      <app-data-table
+        [columns]="columns"
+        [data]="leases"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showAddButton]="isInvestorUser"
+        [showRefreshButton]="true"
+        [showViewButton]="true"
+        [showEditButton]="false"
+        [showDeleteButton]="false"
+        [addButtonText]="'Register'"
+        (pageChange)="onPageChange($event)"
+        (addClick)="onAdd()"
+        (refreshClick)="onRefresh()"
+        (viewClick)="onView($event)"
+        (editClick)="onEdit($event)"
+      >
+        <div extraTableHeader class="w-full min-w-0">
+          <app-farm-lease-filter
+            *ngIf="myRequest"
+            [(searchText)]="searchText"
+            [(status)]="status"
+            (filterChange)="onFilterChange()"
+            (searchChange)="onFilterChange()"
+            (clearFilters)="clearFilters()"
+          ></app-farm-lease-filter>
+        </div>
+      </app-data-table>
+    </div>
+
+    <div *ngIf="showInvestorPlotSelect" class="space-y-4">
+      <div class="flex items-center justify-between gap-3">
+        <button
+          type="button"
+          class="flex-shrink-0 px-3 py-1.5 bg-blue-500 text-white rounded-lg text-sm font-medium
+             hover:bg-blue-600 transition-colors disabled:opacity-60"
+          (click)="closeInvestorPlotPicker()"
+        >
+          Back
+        </button>
       </div>
-    </app-data-table>
+
+      <app-farm-plot-filter
+        [showSearch]="false"
+        [showStatus]="false"
+        [(searchText)]="searchText"
+        [(soilType)]="investorPlotSoilType"
+        [(sizeType)]="investorPlotSizeType"
+        (filterChange)="onInvestorPlotSearch()"
+        (searchChange)="onInvestorPlotSearch()"
+        (clearFilters)="onInvestorPlotClearFilters()"
+      ></app-farm-plot-filter>
+
+      <app-data-card-layout
+        [data]="investorFarmPlots"
+        [loading]="investorPlotsLoading"
+        [total]="investorFarmPlots.length"
+        [pageSize]="investorFarmPlots.length || 10"
+        [pageIndex]="1"
+        [showAddButton]="false"
+        [showRefreshButton]="false"
+        [showDownloadButton]="false"
+        [showViewButton]="false"
+        [showEditButton]="false"
+        [showDeleteButton]="false"
+        [titleAccessor]="getInvestorPlotCardTitle"
+        [createdDateAccessor]="getInvestorPlotCreatedDate"
+        [thumbnailUrlAccessor]="getInvestorPlotThumbnailUrl"
+        [thumbnailAltAccessor]="getInvestorPlotThumbnailAlt"
+        [cardClickEnabled]="true"
+        (cardClick)="onChoosePlot($event)"
+        [noDataMessage]="'No available plots found.'"
+      >
+        <ng-template cardFooterTemplate let-plot>
+          <div class="flex items-center gap-4 text-sm">
+            <button type="button" class="action-link action-link--view" (click)="onViewPlot(plot)">View</button>
+          </div>
+        </ng-template>
+      </app-data-card-layout>
+    </div>
   </ng-template>
 
   <ng-template #rightContent let-lease>
+    <div *ngIf="showInvestorPlotSelect">
+      <app-farm-plot-view [plot]="plot"></app-farm-plot-view>
+    </div>
+
     <app-tabs
-      *ngIf="myRequest"
+      *ngIf="myRequest && !showInvestorPlotSelect"
       [tabs]="tabs"
       [activeTab]="activeTab"
-      (activeTabChange)="activeTab = $event">
-      <!-- Request Tab -->
+      (activeTabChange)="activeTab = $event"
+    >
       <div *ngIf="activeTab === 'detail'">
         <app-farm-lease-view [lease]="lease" [refreshKey]="detailRefreshKey"></app-farm-lease-view>
       </div>
@@ -65,12 +122,12 @@
         ></app-farm-followup-list>
       </div>
     </app-tabs>
-<!--    <app-farm-plot-view *ngIf="!myRequest" [plot]="plot" [refreshKey]="detailRefreshKey"></app-farm-plot-view>-->
   </ng-template>
 </app-page-split-layout>
 
 <app-farm-lease-create-modal
   [(visible)]="showCreateModal"
+  [selectedFarmPlot]="plot"
   (leaseCreated)="onLeaseCreated()"
 ></app-farm-lease-create-modal>
 
