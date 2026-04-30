@@ -1,30 +1,34 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
-import { FarmPlotFilterComponent } from '../../features/farm-plots/pages/farm-plot-filter/farm-plot-filter.component';
-import { SharedModule } from '../../shared/shared.module';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FarmPlot, FarmPlotSizeType, FarmPlotSoilType, FarmPlotStatus } from '../../features/farm-plots/models/farm-plot.model';
 import { FarmPlotService } from '../../features/farm-plots/services/farm-plot.service';
 import { CompanyProfile } from '../../features/farm-company/models/company-profile.model';
 import { CompanyProfileService } from '../../features/farm-company/services/company-profile.service';
 import { TableQueryParams } from '../../shared/data-table/models/table-query-params.model';
 import { PageResponse } from '../../shared/models/api-response.model';
-import { OssMapComponent } from '../../shared/oss-map/oss-map.component';
 import { environment } from '../../../environments/environment';
 import { RequestType } from '../../core/services/http.service';
 import { ImageGalleryModalComponent } from '../../shared/modals/image-gallery-modal/image-gallery-modal.component';
 import { PublicHeaderComponent } from '../public-header/public-header.component';
+import { PublicHeroComponent } from '../public-hero/public-hero.component';
+import { PublicAboutUsComponent } from '../public-about-us/public-about-us.component';
+import { PublicContactComponent } from '../public-contact/public-contact.component';
+import { PublicFooterComponent } from '../public-footer/public-footer.component';
+import { PublicDrawerComponent } from '../public-drawer/public-drawer.component';
+import { PublicPlotsComponent } from '../public-plots/public-plots.component';
 
 @Component({
   selector: 'app-public-website',
   standalone: true,
-  imports: [CommonModule, RouterModule, FarmPlotFilterComponent, SharedModule, OssMapComponent, ImageGalleryModalComponent, PublicHeaderComponent],
+  imports: [CommonModule, RouterModule, ImageGalleryModalComponent, PublicHeaderComponent, PublicHeroComponent, PublicAboutUsComponent, PublicContactComponent, PublicFooterComponent, PublicDrawerComponent, PublicPlotsComponent],
   templateUrl: './public-website.component.html',
   styleUrls: ['./public-website.component.css'],
 })
-export class PublicWebsiteComponent implements OnInit {
+export class PublicWebsiteComponent implements OnInit, OnDestroy {
   private readonly storageApiUrl = `${environment.apiUrl}/files`;
   private readonly initialLoadSize = 500;
+  private fragmentSubscription?: { unsubscribe: () => void };
 
   plots: FarmPlot[] = [];
   filteredPlots: FarmPlot[] = [];
@@ -64,12 +68,23 @@ export class PublicWebsiteComponent implements OnInit {
   constructor(
     private farmPlotService: FarmPlotService,
     private companyProfileService: CompanyProfileService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.loadPlots();
     this.loadCompany();
+    this.fragmentSubscription = this.route.fragment.subscribe((fragment) => {
+      if (!fragment) {
+        return;
+      }
+      setTimeout(() => this.scrollTo(fragment), 0);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.fragmentSubscription?.unsubscribe();
   }
 
   loadPlots(): void {

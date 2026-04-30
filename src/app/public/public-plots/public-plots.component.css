@@ -1,0 +1,30 @@
+.container {
+  width: min(1120px, 92%);
+  margin: 0 auto;
+}
+
+.plots-section {
+  padding: 4.25rem 0;
+}
+
+.plots-section .container {
+  border-radius: 1.25rem;
+}
+
+.section-title-wrap {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.section-title-wrap h2 {
+  font-size: clamp(1.85rem, 3vw, 2.55rem);
+  font-weight: 800;
+  color: #052e2b;
+  letter-spacing: -0.02em;
+}
+
+.section-title-wrap p {
+  color: #334155;
+  max-width: 650px;
+  margin-inline: auto;
+}

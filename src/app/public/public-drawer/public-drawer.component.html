@@ -1,0 +1,19 @@
+<div class="drawer-backdrop" *ngIf="isOpen" (click)="close.emit()"></div>
+<div class="plot-drawer" [class.open]="isOpen">
+  <button type="button" class="back-btn" (click)="close.emit()" aria-label="Go back">← Back</button>
+  <button type="button" class="close-btn" (click)="close.emit()">×</button>
+  <ng-container *ngIf="selectedPlot as plot">
+    <h3>{{ plot.title }}</h3>
+    <img *ngIf="imageUrl" [src]="imageUrl" [alt]="imageAlt" class="drawer-image" />
+    <p class="drawer-description">{{ plot.description || 'No description available.' }}</p>
+    <div class="drawer-meta">
+      <p><strong>Size:</strong> {{ plot.size }} {{ plot.sizeType }}</p>
+      <p><strong>Soil Type:</strong> {{ plot.soilType }}</p>
+      <p><strong>Status:</strong> {{ plot.status }}</p>
+    </div>
+    <div class="drawer-actions">
+      <button type="button" class="gallery-btn" (click)="openGallery.emit()">Open Gallery</button>
+      <button type="button" class="reserve-btn" (click)="reserve.emit()">Reserve Now</button>
+    </div>
+  </ng-container>
+</div>

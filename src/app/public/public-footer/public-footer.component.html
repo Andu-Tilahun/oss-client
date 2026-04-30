@@ -1,11 +1,24 @@
-<footer class="landing-footer">
-  <nav class="footer-links">
-    <a routerLink="/public">Home</a>
-    <a routerLink="/public/about-us">About Us</a>
-    <a routerLink="/public/contact">Contact</a>
-    <a routerLink="/public/terms-of-service">Terms of Service</a>
-    <a routerLink="/public/privacy-policy">Privacy Policy</a>
-  </nav>
-  <p class="footer-copy">© 2026 AgriVest. All rights reserved.</p>
+<footer class="site-footer">
+  <div class="container footer-content">
+    <div>
+      <h4>AgriVest</h4>
+      <p>Smart agricultural investment opportunities for sustainable growth.</p>
+    </div>
+    <div>
+      <h5>Quick Links</h5>
+      <a routerLink="/public" fragment="home">Home</a>
+      <a routerLink="/public" fragment="about">About Us</a>
+      <a routerLink="/public" fragment="contact">Contact</a>
+    </div>
+    <div>
+      <h5>Contact</h5>
+      <p>{{ company?.email || 'N/A' }}</p>
+      <p>{{ company?.contactMobilePhone || company?.officePhone || 'N/A' }}</p>
+    </div>
+    <div>
+      <h5>Legal</h5>
+      <a routerLink="/public/privacy-policy">Privacy Policy</a>
+      <a routerLink="/public/terms-of-service">Terms of Service</a>
+    </div>
+  </div>
 </footer>
-

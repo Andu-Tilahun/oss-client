@@ -1,0 +1,49 @@
+<section id="plots" class="plots-section">
+  <div class="container">
+    <div class="section-title-wrap">
+      <h2>Available Plots</h2>
+      <p>Browse active farm plots ready for development and investment.</p>
+    </div>
+
+    <app-public-card-layout
+      [data]="pagedPlots"
+      [loading]="loadingPlots"
+      [total]="total"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [showRefreshButton]="false"
+      [titleAccessor]="getPlotCardTitle"
+      [subtitleAccessor]="getPublicCardSubtitle"
+      [descriptionAccessor]="getPublicCardDescription"
+      [imageUrlAccessor]="getPlotThumbnailUrl"
+      [imageAltAccessor]="getPlotThumbnailAlt"
+      [badgesAccessor]="getPublicCardBadges"
+      [primaryActionLabel]="'Reserve now'"
+      [secondaryActionLabel]="'Open Gallery'"
+      [showSecondaryAction]="true"
+      [noDataMessage]="'No active farm plots found'"
+      (pageChange)="pageChange.emit($event)"
+      (refreshClick)="refreshClick.emit()"
+      (primaryActionClick)="primaryActionClick.emit($event)"
+      (secondaryActionClick)="secondaryActionClick.emit($event)"
+    >
+      <div class="w-full" extraHeader>
+        <app-farm-plot-filter
+          [showSearch]="false"
+          [showStatus]="false"
+          [searchText]="searchText"
+          [status]="status"
+          [soilType]="soilType"
+          [sizeType]="sizeType"
+          (searchTextChange)="searchTextChange.emit($event)"
+          (statusChange)="statusChange.emit($event)"
+          (soilTypeChange)="soilTypeChange.emit($event)"
+          (sizeTypeChange)="sizeTypeChange.emit($event)"
+          (filterChange)="filterChange.emit()"
+          (searchChange)="searchChange.emit()"
+          (clearFilters)="clearFilters.emit()"
+        ></app-farm-plot-filter>
+      </div>
+    </app-public-card-layout>
+  </div>
+</section>

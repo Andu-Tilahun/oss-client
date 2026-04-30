@@ -48,7 +48,7 @@ export const routes: Routes = [
   },
   {
     path: 'public',
-    loadComponent: () => import('./public/public-landing/public-landing.component').then(m => m.PublicLandingComponent),
+    loadComponent: () => import('./public/public-hero/public-hero.component').then(m => m.PublicHeroComponent),
     canActivate: [GuestGuard]
   },
   {
