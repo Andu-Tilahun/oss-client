@@ -4,6 +4,7 @@
     radial-gradient(circle at left 20%, rgba(5, 150, 105, 0.1), transparent 42%),
     #f8fafc;
   color: #0f172a;
+  overflow-x: hidden;
 }
 
 .container {

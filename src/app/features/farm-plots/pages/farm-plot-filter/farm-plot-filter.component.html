@@ -1,30 +1,30 @@
 <div class="border-b border-slate-100">
-  <div class="flex items-end gap-2 w-full overflow-x-auto scrollbar-hide">
-    <div class="flex items-end gap-2 min-w-[360px]">
-      <div class="w-full min-w-[180px]">
+  <div class="flex items-end justify-between gap-2 w-full overflow-x-auto scrollbar-hide">
+    <div class="flex items-end gap-2 min-w-[280px]">
+      <div class="min-w-[136px]">
         <select
           [(ngModel)]="soilType"
           (ngModelChange)="onSoilTypeChange($event)"
           class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
         >
-          <option [ngValue]="''">Soil Type All</option>
+          <option [ngValue]="''">Soil Type</option>
           <option *ngFor="let s of soilTypes" [ngValue]="s" [disabled]="s === ''"> {{ s }} </option>
         </select>
       </div>
 
-      <div class="w-full min-w-[180px]">
+      <div class="min-w-[136px]">
         <select
           [(ngModel)]="sizeType"
           (ngModelChange)="onSizeTypeChange($event)"
           class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
         >
-          <option [ngValue]="''">Size Type All</option>
+          <option [ngValue]="''">Size Type</option>
           <option *ngFor="let s of sizeTypes" [ngValue]="s" [disabled]="s === ''"> {{ s }} </option>
         </select>
       </div>
     </div>
 
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2 flex-shrink-0">
       <button
         type="button"
         (click)="onClearFilters()"

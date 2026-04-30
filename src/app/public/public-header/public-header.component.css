@@ -95,6 +95,7 @@
   .top-nav {
     padding: 0 16px;
     height: 56px;
+    overflow-x: clip;
   }
 }
 
@@ -131,8 +132,8 @@
   }
 
   .menu {
-    position: absolute;
-    top: 0;
+    position: fixed;
+    top: 56px;
     right: 0;
     bottom: 0;
     left: auto;
