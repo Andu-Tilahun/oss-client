@@ -1,5 +1,19 @@
 <form [formGroup]="userForm" class="space-y-4">
-  <div class="grid grid-cols-2 gap-4">
+  <!-- Profile image first on profile edit -->
+  <div *ngIf="profileUpdate && user as u" class="flex flex-col items-center text-center">
+    <label class="block text-sm font-medium text-gray-700 mb-2">
+      Profile Image
+    </label>
+
+    <app-profile-picture-upload
+      [currentFileId]="u.profileImageUuid"
+      size="large"
+      (fileUploaded)="onProfilePictureUploaded($event)"
+      (fileRemoved)="onProfilePictureRemoved()"
+    ></app-profile-picture-upload>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <!-- First Name -->
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -43,7 +57,7 @@
     />
   </div>
 
-  <div class="grid grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <!-- Username -->
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -158,17 +172,4 @@
     </p>
   </div>
 
-  <!-- Profile Image Upload -->
-  <div *ngIf="profileUpdate && user as u">
-    <label class="block text-sm font-medium text-gray-700 mb-2">
-      Profile Image
-    </label>
-
-    <app-profile-picture-upload
-      [currentFileId]="u.profileImageUuid"
-      size="large"
-      (fileUploaded)="onProfilePictureUploaded($event)"
-      (fileRemoved)="onProfilePictureRemoved()"
-    ></app-profile-picture-upload>
-  </div>
 </form>

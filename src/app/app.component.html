@@ -4,15 +4,19 @@
 
 <!-- Single router-outlet that persists - layout changes around it -->
 <div class="font-sans" [class.flex]="showLayout" [class.h-screen]="showLayout" [class.bg-gray-100]="showLayout" [class.overflow-hidden]="showLayout">
-  <!-- Sidebar (only for dashboard) -->
-  <aside *ngIf="showLayout" class="flex-shrink-0">
-    <app-sidebar></app-sidebar>
+  <!-- Sidebar (only for dashboard); aside takes no width on small screens so the drawer is overlay-only -->
+  <aside *ngIf="showLayout" class="flex-shrink-0 w-0 min-w-0 overflow-visible md:w-auto md:min-w-0">
+    <app-sidebar [(mobileOpen)]="mobileSidebarOpen"></app-sidebar>
   </aside>
 
   <!-- Content area -->
   <div class="flex-1 flex flex-col" [class.overflow-hidden]="showLayout">
     <!-- Header (only for dashboard) -->
-    <app-header *ngIf="showLayout"></app-header>
+    <app-header
+      *ngIf="showLayout"
+      [mobileNavOpen]="mobileSidebarOpen"
+      (menuToggle)="mobileSidebarOpen = !mobileSidebarOpen"
+    ></app-header>
 
     <!-- Main Content - outlet always in same place -->
     <main [class.flex-1]="showLayout" [class.overflow-y-auto]="showLayout" [class.p-6]="showLayout">

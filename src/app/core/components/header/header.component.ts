@@ -1,69 +1,104 @@
-import { Component } from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {Router} from '@angular/router';
-import {AuthService} from '../../../features/auth/services/auth.service';
-import {User} from '../../../features/users/models/user.model';
 import {
-  UserProfileModalComponent
-} from "../../../features/users/modals/user-profile-modal/user-profile-modal.component";
-import {FileUploadService} from "../../../shared/file-upload/file-upload.service";
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  inject,
+  Input,
+  OnInit,
+  Output,
+} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Router, RouterModule} from '@angular/router';
+import {take} from 'rxjs/operators';
+import {NotificationLogService} from '../../../features/notifications/services/notification.service';
+import {NotificationLog} from '../../../features/notifications/models/notification.model';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, UserProfileModalComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css']
+  styleUrls: ['./header.component.css'],
 })
-export class HeaderComponent {
-  currentUser$ = this.authService.currentUser$;
-  showProfileMenu = false;
-  showProfileEditModal = false;
+export class HeaderComponent implements OnInit {
+  private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly notificationService = inject(NotificationLogService);
+  private readonly router = inject(Router);
 
-  constructor(
-    private router: Router,
-    private authService: AuthService,
-    private fileUploadService: FileUploadService
-  ) {
+  /** When true, the mobile navigation drawer is open (for aria-expanded). */
+  @Input() mobileNavOpen = false;
+  @Output() menuToggle = new EventEmitter<void>();
+
+  showNotificationPanel = false;
+  previewItems: NotificationLog[] = [];
+  previewTotal = 0;
+  previewLoading = false;
+  previewError: string | null = null;
+  /** Total count from a lightweight request (for badge). */
+  badgeTotal: number | null = null;
+
+  ngOnInit(): void {
+    this.refreshBadgeCount();
   }
 
-  toggleProfileMenu() {
-    this.showProfileMenu = !this.showProfileMenu;
+  toggleMobileNav(): void {
+    this.menuToggle.emit();
   }
 
-  logout() {
-    this.authService.logout().subscribe({
-      next: () => {
-        console.log('Logged out successfully');
+  toggleNotificationPanel(event: MouseEvent): void {
+    event.stopPropagation();
+    this.showNotificationPanel = !this.showNotificationPanel;
+    if (this.showNotificationPanel) {
+      this.loadPreview();
+    }
+  }
+
+  private refreshBadgeCount(): void {
+    this.notificationService.getNotifications(0, 1).pipe(take(1)).subscribe({
+      next: (res) => {
+        this.badgeTotal = res.totalElements ?? 0;
       },
-      error: (error) => {
-        console.error('Logout error:', error);
-      }
+      error: () => {
+        this.badgeTotal = null;
+      },
     });
   }
 
-  userAvatar(user: User | null): string {
-    if (user?.profileImageUuid) {
-      return this.fileUploadService.getFileUrl(user.profileImageUuid);
+  private loadPreview(): void {
+    this.previewLoading = true;
+    this.previewError = null;
+    this.notificationService.getNotifications(0, 5).pipe(take(1)).subscribe({
+      next: (res) => {
+        this.previewItems = res.content ?? [];
+        this.previewTotal = res.totalElements ?? 0;
+        this.badgeTotal = this.previewTotal;
+        this.previewLoading = false;
+      },
+      error: () => {
+        this.previewError = 'Unable to load notifications.';
+        this.previewItems = [];
+        this.previewLoading = false;
+      },
+    });
+  }
+
+  goToAllNotifications(): void {
+    this.showNotificationPanel = false;
+    void this.router.navigateByUrl('/notifications-inbox');
+  }
+
+  formatPreviewWhen(n: NotificationLog): string {
+    return new Date(n.createdAt).toLocaleString();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(ev: MouseEvent): void {
+    if (!this.showNotificationPanel) {
+      return;
     }
-    const name = user ? `${user.firstName}+${user.lastName}` : 'User';
-    return `https://ui-avatars.com/api/?name=${name}&background=6366f1&color=fff`;
-  }
-
-  userName(user: User | null): string {
-    return user ? `${user.firstName} ${user.lastName}` : 'User';
-  }
-
-  userEmail(user: User | null): string {
-    return user?.email || '';
-  }
-
-  openEditProfile() {
-    this.showProfileMenu = false;
-    this.showProfileEditModal = true;
-  }
-
-  onUserUpdated() {
-
+    if (!this.host.nativeElement.contains(ev.target as Node)) {
+      this.showNotificationPanel = false;
+    }
   }
 }

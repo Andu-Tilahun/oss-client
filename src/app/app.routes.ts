@@ -30,6 +30,19 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'profile',
+    loadComponent: () => import('./features/users/pages/profile-page/profile-page.component').then(m => m.ProfilePageComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'notifications-inbox',
+    loadComponent: () =>
+      import('./features/notifications/pages/notifications-inbox-page/notifications-inbox-page.component').then(
+        (m) => m.NotificationsInboxPageComponent
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'clearing-agent-unit-registration',
     loadComponent: () =>
       import('./features/clearing-agent-unit/pages/clearing-agent-unit-registration/clearing-agent-unit-registration.component')
@@ -213,6 +226,14 @@ export const routes: Routes = [
     loadChildren: () => import('./features/farm-plots/farm-plots.module').then(m => m.FarmPlotsModule),
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['ADMIN', 'OPERATOR'] },
+  },
+  {
+    path: 'farm-plots-explore',
+    loadComponent: () =>
+      import('./features/farm-plots/pages/farm-plots-explore-page/farm-plots-explore-page.component')
+        .then(m => m.FarmPlotsExplorePageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['INVESTOR', 'EXTENSION_WORKER', 'ADMIN', 'OPERATOR'] },
   },
   {
     path: 'farm-followups',
