@@ -63,13 +63,11 @@ export const routes: Routes = [
   },
   {
     path: 'public/terms-of-service',
-    loadComponent: () => import('./public/public-terms/public-terms.component').then(m => m.PublicTermsComponent),
-    canActivate: [GuestGuard]
+    loadComponent: () => import('./public/public-terms/public-terms.component').then(m => m.PublicTermsComponent)
   },
   {
     path: 'public/privacy-policy',
-    loadComponent: () => import('./public/public-privacy/public-privacy.component').then(m => m.PublicPrivacyComponent),
-    canActivate: [GuestGuard]
+    loadComponent: () => import('./public/public-privacy/public-privacy.component').then(m => m.PublicPrivacyComponent)
   },
   {
     path: 'public/clearing-agent-applicant',

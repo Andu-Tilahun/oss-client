@@ -1,3 +1,9 @@
+/* Reserve vertical space so content does not sit under the fixed bar */
+:host {
+  display: block;
+  height: 48px;
+}
+
 .top-nav {
   height: 48px;
   background: #eef0f2;
@@ -6,9 +12,12 @@
   justify-content: space-between;
   padding: 0 11%;
   color: #0f172a;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 50;
+  box-sizing: border-box;
 }
 
 .menu-toggle {
@@ -45,6 +54,10 @@
 }
 
 .hamburger {
+  display: none;
+}
+
+.menu-overlay {
   display: none;
 }
 
@@ -92,6 +105,10 @@
 }
 
 @media (max-width: 720px) {
+  :host {
+    height: 56px;
+  }
+
   .top-nav {
     padding: 0 16px;
     height: 56px;
@@ -108,7 +125,8 @@
     width: 30px;
     height: 30px;
     cursor: pointer;
-    z-index: 6;
+    position: relative;
+    z-index: 60;
   }
 
   .hamburger span {
@@ -119,21 +137,21 @@
     transition: transform 0.25s ease, opacity 0.25s ease;
   }
 
-  .menu-toggle:checked + .hamburger span:nth-child(1) {
+  #public-header-menu-toggle:checked + .hamburger span:nth-child(1) {
     transform: translateY(6px) rotate(45deg);
   }
 
-  .menu-toggle:checked + .hamburger span:nth-child(2) {
+  #public-header-menu-toggle:checked + .hamburger span:nth-child(2) {
     opacity: 0;
   }
 
-  .menu-toggle:checked + .hamburger span:nth-child(3) {
+  #public-header-menu-toggle:checked + .hamburger span:nth-child(3) {
     transform: translateY(-6px) rotate(-45deg);
   }
 
   .menu {
     position: fixed;
-    top: 56px;
+    top: 0;
     right: 0;
     bottom: 0;
     left: auto;
@@ -155,10 +173,30 @@
     visibility: hidden;
     pointer-events: none;
     transition: transform 0.25s ease, opacity 0.25s ease, visibility 0.25s ease;
-    z-index: 5;
+    z-index: 55;
   }
 
-  .menu-toggle:checked + .hamburger + .menu {
+  .menu-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.32);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+    z-index: 54;
+  }
+
+  #public-header-menu-toggle:checked + .hamburger + .menu-overlay {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  #public-header-menu-toggle:checked + .hamburger + .menu-overlay + .menu {
     transform: translateX(0);
     opacity: 1;
     visibility: visible;
