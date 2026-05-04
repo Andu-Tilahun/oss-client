@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../auth/services/auth.service';
 import { User } from '../users/models/user.model';
+import { InvestorHomeComponent } from './investor-home.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, InvestorHomeComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -17,6 +18,10 @@ export class HomeComponent implements OnInit {
   currentTime: Date = new Date();
 
   constructor(private authService: AuthService) {}
+
+  get isInvestor(): boolean {
+    return this.authService.isInvestor();
+  }
 
   ngOnInit() {
     // Get current user

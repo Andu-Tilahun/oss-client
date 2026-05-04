@@ -1,4 +1,9 @@
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
+<app-investor-home *ngIf="isInvestor"></app-investor-home>
+
+<div
+  *ngIf="!isInvestor"
+  class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500"
+>
   <div class="text-center px-4">
     <!-- Welcome Message -->
     <div class="mb-8">
