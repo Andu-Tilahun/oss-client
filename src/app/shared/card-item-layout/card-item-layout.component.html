@@ -1,8 +1,8 @@
 <article class="card-item-layout">
   <header class="card-item-layout__header">
     <div class="card-item-layout__header-left">
-      <ng-content select="[cardHeaderLeft]"></ng-content>
       <ng-container *ngIf="headerLeft">{{ headerLeft }}</ng-container>
+      <ng-content select="[cardHeaderLeft]"></ng-content>
     </div>
     <div class="card-item-layout__header-right">
       <ng-content select="[cardHeaderRight]"></ng-content>

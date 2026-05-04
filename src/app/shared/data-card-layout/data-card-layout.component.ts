@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { TableQueryParams } from '../data-table/models/table-query-params.model';
 import {
+  CardHeaderRightTemplateDirective,
   CardBodyTemplateDirective,
   CardFooterTemplateDirective,
 } from './data-card-layout-templates.directive';
@@ -47,6 +48,7 @@ export class DataCardLayoutComponent<T> {
   @Input() createdDateAccessor?: (item: T) => Date | string | null | undefined;
   @Input() thumbnailUrlAccessor?: (item: T) => string | null | undefined;
   @Input() thumbnailAltAccessor: (item: T) => string = () => 'Thumbnail';
+  @Input() showCreatedDate = true;
 
   @Output() pageChange = new EventEmitter<TableQueryParams>();
   @Output() addClick = new EventEmitter<void>();
@@ -57,6 +59,7 @@ export class DataCardLayoutComponent<T> {
   @Output() deleteClick = new EventEmitter<T>();
   @Output() cardClick = new EventEmitter<T>();
 
+  @ContentChild(CardHeaderRightTemplateDirective) headerRightTemplate?: CardHeaderRightTemplateDirective<T>;
   @ContentChild(CardBodyTemplateDirective) bodyTemplate?: CardBodyTemplateDirective<T>;
   @ContentChild(CardFooterTemplateDirective) footerTemplate?: CardFooterTemplateDirective<T>;
 

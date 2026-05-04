@@ -16,6 +16,7 @@ import {AssignExtensionWorkerRequest} from "../../../assign-extension-worker-req
 import {FarmPlot, FarmPlotFilterRequest, FarmPlotSizeType, FarmPlotSoilType, FarmPlotStatus} from "../../../farm-plots/models/farm-plot.model";
 import {FarmPlotService} from "../../../farm-plots/services/farm-plot.service";
 import {environment} from '../../../../../environments/environment';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-farm-lease-list',
@@ -54,6 +55,13 @@ export class FarmLeaseListComponent implements OnInit {
   contractFileName = 'lease-contract.html';
 
   columns: DataTableColumn<LeaseAgreement>[] = [
+    {
+      header: 'Farm Plot',
+      value: (l) => {
+        const title = l.farmPlot?.title || '-';
+        return title.length > 30 ? `${title.slice(0, 30)}...` : title;
+      },
+    },
     {header: 'Start', value: (l) => l.startDate},
     {header: 'End', value: (l) => l.endDate},
     {header: 'Duration (mo)', value: (l) => String(l.totalDurationMonths)},
@@ -71,9 +79,7 @@ export class FarmLeaseListComponent implements OnInit {
   ];
 
   rightActions: PageSplitRightAction<LeaseAgreement>[];
-  plotSelectionRightActions: PageSplitRightAction<LeaseAgreement>[] = [];
   plot: FarmPlot | null = null;
-  showInvestorPlotSelect = false;
   investorFarmPlots: FarmPlot[] = [];
   investorPlotsLoading = false;
 
@@ -82,7 +88,8 @@ export class FarmLeaseListComponent implements OnInit {
   investorPlotSoilType: FarmPlotSoilType | '' = '';
   investorPlotSizeType: FarmPlotSizeType | '' = '';
 
-  readonly getInvestorPlotCardTitle = (plot: FarmPlot): string => plot.title;
+  readonly getInvestorPlotCardTitle = (plot: FarmPlot): string =>
+    plot.title.length > 30 ? `${plot.title.slice(0, 28)}..` : plot.title;
   readonly getInvestorPlotCreatedDate = (plot: FarmPlot): Date | undefined => plot.createdAt;
   readonly getInvestorPlotThumbnailAlt = (plot: FarmPlot): string => `${plot.title} thumbnail`;
   readonly getInvestorPlotThumbnailUrl = (plot: FarmPlot): string | null =>
@@ -95,6 +102,7 @@ export class FarmLeaseListComponent implements OnInit {
     private toastService: ToastService,
     private authService: AuthService,
     private farmPlotService: FarmPlotService,
+    private router: Router,
   ) {
     const role = (this.authService.getCurrentUser()?.role ?? '').toString().trim().toUpperCase();
 
@@ -165,6 +173,9 @@ export class FarmLeaseListComponent implements OnInit {
     if (this.authService.isAdmin() && !this.status) {
       this.status = 'PENDING';
     }
+    if (this.isInvestorUser) {
+      this.loadInvestorPlots();
+    }
     this.loadLeases();
   }
 
@@ -200,6 +211,12 @@ export class FarmLeaseListComponent implements OnInit {
           return;
         }
 
+        if (this.isInvestorUser && !previousSelectedId) {
+          // Investors should open lease detail only through the view-eye action.
+          this.selectedLease = null;
+          return;
+        }
+
         if (!previousSelectedId) {
           this.selectedLease = {...this.leases[0]};
           this.detailRefreshKey++;
@@ -229,10 +246,6 @@ export class FarmLeaseListComponent implements OnInit {
     this.loadLeases();
   }
 
-  onAdd(): void {
-    this.openInvestorPlotPicker();
-  }
-
   onRefresh(): void {
     this.loadLeases();
   }
@@ -256,7 +269,12 @@ export class FarmLeaseListComponent implements OnInit {
   }
 
   onView(lease: LeaseAgreement): void {
+    if (this.isInvestorUser && window.innerWidth < 1020) {
+      void this.router.navigate(['/farm-leases/lease', lease.id]);
+      return;
+    }
     this.selectedLease = {...lease};
+    this.plot = null;
     this.showCreateModal = false;
     this.showEditModal = false;
   }
@@ -302,26 +320,16 @@ export class FarmLeaseListComponent implements OnInit {
 
   onLeaseCreated(): void {
     this.showCreateModal = false;
-    this.showInvestorPlotSelect = false;
     this.plot = null;
     this.detailRefreshKey++;
     this.loadLeases();
+    this.loadInvestorPlots();
   }
 
   onLeaseUpdated(): void {
     this.showEditModal = false;
     this.detailRefreshKey++;
     this.loadLeases();
-  }
-
-  private openInvestorPlotPicker(): void {
-    this.showInvestorPlotSelect = true;
-    this.plot = null;
-    this.investorPlotSearchText = '';
-    this.investorPlotStatus = '';
-    this.investorPlotSoilType = '';
-    this.investorPlotSizeType = '';
-    this.loadInvestorPlots();
   }
 
   private loadInvestorPlots(): void {
@@ -349,17 +357,6 @@ export class FarmLeaseListComponent implements OnInit {
         this.toastService.error(error.message || 'Failed to fetch farm plots', 'Load Farm Plots');
       },
     });
-  }
-
-  public closeInvestorPlotPicker(): void {
-    this.showInvestorPlotSelect = false;
-    this.investorFarmPlots = [];
-    this.investorPlotsLoading = false;
-    this.plot = null;
-    this.investorPlotSearchText = '';
-    this.investorPlotStatus = '';
-    this.investorPlotSoilType = '';
-    this.investorPlotSizeType = '';
   }
 
   public onInvestorPlotSearch(): void {
@@ -393,11 +390,24 @@ export class FarmLeaseListComponent implements OnInit {
   public onViewPlot(plot: FarmPlot, event?: Event): void {
     event?.preventDefault();
     event?.stopPropagation();
+
+    if (window.innerWidth < 1080) {
+      void this.router.navigate(['/farm-leases/plot', plot.id]);
+      return;
+    }
+
     this.plot = {...plot};
   }
 
   public onChoosePlot(plot: FarmPlot): void {
     this.plot = {...plot};
+    this.selectedLease = null;
+    this.showCreateModal = true;
+  }
+
+  public openCreateLeaseFromPreview(): void {
+    if (!this.plot) return;
+    this.selectedLease = null;
     this.showCreateModal = true;
   }
 

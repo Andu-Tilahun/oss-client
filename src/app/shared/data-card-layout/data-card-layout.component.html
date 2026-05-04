@@ -55,7 +55,18 @@
         *ngFor="let item of data; trackBy: trackByIndex"
         [headerLeft]="getCardTitle(item)"
       >
-        <span cardHeaderRight class="text-xs text-slate-500 whitespace-nowrap">
+        <span *ngIf="headerRightTemplate" cardHeaderLeft class="inline-flex items-center ml-2">
+          <ng-container
+            [ngTemplateOutlet]="headerRightTemplate.templateRef"
+            [ngTemplateOutletContext]="{ $implicit: item }"
+          ></ng-container>
+        </span>
+
+        <span
+          *ngIf="!headerRightTemplate && showCreatedDate"
+          cardHeaderRight
+          class="text-xs text-slate-500 whitespace-nowrap"
+        >
           {{ getCreatedDate(item) ? (getCreatedDate(item) | date:'mediumDate') : '-' }}
         </span>
 
