@@ -1,11 +1,14 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, DestroyRef, EventEmitter, inject, Input, OnInit, Output} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {CommonModule} from '@angular/common';
-import {RouterModule} from '@angular/router';
+import {NavigationEnd, Router, RouterModule} from '@angular/router';
+import {filter} from 'rxjs/operators';
 import {FormsModule} from '@angular/forms';
 import {MENU} from './menu';
 import {AuthService} from '../../../features/auth/services/auth.service';
 import {User} from '../../../features/users/models/user.model';
 import {MenuItem} from './menu.model';
+import {FileUploadService} from '../../../shared/file-upload/file-upload.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -15,6 +18,12 @@ import {MenuItem} from './menu.model';
   styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent implements OnInit {
+  @Input() mobileOpen = false;
+  @Output() mobileOpenChange = new EventEmitter<boolean>();
+
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+
   isCollapsed = false;
 
   allMenuItems = MENU;
@@ -23,9 +32,55 @@ export class SidebarComponent implements OnInit {
   /** Menu items actually rendered in the template (after search filter) */
   displayedMenuItems: MenuItem[] = [];
   currentUser: User | null = null;
+  currentUser$ = this.authService.currentUser$;
   searchTerm = '';
 
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    private fileUploadService: FileUploadService
+  ) {
+    this.router.events
+      .pipe(
+        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        if (this.mobileOpen) {
+          this.mobileOpenChange.emit(false);
+        }
+      });
+  }
+
+  closeMobileDrawer(): void {
+    this.mobileOpenChange.emit(false);
+  }
+
+  logout(): void {
+    this.authService.logout().subscribe({
+      next: () => console.log('Logged out successfully'),
+      error: (error) => console.error('Logout error:', error)
+    });
+  }
+
+  userAvatar(user: User | null): string {
+    if (user?.profileImageUuid) {
+      return this.fileUploadService.getFileUrl(user.profileImageUuid);
+    }
+    const name = user ? `${user.firstName}+${user.lastName}` : 'User';
+    return `https://ui-avatars.com/api/?name=${name}&background=6366f1&color=fff`;
+  }
+
+  userName(user: User | null): string {
+    return user ? `${user.firstName} ${user.lastName}` : 'User';
+  }
+
+  userEmail(user: User | null): string {
+    return user?.email || '';
+  }
+
+  openEditProfile(): void {
+    this.closeMobileDrawer();
+    void this.router.navigateByUrl('/profile');
   }
 
   ngOnInit() {
@@ -57,6 +112,19 @@ export class SidebarComponent implements OnInit {
 
   get menuItems(): MenuItem[] {
     return this.displayedMenuItems;
+  }
+
+  getItemRoute(item: MenuItem): string {
+    const role = this.currentUser?.role?.toUpperCase();
+    // Investors and extension workers use in-app explore page instead of guarded admin farm-plots list.
+    if (item.route === '/farm-plots' && (role === 'INVESTOR' || role === 'EXTENSION_WORKER')) {
+      return '/farm-plots-explore';
+    }
+    return item.route;
+  }
+
+  getItemFragment(item: MenuItem): string | undefined {
+    return undefined;
   }
 
   applySearch(): void {

@@ -1,0 +1,14 @@
+.public-page {
+  background:
+    radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 48%),
+    radial-gradient(circle at left 20%, rgba(5, 150, 105, 0.1), transparent 42%),
+    #f8fafc;
+  color: #0f172a;
+  overflow-x: hidden;
+}
+
+.container {
+  width: min(1120px, 92%);
+  margin: 0 auto;
+}
+

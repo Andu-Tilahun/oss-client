@@ -2,106 +2,170 @@
   [showLeftTitle]="true"
   [showRightTitle]="true"
   leftTitle="Farm Lease Management"
-  [rightTitle]="showInvestorPlotSelect ? 'Farm Plot Detail' : 'Lease Detail'"
-  [rightItem]="showInvestorPlotSelect ? null : selectedLease"
-  [rightEmptyMessage]="showInvestorPlotSelect ? 'Select a plot to view details.' : 'Select a row to view details.'"
-  [showRightEditButton]="!showInvestorPlotSelect && shouldShowLeaseEditButton(selectedLease)"
-  [rightActions]="showInvestorPlotSelect ? plotSelectionRightActions : rightActions"
+  [rightTitle]="(isInvestorUser && plot) ? 'Farm Plot Detail' : 'Lease Detail'"
+  [rightItem]="(isInvestorUser && plot) ? null : selectedLease"
+  [rightEmptyMessage]="
+    (isInvestorUser && plot)
+      ? ''
+      : (isInvestorUser
+          ? 'Select a lease from the table above, or choose a plot below to preview or register.'
+          : 'Select a row to view details.')
+  "
+  [showRightEditButton]="!(isInvestorUser && plot) && shouldShowLeaseEditButton(selectedLease)"
+  [rightActions]="(isInvestorUser && plot) ? [] : rightActions"
   (rightEdit)="onEdit($event)"
 >
   <ng-template #leftContent>
-    <div *ngIf="!showInvestorPlotSelect">
-      <app-data-table
-        [columns]="columns"
-        [data]="leases"
-        [loading]="loading"
-        [total]="total"
-        [pageSize]="pageSize"
-        [pageIndex]="pageIndex"
-        [showAddButton]="isInvestorUser"
-        [showRefreshButton]="true"
-        [showViewButton]="true"
-        [showEditButton]="false"
-        [showDeleteButton]="false"
-        [addButtonText]="'Register'"
-        (pageChange)="onPageChange($event)"
-        (addClick)="onAdd()"
-        (refreshClick)="onRefresh()"
-        (viewClick)="onView($event)"
-        (editClick)="onEdit($event)"
-      >
-        <div extraTableHeader class="w-full min-w-0">
-          <app-farm-lease-filter
-            *ngIf="myRequest"
-            [(searchText)]="searchText"
-            [(status)]="status"
-            (filterChange)="onFilterChange()"
-            (searchChange)="onFilterChange()"
-            (clearFilters)="clearFilters()"
-          ></app-farm-lease-filter>
-        </div>
-      </app-data-table>
-    </div>
-
-    <div *ngIf="showInvestorPlotSelect" class="space-y-4">
-      <div class="flex items-center justify-between gap-3">
-        <button
-          type="button"
-          class="flex-shrink-0 px-3 py-1.5 bg-blue-500 text-white rounded-lg text-sm font-medium
-             hover:bg-blue-600 transition-colors disabled:opacity-60"
-          (click)="closeInvestorPlotPicker()"
+    <div class="space-y-8">
+      <!-- Section 1: Leases -->
+      <section>
+        <h3 *ngIf="isInvestorUser" class="text-base font-semibold text-gray-900 mb-3">My farm leases</h3>
+        <app-data-table
+          [columns]="columns"
+          [data]="leases"
+          [loading]="loading"
+          [total]="total"
+          [pageSize]="pageSize"
+          [pageIndex]="pageIndex"
+          [showColumnPickerControl]="false"
+          [showAddButton]="false"
+          [showRefreshButton]="!isInvestorUser"
+          [showViewButton]="true"
+          [showEditButton]="false"
+          [showDeleteButton]="false"
+          (pageChange)="onPageChange($event)"
+          (refreshClick)="onRefresh()"
+          (viewClick)="onView($event)"
+          (editClick)="onEdit($event)"
         >
-          Back
-        </button>
-      </div>
+          <div extraTableHeader class="w-full min-w-0" *ngIf="myRequest">
+            <div class="flex flex-wrap items-end gap-2">
+              <div class="min-w-[160px]">
+                <select
+                  [value]="status"
+                  (change)="status = $any($event.target).value; onFilterChange()"
+                  class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="ACTIVE">ACTIVE</option>
+                  <option value="PENDING">PENDING</option>
+                  <option value="TERMINATED">TERMINATED</option>
+                </select>
+              </div>
 
-      <app-farm-plot-filter
-        [showSearch]="false"
-        [showStatus]="false"
-        [(searchText)]="searchText"
-        [(soilType)]="investorPlotSoilType"
-        [(sizeType)]="investorPlotSizeType"
-        (filterChange)="onInvestorPlotSearch()"
-        (searchChange)="onInvestorPlotSearch()"
-        (clearFilters)="onInvestorPlotClearFilters()"
-      ></app-farm-plot-filter>
+              <div class="flex-1 min-w-[220px]">
+                <input
+                  [value]="searchText"
+                  (input)="searchText = $any($event.target).value"
+                  (keyup.enter)="onFilterChange()"
+                  type="text"
+                  placeholder="Search lease..."
+                  class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+                />
+              </div>
 
-      <app-data-card-layout
-        [data]="investorFarmPlots"
-        [loading]="investorPlotsLoading"
-        [total]="investorFarmPlots.length"
-        [pageSize]="investorFarmPlots.length || 10"
-        [pageIndex]="1"
-        [showAddButton]="false"
-        [showRefreshButton]="false"
-        [showDownloadButton]="false"
-        [showViewButton]="false"
-        [showEditButton]="false"
-        [showDeleteButton]="false"
-        [titleAccessor]="getInvestorPlotCardTitle"
-        [createdDateAccessor]="getInvestorPlotCreatedDate"
-        [thumbnailUrlAccessor]="getInvestorPlotThumbnailUrl"
-        [thumbnailAltAccessor]="getInvestorPlotThumbnailAlt"
-        [cardClickEnabled]="true"
-        (cardClick)="onChoosePlot($event)"
-        [noDataMessage]="'No available plots found.'"
-      >
-        <ng-template cardFooterTemplate let-plot>
-          <div class="flex items-center gap-4 text-sm">
-            <button type="button" class="action-link action-link--view" (click)="onViewPlot(plot)">View</button>
+              <div class="flex items-center gap-2 pb-[1px]">
+                <button
+                  type="button"
+                  (click)="onFilterChange()"
+                  aria-label="Search leases"
+                  title="Search"
+                  class="h-[34px] w-[34px] rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors flex items-center justify-center"
+                >
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z"></path>
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  (click)="clearFilters()"
+                  aria-label="Clear filters"
+                  title="Clear filters"
+                  class="h-[34px] w-[34px] rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors flex items-center justify-center"
+                >
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
-        </ng-template>
-      </app-data-card-layout>
+        </app-data-table>
+      </section>
+
+      <!-- Section 2 (investors): plots below the table -->
+      <section *ngIf="isInvestorUser" class="border-t border-gray-200 pt-6 space-y-4 flex flex-col items-center">
+        <div class="flex justify-center">
+          <h3 class="text-base font-semibold text-gray-900">Explore More Farm Plots</h3>
+        </div>
+
+        <app-farm-plot-filter
+          [showSearch]="true"
+          [showStatus]="false"
+          [(searchText)]="investorPlotSearchText"
+          [(soilType)]="investorPlotSoilType"
+          [(sizeType)]="investorPlotSizeType"
+          (filterChange)="onInvestorPlotSearch()"
+          (searchChange)="onInvestorPlotSearch()"
+          (clearFilters)="onInvestorPlotClearFilters()"
+        ></app-farm-plot-filter>
+
+        <div class="[&_.bg-white]:!bg-transparent">
+          <app-data-card-layout
+            [data]="investorFarmPlots"
+            [loading]="investorPlotsLoading"
+            [total]="investorFarmPlots.length"
+            [pageSize]="investorFarmPlots.length || 10"
+            [pageIndex]="1"
+            [showAddButton]="false"
+            [showRefreshButton]="false"
+            [showDownloadButton]="false"
+            [showViewButton]="false"
+            [showEditButton]="false"
+            [showDeleteButton]="false"
+            [titleAccessor]="getInvestorPlotCardTitle"
+            [showCreatedDate]="false"
+            [thumbnailUrlAccessor]="getInvestorPlotThumbnailUrl"
+            [thumbnailAltAccessor]="getInvestorPlotThumbnailAlt"
+            [cardClickEnabled]="true"
+            (cardClick)="onChoosePlot($event)"
+            [noDataMessage]="'No available plots found.'"
+          >
+            <ng-template cardHeaderRightTemplate let-plot>
+              <button
+                type="button"
+                class="action-link action-link--view p-1 ml-2"
+                aria-label="View plot details"
+                title="View"
+                (click)="onViewPlot(plot, $event)"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7S3.732 16.057 2.458 12z"></path>
+                </svg>
+              </button>
+            </ng-template>
+          </app-data-card-layout>
+        </div>
+      </section>
     </div>
   </ng-template>
 
   <ng-template #rightContent let-lease>
-    <div *ngIf="showInvestorPlotSelect">
-      <app-farm-plot-view [plot]="plot"></app-farm-plot-view>
+    <div *ngIf="isInvestorUser && plot">
+      <app-farm-plot-view
+        [plot]="plot"
+        [showCreateLeaseButton]="true"
+        (createLease)="openCreateLeaseFromPreview()"
+      ></app-farm-plot-view>
+    </div>
+
+    <div *ngIf="isInvestorUser && !plot && !lease" class="text-sm text-gray-500">
+      Select a lease from the table, or open a plot from the list below.
     </div>
 
     <app-tabs
-      *ngIf="myRequest && !showInvestorPlotSelect"
+      *ngIf="myRequest && lease && !(isInvestorUser && plot)"
       [tabs]="tabs"
       [activeTab]="activeTab"
       (activeTabChange)="activeTab = $event"

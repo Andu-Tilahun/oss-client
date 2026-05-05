@@ -1,15 +1,15 @@
-import {Component} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {RouterModule} from '@angular/router';
-import {PublicHeaderComponent} from '../public-header/public-header.component';
-import {PublicFooterComponent} from '../public-footer/public-footer.component';
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { CompanyProfile } from '../../features/farm-company/models/company-profile.model';
 
 @Component({
   selector: 'app-public-contact',
   standalone: true,
-  imports: [CommonModule, RouterModule, PublicHeaderComponent, PublicFooterComponent],
+  imports: [CommonModule],
   templateUrl: './public-contact.component.html',
   styleUrl: './public-contact.component.css',
 })
-export class PublicContactComponent {}
-
+export class PublicContactComponent {
+  @Input() company: CompanyProfile | null = null;
+  @Input() loadingCompany = false;
+}

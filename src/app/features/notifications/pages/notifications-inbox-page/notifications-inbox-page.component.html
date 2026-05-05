@@ -1,0 +1,68 @@
+<div class="max-w-4xl mx-auto p-4 sm:p-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Notifications</h1>
+      <p class="text-sm text-gray-500 mt-1">All notification log entries for your account.</p>
+    </div>
+    <a
+      routerLink="/home"
+      class="text-sm font-medium text-indigo-600 hover:text-indigo-800 shrink-0"
+    >
+      ← Back to home
+    </a>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div *ngIf="loading" class="p-12 text-center text-gray-500 text-sm">Loading…</div>
+
+    <div *ngIf="!loading && loadError" class="p-8 text-center text-red-600 text-sm">
+      {{ loadError }}
+    </div>
+
+    <div *ngIf="!loading && !loadError && notifications.length === 0" class="p-12 text-center text-gray-500 text-sm">
+      No notifications yet.
+    </div>
+
+    <ul *ngIf="!loading && !loadError && notifications.length > 0" class="divide-y divide-gray-100">
+      <li *ngFor="let n of notifications" class="px-4 sm:px-6 py-4 hover:bg-gray-50/80 transition-colors">
+        <div class="flex flex-col gap-1">
+          <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <span class="font-semibold text-gray-900">{{ n.subject || n.notificationType }}</span>
+            <span class="text-xs font-medium uppercase tracking-wide text-gray-400">{{ n.status }}</span>
+          </div>
+          <p class="text-xs text-gray-500">
+            {{ n.notificationType }}
+            <span *ngIf="n.recipient"> · {{ n.recipient }}</span>
+          </p>
+          <p *ngIf="n.message" class="text-sm text-gray-600 line-clamp-2 mt-1">{{ n.message }}</p>
+          <p class="text-xs text-gray-400 mt-1">{{ formatCreated(n) }}</p>
+        </div>
+      </li>
+    </ul>
+
+    <div
+      *ngIf="!loading && !loadError && totalPages > 1"
+      class="flex items-center justify-between px-4 sm:px-6 py-3 border-t border-gray-100 bg-gray-50/80"
+    >
+      <button
+        type="button"
+        (click)="prevPage()"
+        [disabled]="pageIndex <= 0"
+        class="text-sm font-medium text-indigo-600 disabled:text-gray-300 disabled:cursor-not-allowed hover:text-indigo-800"
+      >
+        Previous
+      </button>
+      <span class="text-xs text-gray-500">
+        Page {{ pageIndex + 1 }} of {{ totalPages }} · {{ totalElements }} total
+      </span>
+      <button
+        type="button"
+        (click)="nextPage()"
+        [disabled]="pageIndex >= totalPages - 1"
+        class="text-sm font-medium text-indigo-600 disabled:text-gray-300 disabled:cursor-not-allowed hover:text-indigo-800"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+</div>

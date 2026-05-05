@@ -6,6 +6,7 @@ import {DataTableComponent} from "./data-table/data-table.component";
 import {ActionIconButtonComponent} from './components/action-icons/action-icon-button/action-icon-button.component';
 import { DataCardLayoutComponent } from './data-card-layout/data-card-layout.component';
 import {
+  CardHeaderRightTemplateDirective,
   CardBodyTemplateDirective,
   CardFooterTemplateDirective
 } from './data-card-layout/data-card-layout-templates.directive';
@@ -19,6 +20,7 @@ import { PublicCardLayoutComponent } from './public-card-layout/public-card-layo
         DataCardLayoutComponent,
         CardItemLayoutComponent,
         PublicCardLayoutComponent,
+        CardHeaderRightTemplateDirective,
         CardBodyTemplateDirective,
         CardFooterTemplateDirective
     ],
@@ -27,6 +29,7 @@ import { PublicCardLayoutComponent } from './public-card-layout/public-card-layo
         DataCardLayoutComponent,
         CardItemLayoutComponent,
         PublicCardLayoutComponent,
+        CardHeaderRightTemplateDirective,
         CardBodyTemplateDirective,
         CardFooterTemplateDirective
     ],

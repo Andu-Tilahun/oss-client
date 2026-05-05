@@ -1,6 +1,6 @@
 <div class="auth-page relative">
   <!-- Top-right services menu -->
-  <div class="absolute top-4 right-4 text-right">
+  <div class="login-services absolute top-4 right-4 z-10 text-right">
     <button
       type="button"
       (click)="showServicesMenu = !showServicesMenu"
@@ -18,12 +18,12 @@
       </a>
     </div>
   </div>
-  <div class="w-full max-w-md">
+  <div class="w-full max-w-md mx-auto min-w-0">
     <!-- Login Card -->
     <div class="auth-card backdrop-blur-sm bg-opacity-95">
 
       <!-- Logo/Icon -->
-      <div class="flex justify-center mb-6">
+      <div class="flex justify-center mb-6 max-[720px]:mb-4">
         <div class="auth-icon">
           <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
@@ -32,7 +32,7 @@
       </div>
 
       <!-- Header -->
-      <div class="text-center mb-8">
+      <div class="text-center mb-8 max-[720px]:mb-6">
         <h2 class="auth-title text-3xl font-bold mb-2">Welcome Back</h2>
         <p class="auth-subtitle">Sign in to continue to your account</p>
       </div>
@@ -130,7 +130,7 @@
           <button
             type="submit"
             [disabled]="isLoading"
-            class="auth-button w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-semibold focus:outline-none transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none"
+            class="auth-button w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-semibold focus:outline-none transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none max-[720px]:min-h-[48px] max-[720px]:active:scale-[0.99]"
           >
             <svg *ngIf="isLoading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

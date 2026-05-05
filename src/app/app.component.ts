@@ -17,6 +17,8 @@ import { filter } from 'rxjs/operators';
 })
 export class AppComponent implements OnInit {
   showLayout = false;
+  /** Mobile-only: sidebar drawer open state (desktop uses persistent sidebar). */
+  mobileSidebarOpen = false;
   private isAuthenticated = false;
   private currentUrl = '';
 

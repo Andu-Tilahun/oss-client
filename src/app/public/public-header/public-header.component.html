@@ -1,14 +1,22 @@
 <header class="top-nav">
-  <div class="brand">
-    <span class="logo" aria-hidden="true">🌱</span>
+  <a class="brand" routerLink="/public" fragment="home">
     <span class="brand-text">AgriVest</span>
-  </div>
+  </a>
+
+  <input type="checkbox" id="public-header-menu-toggle" class="menu-toggle" />
+  <label for="public-header-menu-toggle" class="hamburger" aria-label="Toggle navigation menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </label>
+  <label for="public-header-menu-toggle" class="menu-overlay" aria-hidden="true"></label>
 
   <nav class="menu">
-    <a class="menu-link" [class.active]="activePage === 'home'" routerLink="/public">Home</a>
-    <a class="menu-link" [class.active]="activePage === 'about'" routerLink="/public/about-us">About Us</a>
-    <a class="menu-link" [class.active]="activePage === 'contact'" routerLink="/public/contact">Contact</a>
-    <a class="sign-in-btn" routerLink="/login">Sign in</a>
+    <a class="menu-link" routerLink="/public" fragment="home">Home</a>
+    <a class="menu-link" routerLink="/public" fragment="about">About Us</a>
+    <a class="menu-link" routerLink="/public" fragment="contact">Contact</a>
+    <a class="sign-in-btn mobile-sign-in" routerLink="/login">Sign in</a>
   </nav>
+  <a class="sign-in-btn" routerLink="/login">Sign in</a>
 </header>
 

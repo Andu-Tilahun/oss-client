@@ -1,6 +1,19 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {provideRouter} from '@angular/router';
+import {of} from 'rxjs';
 
-import { HeaderComponent } from './header.component';
+import {HeaderComponent} from './header.component';
+import {NotificationLogService} from '../../../features/notifications/services/notification.service';
+
+const emptyPage = {
+  content: [],
+  totalElements: 0,
+  totalPages: 0,
+  size: 10,
+  number: 0,
+  first: true,
+  last: true,
+};
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
@@ -8,7 +21,16 @@ describe('HeaderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HeaderComponent]
+      imports: [HeaderComponent],
+      providers: [
+        provideRouter([]),
+        {
+          provide: NotificationLogService,
+          useValue: {
+            getNotifications: () => of(emptyPage),
+          },
+        },
+      ],
     })
     .compileComponents();
     

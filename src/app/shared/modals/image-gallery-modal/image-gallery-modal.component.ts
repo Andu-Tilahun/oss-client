@@ -1,15 +1,14 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {ModalComponent} from '../modal/modal.component';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-image-gallery-modal',
   standalone: true,
-  imports: [CommonModule, ModalComponent],
+  imports: [CommonModule],
   templateUrl: './image-gallery-modal.component.html',
   styleUrl: './image-gallery-modal.component.css',
 })
-export class ImageGalleryModalComponent {
+export class ImageGalleryModalComponent implements OnChanges {
   @Input() visible = false;
   @Input() loading = false;
   @Input() title = 'Image Gallery';
@@ -46,5 +45,20 @@ export class ImageGalleryModalComponent {
 
   setActiveIndex(index: number): void {
     this.activeIndex = index;
+  }
+
+  close(): void {
+    this.visible = false;
+    this.visibleChange.emit(false);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!changes['imageUrls']) {
+      return;
+    }
+
+    if (this.activeIndex >= this.imageUrls.length) {
+      this.activeIndex = 0;
+    }
   }
 }

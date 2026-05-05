@@ -19,9 +19,11 @@ import {
 import {ConfirmationModalComponent} from "../../shared/modals/confirmation-modal/confirmation-modal.component";
 import {ModalComponent} from "../../shared/modals/modal/modal.component";
 import {FarmPlotFilterComponent} from '../farm-plots/pages/farm-plot-filter/farm-plot-filter.component';
+import {FarmLeasePlotDetailComponent} from './pages/farm-lease-plot-detail/farm-lease-plot-detail.component';
+import {FarmLeaseMobileDetailComponent} from './pages/farm-lease-mobile-detail/farm-lease-mobile-detail.component';
 
 @NgModule({
-  declarations: [FarmLeaseListComponent],
+  declarations: [FarmLeaseListComponent, FarmLeasePlotDetailComponent, FarmLeaseMobileDetailComponent],
   imports: [
     CommonModule,
     FarmLeasesRoutingModule,

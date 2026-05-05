@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FarmPlot, FarmPlotStatus} from '../../models/farm-plot.model';
 import {FarmPlotService} from '../../services/farm-plot.service';
@@ -32,6 +32,9 @@ export class FarmPlotViewComponent implements OnChanges {
   @Input() id?: string;
 
   @Input() refreshKey = 0;
+  @Input() showCreateLeaseButton = false;
+  @Input() createLeaseButtonText = 'Create Lease Agreement';
+  @Output() createLease = new EventEmitter<void>();
 
   loading = false;
   error: string | null = null;
@@ -91,6 +94,10 @@ export class FarmPlotViewComponent implements OnChanges {
 
   sizeText(p: FarmPlot): string {
     return `${p.size} ${p.sizeType}`;
+  }
+
+  onCreateLease(): void {
+    this.createLease.emit();
   }
 }
 

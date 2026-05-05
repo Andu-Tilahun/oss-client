@@ -12,7 +12,7 @@ export const routes: Routes = [
   {
     path: 'public',
     loadComponent: () =>
-      import('./public/pages/public-website/public-website.component').then((m) => m.PublicWebsiteComponent),
+      import('./public/public-website/public-website.component').then((m) => m.PublicWebsiteComponent),
   },
   {
     path: 'login',
@@ -28,6 +28,19 @@ export const routes: Routes = [
     path: 'home',
     loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent),
     canActivate: [AuthGuard]
+  },
+  {
+    path: 'profile',
+    loadComponent: () => import('./features/users/pages/profile-page/profile-page.component').then(m => m.ProfilePageComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'notifications-inbox',
+    loadComponent: () =>
+      import('./features/notifications/pages/notifications-inbox-page/notifications-inbox-page.component').then(
+        (m) => m.NotificationsInboxPageComponent
+      ),
+    canActivate: [AuthGuard],
   },
   {
     path: 'clearing-agent-unit-registration',
@@ -48,7 +61,7 @@ export const routes: Routes = [
   },
   {
     path: 'public',
-    loadComponent: () => import('./public/public-landing/public-landing.component').then(m => m.PublicLandingComponent),
+    loadComponent: () => import('./public/public-hero/public-hero.component').then(m => m.PublicHeroComponent),
     canActivate: [GuestGuard]
   },
   {
@@ -63,13 +76,11 @@ export const routes: Routes = [
   },
   {
     path: 'public/terms-of-service',
-    loadComponent: () => import('./public/public-terms/public-terms.component').then(m => m.PublicTermsComponent),
-    canActivate: [GuestGuard]
+    loadComponent: () => import('./public/public-terms/public-terms.component').then(m => m.PublicTermsComponent)
   },
   {
     path: 'public/privacy-policy',
-    loadComponent: () => import('./public/public-privacy/public-privacy.component').then(m => m.PublicPrivacyComponent),
-    canActivate: [GuestGuard]
+    loadComponent: () => import('./public/public-privacy/public-privacy.component').then(m => m.PublicPrivacyComponent)
   },
   {
     path: 'public/clearing-agent-applicant',
@@ -215,6 +226,14 @@ export const routes: Routes = [
     loadChildren: () => import('./features/farm-plots/farm-plots.module').then(m => m.FarmPlotsModule),
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['ADMIN', 'OPERATOR'] },
+  },
+  {
+    path: 'farm-plots-explore',
+    loadComponent: () =>
+      import('./features/farm-plots/pages/farm-plots-explore-page/farm-plots-explore-page.component')
+        .then(m => m.FarmPlotsExplorePageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['INVESTOR', 'EXTENSION_WORKER', 'ADMIN', 'OPERATOR'] },
   },
   {
     path: 'farm-followups',

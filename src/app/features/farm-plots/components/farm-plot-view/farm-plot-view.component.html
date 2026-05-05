@@ -76,13 +76,23 @@
     </app-detail-section>
 
     <app-detail-section title="Media">
-      <div class="col-span-full">
-        <app-document-upload
-          label="Image"
-          [currentFileId]="plot.imageUuid"
-          [viewOnly]="true"
-          [required]="false"
-        ></app-document-upload>
+      <div class="col-span-full flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div class="flex-1 min-w-0">
+          <app-document-upload
+            label="Image"
+            [currentFileId]="plot.imageUuid"
+            [viewOnly]="true"
+            [required]="false"
+          ></app-document-upload>
+        </div>
+        <button
+          *ngIf="showCreateLeaseButton"
+          type="button"
+          (click)="onCreateLease()"
+          class="shrink-0 md:mt-8 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors"
+        >
+          {{ createLeaseButtonText }}
+        </button>
       </div>
     </app-detail-section>
 
@@ -99,6 +109,7 @@
         ></app-oss-map>
       </div>
     </app-detail-section>
+
   </ng-container>
 
   <!-- fallback handled by the "No farm plot selected" block above -->

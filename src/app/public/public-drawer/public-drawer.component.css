@@ -1,0 +1,147 @@
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 90;
+}
+
+.plot-drawer {
+  position: fixed;
+  top: 0;
+  right: -460px;
+  width: min(420px, 92vw);
+  height: 100vh;
+  background: #ffffff;
+  z-index: 100;
+  box-shadow: -8px 0 28px rgba(2, 6, 23, 0.2);
+  padding: 1.5rem;
+  overflow-y: auto;
+  transition: right 0.25s ease-in-out;
+}
+
+.plot-drawer.open {
+  right: 0;
+}
+
+.close-btn {
+  border: none;
+  background: #f1f5f9;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  float: right;
+}
+
+.back-btn {
+  display: none;
+}
+
+.plot-drawer h3 {
+  margin: 1.2rem 0 0.8rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #065f46;
+}
+
+.drawer-image {
+  width: 100%;
+  border-radius: 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.drawer-description {
+  color: #334155;
+  margin-bottom: 1rem;
+}
+
+.drawer-meta p {
+  margin-bottom: 0.4rem;
+}
+
+.drawer-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.drawer-actions button {
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.gallery-btn {
+  background: #e2e8f0;
+  color: #1f2937;
+}
+
+.reserve-btn {
+  background: #065f46;
+  color: #ffffff;
+}
+
+@media (max-width: 720px) {
+  .drawer-backdrop {
+    background: rgba(15, 23, 42, 0.7);
+  }
+
+  .plot-drawer {
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    max-height: none;
+    border-radius: 0;
+    padding: 1rem;
+    box-shadow: none;
+    transform: translateY(100%);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.24s ease, opacity 0.2s ease, visibility 0.2s ease;
+  }
+
+  .plot-drawer.open {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .close-btn {
+    display: none;
+  }
+
+  .back-btn {
+    display: inline-block;
+    border: none;
+    background: transparent;
+    color: #1f2937;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .plot-drawer h3 {
+    margin-top: 0.2rem;
+    font-size: 1.2rem;
+  }
+
+  .drawer-actions {
+    position: sticky;
+    bottom: 0;
+    background: #ffffff;
+    padding-top: 0.75rem;
+    margin-top: 1.25rem;
+    border-top: 1px solid #e5e7eb;
+  }
+}

@@ -1,0 +1,58 @@
+<div class="public-page">
+  <app-public-header></app-public-header>
+
+  <app-public-hero (exploreOpportunities)="scrollTo('plots')"></app-public-hero>
+
+  <app-public-plots
+    [pagedPlots]="pagedPlots"
+    [loadingPlots]="loadingPlots"
+    [total]="total"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex"
+    [searchText]="searchText"
+    [status]="status"
+    [soilType]="soilType"
+    [sizeType]="sizeType"
+    [getPlotCardTitle]="getPlotCardTitle"
+    [getPublicCardSubtitle]="getPublicCardSubtitle"
+    [getPublicCardDescription]="getPublicCardDescription"
+    [getPlotThumbnailUrl]="getPlotThumbnailUrl"
+    [getPlotThumbnailAlt]="getPlotThumbnailAlt"
+    [getPublicCardBadges]="getPublicCardBadges"
+    (pageChange)="onPageChange($event)"
+    (refreshClick)="loadPlots()"
+    (primaryActionClick)="openPlotDetail($event)"
+    (secondaryActionClick)="openPublicGallery($event)"
+    (searchTextChange)="searchText = $event"
+    (statusChange)="status = $event"
+    (soilTypeChange)="soilType = $event"
+    (sizeTypeChange)="sizeType = $event"
+    (filterChange)="onFilterChange()"
+    (searchChange)="onFilterChange()"
+    (clearFilters)="clearFilters()"
+  ></app-public-plots>
+
+  <app-public-about-us [company]="company"></app-public-about-us>
+
+  <app-public-contact [company]="company" [loadingCompany]="loadingCompany"></app-public-contact>
+
+  <app-public-footer [company]="company"></app-public-footer>
+
+  <app-public-drawer
+    [selectedPlot]="selectedPlot"
+    [imageUrl]="selectedPlot ? getPlotThumbnailUrl(selectedPlot) : null"
+    [imageAlt]="selectedPlot ? getPlotThumbnailAlt(selectedPlot) : ''"
+    [isOpen]="!!selectedPlot"
+    (close)="closePlotDetail()"
+    (openGallery)="selectedPlot && openPublicGallery(selectedPlot)"
+    (reserve)="goToLogin()"
+  ></app-public-drawer>
+
+  <app-image-gallery-modal
+    [(visible)]="showGalleryModal"
+    [loading]="galleryLoading"
+    [title]="galleryTitle"
+    [imageUrls]="galleryImageUrls"
+    (visibleChange)="onGalleryVisibilityChange($event)"
+  ></app-image-gallery-modal>
+</div>

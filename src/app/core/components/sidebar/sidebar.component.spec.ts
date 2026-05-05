@@ -1,6 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {provideRouter} from '@angular/router';
+import {of} from 'rxjs';
 
-import { SidebarComponent } from './sidebar.component';
+import {SidebarComponent} from './sidebar.component';
+import {AuthService} from '../../../features/auth/services/auth.service';
+import {FileUploadService} from '../../../shared/file-upload/file-upload.service';
 
 describe('SidebarComponent', () => {
   let component: SidebarComponent;
@@ -8,7 +12,18 @@ describe('SidebarComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SidebarComponent]
+      imports: [SidebarComponent],
+      providers: [
+        provideRouter([]),
+        {
+          provide: AuthService,
+          useValue: {
+            currentUser$: of(null),
+            logout: () => of(undefined),
+          },
+        },
+        {provide: FileUploadService, useValue: {getFileUrl: () => ''}},
+      ],
     })
     .compileComponents();
     

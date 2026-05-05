@@ -66,3 +66,10 @@ nav button,
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+/* Public header: lock page scroll while mobile nav is open (frosted overlay blocks interaction) */
+html:has(#public-header-menu-toggle:checked),
+body:has(#public-header-menu-toggle:checked) {
+  overflow: hidden;
+  touch-action: none;
+}
