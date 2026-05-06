@@ -74,9 +74,15 @@ export class NotificationListComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
+        const errorCode =
+          error?.error?.error?.code ||
+          error?.error?.code ||
+          error?.code ||
+          error?.status ||
+          'UNKNOWN_ERROR';
         this.toastService.error(
-          error.message || 'Failed to fetch notifications',
-          'Fetch Audits'
+          `Failed to load notifications (Error code: ${errorCode})`,
+          'Notification Error'
         );
         this.loading = false;
       }

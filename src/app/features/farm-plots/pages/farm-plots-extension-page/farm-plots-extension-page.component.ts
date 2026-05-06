@@ -11,6 +11,7 @@ import { FarmFollowupsModule } from '../../../farm-followups/farm-followups.modu
 import { FarmLeaseService } from '../../../farm-leases/services/farm-lease.service';
 import { SharedModule } from '../../../../shared/shared.module';
 import { environment } from '../../../../../environments/environment';
+import { Router } from '@angular/router';
 
 interface AssignedFarmPlot extends FarmPlot {
   lease: LeaseAgreement;
@@ -42,12 +43,16 @@ export class FarmPlotsExtensionPageComponent implements OnInit {
     { key: 'lease', label: 'Lease Agreement' },
     { key: 'follow-up', label: 'Follow-ups' },
   ];
-  readonly getCurrentPlotCardTitle = (plot: AssignedFarmPlot): string => plot.title;
+  readonly getCurrentPlotCardTitle = (plot: AssignedFarmPlot): string =>
+    plot.title.length > 30 ? `${plot.title.slice(0, 28)}..` : plot.title;
   readonly getCurrentPlotThumbnailAlt = (plot: AssignedFarmPlot): string => `${plot.title} thumbnail`;
   readonly getCurrentPlotThumbnailUrl = (plot: AssignedFarmPlot): string | null =>
     plot.imageUuid ? `${this.storageApiUrl}/${plot.imageUuid}` : null;
 
-  constructor(private farmLeaseService: FarmLeaseService) {}
+  constructor(
+    private farmLeaseService: FarmLeaseService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.previousAssignedLeases = this.buildMockPreviousAssignedLeases();
@@ -55,6 +60,12 @@ export class FarmPlotsExtensionPageComponent implements OnInit {
   }
 
   selectPlot(plot: AssignedFarmPlot | null): void {
+    if (plot && this.isMobileViewport()) {
+      void this.router.navigate(['/farm-plots-extension/detail', plot.lease.id], {
+        state: { lease: plot.lease },
+      });
+      return;
+    }
     this.selectedPlot = plot;
     this.selectedLease = plot?.lease ?? null;
     this.activeTab = 'farm-plot';
@@ -62,6 +73,12 @@ export class FarmPlotsExtensionPageComponent implements OnInit {
 
   selectPreviousLease(lease: LeaseAgreement): void {
     if (!lease?.farmPlot) return;
+    if (this.isMobileViewport()) {
+      void this.router.navigate(['/farm-plots-extension/detail', lease.id], {
+        state: { lease },
+      });
+      return;
+    }
     this.selectedLease = lease;
     this.selectedPlot = {
       ...lease.farmPlot,
@@ -79,6 +96,10 @@ export class FarmPlotsExtensionPageComponent implements OnInit {
 
   get currentActivePlotList(): AssignedFarmPlot[] {
     return this.currentActivePlot ? [this.currentActivePlot] : [];
+  }
+
+  private isMobileViewport(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth < 1020;
   }
 
   private loadAssignedPlots(): void {

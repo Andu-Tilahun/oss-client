@@ -244,6 +244,14 @@ export const routes: Routes = [
     data: { roles: ['EXTENSION_WORKER', 'ADMIN'] },
   },
   {
+    path: 'farm-plots-extension/detail/:leaseId',
+    loadComponent: () =>
+      import('./features/farm-plots/pages/farm-plots-extension-detail-page/farm-plots-extension-detail-page.component')
+        .then(m => m.FarmPlotsExtensionDetailPageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['EXTENSION_WORKER', 'ADMIN'] },
+  },
+  {
     path: 'farm-followups',
     loadChildren: () => import('./features/farm-followups/farm-followups.module').then(m => m.FarmFollowupsModule),
     canActivate: [AuthGuard, RoleGuard],

@@ -183,6 +183,10 @@ export class FarmLeaseListComponent implements OnInit {
     return this.authService.isInvestor();
   }
 
+  public get isExtensionWorkerUser(): boolean {
+    return this.authService.isExtensionWorker();
+  }
+
   private buildFilterRequest(): LeaseFilterRequest {
     return {
       searchText: this.searchText || undefined,

@@ -12,9 +12,9 @@
   <ng-template #leftContent>
     <div class="space-y-8">
       <section class="space-y-3">
-        <div>
+        <div class="grid items-center justify-center text-center">
           <h3 class="text-base font-semibold text-gray-900">Current Active Farm Plot</h3>
-          <p class="text-sm text-gray-500">Open assignment currently in progress.</p>
+          <p class="text-sm text-gray-500 ">Open assignment currently in progress.</p>
         </div>
 
         <div *ngIf="!currentActivePlot" class="text-sm text-gray-500">No active assigned farm plots found.</div>
@@ -44,7 +44,7 @@
             <ng-template cardHeaderRightTemplate let-plot>
               <button
                 type="button"
-                class="action-link action-link--view p-1 ml-2"
+                class="action-link action-link--view p-1 ml-2 text-blue-600 hover:text-blue-700"
                 aria-label="View plot details"
                 title="View"
                 (click)="selectPlot(plot); $event.stopPropagation()"
@@ -60,7 +60,7 @@
       </section>
 
       <section class="space-y-3 border-t border-slate-200 pt-6">
-        <div>
+        <div class="grid items-center justify-center text-center">
           <h3 class="text-base font-semibold text-gray-900">Previously Assigned Farm Plots</h3>
           <p class="text-sm text-gray-500">Completed or non-active assignments and their details.</p>
         </div>
@@ -85,7 +85,7 @@
                 class="cursor-pointer hover:bg-slate-50"
                 (click)="selectPreviousLease(lease)"
               >
-                <td class="px-3 py-2 text-slate-800">{{ lease.farmPlot?.title || '-' }}</td>
+                <td class="px-3 py-2 text-slate-800">{{ lease.farmPlot.title || '-' }}</td>
                 <td class="px-3 py-2 text-slate-600">{{ lease.startDate | date : 'mediumDate' }}</td>
                 <td class="px-3 py-2 text-slate-600">{{ lease.endDate | date : 'mediumDate' }}</td>
                 <td class="px-3 py-2">
@@ -116,7 +116,7 @@
         </div>
         <div *ngIf="activeTab === 'follow-up'">
           <app-farm-followup-list
-            [followUps]="selectedLease.followUpDtoList ?? []"
+            [followUps]="selectedLease.followUpDtoList"
             [externalId]="selectedLease.id"
           ></app-farm-followup-list>
         </div>
