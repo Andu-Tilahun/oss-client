@@ -116,9 +116,12 @@ export class SidebarComponent implements OnInit {
 
   getItemRoute(item: MenuItem): string {
     const role = this.currentUser?.role?.toUpperCase();
-    // Investors and extension workers use in-app explore page instead of guarded admin farm-plots list.
-    if (item.route === '/farm-plots' && (role === 'INVESTOR' || role === 'EXTENSION_WORKER')) {
+    // Investors and extension workers use role-specific farm-plot pages.
+    if (item.route === '/farm-plots' && role === 'INVESTOR') {
       return '/farm-plots-explore';
+    }
+    if (item.route === '/farm-plots' && role === 'EXTENSION_WORKER') {
+      return '/farm-plots-extension';
     }
     return item.route;
   }

@@ -4,11 +4,12 @@ import { RouterModule } from '@angular/router';
 import { AuthService } from '../auth/services/auth.service';
 import { User } from '../users/models/user.model';
 import { InvestorHomeComponent } from './investor-home.component';
+import { ExtensionHomeComponent } from './extension-home.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, InvestorHomeComponent],
+  imports: [CommonModule, RouterModule, InvestorHomeComponent, ExtensionHomeComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -21,6 +22,10 @@ export class HomeComponent implements OnInit {
 
   get isInvestor(): boolean {
     return this.authService.isInvestor();
+  }
+
+  get isExtensionWorker(): boolean {
+    return this.authService.isExtensionWorker();
   }
 
   ngOnInit() {

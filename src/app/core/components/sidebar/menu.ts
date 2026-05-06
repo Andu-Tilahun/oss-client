@@ -111,7 +111,7 @@ export const MENU: MenuItem[] = [
     roles: ['ADMIN', 'OPERATOR', 'INVESTOR','EXTENSION_WORKER'],
     children: [
       { icon: '', label: 'Company', route: '/farm-company', roles: ['ADMIN'] },
-      { icon: '', label: 'Farm Plots', route: '/farm-plots', roles: ['ADMIN', 'EXTENSION_WORKER'] },
+      { icon: '', label: 'Farm Plots', route: '/farm-plots-extension', roles: ['EXTENSION_WORKER'] },
       { icon: '', label: 'Leases', route: '/farm-leases', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
       { icon: '', label: 'Restoration & Follow-ups', route: '/farm-followups', roles: ['EXTENSION_WORKER', 'ADMIN'] },
       {icon: '', label: 'Investments', route: '/crowd-funding/investments', roles: ['INVESTOR', 'ADMIN']},

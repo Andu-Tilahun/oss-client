@@ -99,6 +99,10 @@
   display: none;
 }
 
+.mobile-app-download {
+  display: none;
+}
+
 .sign-in-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 12px 26px rgba(4, 120, 87, 0.3);
@@ -226,5 +230,19 @@
     font-size: 0.95rem;
     padding: 10px 16px;
     border-radius: 8px;
+  }
+
+  .mobile-app-download {
+    display: block;
+    margin-top: auto;
+    text-align: center;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 10px 16px;
+    border-radius: 8px;
+    color: #ffffff;
+    background: linear-gradient(90deg, #2563eb, #1d4ed8);
+    box-shadow: 0 8px 20px rgba(29, 78, 216, 0.25);
   }
 }
