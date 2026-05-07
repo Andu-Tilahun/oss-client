@@ -1,0 +1,30 @@
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+  <div class="flex items-center justify-between mb-5">
+    <h1 class="text-xl font-bold text-gray-900">Assigned Plot Workspace</h1>
+    <a
+      routerLink="/farm-plots-extension"
+      class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+    >
+      Back
+    </a>
+  </div>
+
+  <div *ngIf="!lease" class="text-sm text-gray-500">Unable to load assigned plot details.</div>
+
+  <div *ngIf="lease">
+    <app-tabs [tabs]="tabs" [activeTab]="activeTab" (activeTabChange)="activeTab = $event">
+      <div *ngIf="activeTab === 'farm-plot'">
+        <app-farm-plot-view [plot]="lease.farmPlot"></app-farm-plot-view>
+      </div>
+      <div *ngIf="activeTab === 'lease'">
+        <app-farm-lease-view [lease]="lease"></app-farm-lease-view>
+      </div>
+      <div *ngIf="activeTab === 'follow-up'">
+        <app-farm-followup-list
+          [followUps]="lease.followUpDtoList"
+          [externalId]="lease.id"
+        ></app-farm-followup-list>
+      </div>
+    </app-tabs>
+  </div>
+</div>

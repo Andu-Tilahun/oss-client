@@ -1,27 +1,66 @@
-# ZionFrontend
+# AgriVest
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.17.
+AgriVest is a managed digital platform that connects farm plots with investors in a structured, trusted environment. The frontend application enables coordinated planning, lease execution, follow-up operations, and visibility across the full farm-to-investor lifecycle.
 
-## Development server
+## Platform Overview
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+The platform supports multiple user roles (Admin, Investor, Extension Worker, Operator) and provides role-aware navigation, pages, and actions. Its main goal is to orchestrate resource delivery between farms and investors: from plot discovery, agreement workflows, and extension-worker assignment to field follow-ups, contract tracking, and operational transparency.
 
-## Code scaffolding
+In practice, AgriVest helps teams:
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- Match investable farm plots with interested investors under platform governance
+- Coordinate lease and service workflows with clear ownership and status tracking
+- Connect field execution (extension worker activities) to investor visibility
+- Reduce operational gaps between planning, funding, implementation, and reporting
+- Maintain an auditable process across farm operations and investment activity
 
-## Build
+## Core Features
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+- **Role-based dashboards**
+  - Investor dashboard with capital and lease insights
+  - Extension Worker dashboard with assigned plot and follow-up summary
 
-## Running unit tests
+- **Farm plot management**
+  - Explore and preview plots
+  - Extension Worker assigned-plot workspace
+  - Dedicated mobile detail flow for smaller screens
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+- **Lease management**
+  - Lease listing, filtering, status tracking, and detail view
+  - Contract preview and download flow
+  - Assignment of extension workers to accepted leases
 
-## Running end-to-end tests
+- **Follow-up tracking**
+  - Follow-up listing and creation for assigned lease records
+  - Integrated follow-up visibility inside lease and extension-worker detail tabs
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+- **Crowdfunding and investments**
+  - Campaign and investment sections integrated into platform navigation
+  - Capital deployment visibility tied to lease and farm operations context
 
-## Further help
+## Tech Stack
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+- Angular 17
+- TypeScript
+- Tailwind-based UI styling
+- Modular feature architecture with standalone and module-based components
+
+## Local Development
+
+Install dependencies and run the app:
+
+```bash
+npm install
+npm run host
+```
+
+The app runs at:
+
+- `http://localhost:4200/`
+
+## Build and Test
+
+```bash
+npm run build
+npm test
+```

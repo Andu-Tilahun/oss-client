@@ -55,7 +55,7 @@
         *ngFor="let item of data; trackBy: trackByIndex"
         [headerLeft]="getCardTitle(item)"
       >
-        <span *ngIf="headerRightTemplate" cardHeaderLeft class="inline-flex items-center ml-2">
+        <span *ngIf="headerRightTemplate" cardHeaderRight class="inline-flex items-center ml-2">
           <ng-container
             [ngTemplateOutlet]="headerRightTemplate.templateRef"
             [ngTemplateOutletContext]="{ $implicit: item }"

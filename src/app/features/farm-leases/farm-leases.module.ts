@@ -21,9 +21,17 @@ import {ModalComponent} from "../../shared/modals/modal/modal.component";
 import {FarmPlotFilterComponent} from '../farm-plots/pages/farm-plot-filter/farm-plot-filter.component';
 import {FarmLeasePlotDetailComponent} from './pages/farm-lease-plot-detail/farm-lease-plot-detail.component';
 import {FarmLeaseMobileDetailComponent} from './pages/farm-lease-mobile-detail/farm-lease-mobile-detail.component';
+import {
+  PreviouslyManagedLeaseFarmPlotsComponent
+} from './components/previously-managed-lease-farm-plots/previously-managed-lease-farm-plots.component';
 
 @NgModule({
-  declarations: [FarmLeaseListComponent, FarmLeasePlotDetailComponent, FarmLeaseMobileDetailComponent],
+  declarations: [
+    FarmLeaseListComponent,
+    FarmLeasePlotDetailComponent,
+    FarmLeaseMobileDetailComponent,
+    PreviouslyManagedLeaseFarmPlotsComponent
+  ],
   imports: [
     CommonModule,
     FarmLeasesRoutingModule,

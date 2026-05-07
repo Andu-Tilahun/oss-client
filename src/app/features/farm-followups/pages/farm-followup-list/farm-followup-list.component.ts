@@ -26,9 +26,7 @@ export class FarmFollowUpListComponent {
 
   columns: DataTableColumn<FarmFollowUp>[] = [
     {header: 'Remark', value: (x) => x.remark},
-    {header: 'Attachment', value: (x) => x.attachment ?? ''},
-    {header: 'Created At', value: (x) => x.createdAt ?? ''},
-    {header: 'Created By', value: (x) => x.createdBy ?? ''},
+    {header: 'Created At', value: (x) => this.formatCreatedAt(x.createdAt)},
   ];
 
   constructor(
@@ -94,6 +92,16 @@ export class FarmFollowUpListComponent {
   onFollowUpCreated(): void {
     this.showCreateModal = false;
     this.onRefresh();
+  }
+
+  private formatCreatedAt(value?: string | null): string {
+    if (!value) return '';
+    const d = new Date(value);
+    if (!Number.isFinite(d.getTime())) return '';
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
   }
 }
 
