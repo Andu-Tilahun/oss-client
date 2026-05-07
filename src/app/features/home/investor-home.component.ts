@@ -163,7 +163,7 @@ export class InvestorHomeComponent implements OnInit {
     forkJoin({
       campaigns: this.crowdFundingService
         .filterCrowdFunding({
-          statuses: ['OPEN', 'ACTIVE'],
+          statuses: ['OPEN'],
           sortBy: 'fundingDeadline',
           sortDirection: 'ASC',
           page: 0,
