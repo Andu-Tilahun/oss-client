@@ -17,11 +17,13 @@ import { PublicContactComponent } from '../public-contact/public-contact.compone
 import { PublicFooterComponent } from '../public-footer/public-footer.component';
 import { PublicDrawerComponent } from '../public-drawer/public-drawer.component';
 import { PublicPlotsComponent } from '../public-plots/public-plots.component';
+import { PublicNewsComponent } from '../public-news/public-news.component';
+import { PublicGalleryComponent } from '../public-gallery/public-gallery.component';
 
 @Component({
   selector: 'app-public-website',
   standalone: true,
-  imports: [CommonModule, RouterModule, ImageGalleryModalComponent, PublicHeaderComponent, PublicHeroComponent, PublicAboutUsComponent, PublicContactComponent, PublicFooterComponent, PublicDrawerComponent, PublicPlotsComponent],
+  imports: [CommonModule, RouterModule, ImageGalleryModalComponent, PublicHeaderComponent, PublicHeroComponent, PublicAboutUsComponent, PublicContactComponent, PublicFooterComponent, PublicDrawerComponent, PublicPlotsComponent, PublicNewsComponent, PublicGalleryComponent],
   templateUrl: './public-website.component.html',
   styleUrls: ['./public-website.component.css'],
 })

@@ -4,14 +4,44 @@
 }
 
 .hero {
-  background:
-    linear-gradient(115deg, rgba(4, 120, 87, 0.94), rgba(6, 95, 70, 0.9)),
-    radial-gradient(circle at 18% 22%, rgba(52, 211, 153, 0.42), transparent 48%),
-    radial-gradient(circle at 82% 78%, rgba(167, 243, 208, 0.22), transparent 45%);
   color: #ffffff;
-  padding: 6rem 0;
   position: relative;
   overflow: hidden;
+  height: 100dvh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Desktop: show the full video centred */
+  object-position: center center;
+  z-index: 0;
+}
+
+/* Mobile: crop to the centre-left of the frame where the farm action is */
+@media (max-width: 768px) {
+  .hero-video {
+    object-position: 30% center;
+  }
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    rgba(4, 120, 87, 0.72),
+    rgba(6, 95, 70, 0.65)
+  );
+  z-index: 1;
+  pointer-events: none;
 }
 
 .hero::after {
@@ -19,13 +49,16 @@
   position: absolute;
   inset: auto -10% -120px -10%;
   height: 260px;
-  background: linear-gradient(to top, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.15), transparent);
   pointer-events: none;
+  z-index: 2;
 }
 
 .hero-inner {
   max-width: 680px;
   text-align: center;
+  position: relative;
+  z-index: 3;
 }
 
 .hero h1 {

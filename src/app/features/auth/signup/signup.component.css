@@ -19,7 +19,7 @@
 }
 
 .form-panel {
-  background: #ffffff;
+  background: #f7f7f8;
   display: flex;
   align-items: center;
 }
@@ -27,108 +27,186 @@
 .form-wrap {
   width: min(500px, 86%);
   margin: 0 auto;
-}
-
-.form-wrap.frozen {
-  position: relative;
+  padding: 2rem 0;
 }
 
 .form-wrap h2 {
   margin: 0;
-  font-size: 46px;
-  color: #214f3a;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #052e2b;
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
-  margin: 8px 0 26px;
-  color: #68746d;
-  font-size: 20px;
+  margin: 6px 0 20px;
+  color: #64748b;
+  font-size: 0.97rem;
 }
 
-.frozen-form {
-  filter: blur(3px);
-  pointer-events: none;
+/* ── Step transitions ───────────────────────────────── */
+@keyframes stepSlideIn {
+  from { opacity: 0; transform: translateX(36px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
-.fake-field,
-.fake-button {
-  width: 100%;
-  border-radius: 10px;
-  background: #e9f0ea;
-  border: 1px solid #d8e2da;
+.form-step {
+  display: none;
 }
 
-.fake-field {
-  height: 44px;
-  margin-bottom: 12px;
+.form-step.active {
+  display: block;
+  animation: stepSlideIn 0.38s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 
-.fake-button {
-  height: 48px;
-  margin-top: 4px;
-  background: #0f5d3a;
+/* ── OTP header ─────────────────────────────────────── */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.25); }
+  50%       { transform: scale(1.07); box-shadow: 0 0 0 10px rgba(5, 150, 105, 0); }
 }
 
-.coming-soon-card {
-  position: absolute;
-  left: 50%;
-  top: 56%;
-  transform: translate(-50%, -50%);
-  width: min(360px, 86%);
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(8px);
-  border: 1px solid #dce6df;
-  border-radius: 12px;
+.otp-header {
   text-align: center;
-  padding: 18px 16px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  margin-bottom: 8px;
 }
 
-.coming-soon-card h3 {
-  margin: 0;
-  color: #214f3a;
-  font-size: 24px;
+.otp-icon {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: rgba(5, 150, 105, 0.1);
+  border: 2px solid rgba(5, 150, 105, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  animation: pulse 2.4s ease-in-out infinite;
 }
 
-.coming-soon-card p {
-  margin: 10px 0 12px;
-  color: #5e6962;
-  font-size: 13px;
-  line-height: 1.45;
+/* ── OTP digit boxes ────────────────────────────────── */
+.otp-boxes {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 28px 0 24px;
 }
 
-.coming-soon-card a {
-  color: #1f5f42;
+.otp-box {
+  width: 52px;
+  height: 58px;
+  text-align: center;
+  font-size: 1.6rem;
   font-weight: 700;
-  text-decoration: none;
-  font-size: 14px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 0.55rem;
+  background: #ffffff;
+  color: #052e2b;
+  caret-color: #059669;
+  padding: 0;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
-.coming-soon-card a:hover {
+.otp-box:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+  transform: scale(1.08);
+  outline: none;
+}
+
+.otp-box:not([value=""]):not([value="·"]) {
+  border-color: #059669;
+  background: rgba(5, 150, 105, 0.04);
+}
+
+/* ── Resend row ─────────────────────────────────────── */
+.resend-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 14px;
+}
+
+.resend-btn {
+  background: none;
+  border: none;
+  color: #059669;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
   text-decoration: underline;
+  transition: opacity 0.15s ease;
+}
+
+.resend-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Two-column field row ───────────────────────────── */
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 .field {
   margin-bottom: 12px;
 }
 
-input {
-  width: 100%;
-  border: 1px solid #d8e2da;
-  background: #e9f0ea;
-  color: #2b2b2b;
-  border-radius: 10px;
-  padding: 12px 14px;
-  font-size: 16px;
-  outline: none;
+.field label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f172a;
 }
 
-input.invalid {
-  border-color: #d56c6c;
+.required {
+  color: #dc2626;
+}
+
+input,
+select {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 0.45rem;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.92rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+  appearance: none;
 }
 
 input::placeholder {
-  color: #8d9891;
+  color: #94a3b8;
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.25rem;
+  cursor: pointer;
+}
+
+input:focus,
+select:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+input.field-error,
+select.field-error {
+  border-color: #dc2626;
 }
 
 .password-field {
@@ -137,54 +215,60 @@ input::placeholder {
 
 .eye-btn {
   position: absolute;
-  right: 12px;
-  top: 8px;
+  right: 10px;
+  top: 50%;
+  transform: translateY(20%);
   border: 0;
   background: transparent;
-  color: #5f6963;
+  color: #64748b;
   cursor: pointer;
-  padding: 6px;
+  padding: 4px;
 }
 
 .eye-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   stroke-width: 2;
 }
 
 small {
   display: block;
-  margin-top: 6px;
-  color: #c64949;
-  font-size: 12px;
+  margin-top: 5px;
+  color: #dc2626;
+  font-size: 0.78rem;
 }
 
 .submit-btn {
-  margin-top: 6px;
+  margin-top: 8px;
   width: 100%;
-  border: 0;
-  border-radius: 10px;
-  background: #0f5d3a;
+  border: none;
+  border-radius: 0.5rem;
+  background: #059669;
   color: #fff;
   font-weight: 700;
-  font-size: 24px;
-  padding: 12px;
+  font-size: 1rem;
+  padding: 0.85rem 1rem;
   cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #047857;
 }
 
 .submit-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
 .signup-links {
   margin-top: 12px;
-  text-align: right;
+  text-align: center;
 }
 
 .signup-links a {
-  font-size: 14px;
-  color: #1f5f42;
+  font-size: 0.85rem;
+  color: #059669;
   text-decoration: none;
   font-weight: 600;
 }
@@ -200,6 +284,8 @@ small {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-top-left-radius: 64px;
+  border-bottom-left-radius: 64px;
 }
 
 .brand-overlay {
@@ -276,5 +362,14 @@ small {
     min-height: 280px;
     order: -1;
   }
-}
 
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .otp-box {
+    width: 44px;
+    height: 50px;
+    font-size: 1.4rem;
+  }
+}

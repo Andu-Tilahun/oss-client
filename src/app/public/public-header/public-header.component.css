@@ -1,21 +1,27 @@
-/* Reserve vertical space so content does not sit under the fixed bar */
+/* Header floats above the hero — no reserved height needed */
 :host {
   display: block;
-  height: 48px;
+  height: 0;
 }
 
 .top-nav {
-  height: 48px;
-  background: #eef0f2;
+  height: 52px;
+  background: rgba(238, 240, 242, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 11%;
+  padding: 0 24px;
   color: #0f172a;
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92%, 1080px);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.1);
   z-index: 50;
   box-sizing: border-box;
 }
@@ -112,12 +118,14 @@
 
 @media (max-width: 720px) {
   :host {
-    height: 56px;
+    height: 0;
   }
 
   .top-nav {
     padding: 0 16px;
-    height: 56px;
+    height: 52px;
+    top: 12px;
+    width: min(94%, 480px);
     overflow-x: clip;
   }
 }

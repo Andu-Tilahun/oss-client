@@ -1,0 +1,75 @@
+<section id="news" class="news-section">
+  <div class="container">
+    <div class="section-title-wrap">
+      <h2>News</h2>
+    </div>
+
+    <div class="news-layout">
+      <article class="news-feature">
+        <div class="news-feature-image-wrap">
+          <img class="news-feature-image" [src]="activeItem.imageUrl" [alt]="activeItem.title" loading="lazy" />
+          <span class="news-feature-badge">{{ activeItem.category }}</span>
+        </div>
+
+        <div class="news-feature-content">
+          <h3 class="news-feature-title">{{ activeItem.title }}</h3>
+          <p class="news-feature-date">{{ activeItem.date }}</p>
+
+          <p class="news-feature-summary">{{ activeItem.summary }}</p>
+
+          <p class="news-feature-body" [class.news-feature-body--expanded]="bodyExpanded">
+            {{ activeItem.body }}
+          </p>
+
+          <button type="button" class="news-view-more" (click)="toggleBodyExpanded()">
+            {{ bodyExpanded ? 'View Less' : 'View More' }}
+            <span class="news-chevron" [class.news-chevron--up]="bodyExpanded">&#9662;</span>
+          </button>
+
+          <p *ngIf="activeItem.externalUrl" class="news-external">
+            Read more at:
+            <a [href]="activeItem.externalUrl" target="_blank" rel="noopener noreferrer" class="news-external-link">
+              &#8943;
+            </a>
+          </p>
+
+          <footer class="news-feature-footer">
+            <span>{{ activeItem.readTime }}</span>
+            <span>{{ activeItem.source }}</span>
+          </footer>
+        </div>
+      </article>
+
+      <aside class="news-sidebar">
+        <h4 class="news-sidebar-heading">Latest News</h4>
+
+        <ul class="news-sidebar-list">
+          <li *ngFor="let item of sidebarItems">
+            <button
+              type="button"
+              class="news-sidebar-item"
+              [class.news-sidebar-item--active]="item.id === activeItem.id"
+              (click)="selectItem(item)"
+            >
+              <img class="news-sidebar-thumb" [src]="item.imageUrl" [alt]="item.title" loading="lazy" />
+
+              <div class="news-sidebar-text">
+                <h5>{{ item.title }}</h5>
+                <p class="news-sidebar-excerpt">{{ item.excerpt }}</p>
+                <span class="news-sidebar-meta">{{ item.readTime }}</span>
+              </div>
+
+              <span class="news-sidebar-year">{{ item.year }}</span>
+              <span class="news-sidebar-tag">{{ item.category }}</span>
+            </button>
+          </li>
+        </ul>
+
+        <button type="button" class="news-next-btn" (click)="showNextNews()">
+          Next
+          <span class="news-chevron">&#9662;</span>
+        </button>
+      </aside>
+    </div>
+  </div>
+</section>

@@ -19,6 +19,20 @@ export interface User {
   updatedAt: Date;
 }
 
+export interface SignupRequest {
+  email: string;
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  gender: string;
+  profileImageUuid: string;
+}
+
+export interface VerifyEmailRequest {
+  email: string;
+  otp: string;
+}
+
 export interface RegisterRequest {
   username: string;
   password: string;

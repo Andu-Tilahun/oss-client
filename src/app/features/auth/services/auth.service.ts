@@ -7,7 +7,9 @@ import {
   LoginRequest,
   RegisterRequest,
   ResetPasswordRequest,
-  User
+  SignupRequest,
+  User,
+  VerifyEmailRequest
 } from '../../users/models/user.model';
 import {HttpService, RequestType} from "../../../core/services/http.service";
 import {ApiResponse} from "../../../shared/models/api-response.model";
@@ -36,6 +38,20 @@ export class AuthService {
   register(request: RegisterRequest): Observable<ApiResponse<User>> {
     return this.httpService.post<ApiResponse<User>>(
       `${Endpoints.USERS_ENDPOINT}/register`,
+      request
+    );
+  }
+
+  signup(request: SignupRequest): Observable<ApiResponse<User>> {
+    return this.httpService.post<ApiResponse<User>>(
+      `${Endpoints.USERS_ENDPOINT}/signup`,
+      request
+    );
+  }
+
+  verifyEmail(request: VerifyEmailRequest): Observable<ApiResponse<void>> {
+    return this.httpService.post<ApiResponse<void>>(
+      `${Endpoints.USERS_ENDPOINT}/verify-email`,
       request
     );
   }

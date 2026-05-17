@@ -1,0 +1,99 @@
+<section id="gallery" class="gallery-section">
+  <div class="container">
+    <div class="section-title-wrap">
+      <h2>Gallery</h2>
+      <p>Explore scenes from our partner farms, fields, and sustainable agricultural operations.</p>
+    </div>
+
+    <div class="gallery-grid">
+      <figure
+        *ngFor="let item of galleryItems; index as i"
+        class="gallery-tile"
+        [class.gallery-tile--image]="item.kind === 'image'"
+        [class.gallery-tile--video]="item.kind === 'video'"
+      >
+        <button
+          type="button"
+          class="gallery-tile-btn"
+          (click)="openDetail(i)"
+          [attr.aria-label]="'Read more about ' + item.title"
+        >
+          <img
+            *ngIf="item.kind === 'image'"
+            [src]="item.src"
+            [alt]="item.title"
+            loading="lazy"
+            class="gallery-media"
+          />
+
+          <video
+            *ngIf="item.kind === 'video'"
+            class="gallery-media"
+            [src]="item.src"
+            muted
+            loop
+            playsinline
+            preload="metadata"
+            (mouseenter)="onVideoEnter($event)"
+            (mouseleave)="onVideoLeave($event)"
+          ></video>
+
+          <div class="gallery-overlay">
+            <h3 class="gallery-overlay-title">{{ item.title }}</h3>
+            <p class="gallery-overlay-desc">{{ item.description }}</p>
+          </div>
+        </button>
+      </figure>
+    </div>
+  </div>
+
+  <div
+    *ngIf="showDetailModal && activeItem"
+    class="gallery-detail-overlay"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="activeItem.title"
+  >
+    <button type="button" class="gallery-detail-backdrop" (click)="closeDetail()" aria-label="Close"></button>
+
+    <div class="gallery-detail-panel">
+      <div class="gallery-detail-media-wrap">
+        <button type="button" class="gallery-detail-close" (click)="closeDetail()" aria-label="Close">×</button>
+
+        <img
+          *ngIf="activeItem.kind === 'image'"
+          class="gallery-detail-media"
+          [src]="activeItem.src"
+          [alt]="activeItem.title"
+        />
+
+        <video
+          *ngIf="activeItem.kind === 'video'"
+          #modalVideo
+          class="gallery-detail-media gallery-detail-media--video"
+          [src]="activeItem.src"
+          autoplay
+          muted
+          loop
+          playsinline
+          disablePictureInPicture
+          controlsList="nodownload nofullscreen noremoteplayback"
+        ></video>
+      </div>
+
+      <div class="gallery-detail-body">
+        <h3 class="gallery-detail-title">{{ activeItem.title }}</h3>
+        <p class="gallery-detail-description">{{ activeItem.description }}</p>
+      </div>
+
+      <div class="gallery-detail-nav">
+        <button type="button" class="gallery-nav-btn" (click)="goPrevious()" aria-label="Previous item">
+          &#10094; Previous
+        </button>
+        <button type="button" class="gallery-nav-btn" (click)="goNext()" aria-label="Next item">
+          Next &#10095;
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
