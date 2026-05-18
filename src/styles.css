@@ -55,16 +55,16 @@ nav button,
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #d1fae5;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: #065f46;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #047857;
 }
 
 /* Public header: lock page scroll while mobile nav is open (frosted overlay blocks interaction) */
