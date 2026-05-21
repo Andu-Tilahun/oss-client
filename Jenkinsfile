@@ -2,10 +2,12 @@ pipeline {
     agent any
 
     environment {
-        // References the exact credential ID we created in Step 2
-        GITHUB_CREDS = credentials('github-ssh-auth-oss-front') 
-        // Ensure this uses the git@github.com: SSH format
-        REPO_URL     = 'git@github.com:Andu-Tilahun/oss-client.git'
+        // 1. Point to your exact, explicit Jenkins Credential ID
+        GITHUB_CREDS    = credentials('github-ssh-auth-oss-front') 
+        REPO_URL        = 'git@github.com:Andu-Tilahun/oss-client.git'
+        
+        // 2. Overrides the missing known_hosts file inside the Docker container automatically
+        GIT_SSH_COMMAND = 'ssh -o StrictHostKeyChecking=no'
     }
 
     stages {
@@ -14,9 +16,9 @@ pipeline {
                 // Wipe the workspace cleanly before pulling fresh code
                 cleanWs() 
                 
-                // Clone the repository using your SSH deployment key
+                // Clone the repository using the exact credential ID defined above
                 git branch: 'main',
-                    credentialsId: 'github-ssh-auth',
+                    credentialsId: 'github-ssh-auth-oss-front',
                     url: "${env.REPO_URL}"
             }
         }
