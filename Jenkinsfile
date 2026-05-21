@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // References the exact credential ID we created in Step 2
-        GITHUB_CREDS = credentials('github-ssh-auth') 
+        GITHUB_CREDS = credentials('github-ssh-auth-oss-front') 
         // Ensure this uses the git@github.com: SSH format
         REPO_URL     = 'git@github.com:Andu-Tilahun/oss-client.git'
     }
