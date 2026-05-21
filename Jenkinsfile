@@ -2,32 +2,32 @@ pipeline {
     agent any
 
     environment {
-        // 1. Point to your exact, explicit Jenkins Credential ID
         GITHUB_CREDS    = credentials('github-ssh-auth-oss-front') 
         REPO_URL        = 'git@github.com:Andu-Tilahun/oss-client.git'
-        
-        // 2. Overrides the missing known_hosts file inside the Docker container automatically
-        GIT_SSH_COMMAND = 'ssh -o StrictHostKeyChecking=no'
     }
 
     stages {
         stage('Checkout Source') {
             steps {
-                // Wipe the workspace cleanly before pulling fresh code
                 cleanWs() 
                 
-                // Clone the repository using the exact credential ID defined above
-                git branch: 'main',
-                    credentialsId: 'github-ssh-auth-oss-front',
-                    url: "${env.REPO_URL}"
+                // Use the explicit checkout step to force the SSH bypass directly into the Git configuration runtime
+                checkout([$class: 'GitSCM', 
+                    branches: [[name: '*/main']], 
+                    extensions: [[$class: 'CloneOption', noTags: false, reference: '', shallow: false]], 
+                    userRemoteConfigs: [[
+                        credentialsId: 'github-ssh-auth-oss-front', 
+                        url: "${env.REPO_URL}",
+                        // This config string directly injects the override down into the underlying Git client execution
+                        coreKey: 'ssh -o StrictHostKeyChecking=no'
+                    ]]
+                ])
             }
         }
 
         stage('Deploy Application') {
             steps {
                 echo 'Triggering containerized deployment via DinD sidecar...'
-                
-                // Routes commands directly to the host's daemon to re-build your application
                 sh 'docker compose down && docker compose up -d --build'
             }
         }
