@@ -5,7 +5,7 @@ import {Endpoints} from '../../../core/endpoint/endpoint.model';
 import {LeaseAgreement, LeaseCreateRequest, LeaseFilterRequest,} from '../models/farm-lease.model';
 import {ApiResponse, PageResponse} from '../../../shared/models/api-response.model';
 import {AssignExtensionWorkerRequest} from "../../assign-extension-worker-request";
-import {InvestmentRecord} from "../../crowd-funding/models/crowd-funding.model";
+import {InvestmentRecord} from "../../investment-package/models/investment-package.model";
 
 @Injectable({
   providedIn: 'root',

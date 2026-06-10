@@ -53,6 +53,7 @@
       </div>
 
       <span
+        *ngIf="plot.status"
         class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
         [ngClass]="statusPillClass(plot.status)"
       >
@@ -75,33 +76,69 @@
       <!-- <app-detail-field label="Description" [value]="plot.description || '-'" /> -->
     </app-detail-section>
 
-    <app-detail-section title="Media">
-      <div class="col-span-full flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-        <div class="flex-1 min-w-0">
-          <app-document-upload
-            label="Image"
-            [currentFileId]="plot.imageUuid"
-            [viewOnly]="true"
-            [required]="false"
-          ></app-document-upload>
+    <app-detail-section >
+      <div class="col-span-full space-y-4">
+        <!-- <div *ngIf="getMainImageUrl(); else noMainImage">
+          <p class="text-sm font-medium text-gray-700 mb-2">Plot Image</p>
+          <img
+            [src]="getMainImageUrl()!"
+            [alt]="plot.title"
+            class="max-h-48 rounded-lg border border-gray-200 object-cover cursor-pointer"
+            (click)="openImagePreview(getMainImageUrl()!)"
+          />
+        </div> -->
+        <ng-template #noMainImage>
+          <p class="text-sm text-gray-500">No plot image available.</p>
+        </ng-template>
+
+        <div *ngIf="galleryLoading" class="text-sm text-gray-500">Loading gallery...</div>
+        <div *ngIf="!galleryLoading">
+          <p class="text-sm font-medium text-gray-700 mb-2">Gallery</p>
+          <div class="grid grid-cols-4 gap-3">
+            <ng-container *ngFor="let _ of [0, 1, 2]; let i = index">
+              <img
+                *ngIf="previewGalleryUrls[i] as url"
+                [src]="url"
+                [alt]="'Gallery image ' + (i + 1)"
+                class="w-full h-24 object-cover rounded-lg border border-gray-200 cursor-pointer"
+                (click)="openGallery(i)"
+              />
+              <div
+                *ngIf="!previewGalleryUrls[i]"
+                class="w-full h-24 rounded-lg border border-gray-100 bg-gray-50"
+                aria-hidden="true"
+              ></div>
+            </ng-container>
+            <button
+              *ngIf="allowGalleryUpload"
+              type="button"
+              class="w-full h-24 flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-gray-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              [disabled]="galleryUploading"
+              (click)="openGalleryUpload()"
+              aria-label="Add gallery image"
+            >
+              <span class="text-2xl leading-none">+</span>
+            </button>
+          </div>
         </div>
+
         <button
           *ngIf="showCreateLeaseButton"
           type="button"
           (click)="onCreateLease()"
-          class="shrink-0 md:mt-8 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors"
+          class="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors"
         >
           {{ createLeaseButtonText }}
         </button>
       </div>
     </app-detail-section>
 
-    <app-detail-section title="Location Map">
+    <app-detail-section *ngIf="plot.latitude != null && plot.longitude != null" title="Location Map">
       <div class="col-span-full">
         <app-oss-map
           [interactive]="false"
           [height]="'300px'"
-          [zoom]="14"
+          [zoom]="10"
           [latitude]="plot.latitude"
           [longitude]="plot.longitude"
           [locations]="[{ lat: plot.latitude, lng: plot.longitude, name: plot.title }]"
@@ -114,4 +151,19 @@
 
   <!-- fallback handled by the "No farm plot selected" block above -->
 </app-detail-card>
+
+<app-image-gallery-modal
+  [(visible)]="showGalleryModal"
+  [loading]="galleryLoading"
+  [title]="galleryTitle"
+  [imageUrls]="allGalleryUrls"
+  [initialIndex]="galleryModalInitialIndex"
+></app-image-gallery-modal>
+
+<app-image-upload-modal
+  [(visible)]="showUploadModal"
+  title="Add Gallery Image"
+  (fileUploaded)="onGalleryImageUploaded($event)"
+  (uploadError)="onGalleryUploadError($event)"
+></app-image-upload-modal>
 

@@ -1,0 +1,38 @@
+<app-detail-card>
+  <div *ngIf="!investmentPackage" class="text-sm text-gray-500">No investment package selected.</div>
+
+  <ng-container *ngIf="investmentPackage">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
+      <div>
+        <h3 class="text-2xl font-bold text-gray-900">{{ investmentPackage.title || 'Investment Package' }}</h3>
+      </div>
+
+      <span
+        class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
+        [ngClass]="statusPillClass(investmentPackage.fundingStatus)"
+      >
+        {{ investmentPackage.fundingStatus || '-' }}
+      </span>
+    </div>
+
+    <hr class="border-gray-200 mb-8"/>
+
+    <app-detail-section title="Investment Package">
+      <app-detail-field label="Deadline" [value]="investmentPackage.fundingDeadline || '-'"/>
+      <app-detail-field label="Target" [value]="formatAmount(investmentPackage.targetAmount)"/>
+      <app-detail-field label="Minimum" [value]="formatAmount(investmentPackage.minimumContribution)"/>
+    </app-detail-section>
+
+    <app-detail-section title="Farm operation">
+      <app-detail-field label="Farm activity" [value]="investmentPackage.farmActivity"/>
+      <app-detail-field label="Water source" [value]="investmentPackage.waterSource"/>
+      <app-detail-field label="Operation start" [value]="investmentPackage.startDate"/>
+      <app-detail-field label="Operation end" [value]="investmentPackage.endDate"/>
+    </app-detail-section>
+
+    <app-detail-section *ngIf="investmentPackage.description" title="Description">
+      <div class="col-span-full text-sm text-slate-800 whitespace-pre-wrap">{{ investmentPackage.description }}</div>
+    </app-detail-section>
+
+  </ng-container>
+</app-detail-card>

@@ -11,6 +11,8 @@ import {FarmPlotService} from '../../services/farm-plot.service';
 import {PageResponse} from '../../../../shared/models/api-response.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
+import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
+import {ColumnType} from '../../../../shared/data-table/models/column-types.model';
 import {environment} from '../../../../../environments/environment';
 
 @Component({
@@ -48,11 +50,37 @@ export class FarmPlotListComponent {
   // Forces the right-side detail component to reload after updates.
   detailRefreshKey = 0;
 
-  readonly getPlotCardTitle = (plot: FarmPlot): string => plot.title;
-  readonly getPlotCreatedDate = (plot: FarmPlot): Date | undefined => plot.createdAt;
-  readonly getPlotThumbnailAlt = (plot: FarmPlot): string => `${plot.title} thumbnail`;
-  readonly getPlotThumbnailUrl = (plot: FarmPlot): string | null =>
-    plot.imageUuid ? `${this.storageApiUrl}/${plot.imageUuid}` : null;
+  columns: DataTableColumn<FarmPlot>[] = [
+    {
+      header: 'Title',
+      value: (plot) => plot.title,
+      defaultVisible: true,
+    },
+    {
+      header: 'Size',
+      value: (plot) => `${plot.size} ${plot.sizeType}`,
+      defaultVisible: true,
+    },
+    {
+      header: 'Soil Type',
+      value: (plot) => plot.soilType,
+      defaultVisible: true,
+    },
+    {
+      header: 'Image',
+      columnType: ColumnType.IMAGE,
+      value: (plot) => this.getPlotImageUrl(plot),
+      imageAlt: (plot) => plot.title,
+      defaultVisible: true,
+    },
+    // {
+    //   header: 'Gallery',
+    //   columnType: ColumnType.LINK,
+    //   value: () => 'Gallery',
+    //   columnAction: (plot) => this.onOpenGallery(plot),
+    //   defaultVisible: true,
+    // },
+  ];
 
   get checkIfPlotIsNotAssigned() {
     return true;
@@ -247,6 +275,10 @@ export class FarmPlotListComponent {
       this.galleryImageUrls = [];
       this.galleryLoading = false;
     }
+  }
+
+  getPlotImageUrl(plot: FarmPlot): string | null {
+    return plot.imageUuid ? `${this.storageApiUrl}/${plot.imageUuid}` : null;
   }
 
   private toStorageUrl(imageUuid?: string): string | null {

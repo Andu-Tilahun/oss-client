@@ -1,45 +1,39 @@
 <div class="p-4 sm:p-6">
   <div class="mb-4">
-    <h1 class="text-2xl font-bold text-gray-900">Farm Plots</h1>
-    <p class="text-sm text-gray-500 mt-1">Explore available plots without leaving the dashboard.</p>
+    <h1 class="text-2xl font-bold text-gray-900">Investment Packages</h1>
+    <p class="text-sm text-gray-500 mt-1">Explore open investment opportunities without leaving the dashboard.</p>
   </div>
 
   <app-public-plots
-    [pagedPlots]="pagedPlots"
-    [loadingPlots]="loadingPlots"
+    [pagedPackages]="pagedPackages"
+    [loadingPackages]="loadingPackages"
     [total]="total"
     [pageSize]="pageSize"
     [pageIndex]="pageIndex"
     [searchText]="searchText"
-    [status]="status"
-    [soilType]="soilType"
-    [sizeType]="sizeType"
-    [getPlotCardTitle]="getPlotCardTitle"
+    [getPackageCardTitle]="getPackageCardTitle"
     [getPublicCardSubtitle]="getPublicCardSubtitle"
     [getPublicCardDescription]="getPublicCardDescription"
-    [getPlotThumbnailUrl]="getPlotThumbnailUrl"
-    [getPlotThumbnailAlt]="getPlotThumbnailAlt"
+    [getPackageThumbnailUrl]="getPackageThumbnailUrl"
+    [getPackageThumbnailAlt]="getPackageThumbnailAlt"
     [getPublicCardBadges]="getPublicCardBadges"
     (pageChange)="onPageChange($event)"
-    (refreshClick)="loadPlots()"
-    (primaryActionClick)="openPlotDetail($event)"
+    (refreshClick)="loadPackages()"
+    (primaryActionClick)="openPackageDetail($event)"
     (secondaryActionClick)="openPublicGallery($event)"
     (searchTextChange)="searchText = $event"
-    (statusChange)="status = $event"
-    (soilTypeChange)="soilType = $event"
-    (sizeTypeChange)="sizeType = $event"
     (filterChange)="onFilterChange()"
     (searchChange)="onFilterChange()"
     (clearFilters)="clearFilters()"
   ></app-public-plots>
 
   <app-public-drawer
-    [selectedPlot]="selectedPlot"
-    [imageUrl]="selectedPlot ? getPlotThumbnailUrl(selectedPlot) : null"
-    [imageAlt]="selectedPlot ? getPlotThumbnailAlt(selectedPlot) : ''"
-    [isOpen]="!!selectedPlot"
-    (close)="closePlotDetail()"
-    (openGallery)="selectedPlot && openPublicGallery(selectedPlot)"
+    [selectedPackage]="selectedPackage"
+    [imageUrl]="selectedPackage ? getPackageThumbnailUrl(selectedPackage) : null"
+    [imageAlt]="selectedPackage ? getPackageThumbnailAlt(selectedPackage) : ''"
+    [isOpen]="!!selectedPackage"
+    (close)="closePackageDetail()"
+    (openGallery)="selectedPackage && openPublicGallery(selectedPackage)"
     (reserve)="goToLeases()"
   ></app-public-drawer>
 

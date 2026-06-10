@@ -112,10 +112,21 @@
     </div>
   </div>
 
-  <div>
+  <div *ngIf="mode === 'create'">
+    <label class="block text-sm font-medium text-gray-700 mb-2">
+      Plot Image <span class="text-red-500">*</span>
+    </label>
+    <app-profile-picture-upload
+      #mainImageUpload
+      [deferUpload]="true"
+      [showInlineUploadButton]="false"
+      size="large"
+    ></app-profile-picture-upload>
+  </div>
+
+  <div *ngIf="mode === 'edit'">
     <app-document-upload
       [currentFileId]="profileImageUuid"
-      size="large"
       (fileUploaded)="onImageUploaded($event)"
       (fileRemoved)="onImageRemoved()"
     ></app-document-upload>

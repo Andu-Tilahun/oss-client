@@ -1,0 +1,129 @@
+<app-page-split-layout
+  [showLeftTitle]="true"
+  [showRightTitle]="true"
+  leftTitle="Investment Package"
+  rightTitle="Investment Package Detail"
+  [rightItem]="selectedInvestmentPackage"
+  [rightEmptyMessage]="'Select a row to view details.'"
+  [showRightEditButton]="false"
+  [rightActions]="rightActions"
+>
+  <ng-template #leftContent>
+    <app-data-table
+      [columns]="columns"
+      [data]="investmentPackages"
+      [loading]="loading"
+      [total]="total"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [showAddButton]="isAdmin"
+      [showRefreshButton]="true"
+      [showViewButton]="false"
+      [showEditButton]="isAdmin"
+      [showDeleteButton]="false"
+      [showActionColumn]="isAdmin"
+      [rowClickable]="true"
+      [addButtonText]="'Create Investment Package'"
+      (pageChange)="onPageChange($event)"
+      (addClick)="onAdd()"
+      (refreshClick)="onRefresh()"
+      (rowClick)="onView($event)"
+      (editClick)="onEdit($event)"
+    >
+
+      <div extraTableHeader class="w-full min-w-0">
+        <app-investment-package-filter
+          [(searchText)]="searchText"
+          [(status)]="status"
+          (filterChange)="onFilterChange()"
+          (searchChange)="onFilterChange()"
+          (clearFilters)="clearFilters()"
+        ></app-investment-package-filter>
+      </div>
+
+    </app-data-table>
+  </ng-template>
+
+  <ng-template #rightContent let-investmentPackage>
+    <app-tabs
+      [tabs]="tabs"
+      [activeTab]="activeTab"
+      (activeTabChange)="onTabChange($event)">
+      <div *ngIf="activeTab === 'detail'">
+        <app-investment-package-view
+          [investmentPackage]="investmentPackage"
+          [refreshKey]="detailRefreshKey"
+        ></app-investment-package-view>
+      </div>
+      <div *ngIf="activeTab === 'farm-plot'">
+        <app-farm-plot-view
+          *ngIf="investmentPackage"
+          [plot]="investmentPackage.farmPlot">
+        </app-farm-plot-view>
+      </div>
+      <div *ngIf="activeTab === 'extension-worker'" class="space-y-4">
+        <div *ngIf="investmentPackage?.extensionWorker" class="rounded-lg border border-gray-200 bg-white p-4">
+          <p class="text-sm font-medium text-gray-700 mb-1">Assigned to</p>
+          <p class="text-sm text-gray-900">{{ formatWorkerName(investmentPackage.extensionWorker) }}</p>
+        </div>
+
+        <div *ngIf="canAssignExtensionWorker" class="rounded-lg border border-gray-200 bg-white p-4 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Assign extension worker <span class="text-red-500">*</span>
+            </label>
+            <select
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+              [(ngModel)]="selectedExtensionWorkerId"
+              [disabled]="loadingExtensionWorkers || assigningExtensionWorker"
+            >
+              <option [ngValue]="null">Select extension worker...</option>
+              <option *ngFor="let worker of extensionWorkers" [ngValue]="worker.id">
+                {{ getExtensionWorkerDisplayName(worker) }}
+              </option>
+            </select>
+            <p *ngIf="loadingExtensionWorkers" class="text-xs text-gray-500 mt-2">Loading extension workers...</p>
+          </div>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            [disabled]="!selectedExtensionWorkerId || assigningExtensionWorker || loadingExtensionWorkers"
+            (click)="assignExtensionWorker()"
+          >
+            {{ assigningExtensionWorker ? 'Assigning...' : 'Assign' }}
+          </button>
+        </div>
+
+        <p
+          *ngIf="!investmentPackage?.extensionWorker && !canAssignExtensionWorker"
+          class="text-sm text-gray-500"
+        >
+          No extension worker assigned.
+        </p>
+      </div>
+      <div *ngIf="activeTab === 'follow-up'">
+        <app-farm-followup-list
+          [followUps]="investmentPackage?.followUpDtoList ?? []"
+          [externalId]="investmentPackage?.id ?? ''"
+        ></app-farm-followup-list>
+      </div>
+    </app-tabs>
+  </ng-template>
+</app-page-split-layout>
+
+<app-investment-package-create-modal
+  [(visible)]="showCreateInvestmentPackageModal"
+  (investmentPackageCreated)="onInvestmentPackageCreated()"
+></app-investment-package-create-modal>
+
+<app-investment-package-edit-modal
+  [(visible)]="showEditInvestmentPackageModal"
+  [investmentPackage]="selectedInvestmentPackage"
+  (investmentPackageUpdated)="onInvestmentPackageUpdated()"
+></app-investment-package-edit-modal>
+
+<app-investment-package-create-investment-modal
+  [(visible)]="showCreateInvestmentModal"
+  [investmentPackage]="selectedInvestmentPackage"
+  (investmentCreated)="onInvestmentCreated()"
+></app-investment-package-create-investment-modal>

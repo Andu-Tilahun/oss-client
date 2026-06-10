@@ -3,8 +3,8 @@ import {CommonModule} from '@angular/common';
 import {RouterModule} from '@angular/router';
 import {forkJoin, of} from 'rxjs';
 import {catchError} from 'rxjs/operators';
-import {CrowdFundingService} from '../crowd-funding/services/crowd-funding.service';
-import {CrowdFunding, InvestmentRecord} from '../crowd-funding/models/crowd-funding.model';
+import {InvestmentPackageService} from '../investment-package/services/investment-package.service';
+import {InvestmentPackage, InvestmentRecord} from '../investment-package/models/investment-package.model';
 import {FarmLeaseService} from '../farm-leases/services/farm-lease.service';
 import {LeaseAgreement} from '../farm-leases/models/farm-lease.model';
 import {PageResponse} from '../../shared/models/api-response.model';
@@ -42,7 +42,7 @@ export class InvestorHomeComponent implements OnInit {
   greeting = '';
 
   recentLeases: LeaseAgreement[] = [];
-  campaigns: CrowdFunding[] = [];
+  campaigns: InvestmentPackage[] = [];
 
   /** Sum of lease contract value for “in play” statuses (excludes terminated). */
   totalLeaseCommitted = 0;
@@ -74,7 +74,7 @@ export class InvestorHomeComponent implements OnInit {
     },
     {
       date: 'May 2026',
-      title: 'Crowdfunding campaigns',
+      title: 'Investment Package campaigns',
       body: 'Review open campaigns and your investments from the Farm menu whenever you are ready to deploy capital.',
     },
     {
@@ -85,7 +85,7 @@ export class InvestorHomeComponent implements OnInit {
   ];
 
   constructor(
-    private crowdFundingService: CrowdFundingService,
+    private investmentPackageService: InvestmentPackageService,
     private farmLeaseService: FarmLeaseService
   ) {}
 
@@ -94,7 +94,8 @@ export class InvestorHomeComponent implements OnInit {
     this.loadDashboard();
   }
 
-  campaignUrgencyPct(c: CrowdFunding): number {
+  campaignUrgencyPct(c: InvestmentPackage): number {
+    if (!c.fundingDeadline) return 40;
     const end = new Date(c.fundingDeadline).getTime();
     const now = Date.now();
     if (!Number.isFinite(end)) return 40;
@@ -161,15 +162,15 @@ export class InvestorHomeComponent implements OnInit {
   private loadDashboard(): void {
     this.loading = true;
     forkJoin({
-      campaigns: this.crowdFundingService
-        .filterCrowdFunding({
+      campaigns: this.investmentPackageService
+        .filterInvestmentPackages({
           statuses: ['OPEN'],
           sortBy: 'fundingDeadline',
           sortDirection: 'ASC',
           page: 0,
           size: 12,
         })
-        .pipe(catchError(() => of(this.emptyPage<CrowdFunding>()))),
+        .pipe(catchError(() => of(this.emptyPage<InvestmentPackage>()))),
       leases: this.farmLeaseService
         .filterLeases({
           sortBy: 'startDate',
@@ -178,7 +179,7 @@ export class InvestorHomeComponent implements OnInit {
           size: 120,
         })
         .pipe(catchError(() => of(this.emptyPage<LeaseAgreement>()))),
-      investments: this.crowdFundingService
+      investments: this.investmentPackageService
         .filterInvestments({
           sortBy: 'startDate',
           sortDirection: 'DESC',

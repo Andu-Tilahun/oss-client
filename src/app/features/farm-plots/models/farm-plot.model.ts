@@ -18,10 +18,10 @@ export interface FarmPlot {
   description?: string;
   size: number;
   sizeType: FarmPlotSizeType;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
   soilType: FarmPlotSoilType;
-  status: FarmPlotStatus;
+  status?: FarmPlotStatus;
   imageUuid?: string;
   gallery?: FarmGallery[];
 

@@ -4,6 +4,8 @@ export interface DataTableColumn<T> {
   header: string;
   columnType?: ColumnType;
   value?: (item: T) => any;
+  /** Alt text for IMAGE column type. */
+  imageAlt?: (item: T) => string;
   columnAction?: (item: T) => void;
   defaultValue?: any;
   disabled?: boolean;

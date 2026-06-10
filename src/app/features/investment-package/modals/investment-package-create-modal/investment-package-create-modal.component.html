@@ -1,0 +1,20 @@
+<app-modal
+  [(visible)]="visible"
+  title="Create Investment Package"
+  size="lg"
+  [confirmText]="'Create Investment Package'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-investment-package-form
+      [farmPlots]="farmPlots"
+      #investmentPackageForm mode="create">
+    </app-investment-package-form>
+  </ng-template>
+</app-modal>
+
+
+

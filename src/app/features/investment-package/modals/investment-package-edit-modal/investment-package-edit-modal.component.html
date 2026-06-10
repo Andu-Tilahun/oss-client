@@ -1,0 +1,20 @@
+<app-modal
+  [(visible)]="visible"
+  title="Edit Crowd Funding"
+  size="lg"
+  [confirmText]="'Update Investment Package'"
+  [confirmLoading]="isLoading"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-investment-package-form
+      #investmentPackageForm
+      mode="edit"
+      [investmentPackage]="investmentPackage"
+      [farmPlots]="farmPlots"
+    ></app-investment-package-form>
+  </ng-template>
+</app-modal>
+

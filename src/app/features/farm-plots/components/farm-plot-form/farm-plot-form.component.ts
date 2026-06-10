@@ -1,4 +1,4 @@
-import {Component, forwardRef, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {Component, forwardRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {
   ControlValueAccessor,
@@ -8,8 +8,8 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import {forkJoin} from 'rxjs';
-import {filter, take} from 'rxjs/operators';
+import {forkJoin, Observable, of} from 'rxjs';
+import {filter, map, take} from 'rxjs/operators';
 import {ProfilePictureUploadComponent} from '../../../../shared/file-upload/profile-picture-upload/profile-picture-upload.component';
 import {FarmPlot, FarmPlotRequest, FarmPlotSizeType, FarmPlotSoilType, FarmPlotStatus} from '../../models/farm-plot.model';
 import {DocumentUploadComponent} from '../../../../shared/file-upload/document-upload/document-upload.component';
@@ -40,6 +40,8 @@ const MAX_GALLERY_FILE_SIZE = 10 * 1024 * 1024;
 export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnChanges {
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() farmPlot: FarmPlot | null = null;
+
+  @ViewChild('mainImageUpload') mainImageUpload?: ProfilePictureUploadComponent;
 
   farmPlotForm: FormGroup;
 
@@ -169,6 +171,26 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
     this.farmPlotForm.reset({status: 'ACTIVE'});
     this.profileImageUuid = undefined;
     this.galleryImages = [];
+    if (this.mainImageUpload?.hasPendingUpload()) {
+      this.mainImageUpload.removeImage();
+    }
+  }
+
+  hasPendingMainImage(): boolean {
+    return this.mode === 'create' && !!this.mainImageUpload?.hasPendingUpload();
+  }
+
+  uploadPendingMainImage(): Observable<string | undefined> {
+    const pending = this.mainImageUpload?.pendingFile;
+    if (!pending) {
+      return of(undefined);
+    }
+
+    return this.fileUploadService.uploadFile(pending).pipe(
+      filter((progress) => !!progress.file),
+      take(1),
+      map((progress) => progress.file!.id),
+    );
   }
 
   onImageUploaded(fileId: string): void {

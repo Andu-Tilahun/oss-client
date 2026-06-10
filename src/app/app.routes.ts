@@ -264,9 +264,9 @@ export const routes: Routes = [
     data: { roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
   },
   {
-    path: 'crowd-funding',
+    path: 'investment-package',
     loadChildren: () =>
-      import('./features/crowd-funding/crowd-funding.module').then((m) => m.CrowdFundingModule),
+      import('./features/investment-package/investment-package.module').then((m) => m.InvestmentPackageModule),
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
   },

@@ -6,6 +6,7 @@ import {FarmPlotRequest} from '../../models/farm-plot.model';
 import {FarmPlotService} from '../../services/farm-plot.service';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {forkJoin, of} from 'rxjs';
+import {switchMap} from 'rxjs/operators';
 
 @Component({
   selector: 'app-farm-plot-create-modal',
@@ -33,10 +34,22 @@ export class FarmPlotCreateModalComponent {
       return;
     }
 
-    this.isLoading = true;
-    const request: FarmPlotRequest = this.farmPlotForm.getValue();
+    if (!this.farmPlotForm.hasPendingMainImage()) {
+      this.toastService.error('Please select a plot image', 'Create Farm Plot');
+      return;
+    }
 
-    this.farmPlotService.createFarmPlot(request).subscribe({
+    this.isLoading = true;
+
+    this.farmPlotForm.uploadPendingMainImage().pipe(
+      switchMap((imageUuid) => {
+        const request: FarmPlotRequest = {
+          ...this.farmPlotForm.getValue(),
+          imageUuid: imageUuid ?? '',
+        };
+        return this.farmPlotService.createFarmPlot(request);
+      }),
+    ).subscribe({
       next: (createdPlot) => {
         const galleryImageUuids = this.farmPlotForm.getGalleryImageUuids();
         const createGalleryCalls = galleryImageUuids.map((imageUuid) =>

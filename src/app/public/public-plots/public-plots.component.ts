@@ -1,43 +1,39 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FarmPlotFilterComponent } from '../../features/farm-plots/pages/farm-plot-filter/farm-plot-filter.component';
 import { SharedModule } from '../../shared/shared.module';
-import { FarmPlot, FarmPlotSizeType, FarmPlotSoilType, FarmPlotStatus } from '../../features/farm-plots/models/farm-plot.model';
 import { TableQueryParams } from '../../shared/data-table/models/table-query-params.model';
+import { InvestmentPackage, FundingStatus } from '../../features/investment-package/models/investment-package.model';
+import { InvestmentPackageFilterComponent } from '../../features/investment-package/pages/investment-package-filter/investment-package-filter.component';
 
 @Component({
   selector: 'app-public-plots',
   standalone: true,
-  imports: [CommonModule, FarmPlotFilterComponent, SharedModule],
+  imports: [CommonModule, InvestmentPackageFilterComponent, SharedModule],
   templateUrl: './public-plots.component.html',
   styleUrl: './public-plots.component.css',
 })
 export class PublicPlotsComponent {
-  @Input() pagedPlots: FarmPlot[] = [];
-  @Input() loadingPlots = false;
+  @Input() pagedPackages: InvestmentPackage[] = [];
+  @Input() loadingPackages = false;
   @Input() total = 0;
   @Input() pageSize = 10;
   @Input() pageIndex = 1;
   @Input() searchText = '';
-  @Input() status: FarmPlotStatus | '' = '';
-  @Input() soilType: FarmPlotSoilType | '' = '';
-  @Input() sizeType: FarmPlotSizeType | '' = '';
+  @Input() status: FundingStatus | '' = '';
 
-  @Input() getPlotCardTitle: (plot: FarmPlot) => string = (plot) => plot.title;
-  @Input() getPublicCardSubtitle: (plot: FarmPlot) => string = () => '';
-  @Input() getPublicCardDescription: (plot: FarmPlot) => string = () => '';
-  @Input() getPlotThumbnailUrl: (plot: FarmPlot) => string | null = () => null;
-  @Input() getPlotThumbnailAlt: (plot: FarmPlot) => string = () => '';
-  @Input() getPublicCardBadges: (plot: FarmPlot) => string[] = () => [];
+  @Input() getPackageCardTitle: (pkg: InvestmentPackage) => string = (pkg) => pkg.title;
+  @Input() getPublicCardSubtitle: (pkg: InvestmentPackage) => string = () => '';
+  @Input() getPublicCardDescription: (pkg: InvestmentPackage) => string = () => '';
+  @Input() getPackageThumbnailUrl: (pkg: InvestmentPackage) => string | null = () => null;
+  @Input() getPackageThumbnailAlt: (pkg: InvestmentPackage) => string = () => '';
+  @Input() getPublicCardBadges: (pkg: InvestmentPackage) => string[] = () => [];
 
   @Output() pageChange = new EventEmitter<TableQueryParams>();
   @Output() refreshClick = new EventEmitter<void>();
-  @Output() primaryActionClick = new EventEmitter<FarmPlot>();
-  @Output() secondaryActionClick = new EventEmitter<FarmPlot>();
+  @Output() primaryActionClick = new EventEmitter<InvestmentPackage>();
+  @Output() secondaryActionClick = new EventEmitter<InvestmentPackage>();
   @Output() searchTextChange = new EventEmitter<string>();
-  @Output() statusChange = new EventEmitter<FarmPlotStatus | ''>();
-  @Output() soilTypeChange = new EventEmitter<FarmPlotSoilType | ''>();
-  @Output() sizeTypeChange = new EventEmitter<FarmPlotSizeType | ''>();
+  @Output() statusChange = new EventEmitter<FundingStatus | ''>();
   @Output() filterChange = new EventEmitter<void>();
   @Output() searchChange = new EventEmitter<void>();
   @Output() clearFilters = new EventEmitter<void>();

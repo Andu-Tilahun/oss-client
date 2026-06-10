@@ -49,6 +49,15 @@ export class FarmPlotService {
     );
   }
 
+  getPublicFarmPlotGalleryByPlotId(id: string): Observable<FarmGallery[]> {
+    return this.httpService.get<FarmGallery[]>(
+      `${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/gallery`,
+      undefined,
+      undefined,
+      {requestType: RequestType.LOCAL, skipAuthRedirect: true},
+    );
+  }
+
   addFarmPlotGalleryImage(id: string, request: FarmGalleryCreateRequest): Observable<FarmGallery> {
     return this.httpService.post<FarmGallery>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/gallery`, request);
   }

@@ -110,22 +110,35 @@ export const MENU: MenuItem[] = [
     route: '/farm-plots',
     roles: ['ADMIN', 'OPERATOR', 'INVESTOR','EXTENSION_WORKER'],
     children: [
-      { icon: '', label: 'Company', route: '/farm-company', roles: ['ADMIN'] },
-      { icon: '', label: 'Farm Plots', route: '/farm-plots-extension', roles: ['EXTENSION_WORKER'] },
-      { icon: '', label: 'Leases', route: '/farm-leases', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
-      { icon: '', label: 'Restoration & Follow-ups', route: '/farm-followups', roles: ['EXTENSION_WORKER', 'ADMIN'] },
-      {icon: '', label: 'Investments', route: '/crowd-funding/investments', roles: ['INVESTOR', 'ADMIN']},
+      
       {
         icon: '',
-        label: 'Crowdfunding',
-        route: '/crowd-funding',
+        label: 'Investment Packages',
+        route: '/investment-package',
         roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'],
         children: [
-          {icon: '', label: 'Campaigns', route: '/crowd-funding', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER']},
-          {icon: '', label: 'Investments', route: '/crowd-funding/investments', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER']},
+          {icon: '', label: 'Campaigns', route: '/investment-package', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER']},
+          {icon: '', label: 'Investments', route: '/investment-package/investments', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER']},
         ],
         expanded: false,
       },
+      { icon: '', label: 'Farm Plots', route: '/farm-plots-extension', roles: ['EXTENSION_WORKER'] },
+      { icon: '', label: 'Leases', route: '/farm-leases', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
+      { icon: '', label: 'Restoration & Follow-ups', route: '/farm-followups', roles: ['EXTENSION_WORKER', 'ADMIN'] },
+      {icon: '', label: 'Investments', route: '/investment-package/investments', roles: ['INVESTOR', 'ADMIN']},
+    ],
+    expanded: false
+  },
+  {
+    icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
+    label: 'CMS',
+    route: '/farm-company',
+    roles: ['ADMIN'],
+    children: [
+      { icon: '', label: 'Company', route: '/', roles: ['ADMIN'] },
+      { icon: '', label: 'News & Events', route: '/', roles: ['ADMIN'] },
+      { icon: '', label: 'Gallery', route: '/', roles: ['ADMIN'] },
+      { icon: '', label: 'About Us', route: '/', roles: ['ADMIN'] },
     ],
     expanded: false
   }

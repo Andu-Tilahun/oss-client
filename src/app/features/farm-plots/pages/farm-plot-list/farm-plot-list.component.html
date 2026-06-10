@@ -8,58 +8,43 @@
   (rightEdit)="onEdit($event)"
   (rightClose)="onCloseDetail()"
   [showRightEditButton]="checkIfPlotIsNotAssigned"
-
 >
-  <ng-template #extraTableHeader>
-    <div class="w-full" extraHeader>
-      <app-farm-plot-filter
-        [(searchText)]="searchText"
-        [(status)]="status"
-        [(soilType)]="soilType"
-        [(sizeType)]="sizeType"
-        (filterChange)="onFilterChange()"
-        (searchChange)="onFilterChange()"
-        (clearFilters)="clearFilters()"
-      ></app-farm-plot-filter>
-    </div>
-  </ng-template>
-
   <ng-template #leftContent>
-    <app-data-card-layout
+    <app-data-table
+      [columns]="columns"
       [data]="plots"
       [loading]="loading"
       [total]="total"
       [pageSize]="pageSize"
       [pageIndex]="pageIndex"
+      [showIndex]="true"
       [showAddButton]="true"
       [showRefreshButton]="true"
-      [showDownloadButton]="true"
+      [showExportButton]="true"
       [showViewButton]="false"
       [showEditButton]="checkIfPlotIsNotAssigned"
       [showDeleteButton]="checkIfPlotIsNotAssigned"
-      [cardClickEnabled]="true"
-      [titleAccessor]="getPlotCardTitle"
-      [createdDateAccessor]="getPlotCreatedDate"
-      [thumbnailUrlAccessor]="getPlotThumbnailUrl"
-      [thumbnailAltAccessor]="getPlotThumbnailAlt"
+      [rowClickable]="true"
       (pageChange)="onPageChange($event)"
       (addClick)="onAdd()"
       (refreshClick)="onRefresh()"
-      (downloadClick)="onDownload()"
-      (cardClick)="onView($event)"
+      (exportClick)="onDownload()"
+      (rowClick)="onView($event)"
       (editClick)="onEdit($event)"
       (deleteClick)="onDelete($event)"
     >
-      <ng-container *ngTemplateOutlet="extraTableHeader"></ng-container>
-
-      <ng-template cardFooterTemplate let-plot>
-        <div class="flex items-center gap-4 text-sm">
-          <button type="button" class="action-link action-link--edit" *ngIf="checkIfPlotIsNotAssigned" (click)="onEdit(plot)">Edit</button>
-          <button type="button" class="action-link action-link--delete" *ngIf="checkIfPlotIsNotAssigned" (click)="onDelete(plot)">Delete</button>
-          <button type="button" class="action-link action-link--view" (click)="onOpenGallery(plot)">Gallery</button>
-        </div>
-      </ng-template>
-    </app-data-card-layout>
+      <div extraTableHeader class="w-full min-w-0">
+        <app-farm-plot-filter
+          [(searchText)]="searchText"
+          [(status)]="status"
+          [(soilType)]="soilType"
+          [(sizeType)]="sizeType"
+          (filterChange)="onFilterChange()"
+          (searchChange)="onFilterChange()"
+          (clearFilters)="clearFilters()"
+        ></app-farm-plot-filter>
+      </div>
+    </app-data-table>
   </ng-template>
 
   <ng-template #rightContent let-plot>
@@ -96,6 +81,3 @@
   [imageUrls]="galleryImageUrls"
   (visibleChange)="onGalleryVisibilityChange($event)"
 ></app-image-gallery-modal>
-
-
-
