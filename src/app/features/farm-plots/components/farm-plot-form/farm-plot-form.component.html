@@ -122,35 +122,50 @@
   </div>
 
   <div class="space-y-3">
+    <input
+      #galleryFileInput
+      type="file"
+      accept="image/*"
+      class="hidden"
+      (change)="onGalleryFileSelected($event)"
+    />
+
     <div class="flex items-center justify-between">
       <label class="block text-sm font-medium text-gray-700">Gallery Images</label>
       <button
         type="button"
-        class="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-700"
-        (click)="addGallerySlot()"
+        class="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
+        [disabled]="galleryUploading"
+        (click)="triggerGalleryFileInput(galleryFileInput)"
       >
-        Add Image
+        {{ galleryUploading ? 'Uploading...' : 'Add Image' }}
       </button>
     </div>
 
-    <div *ngFor="let galleryImageId of galleryImageUuids; let i = index" class="rounded-lg border border-gray-200 p-3">
-      <div class="mb-2 flex items-center justify-between">
-        <span class="text-xs text-gray-600">Gallery Image {{ i + 1 }}</span>
-        <button
-          type="button"
-          class="text-xs font-semibold text-rose-600 hover:text-rose-700"
-          (click)="removeGallerySlot(i)"
-        >
-          Remove Slot
-        </button>
+    <p *ngIf="galleryImages.length === 0" class="text-xs text-gray-500">No gallery images yet.</p>
+
+    <div *ngIf="galleryImages.length > 0" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div
+        *ngFor="let image of galleryImages; let i = index"
+        class="min-w-0 rounded-lg border border-gray-200 p-2"
+      >
+        <div class="mb-2 flex items-center justify-between gap-1">
+          <span class="text-xs text-gray-600 truncate">Image {{ i + 1 }}</span>
+          <button
+            type="button"
+            class="shrink-0 text-xs font-semibold text-rose-600 hover:text-rose-700"
+            (click)="removeGallerySlot(i)"
+          >
+            Remove
+          </button>
+        </div>
+        <img
+          [src]="image.previewUrl"
+          [alt]="'Gallery image ' + (i + 1)"
+          class="w-full h-24 object-cover rounded-lg border border-gray-200 cursor-pointer"
+          (click)="openGalleryPreview(image.previewUrl)"
+        />
       </div>
-      <app-document-upload
-        [label]="'Image ' + (i + 1)"
-        [required]="false"
-        [currentFileId]="galleryImageId"
-        (fileUploaded)="onGalleryImageUploaded(i, $event)"
-        (fileRemoved)="onGalleryImageRemoved(i)"
-      ></app-document-upload>
     </div>
   </div>
 </form>

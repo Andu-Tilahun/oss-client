@@ -1,4 +1,4 @@
-import {Component, forwardRef, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {Component, forwardRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {
   ControlValueAccessor,
@@ -34,9 +34,10 @@ import {AuthService} from "../../../auth/services/auth.service";
 export class UserFormComponent implements OnInit, OnChanges, ControlValueAccessor {
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() user: User | null = null;
-  profileImageUuid?: string;
+  @ViewChild(ProfilePictureUploadComponent) profilePictureUpload?: ProfilePictureUploadComponent;
   userForm: FormGroup;
   @Input() profileUpdate = false;
+  @Input() profileImageInline = true;
   roles: Role[] = [];
   employees: Employee[] = [];
 
@@ -182,19 +183,34 @@ export class UserFormComponent implements OnInit, OnChanges, ControlValueAccesso
     return this.isEmployee;
   }
 
+  setProfileImageUuid(fileId: string): void {
+    this.onProfilePictureUploaded(fileId);
+  }
+
   onProfilePictureUploaded(fileId: string) {
+    this.userForm.patchValue({profileImageUuid: fileId});
     if (this.user) {
       this.user.profileImageUuid = fileId;
-      this.patchFormValues(this.user);
     }
-
   }
 
   onProfilePictureRemoved() {
+    this.userForm.patchValue({profileImageUuid: ''});
     if (this.user) {
       this.user.profileImageUuid = undefined;
-      this.patchFormValues(this.user);
     }
+  }
+
+  hasPendingProfileUpload(): boolean {
+    return this.profilePictureUpload?.hasPendingUpload() ?? false;
+  }
+
+  get pendingProfilePreviewUrl(): string | undefined {
+    return this.profilePictureUpload?.pendingPreviewUrl;
+  }
+
+  get profileImageFileId(): string | undefined {
+    return this.userForm.get('profileImageUuid')?.value || this.user?.profileImageUuid || undefined;
   }
 
   private loadRoles(): void {

@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { NotificationLogService } from '../../services/notification.service';
-import { NotificationLog } from '../../models/notification.model';
+import {
+  NotificationLog,
+  NotificationPriorityValue,
+  NotificationStatusValue,
+} from '../../models/notification.model';
 import { DataTableColumn } from '../../../../shared/data-table/models/data-table-column.model';
 import { TableQueryParams } from '../../../../shared/data-table/models/table-query-params.model';
 import { PageResponse } from '../../../../shared/models/api-response.model';
@@ -19,8 +23,8 @@ export class NotificationListComponent implements OnInit {
   pageSize = 10;
   pageIndex = 1;
   searchText = '';
-  status = '';
-  priority = '';
+  status: NotificationStatusValue | '' = '';
+  priority: NotificationPriorityValue | '' = '';
 
   columns: DataTableColumn<NotificationLog>[] = [
     { header: 'Type', value: n => n.notificationType },

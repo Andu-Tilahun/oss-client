@@ -39,6 +39,11 @@ export class UserProfileModalComponent {
       return;
     }
 
+    if (this.userForm.hasPendingProfileUpload()) {
+      this.toastService.error('Click Upload to save your profile photo first', 'Profile Photo');
+      return;
+    }
+
     this.isLoading = true;
     const formValue = this.userForm.getValue();
 

@@ -45,12 +45,12 @@
       [showPagination]="false"
       [showAddButton]="false"
       [showRefreshButton]="false"
-      [showViewButton]="true"
+      [showViewButton]="false"
       [showEditButton]="false"
       [showDeleteButton]="false"
-      (viewClick)="openViewModal($event)"
-      (rowClick)="onView($event)"
+      [showActionColumn]="false"
       [rowClickable]="true"
+      (rowClick)="onView($event)"
     ></app-data-table>
   </ng-template>
 

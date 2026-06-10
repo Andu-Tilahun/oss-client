@@ -61,33 +61,41 @@ export class UserListComponent implements OnInit {
   columns: DataTableColumn<User>[] = [
     {
       header: 'Username',
-      value: (user) => user.username
+      value: (user) => user.username,
+      defaultVisible: false,
     },
     {
       header: 'Full Name',
-      value: (user) => `${user.firstName} ${user.lastName}`
+      value: (user) => `${user.firstName} ${user.lastName}`,
+      defaultVisible: true,
     },
     {
       header: 'Email',
-      value: (user) => user.email
+      value: (user) => user.email,
+      defaultVisible: true,
+      hiddenBelowPx: 920,
     },
     {
       header: 'Gender',
-      value: (user) => user.gender
+      value: (user) => user.gender,
+      defaultVisible: false,
     },
     {
       header: 'Role',
-      value: (user) => user.role
+      value: (user) => user.role,
+      defaultVisible: true,
     },
     {
       header: 'Status',
-      value: (user) => user.accountNonLocked ? 'ACTIVE' : 'LOCKED'
+      value: (user) => user.accountNonLocked ? 'ACTIVE' : 'LOCKED',
+      defaultVisible: false,
     },
     {
       header: 'Lock/Unlock',
       columnType: ColumnType.LINK,
       value: (user) => user.accountNonLocked ? 'Lock' : 'Unlock',
-      columnAction: (user) => this.onToggleLock(user)
+      columnAction: (user) => this.onToggleLock(user),
+      defaultVisible: false,
     }
   ];
 

@@ -6,11 +6,20 @@ import {AuthService} from '../../../auth/services/auth.service';
 import {UserService} from '../../services/user.service';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {UpdateUserRequest, User} from '../../models/user.model';
+import {ProfileImageUploadModalComponent} from '../../../../shared/modals/profile-image-upload-modal/profile-image-upload-modal.component';
+import {ProfilePictureUploadComponent} from '../../../../shared/file-upload/profile-picture-upload/profile-picture-upload.component';
+import {environment} from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-profile-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, UserFormComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    UserFormComponent,
+    ProfileImageUploadModalComponent,
+    ProfilePictureUploadComponent,
+  ],
   templateUrl: './profile-page.component.html',
 })
 export class ProfilePageComponent implements OnInit {
@@ -18,6 +27,8 @@ export class ProfilePageComponent implements OnInit {
 
   currentUser: User | null = null;
   isSaving = false;
+  profileImageModalOpen = false;
+  readonly profileImageUploadUrl = `${environment.apiUrl}/files`;
 
   constructor(
     private authService: AuthService,
@@ -30,6 +41,22 @@ export class ProfilePageComponent implements OnInit {
     this.authService.currentUser$.subscribe((user) => {
       this.currentUser = user;
     });
+  }
+
+  openProfileImageModal(): void {
+    this.profileImageModalOpen = true;
+  }
+
+  onProfileImageUploaded(fileId: string): void {
+    this.userForm?.setProfileImageUuid(fileId);
+    if (this.currentUser) {
+      this.currentUser = {...this.currentUser, profileImageUuid: fileId};
+    }
+    this.toastService.success('Profile photo uploaded. Click Save Changes to update your profile.');
+  }
+
+  onProfileImageUploadError(message: string): void {
+    this.toastService.error(message, 'Profile Photo');
   }
 
   saveProfile(): void {

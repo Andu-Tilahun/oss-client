@@ -27,10 +27,11 @@ export class FileUploadService {
   constructor(private http: HttpClient) {
   }
 
-  uploadFile(file: File): Observable<UploadProgress> {
+  uploadFile(file: File, uploadUrl?: string): Observable<UploadProgress> {
+    const url = uploadUrl ?? this.STORAGE_API_URL;
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<FileMetadata>(this.STORAGE_API_URL, formData, {
+    return this.http.post<FileMetadata>(url, formData, {
       reportProgress: true,
       observe: 'events'
     }).pipe(

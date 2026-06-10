@@ -1,8 +1,10 @@
 import {Component, OnInit, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterModule} from '@angular/router';
+import {switchMap} from 'rxjs/operators';
 import {NotificationLogService} from '../../services/notification.service';
 import {NotificationLog} from '../../models/notification.model';
+import {AuthService} from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-notifications-inbox-page',
@@ -12,6 +14,7 @@ import {NotificationLog} from '../../models/notification.model';
 })
 export class NotificationsInboxPageComponent implements OnInit {
   private readonly notificationService = inject(NotificationLogService);
+  private readonly authService = inject(AuthService);
 
   notifications: NotificationLog[] = [];
   loading = false;
@@ -29,7 +32,9 @@ export class NotificationsInboxPageComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.loadError = null;
-    this.notificationService.getNotifications(this.pageIndex, this.pageSize).subscribe({
+    this.authService.ensureValidSession().pipe(
+      switchMap(() => this.notificationService.getInboxNotifications(this.pageIndex, this.pageSize)),
+    ).subscribe({
       next: (res) => {
         this.notifications = res.content ?? [];
         this.totalElements = res.totalElements ?? 0;

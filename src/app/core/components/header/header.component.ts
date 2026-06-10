@@ -1,5 +1,6 @@
 import {
   Component,
+  DestroyRef,
   ElementRef,
   EventEmitter,
   HostListener,
@@ -8,11 +9,14 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {CommonModule} from '@angular/common';
 import {Router, RouterModule} from '@angular/router';
-import {take} from 'rxjs/operators';
+import {filter, switchMap, take} from 'rxjs/operators';
 import {NotificationLogService} from '../../../features/notifications/services/notification.service';
 import {NotificationLog} from '../../../features/notifications/models/notification.model';
+import {AuthService} from '../../../features/auth/services/auth.service';
+import {RequestType} from '../../services/http.service';
 
 @Component({
   selector: 'app-header',
@@ -23,8 +27,15 @@ import {NotificationLog} from '../../../features/notifications/models/notificati
 })
 export class HeaderComponent implements OnInit {
   private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly notificationService = inject(NotificationLogService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+
+  private readonly notificationPreviewOptions = {
+    requestType: RequestType.NON_BLOCKING,
+    skipAuthRedirect: true,
+  };
 
   /** When true, the mobile navigation drawer is open (for aria-expanded). */
   @Input() mobileNavOpen = false;
@@ -39,7 +50,23 @@ export class HeaderComponent implements OnInit {
   badgeTotal: number | null = null;
 
   ngOnInit(): void {
-    this.refreshBadgeCount();
+    this.authService.currentUser$
+      .pipe(
+        filter((user) => !!user),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        this.refreshBadgeCount();
+      });
+
+    this.authService.currentUser$
+      .pipe(
+        filter((user) => !user),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        this.clearNotificationState();
+      });
   }
 
   toggleMobileNav(): void {
@@ -49,13 +76,25 @@ export class HeaderComponent implements OnInit {
   toggleNotificationPanel(event: MouseEvent): void {
     event.stopPropagation();
     this.showNotificationPanel = !this.showNotificationPanel;
-    if (this.showNotificationPanel) {
+    if (this.showNotificationPanel && this.authService.isAuthenticated()) {
       this.loadPreview();
     }
   }
 
+  private clearNotificationState(): void {
+    this.badgeTotal = null;
+    this.previewItems = [];
+    this.previewTotal = 0;
+    this.previewError = null;
+    this.previewLoading = false;
+    this.showNotificationPanel = false;
+  }
+
   private refreshBadgeCount(): void {
-    this.notificationService.getNotifications(0, 1).pipe(take(1)).subscribe({
+    this.authService.ensureValidSession().pipe(
+      switchMap(() => this.notificationService.getInboxNotifications(0, 1, this.notificationPreviewOptions)),
+      take(1),
+    ).subscribe({
       next: (res) => {
         this.badgeTotal = res.totalElements ?? 0;
       },
@@ -68,7 +107,10 @@ export class HeaderComponent implements OnInit {
   private loadPreview(): void {
     this.previewLoading = true;
     this.previewError = null;
-    this.notificationService.getNotifications(0, 5).pipe(take(1)).subscribe({
+    this.authService.ensureValidSession().pipe(
+      switchMap(() => this.notificationService.getInboxNotifications(0, 5, this.notificationPreviewOptions)),
+      take(1),
+    ).subscribe({
       next: (res) => {
         this.previewItems = res.content ?? [];
         this.previewTotal = res.totalElements ?? 0;

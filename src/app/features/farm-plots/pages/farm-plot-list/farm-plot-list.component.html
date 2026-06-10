@@ -34,9 +34,10 @@
       [showAddButton]="true"
       [showRefreshButton]="true"
       [showDownloadButton]="true"
-      [showViewButton]="true"
+      [showViewButton]="false"
       [showEditButton]="checkIfPlotIsNotAssigned"
       [showDeleteButton]="checkIfPlotIsNotAssigned"
+      [cardClickEnabled]="true"
       [titleAccessor]="getPlotCardTitle"
       [createdDateAccessor]="getPlotCreatedDate"
       [thumbnailUrlAccessor]="getPlotThumbnailUrl"
@@ -45,7 +46,7 @@
       (addClick)="onAdd()"
       (refreshClick)="onRefresh()"
       (downloadClick)="onDownload()"
-      (viewClick)="onView($event)"
+      (cardClick)="onView($event)"
       (editClick)="onEdit($event)"
       (deleteClick)="onDelete($event)"
     >
@@ -53,7 +54,6 @@
 
       <ng-template cardFooterTemplate let-plot>
         <div class="flex items-center gap-4 text-sm">
-          <button type="button" class="action-link action-link--view" (click)="onView(plot)">View</button>
           <button type="button" class="action-link action-link--edit" *ngIf="checkIfPlotIsNotAssigned" (click)="onEdit(plot)">Edit</button>
           <button type="button" class="action-link action-link--delete" *ngIf="checkIfPlotIsNotAssigned" (click)="onDelete(plot)">Delete</button>
           <button type="button" class="action-link action-link--view" (click)="onOpenGallery(plot)">Gallery</button>

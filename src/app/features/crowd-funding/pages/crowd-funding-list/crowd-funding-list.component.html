@@ -19,14 +19,16 @@
       [pageIndex]="pageIndex"
       [showAddButton]="isAdmin"
       [showRefreshButton]="true"
-      [showViewButton]="true"
+      [showViewButton]="false"
       [showEditButton]="isAdmin"
       [showDeleteButton]="false"
+      [showActionColumn]="isAdmin"
+      [rowClickable]="true"
       [addButtonText]="'Create crowdFunding'"
       (pageChange)="onPageChange($event)"
       (addClick)="onAdd()"
       (refreshClick)="onRefresh()"
-      (viewClick)="onView($event)"
+      (rowClick)="onView($event)"
       (editClick)="onEdit($event)"
     >
 

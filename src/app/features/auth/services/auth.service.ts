@@ -1,6 +1,9 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, catchError, Observable, tap, throwError} from 'rxjs';
+import {HttpClient, HttpContext} from '@angular/common/http';
+import {BehaviorSubject, catchError, map, Observable, of, tap, throwError} from 'rxjs';
 import {Router} from '@angular/router';
+import {environment} from '../../../../environments/environment';
+import {SKIP_TOKEN_REFRESH} from '../../../core/interceptors/auth-refresh.interceptor';
 import {
   AuthResponse,
   ForgotPasswordRequest,
@@ -31,6 +34,7 @@ export class AuthService {
 
   constructor(
     private httpService: HttpService,
+    private http: HttpClient,
     private router: Router
   ) {
   }
@@ -61,8 +65,12 @@ export class AuthService {
       .post<AuthResponse>(`${Endpoints.AUTH_ENDPOINT}/login`, credentials)
       .pipe(
         tap((authResponse: AuthResponse) => {
-          this.setSession(authResponse);
-          this.currentUserSubject.next(authResponse.user);
+          const session = this.normalizeAuthResponse(authResponse);
+          this.clearSession();
+          this.setSession(session);
+          if (session?.user) {
+            this.currentUserSubject.next(session.user);
+          }
         }),
         catchError((error) => {
           console.error('Login error:', error);
@@ -118,6 +126,32 @@ export class AuthService {
     );
   }
 
+  private normalizeAuthResponse(authResponse: AuthResponse | Record<string, unknown> | null | undefined): AuthResponse | null {
+    if (!authResponse) {
+      return null;
+    }
+
+    const raw = authResponse as Record<string, unknown>;
+    const token = raw['token'] ?? raw['accessToken'] ?? raw['access_token'];
+    const refreshToken = raw['refreshToken'] ?? raw['refresh_token'];
+    const user = raw['user'] as User | undefined;
+
+    if (!token && !user) {
+      return null;
+    }
+
+    return {
+      token: token ? this.normalizeToken(String(token)) : '',
+      refreshToken: refreshToken ? String(refreshToken) : '',
+      type: String(raw['type'] ?? 'Bearer'),
+      user: user as User,
+    };
+  }
+
+  private normalizeToken(token: string): string {
+    return token.replace(/^Bearer\s+/i, '').trim();
+  }
+
   private setSession(authResponse: AuthResponse | undefined | null): void {
     if (!authResponse) {
       return; // Exit early if authResponse is undefined/null
@@ -142,6 +176,13 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY);
   }
 
+  private notifySessionReady(): void {
+    const user = this.getUserFromStorage();
+    if (user) {
+      this.currentUserSubject.next(user);
+    }
+  }
+
   getUserFromStorage(): User | null {
     const userJson = localStorage.getItem(this.USER_KEY);
     return userJson ? JSON.parse(userJson) : null;
@@ -157,6 +198,84 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.getToken();
+  }
+
+  isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1])) as { exp?: number };
+      if (!payload.exp) {
+        return true;
+      }
+      return payload.exp * 1000 < Date.now();
+    } catch {
+      return true;
+    }
+  }
+
+  isSessionValid(): boolean {
+    const token = this.getToken();
+    return !!token && !this.isTokenExpired(token);
+  }
+
+  isAuthenticated(): boolean {
+    const user = this.currentUserSubject.value ?? this.getUserFromStorage();
+    if (!user) {
+      return false;
+    }
+    if (this.isSessionValid()) {
+      return true;
+    }
+    const refreshToken = this.getRefreshToken();
+    return !!refreshToken && !this.isTokenExpired(refreshToken);
+  }
+
+  ensureValidSession(): Observable<void> {
+    if (this.isSessionValid()) {
+      return of(void 0);
+    }
+
+    const refreshToken = this.getRefreshToken();
+    if (refreshToken && !this.isTokenExpired(refreshToken)) {
+      return this.refreshSession().pipe(map(() => void 0));
+    }
+
+    return throwError(() => new Error('No valid session'));
+  }
+
+  refreshSession(): Observable<AuthResponse> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      return throwError(() => new Error('No refresh token available'));
+    }
+
+    const context = new HttpContext().set(SKIP_TOKEN_REFRESH, true);
+
+    return this.http
+      .post<AuthResponse | ApiResponse<AuthResponse>>(
+        `${environment.apiUrl}${Endpoints.AUTH_ENDPOINT}/refresh`,
+        {refreshToken},
+        {context},
+      )
+      .pipe(
+        map((response) => {
+          const payload = (response as ApiResponse<AuthResponse>)?.data ?? response;
+          return this.normalizeAuthResponse(payload as AuthResponse) as AuthResponse;
+        }),
+        tap((session) => {
+          this.setSession(session);
+          if (session.user) {
+            this.currentUserSubject.next(session.user);
+          } else {
+            this.notifySessionReady();
+          }
+        }),
+        catchError((error) => throwError(() => error)),
+      );
+  }
+
+  clearSessionSilently(): void {
+    this.clearSession();
+    this.currentUserSubject.next(null);
   }
 
   getCurrentUser(): User | null {

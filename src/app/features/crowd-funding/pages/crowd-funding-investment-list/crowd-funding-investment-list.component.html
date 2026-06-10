@@ -18,12 +18,14 @@
       [pageIndex]="pageIndex"
       [showAddButton]="false"
       [showRefreshButton]="true"
-      [showViewButton]="true"
+      [showViewButton]="false"
       [showEditButton]="false"
       [showDeleteButton]="false"
+      [showActionColumn]="false"
+      [rowClickable]="true"
       (pageChange)="onPageChange($event)"
       (refreshClick)="onRefresh()"
-      (viewClick)="onView($event)"
+      (rowClick)="onView($event)"
     >
       <div extraTableHeader class="w-full min-w-0">
         <app-crowd-funding-investment-filter

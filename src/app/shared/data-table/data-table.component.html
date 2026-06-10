@@ -111,8 +111,12 @@
         <tbody class="divide-y divide-slate-100">
         <tr
           *ngFor="let item of paginatedData; let i = index; trackBy: trackByIndex"
-          class="hover:bg-slate-50/60 transition-colors duration-150"
-          [class.cursor-pointer]="rowClickable"
+          class="transition-colors duration-150 hover:bg-slate-100/70"
+          [ngClass]="{
+            'bg-slate-50/80': i % 2 === 0,
+            'bg-white': i % 2 !== 0,
+            'cursor-pointer': rowClickable
+          }"
           (click)="handleRowClick(item, $event)"
         >
           <!-- Index Column -->

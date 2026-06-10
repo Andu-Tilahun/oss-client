@@ -40,22 +40,7 @@
             [cardClickEnabled]="true"
             [noDataMessage]="'No active assigned farm plots found.'"
             (cardClick)="selectPlot($event)"
-          >
-            <ng-template cardHeaderRightTemplate let-plot>
-              <button
-                type="button"
-                class="action-link action-link--view p-1 ml-2 text-blue-600 hover:text-blue-700"
-                aria-label="View plot details"
-                title="View"
-                (click)="selectPlot(plot); $event.stopPropagation()"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7S3.732 16.057 2.458 12z"></path>
-                </svg>
-              </button>
-            </ng-template>
-          </app-data-card-layout>
+          ></app-data-card-layout>
         </div>
       </section>
 

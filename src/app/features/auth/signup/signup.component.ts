@@ -1,11 +1,14 @@
-import {Component} from '@angular/core';
+import {Component, ElementRef, QueryList, ViewChildren} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router, RouterModule} from '@angular/router';
+import {switchMap} from 'rxjs/operators';
 import {ToastService} from '../../../shared/toast/toast.service';
 import {AuthService} from '../services/auth.service';
+import {FileUploadService} from '../../../shared/file-upload/file-upload.service';
+import {uploadDefaultAvatar} from '../../../shared/file-upload/default-avatar.util';
 
-const FALLBACK_PROFILE_IMAGE_UUID = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
+const OTP_LENGTH = 6;
 
 @Component({
   selector: 'app-signup',
@@ -15,18 +18,21 @@ const FALLBACK_PROFILE_IMAGE_UUID = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
   styleUrl: './signup.component.css',
 })
 export class SignupComponent {
+  @ViewChildren('otpInput') otpInputRefs!: QueryList<ElementRef<HTMLInputElement>>;
+
   signupForm: FormGroup;
   submitted = false;
   isLoading = false;
   step: 1 | 2 = 1;
   signupEmail = '';
-  otpDigits: string[] = ['', '', '', '', '', ''];
+  otpDigits: string[] = Array(OTP_LENGTH).fill('');
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private toastService: ToastService,
-    private authService: AuthService
+    private authService: AuthService,
+    private fileUploadService: FileUploadService,
   ) {
     this.signupForm = this.fb.group({
       firstName: ['', [Validators.required]],
@@ -45,31 +51,103 @@ export class SignupComponent {
     return this.otpDigits.join('');
   }
 
+  get isOtpComplete(): boolean {
+    return this.otpDigits.every((d) => d.length === 1);
+  }
+
+  trackByIndex(index: number): number {
+    return index;
+  }
+
+  private setOtpDigits(digits: string[]): void {
+    this.otpDigits = digits.map((d) => d.replace(/\D/g, '').slice(-1));
+  }
+
+  private syncInputsToDom(): void {
+    this.otpInputRefs?.forEach((ref, i) => {
+      ref.nativeElement.value = this.otpDigits[i] ?? '';
+    });
+  }
+
+  private focusOtpInput(index: number): void {
+    const inputs = this.otpInputRefs?.toArray() ?? [];
+    const clamped = Math.max(0, Math.min(index, inputs.length - 1));
+    inputs[clamped]?.nativeElement.focus();
+  }
+
+  private applyDigitsFromIndex(digits: string[], startIndex: number): void {
+    const next = [...this.otpDigits];
+    digits.forEach((d, offset) => {
+      const target = startIndex + offset;
+      if (target < OTP_LENGTH) {
+        next[target] = d;
+      }
+    });
+    this.setOtpDigits(next);
+    this.syncInputsToDom();
+
+    const nextEmpty = next.findIndex((d) => !d);
+    this.focusOtpInput(nextEmpty === -1 ? OTP_LENGTH - 1 : nextEmpty);
+  }
+
   onOtpInput(event: Event, index: number): void {
     const input = event.target as HTMLInputElement;
-    const digit = input.value.replace(/\D/g, '');
-    this.otpDigits[index] = digit ? digit[digit.length - 1] : '';
-    input.value = this.otpDigits[index];
-    if (digit && index < 5) {
-      document.getElementById(`otp-${index + 1}`)?.focus();
+    const digits = input.value.replace(/\D/g, '');
+
+    if (!digits) {
+      const next = [...this.otpDigits];
+      next[index] = '';
+      this.setOtpDigits(next);
+      input.value = '';
+      return;
+    }
+
+    if (digits.length > 1) {
+      this.applyDigitsFromIndex(digits.split(''), index);
+      return;
+    }
+
+    const next = [...this.otpDigits];
+    next[index] = digits;
+    this.setOtpDigits(next);
+    input.value = digits;
+
+    if (index < OTP_LENGTH - 1) {
+      this.focusOtpInput(index + 1);
     }
   }
 
   onOtpKeydown(event: KeyboardEvent, index: number): void {
-    if (event.key === 'Backspace' && !this.otpDigits[index] && index > 0) {
-      this.otpDigits[index - 1] = '';
-      document.getElementById(`otp-${index - 1}`)?.focus();
+    if (event.key !== 'Backspace') {
+      return;
+    }
+
+    if (this.otpDigits[index]) {
+      return;
+    }
+
+    if (index > 0) {
+      event.preventDefault();
+      const next = [...this.otpDigits];
+      next[index - 1] = '';
+      this.setOtpDigits(next);
+      this.syncInputsToDom();
+      this.focusOtpInput(index - 1);
     }
   }
 
   onOtpPaste(event: ClipboardEvent): void {
     const digits = (event.clipboardData?.getData('text') ?? '')
       .replace(/\D/g, '')
-      .slice(0, 6)
+      .slice(0, OTP_LENGTH)
       .split('');
-    digits.forEach((d, i) => (this.otpDigits[i] = d));
-    document.getElementById(`otp-${Math.min(digits.length, 5)}`)?.focus();
+
+    if (digits.length === 0) {
+      return;
+    }
+
     event.preventDefault();
+    this.applyDigitsFromIndex(digits, 0);
   }
 
   onSubmit(): void {
@@ -79,31 +157,45 @@ export class SignupComponent {
       return;
     }
     this.isLoading = true;
-    const payload = {
-      email: this.f['email'].value,
-      firstName: this.f['firstName'].value,
-      lastName: this.f['lastName'].value,
-      middleName: this.f['middleName'].value || undefined,
-      gender: this.f['gender'].value,
-      profileImageUuid: FALLBACK_PROFILE_IMAGE_UUID,
-    };
-    this.authService.signup(payload).subscribe({
+    const gender = this.f['gender'].value;
+
+    uploadDefaultAvatar(this.fileUploadService, gender).pipe(
+      switchMap((profileImageUuid) =>
+        this.authService.signup({
+          email: this.f['email'].value,
+          firstName: this.f['firstName'].value,
+          lastName: this.f['lastName'].value,
+          middleName: this.f['middleName'].value || undefined,
+          gender,
+          profileImageUuid,
+        }),
+      ),
+    ).subscribe({
       next: () => {
         this.isLoading = false;
         this.signupEmail = this.f['email'].value;
+        this.setOtpDigits(Array(OTP_LENGTH).fill(''));
         this.step = 2;
-        setTimeout(() => document.getElementById('otp-0')?.focus(), 50);
+        setTimeout(() => {
+          this.syncInputsToDom();
+          this.focusOtpInput(0);
+        }, 50);
       },
       error: (err) => {
         this.isLoading = false;
-        const message = err?.error?.message || 'Signup failed. Please try again.';
+        const message =
+          err?.error?.message ||
+          err?.message ||
+          (err?.status === 401 || err?.status === 403
+            ? 'Failed to set profile image. Please try again.'
+            : 'Signup failed. Please try again.');
         this.toastService.error(message);
       },
     });
   }
 
   onVerify(): void {
-    if (this.otpValue.length < 6) {
+    if (!this.isOtpComplete) {
       this.toastService.error('Please enter the complete 6-digit code');
       return;
     }

@@ -8,14 +8,25 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
+import {forkJoin} from 'rxjs';
+import {filter, take} from 'rxjs/operators';
 import {ProfilePictureUploadComponent} from '../../../../shared/file-upload/profile-picture-upload/profile-picture-upload.component';
 import {FarmPlot, FarmPlotRequest, FarmPlotSizeType, FarmPlotSoilType, FarmPlotStatus} from '../../models/farm-plot.model';
-import {DocumentUploadComponent} from "../../../../shared/file-upload/document-upload/document-upload.component";
+import {DocumentUploadComponent} from '../../../../shared/file-upload/document-upload/document-upload.component';
+import {FileUploadService} from '../../../../shared/file-upload/file-upload.service';
+import {ToastService} from '../../../../shared/toast/toast.service';
+
+interface GalleryImageItem {
+  id: string;
+  previewUrl: string;
+}
+
+const MAX_GALLERY_FILE_SIZE = 10 * 1024 * 1024;
 
 @Component({
   selector: 'app-farm-plot-form',
   standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, ProfilePictureUploadComponent, DocumentUploadComponent],
+  imports: [CommonModule, ReactiveFormsModule, ProfilePictureUploadComponent, DocumentUploadComponent],
   templateUrl: './farm-plot-form.component.html',
   styleUrls: ['./farm-plot-form.component.css'],
   providers: [
@@ -37,13 +48,17 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
 
   readonly sizeTypes: Array<FarmPlotSizeType> = ['ACRES', 'HECTARES'];
   readonly soilTypes: Array<FarmPlotSoilType> = ['SANDY', 'CLAY', 'LOAMY'];
-  readonly statuses: Array<FarmPlotStatus> = ['ACTIVE', 'INACTIVE', 'UNDER_MAINTENANCE','ASSIGNED_TO_LEASE'];
+  readonly statuses: Array<FarmPlotStatus> = ['ACTIVE', 'INACTIVE', 'UNDER_MAINTENANCE', 'ASSIGNED_TO_LEASE'];
 
-  // Track image file id locally since ProfilePictureUploadComponent controls its preview
   profileImageUuid?: string;
-  galleryImageUuids: string[] = [''];
+  galleryImages: GalleryImageItem[] = [];
+  galleryUploading = false;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private fileUploadService: FileUploadService,
+    private toastService: ToastService,
+  ) {
     this.farmPlotForm = this.createForm();
   }
 
@@ -78,13 +93,32 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
 
   private patchFormValues(plot: FarmPlot): void {
     this.profileImageUuid = plot.imageUuid;
-    this.galleryImageUuids = (plot.gallery ?? [])
+    const galleryIds = (plot.gallery ?? [])
       .slice()
       .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((item) => item.imageUuid);
-    if (this.galleryImageUuids.length === 0) {
-      this.galleryImageUuids = [''];
+      .map((item) => item.imageUuid)
+      .filter((id) => !!id);
+
+    this.galleryImages = [];
+    if (galleryIds.length > 0) {
+      forkJoin(
+        galleryIds.map((id) => this.fileUploadService.getFileMetadata(id)),
+      ).subscribe({
+        next: (metadataList) => {
+          this.galleryImages = metadataList.map((metadata) => ({
+            id: metadata.id,
+            previewUrl: metadata.presignedUrl,
+          }));
+        },
+        error: () => {
+          this.galleryImages = galleryIds.map((id) => ({
+            id,
+            previewUrl: this.fileUploadService.getFileUrl(id),
+          }));
+        },
+      });
     }
+
     this.farmPlotForm.patchValue({
       title: plot.title,
       description: plot.description ?? '',
@@ -98,7 +132,6 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
     });
   }
 
-  // ControlValueAccessor
   writeValue(value: FarmPlotRequest | null): void {
     if (!value) {
       return;
@@ -135,7 +168,7 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
   reset(): void {
     this.farmPlotForm.reset({status: 'ACTIVE'});
     this.profileImageUuid = undefined;
-    this.galleryImageUuids = [''];
+    this.galleryImages = [];
   }
 
   onImageUploaded(fileId: string): void {
@@ -147,32 +180,63 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
     this.profileImageUuid = undefined;
   }
 
-  addGallerySlot(): void {
-    this.galleryImageUuids = [...this.galleryImageUuids, ''];
+  triggerGalleryFileInput(input: HTMLInputElement): void {
+    if (this.galleryUploading) {
+      return;
+    }
+    input.click();
   }
 
-  onGalleryImageUploaded(index: number, fileId: string): void {
-    const copy = [...this.galleryImageUuids];
-    copy[index] = fileId;
-    this.galleryImageUuids = copy;
-  }
+  onGalleryFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
 
-  onGalleryImageRemoved(index: number): void {
-    const copy = [...this.galleryImageUuids];
-    copy[index] = '';
-    this.galleryImageUuids = copy;
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      this.toastService.error('Please select an image file', 'Gallery');
+      return;
+    }
+
+    if (file.size > MAX_GALLERY_FILE_SIZE) {
+      this.toastService.error('File size must be less than 10MB', 'Gallery');
+      return;
+    }
+
+    this.galleryUploading = true;
+    this.fileUploadService.uploadFile(file).pipe(
+      filter((progress) => !!progress.file),
+      take(1),
+    ).subscribe({
+      next: (progress) => {
+        this.galleryUploading = false;
+        const uploaded = progress.file!;
+        this.galleryImages = [
+          ...this.galleryImages,
+          {id: uploaded.id, previewUrl: uploaded.presignedUrl},
+        ];
+      },
+      error: (err) => {
+        this.galleryUploading = false;
+        this.toastService.error(err?.message || 'Failed to upload image', 'Gallery');
+      },
+    });
   }
 
   removeGallerySlot(index: number): void {
-    if (this.galleryImageUuids.length === 1) {
-      this.galleryImageUuids = [''];
-      return;
+    this.galleryImages = this.galleryImages.filter((_, idx) => idx !== index);
+  }
+
+  openGalleryPreview(url: string): void {
+    if (url) {
+      window.open(url, '_blank');
     }
-    this.galleryImageUuids = this.galleryImageUuids.filter((_, idx) => idx !== index);
   }
 
   getGalleryImageUuids(): string[] {
-    return [...new Set(this.galleryImageUuids.filter((id) => !!id))];
+    return this.galleryImages.map((image) => image.id);
   }
 }
-

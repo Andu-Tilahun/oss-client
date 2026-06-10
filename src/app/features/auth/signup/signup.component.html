@@ -68,22 +68,22 @@
 
           <div class="otp-boxes">
             <input
-              *ngFor="let d of otpDigits; let i = index"
+              *ngFor="let d of otpDigits; let i = index; trackBy: trackByIndex"
+              #otpInput
               [id]="'otp-' + i"
               type="text"
               inputmode="numeric"
-              maxlength="1"
+              maxlength="6"
               class="otp-box"
-              [value]="otpDigits[i]"
               (input)="onOtpInput($event, i)"
               (keydown)="onOtpKeydown($event, i)"
               (paste)="onOtpPaste($event)"
               placeholder="·"
-              autocomplete="one-time-code"
+              [attr.autocomplete]="i === 0 ? 'one-time-code' : 'off'"
             />
           </div>
 
-          <button type="button" [disabled]="isLoading || otpValue.length < 6" class="submit-btn" (click)="onVerify()">
+          <button type="button" [disabled]="isLoading || !isOtpComplete" class="submit-btn" (click)="onVerify()">
             {{ isLoading ? 'Verifying...' : 'Verify Email' }}
           </button>
 

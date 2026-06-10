@@ -7,4 +7,8 @@ export interface DataTableColumn<T> {
   columnAction?: (item: T) => void;
   defaultValue?: any;
   disabled?: boolean;
+  /** When false, column hidden on initial load (default true if omitted). */
+  defaultVisible?: boolean;
+  /** Hide this column when viewport width is below this value (px). */
+  hiddenBelowPx?: number;
 }

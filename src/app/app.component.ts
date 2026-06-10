@@ -25,18 +25,41 @@ export class AppComponent implements OnInit {
   constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit() {
-    this.isAuthenticated = this.authService.isLoggedIn();
     this.currentUrl = this.router.url;
+    this.syncAuthenticatedState();
     this.updateLayoutVisibility();
+    this.restoreSessionIfNeeded();
 
-    this.authService.currentUser$.subscribe((user) => {
-      this.isAuthenticated = !!user;
+    this.authService.currentUser$.subscribe(() => {
+      this.syncAuthenticatedState();
       this.updateLayoutVisibility();
     });
 
     this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((event) => {
       this.currentUrl = (event as NavigationEnd).urlAfterRedirects;
       this.updateLayoutVisibility();
+    });
+  }
+
+  private syncAuthenticatedState(): void {
+    this.isAuthenticated = this.authService.isAuthenticated();
+  }
+
+  private restoreSessionIfNeeded(): void {
+    if (this.authService.isSessionValid() || !this.authService.getRefreshToken()) {
+      return;
+    }
+
+    this.authService.refreshSession().subscribe({
+      next: () => {
+        this.syncAuthenticatedState();
+        this.updateLayoutVisibility();
+      },
+      error: () => {
+        this.authService.clearSessionSilently();
+        this.syncAuthenticatedState();
+        this.updateLayoutVisibility();
+      },
     });
   }
 

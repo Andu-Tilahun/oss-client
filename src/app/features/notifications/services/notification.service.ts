@@ -1,10 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { HttpService } from '../../../core/services/http.service';
+import { HttpService, RequestOption } from '../../../core/services/http.service';
 import { Endpoints } from '../../../core/endpoint/endpoint.model';
 import { PageResponse } from '../../../shared/models/api-response.model';
-import { NotificationLog } from '../models/notification.model';
+import {
+  NotificationLog,
+  NotificationPriorityValue,
+  NotificationStatus,
+  NotificationStatusValue,
+} from '../models/notification.model';
 
 @Injectable({
   providedIn: 'root'
@@ -23,8 +28,9 @@ export class NotificationLogService {
   getNotifications(
     page: number = 0,
     size: number = 10,
-    status?: string,
-    priority?: string
+    status?: NotificationStatusValue,
+    priority?: NotificationPriorityValue,
+    requestOptions?: RequestOption,
   ): Observable<PageResponse<NotificationLog>> {
     let params = new HttpParams()
       .set('page', page.toString())
@@ -41,8 +47,17 @@ export class NotificationLogService {
     return this.httpService.get<PageResponse<NotificationLog>>(
       Endpoints.NOTIFICATIONS_ENDPOINT,
       undefined,
-      params
+      params,
+      requestOptions,
     );
+  }
+
+  getInboxNotifications(
+    page: number = 0,
+    size: number = 10,
+    requestOptions?: RequestOption,
+  ): Observable<PageResponse<NotificationLog>> {
+    return this.getNotifications(page, size, NotificationStatus.SENT, undefined, requestOptions);
   }
 }
 

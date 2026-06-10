@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
@@ -24,8 +25,8 @@ export class DataTableComponent<T> {
   @Input()
   set columns(value: DataTableColumn<T>[]) {
     this._columns = value ?? [];
-    // Default: all columns visible when columns input changes.
-    this.columnVisibility = this._columns.map(() => true);
+    this.columnUserOverrides = this._columns.map(() => null);
+    this.applyColumnVisibility();
   }
   get columns(): DataTableColumn<T>[] {
     return this._columns;
@@ -76,13 +77,17 @@ export class DataTableComponent<T> {
 
   // Column visibility
   columnVisibility: boolean[] = [];
+  private columnUserOverrides: (boolean | null)[] = [];
   showColumnPicker = false;
   @Input() showColumnPickerControl = true;
 
   // Pagination
   pageSizeOptions = [10, 20, 50, 100];
 
-  constructor(private readonly elRef: ElementRef<HTMLElement>) {}
+  constructor(
+    private readonly elRef: ElementRef<HTMLElement>,
+    private readonly cdr: ChangeDetectorRef,
+  ) {}
 
   get visibleColumns(): DataTableColumn<T>[] {
     return this._columns.filter((_, idx) => this.columnVisibility[idx] !== false);
@@ -94,7 +99,15 @@ export class DataTableComponent<T> {
   }
 
   setColumnVisible(index: number, visible: boolean): void {
+    this.columnUserOverrides[index] = visible;
     this.columnVisibility[index] = visible;
+    this.cdr.markForCheck();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.applyColumnVisibility();
+    this.cdr.markForCheck();
   }
 
   @HostListener('document:click', ['$event'])
@@ -103,6 +116,22 @@ export class DataTableComponent<T> {
     const target = event.target as Node | null;
     if (target && this.elRef.nativeElement.contains(target)) return;
     this.showColumnPicker = false;
+  }
+
+  private applyColumnVisibility(): void {
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1024;
+    this.columnVisibility = this._columns.map((column, index) => {
+      const userOverride = this.columnUserOverrides[index];
+      if (userOverride !== null && userOverride !== undefined) {
+        return userOverride;
+      }
+
+      let visible = column.defaultVisible ?? true;
+      if (column.hiddenBelowPx != null && viewportWidth < column.hiddenBelowPx) {
+        visible = false;
+      }
+      return visible;
+    });
   }
 
   get totalPages(): number {

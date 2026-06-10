@@ -30,12 +30,14 @@
           [showColumnPickerControl]="false"
           [showAddButton]="false"
           [showRefreshButton]="!isInvestorUser"
-          [showViewButton]="true"
+          [showViewButton]="false"
           [showEditButton]="false"
           [showDeleteButton]="false"
+          [showActionColumn]="false"
+          [rowClickable]="true"
           (pageChange)="onPageChange($event)"
           (refreshClick)="onRefresh()"
-          (viewClick)="onView($event)"
+          (rowClick)="onView($event)"
           (editClick)="onEdit($event)"
         >
           <div extraTableHeader class="w-full min-w-0" *ngIf="myRequest">

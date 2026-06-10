@@ -193,11 +193,15 @@ export class HttpService {
       } else if (error.message) {
         errorMessage = error.message;
       }
+      const requestType = httpContext.get(REQUEST_TYPE);
       const skipAuthRedirect = httpContext.get(SKIP_AUTH_REDIRECT);
-      if (error.status === HttpStatus.UNAUTHORIZED && !skipAuthRedirect) {
-        this.authService.forceLogout();
-        return throwError(() => new Error('Session expired. Please log in again.'));
+      const suppressToast = requestType === RequestType.NON_BLOCKING
+        || (requestType === RequestType.LOCAL && skipAuthRedirect);
+
+      if (!suppressToast) {
+        this.toastService.error(errorMessage);
       }
+      return throwError(() => new Error(errorMessage));
     }
     this.toastService.error(errorMessage);
     return throwError(() => new Error(errorMessage));
