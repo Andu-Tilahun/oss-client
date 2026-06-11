@@ -34,7 +34,7 @@ export class InvestmentPackageFormComponent implements OnInit, OnChanges, OnDest
   @Input() farmPlots: FarmPlot[] = [];
 
   form: FormGroup;
-  statuses: FundingStatus[] = ['OPEN', 'CLOSED', 'FUNDED', 'FAILED'];
+  statuses: FundingStatus[] = ['PENDING', 'OPEN', 'CLOSED', 'FUNDED', 'FAILED'];
   packageTypes: InvestmentPackageType[] = ['CROWDFUNDING', 'BIDDING', 'LEASING'];
   activities: FarmActivity[] = ['CROPS', 'LIVE_STOCKS', 'AGRO_FORESTRY'];
   waterSources: WaterSource[] = ['IRRIGATION', 'RIVER_ACCESS', 'RAIN_FED'];

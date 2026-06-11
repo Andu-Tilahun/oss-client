@@ -195,10 +195,10 @@ export class InvestorHomeComponent implements OnInit {
         this.recentLeases = leaseList.slice(0, 8);
         this.campaigns = campaigns.content ?? [];
 
-        const leaseCommittedStatuses = new Set(['ACTIVE', 'ACCEPTED', 'SENT', 'PENDING']);
+        const leaseCommittedStatuses = new Set(['ACTIVE', 'ACCEPTED', 'SENT', 'PENDING', 'OPEN', 'FUNDED']);
         this.totalLeaseCommitted = leaseList
-          .filter((l) => leaseCommittedStatuses.has(l.status))
-          .reduce((s, l) => s + (l.totalAmount ?? 0), 0);
+          .filter((l) => leaseCommittedStatuses.has(l.status ?? l.fundingStatus ?? ''))
+          .reduce((s, l) => s + (l.totalAmount ?? l.targetAmount ?? 0), 0);
 
         const crowdCountStatuses = new Set([
           'ACTIVE',
@@ -220,7 +220,9 @@ export class InvestorHomeComponent implements OnInit {
           this.allocationCrowdPct = 0;
         }
 
-        this.leaseCapitalByStatus = this.toMoneyBars(this.sumBy(leaseList, (l) => l.status, (l) => l.totalAmount ?? 0));
+        this.leaseCapitalByStatus = this.toMoneyBars(
+          this.sumBy(leaseList, (l) => l.status ?? l.fundingStatus ?? '-', (l) => l.totalAmount ?? l.targetAmount ?? 0),
+        );
         this.computeInvestmentSelectionSlices(leaseList, invList);
         this.leaseMonthlyTrend = this.buildLeaseMonthlyTrend(leaseList);
         this.crowdWeightedRoiPct = this.weightedCrowdRoi(invList);
@@ -239,13 +241,13 @@ export class InvestorHomeComponent implements OnInit {
    * Crowd = funded/active crowd positions (non-pending).
    */
   private computeInvestmentSelectionSlices(leaseList: LeaseAgreement[], invList: InvestmentRecord[]): void {
-    const liveLease = new Set(['ACTIVE', 'ACCEPTED', 'SENT']);
+    const liveLease = new Set(['ACTIVE', 'ACCEPTED', 'SENT', 'FUNDED']);
     this.selectionLease = leaseList
-      .filter((l) => liveLease.has(l.status))
-      .reduce((s, l) => s + (l.totalAmount ?? 0), 0);
+      .filter((l) => liveLease.has(l.status ?? l.fundingStatus ?? ''))
+      .reduce((s, l) => s + (l.totalAmount ?? l.targetAmount ?? 0), 0);
 
     this.selectionBid =
-      leaseList.filter((l) => l.status === 'PENDING').reduce((s, l) => s + (l.totalAmount ?? 0), 0) +
+      leaseList.filter((l) => (l.status ?? '') === 'PENDING').reduce((s, l) => s + (l.totalAmount ?? l.targetAmount ?? 0), 0) +
       invList.filter((i) => i.status === 'PENDING').reduce((s, i) => s + (i.amount ?? 0), 0);
 
     const crowdLive = new Set(['ACTIVE', 'SENT', 'PAID', 'ACCEPTED']);

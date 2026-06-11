@@ -1,18 +1,12 @@
 <app-page-split-layout
   [showLeftTitle]="true"
   [showRightTitle]="true"
-  leftTitle="Farm Lease Management"
+  leftTitle="Leasing Investment Packages"
   [rightTitle]="(isInvestorUser && plot) ? 'Farm Plot Detail' : 'Lease Detail'"
   [rightItem]="(isInvestorUser && plot) ? null : selectedLease"
-  [rightEmptyMessage]="
-    (isInvestorUser && plot)
-      ? ''
-      : (isInvestorUser
-          ? 'Select a lease from the table above, or choose a plot below to preview or register.'
-          : 'Select a row to view details.')
-  "
+  [rightEmptyMessage]="(isInvestorUser && plot) ? '' : 'Select a row to view details.'"
   [showRightEditButton]="!(isInvestorUser && plot) && shouldShowLeaseEditButton(selectedLease)"
-  [rightActions]="(isInvestorUser && plot) ? [] : rightActions"
+  [rightActions]="[]"
   (rightEdit)="onEdit($event)"
 >
   <ng-template #leftContent>
@@ -31,27 +25,58 @@
           [showAddButton]="false"
           [showRefreshButton]="!isInvestorUser"
           [showViewButton]="false"
-          [showEditButton]="false"
-          [showDeleteButton]="false"
-          [showActionColumn]="false"
+          [showEditButton]="isAdmin"
+          [showDeleteButton]="isAdmin"
+          [showActionColumn]="true"
+          [rowActions]="tableRowActions"
+          [actionCellLabel]="isAdmin ? getAdminActionCellLabel : undefined"
           [rowClickable]="true"
           (pageChange)="onPageChange($event)"
           (refreshClick)="onRefresh()"
           (rowClick)="onView($event)"
-          (editClick)="onEdit($event)"
+          (editClick)="onEditPackage($event)"
+          (deleteClick)="onDeletePackage($event)"
         >
           <div extraTableHeader class="w-full min-w-0" *ngIf="myRequest">
             <div class="flex flex-wrap items-end gap-2">
-              <div class="min-w-[160px]">
+              <div *ngIf="!isInvestorUser" class="min-w-[160px]">
                 <select
                   [value]="status"
                   (change)="status = $any($event.target).value; onFilterChange()"
                   class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
                 >
                   <option value="">All Statuses</option>
-                  <option value="ACTIVE">ACTIVE</option>
                   <option value="PENDING">PENDING</option>
-                  <option value="TERMINATED">TERMINATED</option>
+                  <option value="OPEN">OPEN</option>
+                  <option value="CLOSED">CLOSED</option>
+                  <option value="FUNDED">FUNDED</option>
+                  <option value="FAILED">FAILED</option>
+                </select>
+              </div>
+
+              <div class="min-w-[160px]">
+                <select
+                  [value]="paymentStatus"
+                  (change)="paymentStatus = $any($event.target).value; onFilterChange()"
+                  class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+                >
+                  <option value="">All Payment Statuses</option>
+                  <option value="PENDING">PENDING</option>
+                  <option value="PAID">PAID</option>
+                  <option value="FAILED">FAILED</option>
+                </select>
+              </div>
+
+              <div class="min-w-[140px]">
+                <select
+                  [value]="soilType"
+                  (change)="soilType = $any($event.target).value; onFilterChange()"
+                  class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+                >
+                  <option value="">All Soil Types</option>
+                  <option value="SANDY">SANDY</option>
+                  <option value="CLAY">CLAY</option>
+                  <option value="LOAMY">LOAMY</option>
                 </select>
               </div>
 
@@ -164,24 +189,91 @@
       ></app-farm-plot-view>
     </div>
 
-    <div *ngIf="isInvestorUser && !plot && !lease" class="text-sm text-gray-500">
-      Select a lease from the table, or open a plot from the list below.
-    </div>
-
     <app-tabs
       *ngIf="myRequest && lease && !(isInvestorUser && plot)"
       [tabs]="tabs"
       [activeTab]="activeTab"
-      (activeTabChange)="activeTab = $event"
+      (activeTabChange)="onTabChange($event)"
     >
       <div *ngIf="activeTab === 'detail'">
-        <app-farm-lease-view [lease]="lease" [refreshKey]="detailRefreshKey"></app-farm-lease-view>
+        <app-investment-package-view
+          [investmentPackage]="asInvestmentPackage(lease)"
+          [refreshKey]="detailRefreshKey"
+        ></app-investment-package-view>
       </div>
       <div *ngIf="activeTab === 'farm-plot'">
         <app-farm-plot-view *ngIf="lease" [plot]="lease.farmPlot"></app-farm-plot-view>
       </div>
-      <div *ngIf="activeTab === 'user'">
-        <app-user-view *ngIf="lease" [user]="lease.investorUser"></app-user-view>
+      <div *ngIf="activeTab === 'investor'" class="space-y-4">
+        <p *ngIf="packageInvestmentsLoading" class="text-sm text-gray-500">Loading investors...</p>
+
+        <p
+          *ngIf="!packageInvestmentsLoading && packageInvestments.length === 0"
+          class="text-sm text-gray-500"
+        >
+          No investors have applied for this package yet.
+        </p>
+
+        <div
+          *ngFor="let investment of packageInvestments"
+          class="rounded-lg border border-gray-200 bg-white p-4 space-y-3"
+        >
+          <app-user-view *ngIf="investment.investorUser" [user]="investment.investorUser"></app-user-view>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+            <div>
+              <p class="text-gray-500">Amount</p>
+              <p class="text-gray-900 font-medium">{{ formatAmount(investment.amount) }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Payment method</p>
+              <p class="text-gray-900 font-medium">{{ investment.paymentMethod || '-' }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Status</p>
+              <p class="text-gray-900 font-medium">{{ investment.status || '-' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="activeTab === 'extension-worker'" class="space-y-4">
+        <div *ngIf="lease?.extensionWorker" class="rounded-lg border border-gray-200 bg-white p-4">
+          <p class="text-sm font-medium text-gray-700 mb-1">Assigned to</p>
+          <p class="text-sm text-gray-900">{{ formatWorkerName(lease.extensionWorker) }}</p>
+        </div>
+
+        <div *ngIf="canAssignExtensionWorker" class="rounded-lg border border-gray-200 bg-white p-4 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Assign extension worker <span class="text-red-500">*</span>
+            </label>
+            <select
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+              [(ngModel)]="selectedExtensionWorkerId"
+              [disabled]="loadingExtensionWorkers || assigningExtensionWorker"
+            >
+              <option [ngValue]="null">Select extension worker...</option>
+              <option *ngFor="let worker of extensionWorkers" [ngValue]="worker.id">
+                {{ getExtensionWorkerDisplayName(worker) }}
+              </option>
+            </select>
+            <p *ngIf="loadingExtensionWorkers" class="text-xs text-gray-500 mt-2">Loading extension workers...</p>
+          </div>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            [disabled]="!selectedExtensionWorkerId || assigningExtensionWorker || loadingExtensionWorkers"
+            (click)="assignExtensionWorker()"
+          >
+            {{ assigningExtensionWorker ? 'Assigning...' : 'Assign' }}
+          </button>
+        </div>
+
+        <p
+          *ngIf="!lease?.extensionWorker && !canAssignExtensionWorker"
+          class="text-sm text-gray-500"
+        >
+          No extension worker assigned.
+        </p>
       </div>
       <div *ngIf="activeTab === 'follow-up'">
         <app-farm-followup-list
@@ -211,29 +303,27 @@
   (decisionSelected)="onAdminDecision($event)"
 ></app-farm-lease-approve-modal>
 
-<app-extension-worker-assign-modal [(visible)]="showAssignExtenstionWorkerModal"
-                                   (selectedUserIdChange)="onSelectedUser($event)"
-                                   (confirm)="onConfirm($event)">
-</app-extension-worker-assign-modal>
+<app-investment-package-create-investment-modal
+  [(visible)]="showCreateInvestmentModal"
+  [investmentPackage]="asInvestmentPackage(selectedLease)"
+  [leasePaymentMode]="true"
+  (investmentCreated)="onInvestmentCreated()"
+></app-investment-package-create-investment-modal>
+
+<app-investment-package-edit-modal
+  [(visible)]="showEditInvestmentPackageModal"
+  [investmentPackage]="asInvestmentPackage(selectedLease)"
+  (investmentPackageUpdated)="onInvestmentPackageUpdated()"
+></app-investment-package-edit-modal>
 
 <app-confirmation-modal
-  [(visible)]="showConfirmationModal"
-  title="Send Lease Agreement"
-  [message]="'Are you sure you want to send ?'"
+  [(visible)]="showDeleteModal"
+  title="Delete Investment Package"
+  [message]="'Are you sure you want to delete this investment package?'"
   type="warning"
-  confirmText="Send Lease Agreement"
-  [confirmLoading]="lockSend"
-  (confirm)="handleSendConfirmation()"
-></app-confirmation-modal>
-
-<app-confirmation-modal
-  [(visible)]="showCancelModal"
-  title="Cancel Lease Agreement"
-  [message]="'Are you sure you want to cancel ?'"
-  type="warning"
-  confirmText="Cancel Lease Agreement"
-  [confirmLoading]="lockCancel"
-  (confirm)="handleCancelConfirmation()"
+  confirmText="Delete"
+  [confirmLoading]="deleting"
+  (confirm)="handleDeleteConfirmation()"
 ></app-confirmation-modal>
 
 <app-modal

@@ -115,17 +115,16 @@ export const MENU: MenuItem[] = [
         icon: '',
         label: 'Investment Packages',
         route: '/investment-package',
-        roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'],
-        children: [
-          {icon: '', label: 'Campaigns', route: '/investment-package', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER']},
-          {icon: '', label: 'Investments', route: '/investment-package/investments', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER']},
-        ],
+        roles: ['ADMIN'],
+
         expanded: false,
       },
-      { icon: '', label: 'Farm Plots', route: '/farm-plots-extension', roles: ['EXTENSION_WORKER'] },
       { icon: '', label: 'Leases', route: '/farm-leases', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
+      { icon: '', label: 'Bidding', route: '/farm-leases', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
+      { icon: '', label: 'Crowdfunding', route: '/farm-leases', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
+      { icon: '', label: 'Farm Plots', route: '/farm-plots-extension', roles: ['EXTENSION_WORKER'] },
+      
       { icon: '', label: 'Restoration & Follow-ups', route: '/farm-followups', roles: ['EXTENSION_WORKER', 'ADMIN'] },
-      {icon: '', label: 'Investments', route: '/investment-package/investments', roles: ['INVESTOR', 'ADMIN']},
     ],
     expanded: false
   },

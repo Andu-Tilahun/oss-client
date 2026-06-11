@@ -24,7 +24,7 @@ export class InvestmentPackageFilterComponent {
   @Output() clearFilters = new EventEmitter<void>();
   @Output() filterChange = new EventEmitter<void>();
 
-  readonly statuses: FundingStatus[] = ['OPEN', 'CLOSED', 'FUNDED', 'FAILED'];
+  readonly statuses: FundingStatus[] = ['PENDING', 'OPEN', 'CLOSED', 'FUNDED', 'FAILED'];
 
   onSearchTextChange(value: string) {
     this.searchTextChange.emit(value);

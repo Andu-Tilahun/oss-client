@@ -120,8 +120,11 @@ export class FarmPlotsExtensionPageComponent implements OnInit {
             lease,
           }));
 
-        const currentlyAssignedStatuses = new Set(['ACTIVE', 'ACCEPTED', 'SENT']);
-        this.activeAssignedPlots = assigned.filter((item) => currentlyAssignedStatuses.has(item.lease.status));
+        const currentlyAssignedStatuses = new Set(['ACTIVE', 'ACCEPTED', 'SENT', 'OPEN', 'FUNDED']);
+        this.activeAssignedPlots = assigned.filter((item) => {
+          const status = item.lease.status ?? item.lease.fundingStatus ?? '';
+          return currentlyAssignedStatuses.has(status);
+        });
 
         this.selectPlot(this.activeAssignedPlots[0] ?? assigned[0] ?? null);
       },
@@ -168,6 +171,12 @@ export class FarmPlotsExtensionPageComponent implements OnInit {
         investorId: investorUser.id,
         startDate: '2025-10-01',
         endDate: '2026-02-01',
+        farmActivity: 'CROPS',
+        waterSource: 'RAIN_FED',
+        title: 'Bole West Leasing Package',
+        targetAmount: 120000,
+        minimumContribution: 120000,
+        fundingStatus: 'CLOSED',
         totalDurationMonths: 4,
         status: 'TERMINATED',
         totalAmount: 120000,
@@ -193,6 +202,12 @@ export class FarmPlotsExtensionPageComponent implements OnInit {
         investorId: investorUser.id,
         startDate: '2025-06-15',
         endDate: '2025-12-15',
+        farmActivity: 'CROPS',
+        waterSource: 'IRRIGATION',
+        title: 'Akaki Riverside Leasing Package',
+        targetAmount: 98000,
+        minimumContribution: 98000,
+        fundingStatus: 'ACTIVE',
         totalDurationMonths: 6,
         status: 'ACCEPTED',
         totalAmount: 98000,

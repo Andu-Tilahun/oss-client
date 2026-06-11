@@ -130,11 +130,18 @@
               <!-- Button Type -->
               <ng-container *ngSwitchCase="columnType.BUTTON">
                 <button
+                  *ngIf="column.value?.(item) && column.actionable?.(item) !== false"
                   (click)="$event.stopPropagation(); column.columnAction?.(item)"
                   class="text-blue-600 hover:text-blue-700 font-medium transition-colors"
                 >
-                  {{ column.value ? column.value(item) : '' }}
+                  {{ column.value?.(item) }}
                 </button>
+                <span
+                  *ngIf="column.value?.(item) && column.actionable?.(item) === false"
+                  class="text-slate-500 text-sm"
+                >
+                  {{ column.value?.(item) }}
+                </span>
               </ng-container>
 
               <!-- Link Type -->
@@ -218,6 +225,26 @@
                 </svg>
                 Delete
               </button>
+
+              <span
+                *ngIf="actionCellLabel?.(item)"
+                class="text-slate-500 text-xs"
+              >
+                {{ actionCellLabel?.(item) }}
+              </span>
+
+              <ng-container *ngFor="let action of rowActions">
+                <app-action-icon-button
+                  *ngIf="isRowActionVisible(action, item)"
+                  [icon]="action.icon"
+                  [title]="action.title || ''"
+                  [disabled]="isRowActionDisabled(action, item)"
+                  [buttonClass]="action.buttonClass || ''"
+                  [svgClass]="action.svgClass || ''"
+                  size="sm"
+                  (click)="onRowActionClick(action, item)"
+                ></app-action-icon-button>
+              </ng-container>
             </div>
           </td>
         </tr>

@@ -1,25 +1,56 @@
 <app-modal
   [(visible)]="visible"
-  title="Create Investment"
+  [title]="modalTitle"
   size="md"
   [maskClosable]="false"
   (visibleChange)="visibleChange.emit($event)"
   [showCancelButton]="true"
+  [confirmText]="confirmLabel"
+  [confirmLoading]="isSaving"
+  [confirmDisabled]="isConfirmDisabled"
   (confirm)="onSubmit()"
   (cancel)="onCancel()"
-  (visibleChange)="visibleChange.emit($event)"
 >
   <ng-template #modalBody>
-    <div class="space-y-3">
+    <div *ngIf="leasePaymentMode" class="space-y-4">
+      <p class="text-sm text-gray-600">
+        Please confirm that you have paid the lease amount below. Attach your payment proof
+        (receipt, transfer screenshot, or invoice) before clicking Paid.
+      </p>
 
+      <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+        <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Amount paid</p>
+        <p class="text-lg font-semibold text-gray-900">
+          {{ formatAmount(investmentPackage?.targetAmount) }}
+        </p>
+      </div>
+
+      <app-document-upload
+        label="Payment proof"
+        [required]="true"
+        [currentFileId]="attachmentId || undefined"
+        accept="image/*,.pdf"
+        (fileUploaded)="onProofUploaded($event)"
+        (fileRemoved)="onProofRemoved()"
+      ></app-document-upload>
+    </div>
+
+    <div *ngIf="!leasePaymentMode" class="space-y-3">
       <form [formGroup]="form" class="space-y-2">
         <label class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
-        <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900" type="number" step="0.01" formControlName="amount"/>
-        <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900" formControlName="paymentMethod">
+        <input
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+          type="number"
+          step="0.01"
+          formControlName="amount"
+        />
+        <select
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+          formControlName="paymentMethod"
+        >
           <option *ngFor="let m of paymentMethods" [value]="m">{{ m }}</option>
         </select>
       </form>
     </div>
   </ng-template>
 </app-modal>
-

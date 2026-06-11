@@ -15,9 +15,21 @@ export class FarmLeaseService {
   }
 
   filterLeases(request: LeaseFilterRequest): Observable<PageResponse<LeaseAgreement>> {
-    return this.httpService.post<PageResponse<LeaseAgreement>>(
-      `${Endpoints.FARM_LEASES_ENDPOINT}/filter`,
-      request,
+    const body = {
+      investmentPackageType: request.investmentPackageType ?? 'LEASING',
+      page: request.page,
+      size: request.size,
+      sortBy: request.sortBy,
+      sortDirection: request.sortDirection,
+      ...(request.searchText ? {searchText: request.searchText} : {}),
+      ...(request.statuses?.length ? {statuses: request.statuses} : {}),
+      ...(request.paymentStatuses?.length ? {paymentStatuses: request.paymentStatuses} : {}),
+      ...(request.soilTypes?.length ? {soilTypes: request.soilTypes} : {}),
+    };
+
+    return this.httpService.put<PageResponse<LeaseAgreement>>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/filter`,
+      body,
     );
   }
 

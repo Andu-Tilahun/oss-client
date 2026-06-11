@@ -1,6 +1,15 @@
 import {Component, OnInit} from '@angular/core';
 import {jsPDF} from 'jspdf';
-import {LeaseAgreement, LeaseFilterRequest, LeaseStatus} from '../../models/farm-lease.model';
+import {LeaseAgreement, LeaseFilterRequest} from '../../models/farm-lease.model';
+import {
+  FundingStatus,
+  InvestmentPackage,
+  InvestmentPaymentStatus,
+  InvestmentRecord,
+} from '../../../investment-package/models/investment-package.model';
+import {InvestmentPackageService} from '../../../investment-package/services/investment-package.service';
+import {UserService} from '../../../users/services/user.service';
+import {User} from '../../../users/models/user.model';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
 import {FarmLeaseService} from '../../services/farm-lease.service';
 import {ApiResponse, PageResponse} from '../../../../shared/models/api-response.model';
@@ -12,7 +21,6 @@ import {
 import {AuthService} from '../../../auth/services/auth.service';
 import {AdminLeaseDecision} from '../../modals/farm-lease-approve-modal/farm-lease-approve-modal.component';
 import {TabItem} from "../../../../shared/tabs/models/tab-item.model";
-import {AssignExtensionWorkerRequest} from "../../../assign-extension-worker-request";
 import {FarmPlot, FarmPlotFilterRequest, FarmPlotSizeType, FarmPlotSoilType, FarmPlotStatus} from "../../../farm-plots/models/farm-plot.model";
 import {FarmPlotService} from "../../../farm-plots/services/farm-plot.service";
 import {environment} from '../../../../../environments/environment';
@@ -35,50 +43,47 @@ export class FarmLeaseListComponent implements OnInit {
   currentPage = 0;
 
   searchText = '';
-  status: LeaseStatus | '' = '';
+  status: FundingStatus | '' = '';
+  paymentStatus: InvestmentPaymentStatus | '' = '';
+  soilType: FarmPlotSoilType | '' = '';
 
   showCreateModal = false;
   showEditModal = false;
+  showEditInvestmentPackageModal = false;
+  showDeleteModal = false;
+  deleting = false;
+  showCreateInvestmentModal = false;
   selectedLease: LeaseAgreement | null = null;
   detailRefreshKey = 0;
-  assignExtensionWorkerRequest = {} as AssignExtensionWorkerRequest;
   showAdminActionModal = false;
-  showAssignExtenstionWorkerModal = false;
-  lockSend = false;
-  lockCancel = false;
-  showConfirmationModal = false;
-  showCancelModal = false;
+
+  extensionWorkers: User[] = [];
+  selectedExtensionWorkerId: string | null = null;
+  loadingExtensionWorkers = false;
+  assigningExtensionWorker = false;
   private adminActionLoading = false;
   showContractModal = false;
   contractLoading = false;
   contractHtml = '';
   contractFileName = 'lease-contract.html';
 
-  columns: DataTableColumn<LeaseAgreement>[] = [
-    {
-      header: 'Farm Plot',
-      value: (l) => {
-        const title = l.farmPlot?.title || '-';
-        return title.length > 30 ? `${title.slice(0, 30)}...` : title;
-      },
-    },
-    {header: 'Start', value: (l) => l.startDate},
-    {header: 'End', value: (l) => l.endDate},
-    {header: 'Duration (mo)', value: (l) => String(l.totalDurationMonths)},
-    {header: 'Status', value: (l) => l.status},
-    {header: 'Amount', value: (l) => this.formatAmount(l.totalAmount)},
-  ];
+  columns: DataTableColumn<LeaseAgreement>[] = [];
 
   activeTab = 'detail';
 
   tabs: TabItem[] = [
     {key: 'detail', label: 'Detail'},
     {key: 'farm-plot', label: 'FarmPlot'},
-    {key: 'user', label: 'User'},
+    {key: 'investor', label: 'Investor'},
+    {key: 'extension-worker', label: 'Extension Worker'},
     {key: 'follow-up', label: 'FollowUp'},
   ];
 
-  rightActions: PageSplitRightAction<LeaseAgreement>[];
+  packageInvestments: InvestmentRecord[] = [];
+  packageInvestmentsLoading = false;
+
+  tableRowActions: PageSplitRightAction<LeaseAgreement>[] = [];
+  readonly rightActions: PageSplitRightAction<LeaseAgreement>[] = [];
   plot: FarmPlot | null = null;
   investorFarmPlots: FarmPlot[] = [];
   investorPlotsLoading = false;
@@ -99,83 +104,150 @@ export class FarmLeaseListComponent implements OnInit {
 
   constructor(
     private farmLeaseService: FarmLeaseService,
+    private investmentPackageService: InvestmentPackageService,
+    private userService: UserService,
     private toastService: ToastService,
     private authService: AuthService,
     private farmPlotService: FarmPlotService,
     private router: Router,
   ) {
-    const role = (this.authService.getCurrentUser()?.role ?? '').toString().trim().toUpperCase();
+    this.buildColumns();
+    this.buildTableRowActions();
+  }
 
-    this.rightActions = [
-      {
-        id: 'sent',
-        icon: 'send',
-        title: 'Send',
-        visible: (r) => this.authService.isInvestor() && r.status == "PENDING",
-        action: (r) => this.onSend(r),
-      },
-      {
-        id: 'cancel',
-        icon: 'cancel',
-        title: 'Cancel',
-        visible: (r) => this.authService.isInvestor() && r.status == "PENDING",
-        action: (r) => this.onCancel(r),
-      },
-
-      {
-        id: 'download',
-        icon: 'download',
-        title: 'Download',
-        visible: (r) => this.authService.isInvestor() && r.status == "ACCEPTED",
-        action: (r) => this.onDownload(r),
-      },
-      {
-        id: 'approve',
-        icon: 'check',
-        title: 'Approve lease',
-        visible: (l) => this.authService.isAdmin() && l.status == "SENT",
-        action: (l) => this.onApproveLease(l),
-      },
-      {
-        id: 'assign',
-        icon: 'assign',
-        title: 'Assign Extension Worker',
-        visible: (r) => this.authService.isInvestor() && r.status == "ACCEPTED" && !r.extensionWorker,
-        action: (r) => this.onAssignExtensionWorker(r),
-      },
+  private buildColumns(): void {
+    this.columns = [
+      {header: 'Title', value: (l) => l.title},
+      {header: 'Farm activity', value: (l) => l.farmActivity},
+      {header: 'Water source', value: (l) => l.waterSource},
+      {header: 'Target', value: (l) => this.formatAmount(l.targetAmount)},
+      {header: 'Status', value: (l) => l.fundingStatus},
     ];
   }
 
-  private normalizeStatus(status: unknown): string {
-    return (status ?? '').toString().trim().toUpperCase();
+  private buildTableRowActions(): void {
+    if (this.isAdmin) {
+      this.tableRowActions = [
+        {
+          id: 'review',
+          icon: 'check',
+          title: 'Review',
+          visible: (l) => this.canAdminReview(l),
+          action: (l) => this.onApproveLease(l),
+        },
+      ];
+      return;
+    }
+
+    if (this.isInvestorUser) {
+      this.tableRowActions = [
+        {
+          id: 'invest',
+          icon: 'plus',
+          title: 'Invest',
+          visible: (r) => r.fundingStatus === 'OPEN',
+          action: (r) => this.onInvest(r),
+        },
+        {
+          id: 'download',
+          icon: 'download',
+          title: 'Download',
+          visible: (r) =>
+            !!r.agreementId &&
+            (r.fundingStatus === 'FUNDED' || r.fundingStatus === 'ACTIVE'),
+          action: (r) => this.onDownload(r),
+        },
+      ];
+      return;
+    }
+
+    this.tableRowActions = [];
   }
 
-  private isLeaseActive(lease: LeaseAgreement | null | undefined): boolean {
-    return this.normalizeStatus(lease?.status) === 'ACTIVE';
+  hasAppliedInvestors(lease: LeaseAgreement): boolean {
+    return (lease.investorIdList?.length ?? 0) > 0;
   }
 
-  private isLeasePending(lease: LeaseAgreement | null | undefined): boolean {
-    return this.normalizeStatus(lease?.status) === 'PENDING';
+  getAdminActionCellLabel(lease: LeaseAgreement): string {
+    if (!this.hasAppliedInvestors(lease)) {
+      return 'No investor';
+    }
+    return '';
   }
 
-  public shouldShowLeaseEditButton(lease: LeaseAgreement | null | undefined): boolean {
-    return this.authService.isInvestor() && lease?.status == 'PENDING';
+  canAdminReview(lease: LeaseAgreement): boolean {
+    return this.hasAppliedInvestors(lease)
+      && (lease.fundingStatus === 'PENDING' || lease.fundingStatus === 'OPEN');
   }
 
-  private shouldShowApproveLeaseAction(lease: LeaseAgreement | null | undefined): boolean {
-    if (!lease) return false;
-    // Admin approves/rejects leases that are registered but not yet active.
-    return this.authService.isAdmin() && this.isLeasePending(lease);
+  get canAssignExtensionWorker(): boolean {
+    if (!this.selectedLease) {
+      return false;
+    }
+    return (
+      this.authService.isAdmin() &&
+      this.selectedLease.fundingStatus === 'OPEN' &&
+      !this.selectedLease.extensionWorker
+    );
+  }
+
+  public shouldShowLeaseEditButton(_lease: LeaseAgreement | null | undefined): boolean {
+    return false;
+  }
+
+  onTabChange(tab: string): void {
+    this.activeTab = tab;
+    if (tab === 'extension-worker' && this.extensionWorkers.length === 0 && !this.loadingExtensionWorkers) {
+      this.loadExtensionWorkers();
+    }
+    if (tab === 'investor' && this.selectedLease?.id) {
+      this.loadPackageInvestments(this.selectedLease.id);
+    }
+  }
+
+  loadPackageInvestments(packageId: string): void {
+    this.packageInvestmentsLoading = true;
+    this.investmentPackageService.filterInvestments({
+      crowdFundingIds: [packageId],
+      sortBy: 'createdDate',
+      sortDirection: 'DESC',
+      page: 0,
+      size: 100,
+    }).subscribe({
+      next: (response) => {
+        this.packageInvestments = (response.content ?? []).filter(
+          (investment) => investment.crowdFundingId === packageId,
+        );
+        this.packageInvestmentsLoading = false;
+      },
+      error: (error) => {
+        this.packageInvestments = [];
+        this.packageInvestmentsLoading = false;
+        this.toastService.error(
+          error.message || 'Failed to load package investors',
+          'Load Investors',
+        );
+      },
+    });
+  }
+
+  asInvestmentPackage(lease: LeaseAgreement | null): InvestmentPackage | null {
+    if (!lease) {
+      return null;
+    }
+    return {
+      ...lease,
+      farmPlotId: lease.farmPlotId ?? lease.farmPlot?.id ?? '',
+      followUpDtoList: lease.followUpDtoList ?? [],
+    } as InvestmentPackage;
   }
 
   ngOnInit(): void {
-    // Admin should start on "needs decision" leases.
-    if (this.authService.isAdmin() && !this.status) {
-      this.status = 'PENDING';
-    }
     if (this.isInvestorUser) {
+      this.status = '';
       this.loadInvestorPlots();
     }
+    this.buildTableRowActions();
     this.loadLeases();
   }
 
@@ -187,15 +259,43 @@ export class FarmLeaseListComponent implements OnInit {
     return this.authService.isExtensionWorker();
   }
 
+  get isAdmin(): boolean {
+    return this.authService.isAdmin();
+  }
+
+  private shouldApplyInvestorLeaseVisibility(): boolean {
+    return this.isInvestorUser && !this.isAdmin;
+  }
+
+  private isLeaseVisibleToInvestor(lease: LeaseAgreement): boolean {
+    const userId = this.authService.getCurrentUser()?.id;
+    if (!userId) return false;
+    if (lease.fundingStatus === 'OPEN') return true;
+    return lease.investorIdList?.includes(userId) ?? false;
+  }
+
+  private filterLeasesForInvestor(leases: LeaseAgreement[]): LeaseAgreement[] {
+    return leases.filter((l) => this.isLeaseVisibleToInvestor(l));
+  }
+
   private buildFilterRequest(): LeaseFilterRequest {
     return {
       searchText: this.searchText || undefined,
-      statuses: this.status ? [this.status] : undefined,
-      sortBy: 'startDate',
+      statuses: !this.shouldApplyInvestorLeaseVisibility() && this.status ? [this.status] : undefined,
+      paymentStatuses: this.paymentStatus ? [this.paymentStatus] : undefined,
+      soilTypes: this.soilType ? [this.soilType] : undefined,
+      sortBy: 'fundingDeadline',
       sortDirection: 'DESC',
       page: this.currentPage,
       size: this.pageSize,
     };
+  }
+
+  private getLeaseAgreementId(lease: LeaseAgreement | null | undefined): string | null {
+    if (!lease) {
+      return null;
+    }
+    return lease.agreementId ?? lease.id ?? null;
   }
 
   loadLeases(): void {
@@ -203,20 +303,17 @@ export class FarmLeaseListComponent implements OnInit {
     const request = this.buildFilterRequest();
     this.farmLeaseService.filterLeases(request).subscribe({
       next: (response: PageResponse<LeaseAgreement>) => {
-        this.leases = response.content;
-        this.total = response.totalElements;
+        const content = this.shouldApplyInvestorLeaseVisibility()
+          ? this.filterLeasesForInvestor(response.content)
+          : response.content;
+        this.leases = content;
+        this.total = this.shouldApplyInvestorLeaseVisibility() ? content.length : response.totalElements;
         this.loading = false;
         this.toastService.success('Leases retrieved successfully');
 
         const previousSelectedId = this.selectedLease?.id;
 
         if (this.leases.length === 0) {
-          this.selectedLease = null;
-          return;
-        }
-
-        if (this.isInvestorUser && !previousSelectedId) {
-          // Investors should open lease detail only through the view-eye action.
           this.selectedLease = null;
           return;
         }
@@ -230,11 +327,13 @@ export class FarmLeaseListComponent implements OnInit {
         const match = this.leases.find((l) => l.id === previousSelectedId);
         if (match) {
           this.selectedLease = {...match};
+          this.refreshPackageInvestmentsIfNeeded();
           return;
         }
 
         this.selectedLease = {...this.leases[0]};
         this.detailRefreshKey++;
+        this.refreshPackageInvestmentsIfNeeded();
       },
       error: (error) => {
         this.toastService.error(error.message || 'Failed to fetch leases', 'Fetch Leases');
@@ -267,6 +366,8 @@ export class FarmLeaseListComponent implements OnInit {
   clearFilters(): void {
     this.searchText = '';
     this.status = '';
+    this.paymentStatus = '';
+    this.soilType = '';
     this.currentPage = 0;
     this.pageIndex = 1;
     this.loadLeases();
@@ -279,14 +380,64 @@ export class FarmLeaseListComponent implements OnInit {
     }
     this.selectedLease = {...lease};
     this.plot = null;
+    this.packageInvestments = [];
     this.showCreateModal = false;
     this.showEditModal = false;
+    if (this.activeTab === 'investor') {
+      this.loadPackageInvestments(lease.id);
+    }
+  }
+
+  private refreshPackageInvestmentsIfNeeded(): void {
+    if (this.activeTab === 'investor' && this.selectedLease?.id) {
+      this.loadPackageInvestments(this.selectedLease.id);
+    }
   }
 
   onEdit(lease: LeaseAgreement): void {
     this.selectedLease = {...lease};
     this.showCreateModal = false;
     this.showEditModal = true;
+  }
+
+  onEditPackage(lease: LeaseAgreement): void {
+    this.selectedLease = {...lease};
+    this.showDeleteModal = false;
+    this.showEditInvestmentPackageModal = true;
+  }
+
+  onDeletePackage(lease: LeaseAgreement): void {
+    this.selectedLease = {...lease};
+    this.showEditInvestmentPackageModal = false;
+    this.showDeleteModal = true;
+  }
+
+  handleDeleteConfirmation(): void {
+    if (!this.selectedLease?.id) return;
+
+    this.deleting = true;
+    this.investmentPackageService.deleteInvestmentPackage(this.selectedLease.id).subscribe({
+      next: () => {
+        this.deleting = false;
+        this.showDeleteModal = false;
+        this.selectedLease = null;
+        this.toastService.success('Investment package deleted successfully');
+        this.loadLeases();
+      },
+      error: (error) => {
+        this.deleting = false;
+        this.toastService.error(
+          error.message || 'Failed to delete investment package',
+          'Delete Investment Package',
+        );
+      },
+    });
+  }
+
+  onInvestmentPackageUpdated(): void {
+    this.showEditInvestmentPackageModal = false;
+    this.detailRefreshKey++;
+    this.loadLeases();
   }
 
   onApproveLease(lease: LeaseAgreement): void {
@@ -298,15 +449,13 @@ export class FarmLeaseListComponent implements OnInit {
   }
 
   onAdminDecision(decision: AdminLeaseDecision): void {
-    const leaseId = this.selectedLease?.id;
+    const leaseId = this.getLeaseAgreementId(this.selectedLease);
     if (!leaseId) return;
 
     if (this.adminActionLoading) return;
     this.adminActionLoading = true;
 
-    const request$ = this.farmLeaseService.adminDecideLease(leaseId, decision);
-
-    request$.subscribe({
+    this.farmLeaseService.adminDecideLease(leaseId, decision).subscribe({
       next: (res: ApiResponse<LeaseAgreement>) => {
         this.adminActionLoading = false;
         this.toastService.success(
@@ -315,11 +464,75 @@ export class FarmLeaseListComponent implements OnInit {
         );
         this.detailRefreshKey++;
         this.selectedLease = res?.data ?? null;
+        this.loadLeases();
       },
       error: () => {
         this.adminActionLoading = false;
       },
     });
+  }
+
+  onInvest(lease: LeaseAgreement): void {
+    this.selectedLease = {...lease};
+    this.showCreateInvestmentModal = true;
+  }
+
+  onInvestmentCreated(): void {
+    this.showCreateInvestmentModal = false;
+    this.toastService.success('Investment registered successfully');
+    this.loadLeases();
+  }
+
+  loadExtensionWorkers(): void {
+    this.loadingExtensionWorkers = true;
+    this.userService.getUsersByRole('EXTENSION_WORKER').subscribe({
+      next: (users) => {
+        this.extensionWorkers = users ?? [];
+        this.loadingExtensionWorkers = false;
+      },
+      error: () => {
+        this.extensionWorkers = [];
+        this.loadingExtensionWorkers = false;
+        this.toastService.error('Failed to load extension workers', 'Extension Worker');
+      },
+    });
+  }
+
+  assignExtensionWorker(): void {
+    if (!this.selectedLease?.id || !this.selectedExtensionWorkerId) {
+      return;
+    }
+
+    this.assigningExtensionWorker = true;
+    this.investmentPackageService.assignExtensionWorker({
+      externalId: this.selectedLease.id,
+      extensionWorkerId: this.selectedExtensionWorkerId,
+    }).subscribe({
+      next: (res: ApiResponse<InvestmentPackage>) => {
+        this.assigningExtensionWorker = false;
+        this.selectedLease = (res?.data as LeaseAgreement | undefined) ?? null;
+        this.selectedExtensionWorkerId = null;
+        this.detailRefreshKey++;
+        this.toastService.success('Extension Worker assigned successfully');
+        this.loadLeases();
+      },
+      error: () => {
+        this.assigningExtensionWorker = false;
+        this.toastService.error('Failed to assign Extension Worker');
+      },
+    });
+  }
+
+  formatWorkerName(worker: User | null | undefined): string {
+    if (!worker) {
+      return '-';
+    }
+    const name = [worker.firstName, worker.lastName].filter(Boolean).join(' ').trim();
+    return name || worker.username || worker.email || '-';
+  }
+
+  getExtensionWorkerDisplayName(user: User): string {
+    return this.formatWorkerName(user);
   }
 
   onLeaseCreated(): void {
@@ -385,6 +598,7 @@ export class FarmLeaseListComponent implements OnInit {
       case 'UNDER_MAINTENANCE':
         return 'bg-yellow-50 text-yellow-700 border-yellow-200';
       case 'ASSIGNED_TO_LEASE':
+      case 'ASSIGNED_TO_INVESTMENT_PACKAGE':
         return 'bg-gray-50 text-gray-700 border-gray-200';
       default:
         return 'bg-slate-50 text-slate-700 border-slate-200';
@@ -415,56 +629,23 @@ export class FarmLeaseListComponent implements OnInit {
     this.showCreateModal = true;
   }
 
-  private formatAmount(value: number | undefined): string {
+  formatAmount(value: number | undefined): string {
     if (value === undefined || value === null) return '-';
     return new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(
       value,
     );
   }
 
-  private onAssignExtensionWorker(r: LeaseAgreement) {
-    this.showAssignExtenstionWorkerModal = true;
-  }
-
-  onSelectedUser(id: any) {
-    this.assignExtensionWorkerRequest.externalId = this.selectedLease!.id;
-    this.assignExtensionWorkerRequest.extensionWorkerId = id;
-    console.log(this.assignExtensionWorkerRequest)
-  }
-
-  onConfirm($event: void) {
-    this.farmLeaseService.assignExtensionWorker(this.assignExtensionWorkerRequest).subscribe({
-      next: (res: ApiResponse<LeaseAgreement>) => {
-        this.selectedLease = res?.data ?? null;
-        this.loading = false;
-        this.showAssignExtenstionWorkerModal = false;
-        this.toastService.success('Extension Worker Assigned successfully');
-      },
-      error: () => {
-        this.toastService.error('Failed to assign Extension Worker');
-        this.loading = false;
-      },
-    });
-  }
-
-  onSend(leaseAgreement: LeaseAgreement): void {
-    this.selectedLease = {...leaseAgreement};
-    this.showConfirmationModal = true;
-    this.lockSend = false;
-  }
-
-  onCancel(leaseAgreement: LeaseAgreement): void {
-    this.selectedLease = {...leaseAgreement};
-    this.showCancelModal = true;
-    this.lockCancel = false;
-  }
-
-
   private onDownload(r: LeaseAgreement) {
+    const leaseId = this.getLeaseAgreementId(r);
+    if (!leaseId) {
+      return;
+    }
+
     this.contractLoading = true;
     this.contractHtml = '';
-    this.contractFileName = `lease-contract-${r.id}.pdf`;
-    this.farmLeaseService.getContractHtml(r.id).subscribe({
+    this.contractFileName = `lease-contract-${leaseId}.pdf`;
+    this.farmLeaseService.getContractHtml(leaseId).subscribe({
       next: (html) => {
         this.contractHtml = html;
         this.showContractModal = true;
@@ -527,50 +708,4 @@ export class FarmLeaseListComponent implements OnInit {
     }
   }
 
-  handleSendConfirmation() {
-    if (!this.selectedLease) return;
-
-    this.lockSend = true;
-
-    this.farmLeaseService.send(this.selectedLease.id).subscribe({
-      next: (res: ApiResponse<LeaseAgreement>) => {
-        this.selectedLease = res?.data ?? null;
-        this.lockSend = false;
-        this.showConfirmationModal = false;
-        this.toastService.success(`Lease Agreement sent successfully`);
-
-      },
-      error: (error) => {
-        this.lockSend = false;
-        this.toastService.error(
-          error.message || 'Failed to send Lease Agreement',
-          'Send Agreement'
-        );
-      }
-    });
-
-  }
-
-  handleCancelConfirmation() {
-    if (!this.selectedLease) return;
-
-    this.lockCancel = true;
-
-    this.farmLeaseService.cancel(this.selectedLease.id).subscribe({
-      next: (res: ApiResponse<LeaseAgreement>) => {
-        this.selectedLease = res?.data ?? null;
-        this.lockCancel = false;
-        this.showCancelModal = false;
-        this.toastService.success(`Lease Agreement cancelled successfully`);
-
-      },
-      error: (error) => {
-        this.lockCancel = false;
-        this.toastService.error(
-          error.message || 'Failed to cancel Lease Agreement',
-          'Cancel Agreement'
-        );
-      }
-    });
-  }
 }

@@ -1,5 +1,6 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
 import {FarmLeasesRoutingModule} from './farm-leases-routing.module';
 import {SharedModule} from '../../shared/shared.module';
 import {FarmLeaseListComponent} from './pages/farm-lease-list/farm-lease-list.component';
@@ -24,6 +25,11 @@ import {FarmLeaseMobileDetailComponent} from './pages/farm-lease-mobile-detail/f
 import {
   PreviouslyManagedLeaseFarmPlotsComponent
 } from './components/previously-managed-lease-farm-plots/previously-managed-lease-farm-plots.component';
+import {InvestmentPackageViewComponent} from '../investment-package/components/investment-package-view/investment-package-view.component';
+import {
+  InvestmentPackageCreateInvestmentModalComponent
+} from '../investment-package/modals/investment-package-create-investment-modal/investment-package-create-investment-modal.component';
+import {InvestmentPackageEditModalComponent} from '../investment-package/modals/investment-package-edit-modal/investment-package-edit-modal.component';
 
 @NgModule({
   declarations: [
@@ -34,8 +40,12 @@ import {
   ],
   imports: [
     CommonModule,
+    FormsModule,
     FarmLeasesRoutingModule,
     SharedModule,
+    InvestmentPackageViewComponent,
+    InvestmentPackageCreateInvestmentModalComponent,
+    InvestmentPackageEditModalComponent,
     PageSplitLayoutComponent,
     FarmLeaseFilterComponent,
     FarmLeaseViewComponent,

@@ -10,6 +10,7 @@
       </div>
 
       <span
+        *ngIf="detail.status"
         class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
         [ngClass]="statusPillClass(detail.status)"
       >

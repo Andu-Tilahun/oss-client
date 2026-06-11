@@ -1,12 +1,12 @@
 import {User} from "../../users/models/user.model";
-import {FarmPlot} from "../../farm-plots/models/farm-plot.model";
+import {FarmPlot, FarmPlotSoilType} from "../../farm-plots/models/farm-plot.model";
 import {FarmFollowUp} from "../../farm-followups/models/farm-followup.model";
 
 export type FarmActivity = 'CROPS' | 'LIVE_STOCKS' | 'AGRO_FORESTRY';
 export type WaterSource = 'IRRIGATION' | 'RIVER_ACCESS' | 'RAIN_FED';
 export type InvestmentPackageType = 'CROWDFUNDING' | 'BIDDING' | 'LEASING';
 
-export type FundingStatus = 'OPEN' | 'ACTIVE' | 'CLOSED' | 'FUNDED' | 'FAILED';
+export type FundingStatus = 'PENDING' | 'OPEN' | 'ACTIVE' | 'CLOSED' | 'FUNDED' | 'FAILED';
 
 export type InvestmentPaymentMethod = 'CREDIT' | 'BANK_TRANSFER' | 'CRYPTO';
 export type InvestmentStatus = 'PAID' | 'SENT' | 'ACTIVE' | 'PENDING' | 'FAILED' | 'ACCEPTED'| 'REJECTED';
@@ -58,6 +58,8 @@ export interface InvestmentPackageCreateRequest {
 export interface InvestmentPackageFilterRequest {
   searchText?: string;
   statuses?: FundingStatus[];
+  paymentStatuses?: InvestmentPaymentStatus[];
+  soilTypes?: FarmPlotSoilType[];
   sortBy?: string;
   sortDirection?: 'ASC' | 'DESC';
   page: number;
@@ -82,9 +84,17 @@ export interface InvestmentCreateRequest {
   paymentMethod: InvestmentPaymentMethod;
 }
 
+export interface InvestmentRecordCreateRequest {
+  investmentPackageId: string;
+  amount: number;
+  paymentMethod: InvestmentPaymentMethod;
+  attachmentId: string;
+}
+
 export interface InvestmentFilterRequest {
   searchText?: string;
   statuses?: InvestmentStatus[];
+  crowdFundingIds?: string[];
   sortBy?: string;
   sortDirection?: 'ASC' | 'DESC';
   page: number;

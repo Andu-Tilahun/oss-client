@@ -59,7 +59,7 @@ export class FarmLeaseViewComponent implements OnChanges {
   }
 
 
-  statusPillClass(status: LeaseStatus): string {
+  statusPillClass(status: LeaseStatus | undefined): string {
     switch (status) {
       case 'ACTIVE':
         return 'bg-green-50 text-green-700 border-green-200';

@@ -11,6 +11,7 @@ import {
 import {DataTableColumn} from './models/data-table-column.model';
 import {ColumnType} from './models/column-types.model';
 import {TableQueryParams} from './models/table-query-params.model';
+import {PageSplitRightAction} from '../components/page-split-layout/page-split-layout/page-split-right-action.model';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -54,6 +55,8 @@ export class DataTableComponent<T> {
   @Input() showViewButton = false;
   @Input() showEditButton = false;
   @Input() showDeleteButton = false;
+  @Input() rowActions: PageSplitRightAction<T>[] = [];
+  @Input() actionCellLabel?: (item: T) => string;
 
   // Icons (we'll use SVG paths)
   @Input() viewIcon = 'eye';
@@ -202,5 +205,26 @@ export class DataTableComponent<T> {
       return;
     }
     this.rowClick.emit(item);
+  }
+
+  isRowActionVisible(action: PageSplitRightAction<T>, item: T): boolean {
+    if (!action.visible) {
+      return true;
+    }
+    return action.visible(item);
+  }
+
+  isRowActionDisabled(action: PageSplitRightAction<T>, item: T): boolean {
+    if (!action.disabled) {
+      return false;
+    }
+    return action.disabled(item);
+  }
+
+  onRowActionClick(action: PageSplitRightAction<T>, item: T): void {
+    if (this.isRowActionDisabled(action, item)) {
+      return;
+    }
+    action.action(item);
   }
 }

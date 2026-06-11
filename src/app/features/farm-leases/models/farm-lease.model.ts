@@ -1,6 +1,13 @@
 import {User} from "../../users/models/user.model";
-import {FarmPlot} from "../../farm-plots/models/farm-plot.model";
+import {FarmPlot, FarmPlotSoilType} from "../../farm-plots/models/farm-plot.model";
 import {FarmFollowUp} from "../../farm-followups/models/farm-followup.model";
+import {
+  FarmActivity,
+  FundingStatus,
+  InvestmentPackageType,
+  InvestmentPaymentStatus,
+  WaterSource,
+} from "../../investment-package/models/investment-package.model";
 
 export type LeaseStatus = 'ACTIVE' | 'PENDING' | 'TERMINATED' | 'ACCEPTED' | 'SENT';
 export type LeaseTermStatus = 'ACTIVE' | 'PAID' | 'PASSED';
@@ -16,17 +23,34 @@ export interface LeaseTerm {
 
 export interface LeaseAgreement {
   id: string;
-  farmPlotId: string;
-  investorId: string;
   startDate: string;
   endDate: string;
-  totalDurationMonths: number;
-  status: LeaseStatus;
-  totalAmount: number;
-  investorUser: User;
+  farmActivity: FarmActivity;
+  waterSource: WaterSource;
+  title: string;
+  agreementId?: string | null;
+  targetAmount: number;
+  minimumContribution: number;
+  paidDate?: string | null;
+  attachmentIdList?: string[];
+  paymentStatus?: InvestmentPaymentStatus;
+  investorIdList?: string[];
+  expectedInvestorNumber?: number;
+  fundingDeadline?: string;
+  fundingStatus: FundingStatus;
+  investmentPackageType?: InvestmentPackageType;
+  remark?: string | null;
+  description?: string;
+  farmPlotId?: string;
   farmPlot: FarmPlot;
-  extensionWorker: User;
-  followUpDtoList: FarmFollowUp[];
+  followUpDtoList?: FarmFollowUp[];
+  extensionWorker?: User | null;
+  // Legacy lease-agreement fields (optional — used by create/edit/modals and lease endpoints)
+  investorId?: string;
+  investorUser?: User;
+  totalDurationMonths?: number;
+  status?: LeaseStatus;
+  totalAmount?: number;
   terms?: LeaseTerm[];
 }
 
@@ -56,10 +80,12 @@ export interface LeaseDefineTermsRequest {
 
 export interface LeaseFilterRequest {
   searchText?: string;
-  statuses?: LeaseStatus[];
+  statuses?: FundingStatus[];
+  paymentStatuses?: InvestmentPaymentStatus[];
+  soilTypes?: FarmPlotSoilType[];
+  investmentPackageType?: InvestmentPackageType;
   sortBy?: string;
   sortDirection?: 'ASC' | 'DESC';
   page: number;
   size: number;
 }
-

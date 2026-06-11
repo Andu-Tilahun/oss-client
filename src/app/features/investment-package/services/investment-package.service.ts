@@ -11,6 +11,7 @@ import {
   InvestmentCreateRequest,
   InvestmentFilterRequest,
   InvestmentRecord,
+  InvestmentRecordCreateRequest,
 } from '../models/investment-package.model';
 import {AssignExtensionWorkerRequest} from "../../assign-extension-worker-request";
 import {LeaseAgreement} from "../../farm-leases/models/farm-lease.model";
@@ -53,6 +54,12 @@ export class InvestmentPackageService {
     );
   }
 
+  deleteInvestmentPackage(id: string): Observable<ApiResponse<void>> {
+    return this.httpService.delete<ApiResponse<void>>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${id}`,
+    );
+  }
+
   getInvestmentPackageById(crowdFundingId: string): Observable<ApiResponse<InvestmentPackage>> {
     return this.httpService.get<ApiResponse<InvestmentPackage>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${crowdFundingId}`,
@@ -69,7 +76,14 @@ export class InvestmentPackageService {
 
   createInvestment(request: InvestmentCreateRequest): Observable<ApiResponse<InvestmentRecord>> {
     return this.httpService.post<ApiResponse<InvestmentRecord>>(
-      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investments`,
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investmentRecord`,
+      request,
+    );
+  }
+
+  createInvestmentRecord(request: InvestmentRecordCreateRequest): Observable<ApiResponse<InvestmentRecord>> {
+    return this.httpService.post<ApiResponse<InvestmentRecord>>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investmentRecord`,
       request,
     );
   }

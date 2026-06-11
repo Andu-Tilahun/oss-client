@@ -21,7 +21,7 @@
       </div>
       <div *ngIf="activeTab === 'follow-up'">
         <app-farm-followup-list
-          [followUps]="lease.followUpDtoList"
+          [followUps]="lease.followUpDtoList ?? []"
           [externalId]="lease.id"
         ></app-farm-followup-list>
       </div>
