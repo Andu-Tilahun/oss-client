@@ -2,7 +2,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SharedModule } from '../../shared/shared.module';
 import { TableQueryParams } from '../../shared/data-table/models/table-query-params.model';
-import { InvestmentPackage, FundingStatus } from '../../features/investment-package/models/investment-package.model';
+import { InvestmentPackage } from '../../features/investment-package/models/investment-package.model';
+import { FundingStatus } from '../../shared/models/funding-status.model';
 import { InvestmentPackageFilterComponent } from '../../features/investment-package/pages/investment-package-filter/investment-package-filter.component';
 
 @Component({

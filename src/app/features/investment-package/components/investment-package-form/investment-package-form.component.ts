@@ -12,12 +12,12 @@ import {
 import {Subscription} from 'rxjs';
 import {
   FarmActivity,
-  FundingStatus,
   InvestmentPackage,
   InvestmentPackageCreateRequest,
   InvestmentPackageType,
   WaterSource,
 } from '../../models/investment-package.model';
+import {FundingStatus, FUNDING_STATUSES} from '../../../../shared/models/funding-status.model';
 import {FarmPlot} from '../../../farm-plots/models/farm-plot.model';
 
 @Component({
@@ -34,7 +34,7 @@ export class InvestmentPackageFormComponent implements OnInit, OnChanges, OnDest
   @Input() farmPlots: FarmPlot[] = [];
 
   form: FormGroup;
-  statuses: FundingStatus[] = ['PENDING', 'OPEN', 'CLOSED', 'FUNDED', 'FAILED'];
+  statuses: FundingStatus[] = FUNDING_STATUSES;
   packageTypes: InvestmentPackageType[] = ['CROWDFUNDING', 'BIDDING', 'LEASING'];
   activities: FarmActivity[] = ['CROPS', 'LIVE_STOCKS', 'AGRO_FORESTRY'];
   waterSources: WaterSource[] = ['IRRIGATION', 'RIVER_ACCESS', 'RAIN_FED'];
@@ -55,7 +55,7 @@ export class InvestmentPackageFormComponent implements OnInit, OnChanges, OnDest
         minimumContribution: [null, [Validators.required, Validators.min(0.01)]],
         expectedInvestorNumber: [null, [Validators.required, Validators.min(1)]],
         fundingDeadline: ['', Validators.required],
-        fundingStatus: ['OPEN', Validators.required],
+        fundingStatus: [FundingStatus.OPEN, Validators.required],
         description: [''],
         remark: [''],
       },
@@ -154,7 +154,7 @@ export class InvestmentPackageFormComponent implements OnInit, OnChanges, OnDest
       minimumContribution: null,
       expectedInvestorNumber: null,
       fundingDeadline: '',
-      fundingStatus: 'OPEN',
+      fundingStatus: FundingStatus.OPEN,
       description: '',
       remark: '',
     });

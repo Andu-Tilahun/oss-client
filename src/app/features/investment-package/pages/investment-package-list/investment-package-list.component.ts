@@ -9,11 +9,11 @@ import {
 import {InvestmentPackageService} from '../../services/investment-package.service';
 import {ApiResponse, PageResponse} from '../../../../shared/models/api-response.model';
 import {
-  FundingStatus,
   InvestmentPackage,
   InvestmentPackageFilterRequest,
   InvestmentPackageType,
 } from '../../models/investment-package.model';
+import {FundingStatus, FUNDING_STATUSES} from '../../../../shared/models/funding-status.model';
 import {TabItem} from '../../../../shared/tabs/models/tab-item.model';
 import {UserService} from '../../../users/services/user.service';
 import {User} from '../../../users/models/user.model';
@@ -100,9 +100,6 @@ export class InvestmentPackageListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (!this.authService.isInvestor()) {
-      this.status = 'OPEN';
-    }
     this.loadInvestmentPackages();
   }
 
@@ -116,7 +113,7 @@ export class InvestmentPackageListComponent implements OnInit {
   private buildFilterRequest(): InvestmentPackageFilterRequest {
     return {
       searchText: this.searchText || undefined,
-      statuses: this.status ? [this.status] : undefined,
+      statuses: this.status ? [this.status] : FUNDING_STATUSES,
       sortBy: 'fundingDeadline',
       sortDirection: 'DESC',
       page: this.currentPage,

@@ -1,6 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {InvestmentPackage, FundingStatus} from '../../models/investment-package.model';
+import {InvestmentPackage} from '../../models/investment-package.model';
+import {FundingStatus} from '../../../../shared/models/funding-status.model';
 import {DetailCardComponent} from '../../../../shared/components/detail-field/detail-card/detail-card.component';
 import {DetailSectionComponent} from '../../../../shared/components/detail-field/detail-section/detail-section.component';
 import {DetailFieldComponent} from '../../../../shared/components/detail-field/detail-field/detail-field.component';

@@ -17,6 +17,7 @@ export class FilterBarComponent implements OnChanges {
   @Input() searchPlaceholder = 'Search...';
   @Input() applyLabel = 'Search';
   @Input() clearLabel = 'Clear Filters';
+  @Input() useIconButtons = false;
 
   @Output() searchChange = new EventEmitter<void>();
   @Output() clearFilters = new EventEmitter<void>();

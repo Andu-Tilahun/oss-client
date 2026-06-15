@@ -1,12 +1,13 @@
 import {User} from "../../users/models/user.model";
 import {FarmPlot, FarmPlotSoilType} from "../../farm-plots/models/farm-plot.model";
 import {FarmFollowUp} from "../../farm-followups/models/farm-followup.model";
+import {FundingStatus} from "../../../shared/models/funding-status.model";
+
+export {FundingStatus, FUNDING_STATUSES} from "../../../shared/models/funding-status.model";
 
 export type FarmActivity = 'CROPS' | 'LIVE_STOCKS' | 'AGRO_FORESTRY';
 export type WaterSource = 'IRRIGATION' | 'RIVER_ACCESS' | 'RAIN_FED';
 export type InvestmentPackageType = 'CROWDFUNDING' | 'BIDDING' | 'LEASING';
-
-export type FundingStatus = 'PENDING' | 'OPEN' | 'ACTIVE' | 'CLOSED' | 'FUNDED' | 'FAILED';
 
 export type InvestmentPaymentMethod = 'CREDIT' | 'BANK_TRANSFER' | 'CRYPTO';
 export type InvestmentStatus = 'PAID' | 'SENT' | 'ACTIVE' | 'PENDING' | 'FAILED' | 'ACCEPTED'| 'REJECTED';

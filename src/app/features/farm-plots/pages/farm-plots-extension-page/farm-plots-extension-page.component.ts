@@ -9,6 +9,7 @@ import { FarmLeaseViewComponent } from '../../../farm-leases/components/farm-lea
 import { TabsComponent } from '../../../../shared/tabs/app-tabs/app-tabs.component';
 import { FarmFollowupsModule } from '../../../farm-followups/farm-followups.module';
 import { FarmLeaseService } from '../../../farm-leases/services/farm-lease.service';
+import { FundingStatus } from '../../../../shared/models/funding-status.model';
 import { SharedModule } from '../../../../shared/shared.module';
 import { environment } from '../../../../../environments/environment';
 import { Router } from '@angular/router';
@@ -176,7 +177,7 @@ export class FarmPlotsExtensionPageComponent implements OnInit {
         title: 'Bole West Leasing Package',
         targetAmount: 120000,
         minimumContribution: 120000,
-        fundingStatus: 'CLOSED',
+        fundingStatus: FundingStatus.CLOSED,
         totalDurationMonths: 4,
         status: 'TERMINATED',
         totalAmount: 120000,
@@ -207,7 +208,7 @@ export class FarmPlotsExtensionPageComponent implements OnInit {
         title: 'Akaki Riverside Leasing Package',
         targetAmount: 98000,
         minimumContribution: 98000,
-        fundingStatus: 'ACTIVE',
+        fundingStatus: FundingStatus.FUNDED,
         totalDurationMonths: 6,
         status: 'ACCEPTED',
         totalAmount: 98000,

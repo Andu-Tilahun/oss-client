@@ -7,19 +7,15 @@
   (searchChange)="onSearch()"
   (clearFilters)="onClearFilters()"
 >
-  <div *ngIf="showStatus" class="flex items-center gap-2 flex-shrink-0 min-w-0">
-    <label class="text-sm font-medium text-slate-600 whitespace-nowrap shrink-0" for="investment-package-status">
-      Status
-    </label>
-    <select
-      id="investment-package-status"
-      [(ngModel)]="status"
-      (ngModelChange)="onStatusChange($event)"
-      class="min-w-[7rem] w-40 max-w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700 bg-white"
-    >
-      <option [ngValue]="''">All</option>
-      <option *ngFor="let s of statuses" [ngValue]="s">{{ s }}</option>
-    </select>
-  </div>
+  <app-funding-status-filter
+    *ngIf="showStatus"
+    [(status)]="status"
+    [statuses]="investmentPackageFundingStatuses"
+    allOptionLabel="All"
+    selectId="investment-package-status"
+    [showLabel]="true"
+    label="Status"
+    (statusChange)="onStatusChange($event)"
+  ></app-funding-status-filter>
 </app-filter-bar>
 

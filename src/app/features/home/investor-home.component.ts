@@ -5,6 +5,7 @@ import {forkJoin, of} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 import {InvestmentPackageService} from '../investment-package/services/investment-package.service';
 import {InvestmentPackage, InvestmentRecord} from '../investment-package/models/investment-package.model';
+import {FundingStatus} from '../../shared/models/funding-status.model';
 import {FarmLeaseService} from '../farm-leases/services/farm-lease.service';
 import {LeaseAgreement} from '../farm-leases/models/farm-lease.model';
 import {PageResponse} from '../../shared/models/api-response.model';
@@ -164,7 +165,7 @@ export class InvestorHomeComponent implements OnInit {
     forkJoin({
       campaigns: this.investmentPackageService
         .filterInvestmentPackages({
-          statuses: ['OPEN'],
+          statuses: [FundingStatus.OPEN],
           sortBy: 'fundingDeadline',
           sortDirection: 'ASC',
           page: 0,

@@ -2,11 +2,11 @@ import {Component, OnInit} from '@angular/core';
 import {jsPDF} from 'jspdf';
 import {LeaseAgreement, LeaseFilterRequest} from '../../models/farm-lease.model';
 import {
-  FundingStatus,
   InvestmentPackage,
   InvestmentPaymentStatus,
   InvestmentRecord,
 } from '../../../investment-package/models/investment-package.model';
+import {FundingStatus} from '../../../../shared/models/funding-status.model';
 import {InvestmentPackageService} from '../../../investment-package/services/investment-package.service';
 import {UserService} from '../../../users/services/user.service';
 import {User} from '../../../users/models/user.model';
@@ -145,7 +145,7 @@ export class FarmLeaseListComponent implements OnInit {
           id: 'invest',
           icon: 'plus',
           title: 'Invest',
-          visible: (r) => r.fundingStatus === 'OPEN',
+          visible: (r) => r.fundingStatus === FundingStatus.OPEN,
           action: (r) => this.onInvest(r),
         },
         {
@@ -154,7 +154,7 @@ export class FarmLeaseListComponent implements OnInit {
           title: 'Download',
           visible: (r) =>
             !!r.agreementId &&
-            (r.fundingStatus === 'FUNDED' || r.fundingStatus === 'ACTIVE'),
+            r.fundingStatus === FundingStatus.FUNDED,
           action: (r) => this.onDownload(r),
         },
       ];
@@ -177,7 +177,7 @@ export class FarmLeaseListComponent implements OnInit {
 
   canAdminReview(lease: LeaseAgreement): boolean {
     return this.hasAppliedInvestors(lease)
-      && (lease.fundingStatus === 'PENDING' || lease.fundingStatus === 'OPEN');
+      && lease.fundingStatus === FundingStatus.OPEN;
   }
 
   get canAssignExtensionWorker(): boolean {
@@ -186,13 +186,19 @@ export class FarmLeaseListComponent implements OnInit {
     }
     return (
       this.authService.isAdmin() &&
-      this.selectedLease.fundingStatus === 'OPEN' &&
+      this.selectedLease.fundingStatus === FundingStatus.OPEN &&
       !this.selectedLease.extensionWorker
     );
   }
 
   public shouldShowLeaseEditButton(_lease: LeaseAgreement | null | undefined): boolean {
     return false;
+  }
+
+  get rightPanelTitle(): string {
+    if (this.selectedLease) return 'Lease Detail';
+    if (this.isInvestorUser && this.plot) return 'Farm Plot Detail';
+    return 'Lease Detail';
   }
 
   onTabChange(tab: string): void {
@@ -244,7 +250,6 @@ export class FarmLeaseListComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.isInvestorUser) {
-      this.status = '';
       this.loadInvestorPlots();
     }
     this.buildTableRowActions();
@@ -263,6 +268,10 @@ export class FarmLeaseListComponent implements OnInit {
     return this.authService.isAdmin();
   }
 
+  get isStaffUser(): boolean {
+    return this.isAdmin || this.isExtensionWorkerUser;
+  }
+
   private shouldApplyInvestorLeaseVisibility(): boolean {
     return this.isInvestorUser && !this.isAdmin;
   }
@@ -270,7 +279,7 @@ export class FarmLeaseListComponent implements OnInit {
   private isLeaseVisibleToInvestor(lease: LeaseAgreement): boolean {
     const userId = this.authService.getCurrentUser()?.id;
     if (!userId) return false;
-    if (lease.fundingStatus === 'OPEN') return true;
+    if (lease.fundingStatus === FundingStatus.OPEN) return true;
     return lease.investorIdList?.includes(userId) ?? false;
   }
 
@@ -278,10 +287,14 @@ export class FarmLeaseListComponent implements OnInit {
     return leases.filter((l) => this.isLeaseVisibleToInvestor(l));
   }
 
+  private resolveStatusFilter(): FundingStatus[] | undefined {
+    return this.status ? [this.status] : undefined;
+  }
+
   private buildFilterRequest(): LeaseFilterRequest {
     return {
       searchText: this.searchText || undefined,
-      statuses: !this.shouldApplyInvestorLeaseVisibility() && this.status ? [this.status] : undefined,
+      statuses: this.resolveStatusFilter(),
       paymentStatuses: this.paymentStatus ? [this.paymentStatus] : undefined,
       soilTypes: this.soilType ? [this.soilType] : undefined,
       sortBy: 'fundingDeadline',
@@ -298,42 +311,44 @@ export class FarmLeaseListComponent implements OnInit {
     return lease.agreementId ?? lease.id ?? null;
   }
 
+  private syncSelectedLeaseAfterLoad(previousId?: string | null): void {
+    if (this.leases.length === 0) {
+      this.selectedLease = null;
+      return;
+    }
+
+    if (previousId) {
+      const match = this.leases.find((l) => l.id === previousId);
+      if (match) {
+        this.selectedLease = {...match};
+        this.refreshPackageInvestmentsIfNeeded();
+        return;
+      }
+    }
+
+    this.selectedLease = {...this.leases[0]};
+    this.detailRefreshKey++;
+    this.refreshPackageInvestmentsIfNeeded();
+  }
+
   loadLeases(): void {
     this.loading = true;
     const request = this.buildFilterRequest();
     this.farmLeaseService.filterLeases(request).subscribe({
       next: (response: PageResponse<LeaseAgreement>) => {
-        const content = this.shouldApplyInvestorLeaseVisibility()
-          ? this.filterLeasesForInvestor(response.content)
-          : response.content;
-        this.leases = content;
-        this.total = this.shouldApplyInvestorLeaseVisibility() ? content.length : response.totalElements;
-        this.loading = false;
-        this.toastService.success('Leases retrieved successfully');
-
+        const rawContent = response.content ?? [];
         const previousSelectedId = this.selectedLease?.id;
 
-        if (this.leases.length === 0) {
-          this.selectedLease = null;
-          return;
+        if (this.shouldApplyInvestorLeaseVisibility()) {
+          this.leases = this.filterLeasesForInvestor(rawContent);
+          this.total = this.leases.length;
+        } else {
+          this.leases = rawContent;
+          this.total = Math.max(response.totalElements ?? 0, rawContent.length);
         }
-
-        if (!previousSelectedId) {
-          this.selectedLease = {...this.leases[0]};
-          this.detailRefreshKey++;
-          return;
-        }
-
-        const match = this.leases.find((l) => l.id === previousSelectedId);
-        if (match) {
-          this.selectedLease = {...match};
-          this.refreshPackageInvestmentsIfNeeded();
-          return;
-        }
-
-        this.selectedLease = {...this.leases[0]};
-        this.detailRefreshKey++;
-        this.refreshPackageInvestmentsIfNeeded();
+        this.loading = false;
+        this.toastService.success('Leases retrieved successfully');
+        this.syncSelectedLeaseAfterLoad(previousSelectedId);
       },
       error: (error) => {
         this.toastService.error(error.message || 'Failed to fetch leases', 'Fetch Leases');
@@ -615,6 +630,7 @@ export class FarmLeaseListComponent implements OnInit {
     }
 
     this.plot = {...plot};
+    this.selectedLease = null;
   }
 
   public onChoosePlot(plot: FarmPlot): void {

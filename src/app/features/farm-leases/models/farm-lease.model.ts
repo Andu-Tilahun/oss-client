@@ -3,11 +3,11 @@ import {FarmPlot, FarmPlotSoilType} from "../../farm-plots/models/farm-plot.mode
 import {FarmFollowUp} from "../../farm-followups/models/farm-followup.model";
 import {
   FarmActivity,
-  FundingStatus,
   InvestmentPackageType,
   InvestmentPaymentStatus,
   WaterSource,
 } from "../../investment-package/models/investment-package.model";
+import {FundingStatus} from "../../../shared/models/funding-status.model";
 
 export type LeaseStatus = 'ACTIVE' | 'PENDING' | 'TERMINATED' | 'ACCEPTED' | 'SENT';
 export type LeaseTermStatus = 'ACTIVE' | 'PAID' | 'PASSED';

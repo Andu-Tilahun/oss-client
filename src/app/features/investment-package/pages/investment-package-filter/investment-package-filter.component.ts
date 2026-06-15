@@ -2,12 +2,13 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {FilterBarComponent} from '../../../../shared/components/filter-bar/filter-bar.component';
-import {FundingStatus} from '../../models/investment-package.model';
+import {FundingStatus, FUNDING_STATUSES} from '../../../../shared/models/funding-status.model';
+import {FundingStatusFilterComponent} from '../../components/funding-status-filter/funding-status-filter.component';
 
 @Component({
   selector: 'app-investment-package-filter',
   standalone: true,
-  imports: [CommonModule, FormsModule, FilterBarComponent],
+  imports: [CommonModule, FormsModule, FilterBarComponent, FundingStatusFilterComponent],
   templateUrl: './investment-package-filter.component.html',
   styleUrls: ['./investment-package-filter.component.css'],
 })
@@ -24,7 +25,7 @@ export class InvestmentPackageFilterComponent {
   @Output() clearFilters = new EventEmitter<void>();
   @Output() filterChange = new EventEmitter<void>();
 
-  readonly statuses: FundingStatus[] = ['PENDING', 'OPEN', 'CLOSED', 'FUNDED', 'FAILED'];
+  readonly investmentPackageFundingStatuses = FUNDING_STATUSES;
 
   onSearchTextChange(value: string) {
     this.searchTextChange.emit(value);
@@ -45,4 +46,3 @@ export class InvestmentPackageFilterComponent {
     this.clearFilters.emit();
   }
 }
-
