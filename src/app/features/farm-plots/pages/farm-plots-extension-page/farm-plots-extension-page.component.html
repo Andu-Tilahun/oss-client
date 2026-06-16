@@ -3,7 +3,7 @@
   [showRightTitle]="true"
   leftTitle="Assigned Farm Plots"
   rightTitle="Assigned Plot Workspace"
-  [rightItem]="selectedLease"
+  [rightItem]="selectedAgreement"
   [showRightEditButton]="false"
   [showRightCloseButton]="false"
   [rightActions]="[]"
@@ -50,11 +50,11 @@
           <p class="text-sm text-gray-500">Completed or non-active assignments and their details.</p>
         </div>
 
-        <div *ngIf="previousAssignedLeases.length === 0" class="text-sm text-gray-500">
+        <div *ngIf="previousAssignedAgreements.length === 0" class="text-sm text-gray-500">
           No previously assigned farm plots found.
         </div>
 
-        <div *ngIf="previousAssignedLeases.length > 0" class="overflow-x-auto rounded-lg border border-slate-200">
+        <div *ngIf="previousAssignedAgreements.length > 0" class="overflow-x-auto rounded-lg border border-slate-200">
           <table class="min-w-full divide-y divide-slate-200 text-sm">
             <thead class="bg-slate-50">
               <tr>
@@ -66,24 +66,24 @@
             </thead>
             <tbody class="divide-y divide-slate-100">
               <tr
-                *ngFor="let lease of previousAssignedLeases"
+                *ngFor="let agreement of previousAssignedAgreements"
                 class="cursor-pointer hover:bg-slate-50"
-                (click)="selectPreviousLease(lease)"
+                (click)="selectPreviousAgreement(agreement)"
               >
-                <td class="px-3 py-2 text-slate-800">{{ lease.farmPlot.title || '-' }}</td>
-                <td class="px-3 py-2 text-slate-600">{{ lease.startDate | date : 'mediumDate' }}</td>
-                <td class="px-3 py-2 text-slate-600">{{ lease.endDate | date : 'mediumDate' }}</td>
+                <td class="px-3 py-2 text-slate-800">{{ agreement.farmPlot.title || '-' }}</td>
+                <td class="px-3 py-2 text-slate-600">{{ agreement.startDate | date : 'mediumDate' }}</td>
+                <td class="px-3 py-2 text-slate-600">{{ agreement.endDate | date : 'mediumDate' }}</td>
                 <td class="px-3 py-2">
                   <span class="inline-flex rounded-full border border-slate-200 px-2 py-0.5 text-xs font-medium text-slate-700">
-                    {{ lease.status }}
+                    {{ agreement.status }}
                   </span>
                 </td>
               </tr>
             </tbody>
           </table>
           <div class="flex items-center justify-between border-t border-slate-200 bg-white px-3 py-2 text-xs text-slate-500">
-            <span>Show {{ previousAssignedLeases.length }} entries</span>
-            <span>Showing 1 to {{ previousAssignedLeases.length }} of {{ previousAssignedLeases.length }} results</span>
+            <span>Show {{ previousAssignedAgreements.length }} entries</span>
+            <span>Showing 1 to {{ previousAssignedAgreements.length }} of {{ previousAssignedAgreements.length }} results</span>
           </div>
         </div>
       </section>
@@ -91,18 +91,18 @@
   </ng-template>
 
   <ng-template #rightContent>
-    <div *ngIf="selectedPlot && selectedLease; else noSelection">
+    <div *ngIf="selectedPlot && selectedAgreement; else noSelection">
       <app-tabs [tabs]="tabs" [activeTab]="activeTab" (activeTabChange)="activeTab = $event">
         <div *ngIf="activeTab === 'farm-plot'">
           <app-farm-plot-view [plot]="selectedPlot"></app-farm-plot-view>
         </div>
         <div *ngIf="activeTab === 'lease'">
-          <app-farm-lease-view [lease]="selectedLease"></app-farm-lease-view>
+          <app-investment-package-type-view [agreement]="selectedAgreement"></app-investment-package-type-view>
         </div>
         <div *ngIf="activeTab === 'follow-up'">
           <app-farm-followup-list
-            [followUps]="selectedLease.followUpDtoList ?? []"
-            [externalId]="selectedLease.id"
+            [followUps]="selectedAgreement.followUpDtoList ?? []"
+            [externalId]="selectedAgreement.id"
           ></app-farm-followup-list>
         </div>
       </app-tabs>

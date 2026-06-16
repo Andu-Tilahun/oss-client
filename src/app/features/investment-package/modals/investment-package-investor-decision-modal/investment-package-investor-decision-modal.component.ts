@@ -5,8 +5,8 @@ import {ToastService} from '../../../../shared/toast/toast.service';
 import {InvestmentPackageService} from '../../services/investment-package.service';
 import {InvestmentRecord} from '../../models/investment-package.model';
 import {
-  AdminLeaseDecision
-} from "../../../farm-leases/modals/farm-lease-approve-modal/farm-lease-approve-modal.component";
+  AdminInvestmentPackageTypeDecision
+} from "../../../investment-package-types/modals/investment-package-type-admin-action-modal/investment-package-type-admin-action-modal.component";
 import {FormsModule} from "@angular/forms";
 
 export type InvestorDecision = 'ACCEPTED' | 'REJECTED';
@@ -24,7 +24,7 @@ export class InvestmentPackageInvestorDecisionModalComponent {
   @Input() investment: InvestmentRecord | null = null;
   isSaving = false;
   isLoading = false;
-  decision: AdminLeaseDecision = 'ACCEPTED';
+  decision: AdminInvestmentPackageTypeDecision = 'ACCEPTED';
 
   constructor(
     private investmentPackageService: InvestmentPackageService,

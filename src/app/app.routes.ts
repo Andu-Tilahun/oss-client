@@ -258,8 +258,8 @@ export const routes: Routes = [
     data: { roles: ['EXTENSION_WORKER', 'ADMIN'] },
   },
   {
-    path: 'farm-leases',
-    loadChildren: () => import('./features/farm-leases/farm-leases.module').then(m => m.FarmLeasesModule),
+    path: 'investment-package-types',
+    loadChildren: () => import('./features/investment-package-types/investment-package-types.module').then(m => m.InvestmentPackageTypesModule),
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
   },

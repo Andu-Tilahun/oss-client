@@ -1,21 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FarmPlot } from '../../models/farm-plot.model';
-import { LeaseAgreement, LeaseFilterRequest } from '../../../farm-leases/models/farm-lease.model';
+import { InvestmentPackageTypeAgreement, InvestmentPackageTypeFilterRequest } from '../../../investment-package-types/models/investment-package-type.model';
 import { TabItem } from '../../../../shared/tabs/models/tab-item.model';
 import { PageSplitLayoutComponent } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
 import { FarmPlotViewComponent } from '../../components/farm-plot-view/farm-plot-view.component';
-import { FarmLeaseViewComponent } from '../../../farm-leases/components/farm-lease-view/farm-lease-view.component';
+import { InvestmentPackageTypeViewComponent } from '../../../investment-package-types/components/investment-package-type-view/investment-package-type-view.component';
 import { TabsComponent } from '../../../../shared/tabs/app-tabs/app-tabs.component';
 import { FarmFollowupsModule } from '../../../farm-followups/farm-followups.module';
-import { FarmLeaseService } from '../../../farm-leases/services/farm-lease.service';
+import { InvestmentPackageTypeService } from '../../../investment-package-types/services/investment-package-type.service';
 import { FundingStatus } from '../../../../shared/models/funding-status.model';
 import { SharedModule } from '../../../../shared/shared.module';
 import { environment } from '../../../../../environments/environment';
 import { Router } from '@angular/router';
 
 interface AssignedFarmPlot extends FarmPlot {
-  lease: LeaseAgreement;
+  agreement: InvestmentPackageTypeAgreement;
 }
 
 @Component({
@@ -25,7 +25,7 @@ interface AssignedFarmPlot extends FarmPlot {
     CommonModule,
     PageSplitLayoutComponent,
     FarmPlotViewComponent,
-    FarmLeaseViewComponent,
+    InvestmentPackageTypeViewComponent,
     TabsComponent,
     FarmFollowupsModule,
     SharedModule,
@@ -35,9 +35,9 @@ interface AssignedFarmPlot extends FarmPlot {
 export class FarmPlotsExtensionPageComponent implements OnInit {
   private readonly storageApiUrl = `${environment.apiUrl}/files`;
   activeAssignedPlots: AssignedFarmPlot[] = [];
-  previousAssignedLeases: LeaseAgreement[] = [];
+  previousAssignedAgreements: InvestmentPackageTypeAgreement[] = [];
   selectedPlot: AssignedFarmPlot | null = null;
-  selectedLease: LeaseAgreement | null = null;
+  selectedAgreement: InvestmentPackageTypeAgreement | null = null;
   activeTab = 'farm-plot';
   readonly tabs: TabItem[] = [
     { key: 'farm-plot', label: 'Farm Plot Detail' },
@@ -51,39 +51,39 @@ export class FarmPlotsExtensionPageComponent implements OnInit {
     plot.imageUuid ? `${this.storageApiUrl}/${plot.imageUuid}` : null;
 
   constructor(
-    private farmLeaseService: FarmLeaseService,
+    private investmentPackageTypeService: InvestmentPackageTypeService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.previousAssignedLeases = this.buildMockPreviousAssignedLeases();
+    this.previousAssignedAgreements = this.buildMockPreviousAssignedAgreements();
     this.loadAssignedPlots();
   }
 
   selectPlot(plot: AssignedFarmPlot | null): void {
     if (plot && this.isMobileViewport()) {
-      void this.router.navigate(['/farm-plots-extension/detail', plot.lease.id], {
-        state: { lease: plot.lease },
+      void this.router.navigate(['/farm-plots-extension/detail', plot.agreement.id], {
+        state: { agreement: plot.agreement },
       });
       return;
     }
     this.selectedPlot = plot;
-    this.selectedLease = plot?.lease ?? null;
+    this.selectedAgreement = plot?.agreement ?? null;
     this.activeTab = 'farm-plot';
   }
 
-  selectPreviousLease(lease: LeaseAgreement): void {
-    if (!lease?.farmPlot) return;
+  selectPreviousAgreement(agreement: InvestmentPackageTypeAgreement): void {
+    if (!agreement?.farmPlot) return;
     if (this.isMobileViewport()) {
-      void this.router.navigate(['/farm-plots-extension/detail', lease.id], {
-        state: { lease },
+      void this.router.navigate(['/farm-plots-extension/detail', agreement.id], {
+        state: { agreement },
       });
       return;
     }
-    this.selectedLease = lease;
+    this.selectedAgreement = agreement;
     this.selectedPlot = {
-      ...lease.farmPlot,
-      lease,
+      ...agreement.farmPlot,
+      agreement,
     };
     this.activeTab = 'farm-plot';
   }
@@ -104,26 +104,26 @@ export class FarmPlotsExtensionPageComponent implements OnInit {
   }
 
   private loadAssignedPlots(): void {
-    const request: LeaseFilterRequest = {
+    const request: InvestmentPackageTypeFilterRequest = {
       sortBy: 'startDate',
       sortDirection: 'DESC',
       page: 0,
       size: 1000,
     };
 
-    this.farmLeaseService.filterLeases(request).subscribe({
+    this.investmentPackageTypeService.filter(request).subscribe({
       next: (response) => {
-        const leases = response.content ?? [];
-        const assigned = leases
-          .filter((lease) => !!lease?.farmPlot)
-          .map((lease) => ({
-            ...lease.farmPlot,
-            lease,
+        const agreements = response.content ?? [];
+        const assigned = agreements
+          .filter((agreement) => !!agreement?.farmPlot)
+          .map((agreement) => ({
+            ...agreement.farmPlot,
+            agreement,
           }));
 
         const currentlyAssignedStatuses = new Set(['ACTIVE', 'ACCEPTED', 'SENT', 'OPEN', 'FUNDED']);
         this.activeAssignedPlots = assigned.filter((item) => {
-          const status = item.lease.status ?? item.lease.fundingStatus ?? '';
+          const status = item.agreement.status ?? item.agreement.fundingStatus ?? '';
           return currentlyAssignedStatuses.has(status);
         });
 
@@ -136,7 +136,7 @@ export class FarmPlotsExtensionPageComponent implements OnInit {
     });
   }
 
-  private buildMockPreviousAssignedLeases(): LeaseAgreement[] {
+  private buildMockPreviousAssignedAgreements(): InvestmentPackageTypeAgreement[] {
     const investorUser = {
       id: 'mock-investor-1',
       username: 'investor.user',

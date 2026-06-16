@@ -6,8 +6,8 @@ import {catchError} from 'rxjs/operators';
 import {InvestmentPackageService} from '../investment-package/services/investment-package.service';
 import {InvestmentPackage, InvestmentRecord} from '../investment-package/models/investment-package.model';
 import {FundingStatus} from '../../shared/models/funding-status.model';
-import {FarmLeaseService} from '../farm-leases/services/farm-lease.service';
-import {LeaseAgreement} from '../farm-leases/models/farm-lease.model';
+import {InvestmentPackageTypeService} from '../investment-package-types/services/investment-package-type.service';
+import {InvestmentPackageTypeAgreement} from '../investment-package-types/models/investment-package-type.model';
 import {PageResponse} from '../../shared/models/api-response.model';
 
 interface MoneyBarRow {
@@ -42,7 +42,7 @@ export class InvestorHomeComponent implements OnInit {
   loading = true;
   greeting = '';
 
-  recentLeases: LeaseAgreement[] = [];
+  recentPackageTypes: InvestmentPackageTypeAgreement[] = [];
   campaigns: InvestmentPackage[] = [];
 
   /** Sum of lease contract value for “in play” statuses (excludes terminated). */
@@ -87,7 +87,7 @@ export class InvestorHomeComponent implements OnInit {
 
   constructor(
     private investmentPackageService: InvestmentPackageService,
-    private farmLeaseService: FarmLeaseService
+    private investmentPackageTypeService: InvestmentPackageTypeService
   ) {}
 
   ngOnInit(): void {
@@ -172,14 +172,14 @@ export class InvestorHomeComponent implements OnInit {
           size: 12,
         })
         .pipe(catchError(() => of(this.emptyPage<InvestmentPackage>()))),
-      leases: this.farmLeaseService
-        .filterLeases({
+      packageTypes: this.investmentPackageTypeService
+        .filter({
           sortBy: 'startDate',
           sortDirection: 'DESC',
           page: 0,
           size: 120,
         })
-        .pipe(catchError(() => of(this.emptyPage<LeaseAgreement>()))),
+        .pipe(catchError(() => of(this.emptyPage<InvestmentPackageTypeAgreement>()))),
       investments: this.investmentPackageService
         .filterInvestments({
           sortBy: 'startDate',
@@ -189,15 +189,15 @@ export class InvestorHomeComponent implements OnInit {
         })
         .pipe(catchError(() => of(this.emptyPage<InvestmentRecord>()))),
     }).subscribe({
-      next: ({campaigns, leases, investments}) => {
-        const leaseList = leases.content ?? [];
+      next: ({campaigns, packageTypes, investments}) => {
+        const packageTypeList = packageTypes.content ?? [];
         const invList = investments.content ?? [];
 
-        this.recentLeases = leaseList.slice(0, 8);
+        this.recentPackageTypes = packageTypeList.slice(0, 8);
         this.campaigns = campaigns.content ?? [];
 
         const leaseCommittedStatuses = new Set(['ACTIVE', 'ACCEPTED', 'SENT', 'PENDING', 'OPEN', 'FUNDED']);
-        this.totalLeaseCommitted = leaseList
+        this.totalLeaseCommitted = packageTypeList
           .filter((l) => leaseCommittedStatuses.has(l.status ?? l.fundingStatus ?? ''))
           .reduce((s, l) => s + (l.totalAmount ?? l.targetAmount ?? 0), 0);
 
@@ -222,10 +222,10 @@ export class InvestorHomeComponent implements OnInit {
         }
 
         this.leaseCapitalByStatus = this.toMoneyBars(
-          this.sumBy(leaseList, (l) => l.status ?? l.fundingStatus ?? '-', (l) => l.totalAmount ?? l.targetAmount ?? 0),
+          this.sumBy(packageTypeList, (l) => l.status ?? l.fundingStatus ?? '-', (l) => l.totalAmount ?? l.targetAmount ?? 0),
         );
-        this.computeInvestmentSelectionSlices(leaseList, invList);
-        this.leaseMonthlyTrend = this.buildLeaseMonthlyTrend(leaseList);
+        this.computeInvestmentSelectionSlices(packageTypeList, invList);
+        this.leaseMonthlyTrend = this.buildPackageTypeMonthlyTrend(packageTypeList);
         this.crowdWeightedRoiPct = this.weightedCrowdRoi(invList);
 
         this.loading = false;
@@ -241,14 +241,14 @@ export class InvestorHomeComponent implements OnInit {
    * Bid = pending lease applications + pending crowd commitments.
    * Crowd = funded/active crowd positions (non-pending).
    */
-  private computeInvestmentSelectionSlices(leaseList: LeaseAgreement[], invList: InvestmentRecord[]): void {
+  private computeInvestmentSelectionSlices(packageTypeList: InvestmentPackageTypeAgreement[], invList: InvestmentRecord[]): void {
     const liveLease = new Set(['ACTIVE', 'ACCEPTED', 'SENT', 'FUNDED']);
-    this.selectionLease = leaseList
+    this.selectionLease = packageTypeList
       .filter((l) => liveLease.has(l.status ?? l.fundingStatus ?? ''))
       .reduce((s, l) => s + (l.totalAmount ?? l.targetAmount ?? 0), 0);
 
     this.selectionBid =
-      leaseList.filter((l) => (l.status ?? '') === 'PENDING').reduce((s, l) => s + (l.totalAmount ?? l.targetAmount ?? 0), 0) +
+      packageTypeList.filter((l) => (l.status ?? '') === 'PENDING').reduce((s, l) => s + (l.totalAmount ?? l.targetAmount ?? 0), 0) +
       invList.filter((i) => i.status === 'PENDING').reduce((s, i) => s + (i.amount ?? 0), 0);
 
     const crowdLive = new Set(['ACTIVE', 'SENT', 'PAID', 'ACCEPTED']);
@@ -283,8 +283,8 @@ export class InvestorHomeComponent implements OnInit {
       .sort((a, b) => b.amount - a.amount);
   }
 
-  /** Last 6 months: sum of lease contract value by start month. */
-  private buildLeaseMonthlyTrend(leases: LeaseAgreement[]): TrendPoint[] {
+  /** Last 6 months: sum of package type contract value by start month. */
+  private buildPackageTypeMonthlyTrend(packageTypes: InvestmentPackageTypeAgreement[]): TrendPoint[] {
     const now = new Date();
     const months: { key: string; label: string; start: Date }[] = [];
     for (let i = 5; i >= 0; i--) {
@@ -296,7 +296,7 @@ export class InvestorHomeComponent implements OnInit {
     const sums: Record<string, number> = {};
     for (const m of months) sums[m.key] = 0;
 
-    for (const l of leases) {
+    for (const l of packageTypes) {
       if (!l.startDate) continue;
       const sd = new Date(l.startDate);
       if (!Number.isFinite(sd.getTime())) continue;

@@ -139,7 +139,7 @@ export class FarmPlotsExplorePageComponent implements OnInit {
   }
 
   goToLeases(): void {
-    void this.router.navigateByUrl('/farm-leases');
+    void this.router.navigateByUrl('/investment-package-types/leasing');
   }
 
   private applyClientFilters(): void {

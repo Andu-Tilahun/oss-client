@@ -14,7 +14,6 @@ import {
   InvestmentRecordCreateRequest,
 } from '../models/investment-package.model';
 import {AssignExtensionWorkerRequest} from "../../assign-extension-worker-request";
-import {LeaseAgreement} from "../../farm-leases/models/farm-lease.model";
 
 @Injectable({providedIn: 'root'})
 export class InvestmentPackageService {

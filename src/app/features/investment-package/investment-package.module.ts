@@ -6,6 +6,7 @@ import {PageSplitLayoutComponent} from '../../shared/components/page-split-layou
 import {InvestmentPackageRoutingModule} from './investment-package-routing.module';
 import {InvestmentPackageListComponent} from './pages/investment-package-list/investment-package-list.component';
 import {InvestmentPackageViewComponent} from './components/investment-package-view/investment-package-view.component';
+import {InvestmentPackageDetailPanelComponent} from './components/investment-package-detail-panel/investment-package-detail-panel.component';
 import {InvestmentPackageCreateModalComponent} from './modals/investment-package-create-modal/investment-package-create-modal.component';
 import {InvestmentPackageEditModalComponent} from './modals/investment-package-edit-modal/investment-package-edit-modal.component';
 import {InvestmentPackageCreateInvestmentModalComponent} from './modals/investment-package-create-investment-modal/investment-package-create-investment-modal.component';
@@ -36,6 +37,7 @@ import {UserViewComponent} from "../users/components/user-view/user-view.compone
         InvestmentPackageFilterComponent,
         InvestmentPackageInvestmentFilterComponent,
         InvestmentPackageViewComponent,
+        InvestmentPackageDetailPanelComponent,
         InvestmentPackageInvestmentViewComponent,
         InvestmentPackageCreateModalComponent,
         InvestmentPackageEditModalComponent,

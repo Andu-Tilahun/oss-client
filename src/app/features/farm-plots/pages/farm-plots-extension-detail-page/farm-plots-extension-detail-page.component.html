@@ -9,20 +9,20 @@
     </a>
   </div>
 
-  <div *ngIf="!lease" class="text-sm text-gray-500">Unable to load assigned plot details.</div>
+  <div *ngIf="!agreement" class="text-sm text-gray-500">Unable to load assigned plot details.</div>
 
-  <div *ngIf="lease">
+  <div *ngIf="agreement">
     <app-tabs [tabs]="tabs" [activeTab]="activeTab" (activeTabChange)="activeTab = $event">
       <div *ngIf="activeTab === 'farm-plot'">
-        <app-farm-plot-view [plot]="lease.farmPlot"></app-farm-plot-view>
+        <app-farm-plot-view [plot]="agreement.farmPlot"></app-farm-plot-view>
       </div>
       <div *ngIf="activeTab === 'lease'">
-        <app-farm-lease-view [lease]="lease"></app-farm-lease-view>
+        <app-investment-package-type-view [agreement]="agreement"></app-investment-package-type-view>
       </div>
       <div *ngIf="activeTab === 'follow-up'">
         <app-farm-followup-list
-          [followUps]="lease.followUpDtoList ?? []"
-          [externalId]="lease.id"
+          [followUps]="agreement.followUpDtoList ?? []"
+          [externalId]="agreement.id"
         ></app-farm-followup-list>
       </div>
     </app-tabs>

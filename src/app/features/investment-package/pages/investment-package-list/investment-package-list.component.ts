@@ -7,7 +7,7 @@ import {
   PageSplitRightAction
 } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
 import {InvestmentPackageService} from '../../services/investment-package.service';
-import {ApiResponse, PageResponse} from '../../../../shared/models/api-response.model';
+import {PageResponse} from '../../../../shared/models/api-response.model';
 import {
   InvestmentPackage,
   InvestmentPackageFilterRequest,
@@ -15,8 +15,6 @@ import {
 } from '../../models/investment-package.model';
 import {FundingStatus, FUNDING_STATUSES} from '../../../../shared/models/funding-status.model';
 import {TabItem} from '../../../../shared/tabs/models/tab-item.model';
-import {UserService} from '../../../users/services/user.service';
-import {User} from '../../../users/models/user.model';
 
 @Component({
   selector: 'app-investment-package-list',
@@ -42,11 +40,6 @@ export class InvestmentPackageListComponent implements OnInit {
   showEditInvestmentPackageModal = false;
   showCreateInvestmentModal = false;
 
-  extensionWorkers: User[] = [];
-  selectedExtensionWorkerId: string | null = null;
-  loadingExtensionWorkers = false;
-  assigningExtensionWorker = false;
-
   columns: DataTableColumn<InvestmentPackage>[] = [
     {header: 'Title', value: (c) => c.title},
     {header: 'Status', value: (c) => c.fundingStatus, defaultVisible: false},
@@ -55,8 +48,6 @@ export class InvestmentPackageListComponent implements OnInit {
     {header: 'Target', value: (c) => this.formatAmount(c.targetAmount)},
     {header: 'Minimum', value: (c) => this.formatAmount(c.minimumContribution)},
   ];
-
-  activeTab = 'detail';
 
   tabs: TabItem[] = [
     {key: 'detail', label: 'Detail'},
@@ -71,7 +62,6 @@ export class InvestmentPackageListComponent implements OnInit {
     private investmentPackageService: InvestmentPackageService,
     private toastService: ToastService,
     private authService: AuthService,
-    private userService: UserService,
   ) {
     this.rightActions = [
       {
@@ -88,26 +78,13 @@ export class InvestmentPackageListComponent implements OnInit {
     return this.authService.isAdmin();
   }
 
-  get canAssignExtensionWorker(): boolean {
-    if (!this.selectedInvestmentPackage) {
-      return false;
-    }
-    return (
-      this.authService.isAdmin() &&
-      this.selectedInvestmentPackage.fundingStatus === 'OPEN' &&
-      !this.selectedInvestmentPackage.extensionWorker
-    );
-  }
-
   ngOnInit(): void {
     this.loadInvestmentPackages();
   }
 
-  onTabChange(tab: string): void {
-    this.activeTab = tab;
-    if (tab === 'extension-worker' && this.extensionWorkers.length === 0 && !this.loadingExtensionWorkers) {
-      this.loadExtensionWorkers();
-    }
+  onExtensionWorkerAssigned(pkg: InvestmentPackage): void {
+    this.selectedInvestmentPackage = pkg;
+    this.detailRefreshKey++;
   }
 
   private buildFilterRequest(): InvestmentPackageFilterRequest {
@@ -155,21 +132,6 @@ export class InvestmentPackageListComponent implements OnInit {
     });
   }
 
-  loadExtensionWorkers(): void {
-    this.loadingExtensionWorkers = true;
-    this.userService.getUsersByRole('EXTENSION_WORKER').subscribe({
-      next: (users) => {
-        this.extensionWorkers = users ?? [];
-        this.loadingExtensionWorkers = false;
-      },
-      error: () => {
-        this.extensionWorkers = [];
-        this.loadingExtensionWorkers = false;
-        this.toastService.error('Failed to load extension workers', 'Extension Worker');
-      },
-    });
-  }
-
   onPageChange(params: TableQueryParams) {
     this.pageIndex = params.pageIndex;
     this.currentPage = this.pageIndex - 1;
@@ -206,7 +168,6 @@ export class InvestmentPackageListComponent implements OnInit {
   onView(c: InvestmentPackage): void {
     this.selectedInvestmentPackage = {...c};
     this.showCreateInvestmentModal = false;
-    this.selectedExtensionWorkerId = null;
   }
 
   onEdit(c: InvestmentPackage): void {
@@ -234,42 +195,6 @@ export class InvestmentPackageListComponent implements OnInit {
   onInvestmentCreated(): void {
     this.showCreateInvestmentModal = false;
     this.toastService.success('Investment registered successfully');
-  }
-
-  assignExtensionWorker(): void {
-    if (!this.selectedInvestmentPackage?.id || !this.selectedExtensionWorkerId) {
-      return;
-    }
-
-    this.assigningExtensionWorker = true;
-    this.investmentPackageService.assignExtensionWorker({
-      externalId: this.selectedInvestmentPackage.id,
-      extensionWorkerId: this.selectedExtensionWorkerId,
-    }).subscribe({
-      next: (res: ApiResponse<InvestmentPackage>) => {
-        this.assigningExtensionWorker = false;
-        this.selectedInvestmentPackage = res?.data ?? null;
-        this.selectedExtensionWorkerId = null;
-        this.detailRefreshKey++;
-        this.toastService.success('Extension Worker assigned successfully');
-      },
-      error: () => {
-        this.assigningExtensionWorker = false;
-        this.toastService.error('Failed to assign Extension Worker');
-      },
-    });
-  }
-
-  formatWorkerName(worker: User | null | undefined): string {
-    if (!worker) {
-      return '-';
-    }
-    const name = [worker.firstName, worker.lastName].filter(Boolean).join(' ').trim();
-    return name || worker.username || worker.email || '-';
-  }
-
-  getExtensionWorkerDisplayName(user: User): string {
-    return this.formatWorkerName(user);
   }
 
   private formatPackageType(value: InvestmentPackageType | undefined): string {

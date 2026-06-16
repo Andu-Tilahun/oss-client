@@ -22,7 +22,7 @@ export const Endpoints = {
   // Farm
   FARM_PLOTS_ENDPOINT: '/farm/farm-plots',
   FARM_COMPANY_ENDPOINT: '/farm/company',
-  FARM_LEASES_ENDPOINT: '/farm/leases',
+  INVESTMENT_PACKAGE_TYPES_ENDPOINT: '/farm/leases',
   INVESTMENT_PACKAGES_ENDPOINT: '/farm/investment-packages',
   FARM_FOLLOWUPS_ENDPOINT: '/farm/followups',
 
