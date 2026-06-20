@@ -3,7 +3,7 @@
   [showRightTitle]="true"
   [leftTitle]="pageTitle"
   [rightTitle]="rightPanelTitle"
-  [rightItem]="selectedAgreement"
+  [rightItem]="rightPanelItem"
   [rightEmptyMessage]="'Select a row to view details.'"
   [showRightEditButton]="!!selectedAgreement && shouldShowPackageTypeEditButton(selectedAgreement)"
   [rightActions]="[]"
@@ -25,8 +25,8 @@
           [showAddButton]="false"
           [showRefreshButton]="!isInvestorUser"
           [showViewButton]="false"
-          [showEditButton]="isAdmin"
-          [showDeleteButton]="isAdmin"
+          [showEditButton]="false"
+          [showDeleteButton]="false"
           [showActionColumn]="true"
           [rowActions]="tableRowActions"
           [actionCellLabel]="isAdmin ? getAdminActionCellLabel : undefined"
@@ -34,8 +34,6 @@
           (pageChange)="onPageChange($event)"
           (refreshClick)="onRefresh()"
           (rowClick)="onView($event)"
-          (editClick)="onEditPackage($event)"
-          (deleteClick)="onDeletePackage($event)"
         >
           <div extraTableHeader class="w-full min-w-0" *ngIf="myRequest">
             <app-investment-package-type-filter
@@ -110,24 +108,33 @@
     </div>
   </ng-template>
 
-  <ng-template #rightContent let-agreement>
-    <div *ngIf="isInvestorUser && plot && !selectedAgreement">
-      <app-farm-plot-view
-        [plot]="plot"
-        [showCreateLeaseButton]="true"
-        (createLease)="openCreatePackageTypeFromPreview()"
-      ></app-farm-plot-view>
-    </div>
-
-    <app-investment-package-detail-panel
-      [investmentPackage]="asInvestmentPackage(agreement)"
+  <ng-template #rightContent let-item>
+    <app-investment-package-type-plot-detail
+      *ngIf="selectedAgreement"
+      mode="lease"
+      [embedded]="true"
+      [agreement]="item"
+      [investmentPackageType]="investmentPackageType"
       [refreshKey]="detailRefreshKey"
       [tabs]="tabs"
+      [forcedTab]="pendingForcedTab"
       [packageInvestments]="packageInvestments"
       [packageInvestmentsLoading]="packageInvestmentsLoading"
       (tabChange)="onTabChange($event)"
       (extensionWorkerAssigned)="onExtensionWorkerAssigned($event)"
-    ></app-investment-package-detail-panel>
+      (candidatesChosen)="onCandidatesChosen()"
+      (agreementCreated)="onAgreementCreated()"
+    ></app-investment-package-type-plot-detail>
+
+    <app-investment-package-type-plot-detail
+      *ngIf="!selectedAgreement && plot"
+      mode="plot"
+      [embedded]="true"
+      [plot]="plot"
+      [investmentPackageType]="investmentPackageType"
+      [showCreateLeaseButton]="true"
+      (createLease)="openCreatePackageTypeFromPreview()"
+    ></app-investment-package-type-plot-detail>
   </ng-template>
 </app-page-split-layout>
 

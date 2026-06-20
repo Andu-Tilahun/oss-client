@@ -10,7 +10,7 @@
 
     <app-detail-section title="Investment">
       <app-detail-field label="investmentPackage"
-                        [value]="investment.crowdFunding?.title || investment.crowdFundingId || '-'"/>
+                        [value]="investment.investmentPackage?.title || investment.investmentPackageId || '-'"/>
       <app-detail-field label="Amount" [value]="formatAmount(investment.amount)"/>
       <app-detail-field label="Payment method" [value]="investment.paymentMethod || '-'"/>
       <app-detail-field label="Status" [value]="investment.status || '-'"/>

@@ -57,6 +57,7 @@ export class InvestmentPackageListComponent implements OnInit {
   ];
 
   rightActions: PageSplitRightAction<InvestmentPackage>[];
+  tableRowActions: PageSplitRightAction<InvestmentPackage>[];
 
   constructor(
     private investmentPackageService: InvestmentPackageService,
@@ -70,6 +71,15 @@ export class InvestmentPackageListComponent implements OnInit {
         title: 'Invest',
         visible: (c) => this.authService.isInvestor() && c.fundingStatus == 'OPEN',
         action: (c) => this.onInvest(c),
+      },
+    ];
+    this.tableRowActions = [
+      {
+        id: 'edit',
+        icon: 'edit',
+        title: 'Edit',
+        visible: (c) => this.isAdmin && c.fundingStatus !== 'CLOSED',
+        action: (c) => this.onEdit(c),
       },
     ];
   }

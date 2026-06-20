@@ -24,7 +24,13 @@ export const Endpoints = {
   FARM_COMPANY_ENDPOINT: '/farm/company',
   INVESTMENT_PACKAGE_TYPES_ENDPOINT: '/farm/leases',
   INVESTMENT_PACKAGES_ENDPOINT: '/farm/investment-packages',
+
+  
+
   FARM_FOLLOWUPS_ENDPOINT: '/farm/followups',
+
+    // investment aggrement
+  INVESTMENT_AGGREMENT_ENDPOINT: '/farm/investment-agreements', 
 
   // Inventory
   EMPLOYEES_ENDPOINT: '/inventory/employees',
@@ -35,4 +41,12 @@ export const Endpoints = {
   TRANSFER_RECORDS_ENDPOINT: '/inventory/transfer-records',
   REPLACEMENT_RECORDS_ENDPOINT: '/inventory/replacement-records',
   GATE_LOGS_ENDPOINT: '/inventory/gate-logs',
+
+
+ 
+
+
+
+  // storage
+  STORAGE_ENDPOINT: '/files',
 }

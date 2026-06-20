@@ -2,7 +2,6 @@ import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {InvestmentPackageTypeListComponent} from './pages/investment-package-type-list/investment-package-type-list.component';
 import {InvestmentPackageTypePlotDetailComponent} from './pages/investment-package-type-plot-detail/investment-package-type-plot-detail.component';
-import {InvestmentPackageTypeMobileDetailComponent} from './pages/investment-package-type-mobile-detail/investment-package-type-mobile-detail.component';
 import {InvestmentPackageType} from '../investment-package/models/investment-package.model';
 
 function packageTypeRoutes(
@@ -18,12 +17,12 @@ function packageTypeRoutes(
     {
       path: 'plot/:id',
       component: InvestmentPackageTypePlotDetailComponent,
-      data: {investmentPackageType, pageTitle},
+      data: {investmentPackageType, pageTitle, detailMode: 'plot'},
     },
     {
       path: 'package/:id',
-      component: InvestmentPackageTypeMobileDetailComponent,
-      data: {investmentPackageType, pageTitle},
+      component: InvestmentPackageTypePlotDetailComponent,
+      data: {investmentPackageType, pageTitle, detailMode: 'lease'},
     },
   ];
 }

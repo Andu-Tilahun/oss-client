@@ -33,6 +33,8 @@ export interface InvestmentPackage {
   attachmentIdList?: string[];
   paymentStatus?: InvestmentPaymentStatus;
   investorIdList?: string[];
+  investorId?: string;
+  investorUser?: User;
   farmPlot: FarmPlot;
   followUpDtoList?: FarmFollowUp[];
   description?: string;
@@ -69,13 +71,14 @@ export interface InvestmentPackageFilterRequest {
 
 export interface InvestmentRecord {
   id: string;
-  crowdFundingId: string;
+  investmentPackageId: string;
   investorId: string;
   amount: number;
   paymentMethod: InvestmentPaymentMethod;
   roi?: string;
   status: InvestmentStatus;
-  crowdFunding?: InvestmentPackage;
+  paymentStatus?: InvestmentPaymentStatus;
+  investmentPackage?: InvestmentPackage;
   investorUser: User;
 }
 
@@ -90,6 +93,38 @@ export interface InvestmentRecordCreateRequest {
   amount: number;
   paymentMethod: InvestmentPaymentMethod;
   attachmentId: string;
+}
+
+export interface ChooseCandidatesRequest {
+  investmentPackageId: string;
+  farmPlotId: string;
+  investorIds: string[];
+}
+
+export interface InvestmentAgreement {
+  id: string;
+  farmPlotId: string;
+  investmentPackageId: string;
+  investorIdList: string[];
+  assignedExtensionWorkerId?: string | null;
+  startDate: string;
+  endDate: string;
+  totalDurationMonths: number;
+  status: string;
+  totalAmount: number;
+  investmentPackageType: InvestmentPackageType;
+  farmPlot: FarmPlot;
+  investorUser?: User;
+  extensionWorker?: User | null;
+  followUpDtoList?: FarmFollowUp[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateInvestmentAgreementRequest {
+  farmPlotId: string;
+  investmentPackageId: string;
+  paymentStatus: InvestmentPaymentStatus;
 }
 
 export interface InvestmentFilterRequest {

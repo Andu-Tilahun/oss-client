@@ -1,18 +1,30 @@
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {InvestmentPackage, InvestmentRecord} from '../../models/investment-package.model';
+import {forkJoin} from 'rxjs';
+import {
+  ChooseCandidatesRequest,
+  CreateInvestmentAgreementRequest,
+  InvestmentAgreement,
+  InvestmentPackage,
+  InvestmentRecord,
+} from '../../models/investment-package.model';
+import {FundingStatus} from '../../../../shared/models/funding-status.model';
+import {Endpoints} from '../../../../core/endpoint/endpoint.model';
+import {environment} from '../../../../../environments/environment';
 import {TabItem} from '../../../../shared/tabs/models/tab-item.model';
 import {TabsComponent} from '../../../../shared/tabs/app-tabs/app-tabs.component';
 import {InvestmentPackageViewComponent} from '../investment-package-view/investment-package-view.component';
 import {FarmPlotViewComponent} from '../../../farm-plots/components/farm-plot-view/farm-plot-view.component';
 import {FarmFollowupsModule} from '../../../farm-followups/farm-followups.module';
 import {UserViewComponent} from '../../../users/components/user-view/user-view.component';
+import {ImageGalleryModalComponent} from '../../../../shared/modals/image-gallery-modal/image-gallery-modal.component';
 import {AuthService} from '../../../auth/services/auth.service';
 import {UserService} from '../../../users/services/user.service';
 import {InvestmentPackageService} from '../../services/investment-package.service';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {User} from '../../../users/models/user.model';
+import {AssignExtensionWorkerRequest, ChangeExtensionWorkerRequest} from '../../../assign-extension-worker-request';
 
 @Component({
   selector: 'app-investment-package-detail-panel',
@@ -25,6 +37,7 @@ import {User} from '../../../users/models/user.model';
     FarmPlotViewComponent,
     FarmFollowupsModule,
     UserViewComponent,
+    ImageGalleryModalComponent,
   ],
   templateUrl: './investment-package-detail-panel.component.html',
 })
@@ -32,17 +45,39 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   @Input() investmentPackage: InvestmentPackage | null = null;
   @Input() refreshKey = 0;
   @Input() tabs: TabItem[] = [];
+  @Input() forcedTab: string | null = null;
   @Input() packageInvestments: InvestmentRecord[] = [];
   @Input() packageInvestmentsLoading = false;
 
   @Output() tabChange = new EventEmitter<string>();
   @Output() extensionWorkerAssigned = new EventEmitter<InvestmentPackage>();
+  @Output() candidatesChosen = new EventEmitter<void>();
+  @Output() agreementCreated = new EventEmitter<void>();
 
   activeTab = '';
   extensionWorkers: User[] = [];
   selectedExtensionWorkerId: string | null = null;
   loadingExtensionWorkers = false;
   assigningExtensionWorker = false;
+  showChangeExtensionWorkerForm = false;
+  changeExtensionWorkerId: string | null = null;
+  changeExtensionWorkerDescription = '';
+  changingExtensionWorker = false;
+  closedLeaseInvestors: User[] = [];
+  closedLeaseInvestorsLoading = false;
+  selectedCandidateIds: string[] = [];
+  choosingCandidates = false;
+  confirmedCandidates: User[] = [];
+  candidatesConfirmedView = false;
+  showAttachmentModal = false;
+  attachmentModalUrls: string[] = [];
+  attachmentModalIndex = 0;
+  agreement: InvestmentAgreement | null = null;
+  agreementLoading = false;
+  creatingAgreement = false;
+  private loadedClosedLeaseInvestorsKey: string | null = null;
+  private lastPackageIdForCandidates: string | null = null;
+  private loadedAgreementId: string | null = null;
 
   constructor(
     private authService: AuthService,
@@ -56,19 +91,75 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
       this.ensureActiveTab();
     }
     if (changes['investmentPackage']) {
-      this.selectedExtensionWorkerId = null;
+      // asInvestmentPackage() rebuilds a new object on every CD cycle, so investmentPackage
+      // changes by reference far more often than the underlying package actually changes.
+      // Only reset transient form state when the package id genuinely differs.
+      if (this.investmentPackage?.id !== this.lastPackageIdForCandidates) {
+        this.lastPackageIdForCandidates = this.investmentPackage?.id ?? null;
+        this.selectedCandidateIds = [];
+        this.confirmedCandidates = [];
+        this.candidatesConfirmedView = false;
+        this.selectedExtensionWorkerId = null;
+        this.showChangeExtensionWorkerForm = false;
+        this.changeExtensionWorkerId = null;
+        this.changeExtensionWorkerDescription = '';
+      }
+      if (this.activeTab === 'investor' || this.activeTab === 'choose-candidate') {
+        this.maybeLoadClosedLeaseInvestors();
+      }
+      if (this.activeTab === 'contract') {
+        this.maybeLoadAgreement();
+      }
+    }
+    if (changes['refreshKey'] && this.forcedTab && this.hasTab(this.forcedTab)) {
+      this.onTabChange(this.forcedTab);
     }
   }
 
   get canAssignExtensionWorker(): boolean {
-    if (!this.investmentPackage) {
+    if (!this.investmentPackage || !this.authService.isAdmin() || this.investmentPackage.extensionWorker) {
       return false;
     }
-    return (
-      this.authService.isAdmin() &&
-      this.investmentPackage.fundingStatus === 'OPEN' &&
-      !this.investmentPackage.extensionWorker
-    );
+    if (this.investmentPackage.investmentPackageType === 'LEASING') {
+      return !!this.investmentPackage.agreementId;
+    }
+    return this.investmentPackage.fundingStatus === 'OPEN';
+  }
+
+  get canChangeExtensionWorker(): boolean {
+    return this.authService.isAdmin() && !!this.investmentPackage?.extensionWorker;
+  }
+
+  get selectedExtensionWorkerDetail(): User | null {
+    return this.extensionWorkers.find((w) => w.id === this.selectedExtensionWorkerId) ?? null;
+  }
+
+  get selectedChangeExtensionWorkerDetail(): User | null {
+    return this.extensionWorkers.find((w) => w.id === this.changeExtensionWorkerId) ?? null;
+  }
+
+  get isAdminRole(): boolean {
+    return this.authService.isAdmin();
+  }
+
+  get isInvestorRole(): boolean {
+    return this.authService.isInvestor();
+  }
+
+  get isExtensionWorkerRole(): boolean {
+    return this.authService.isExtensionWorker();
+  }
+
+  /** The logged-in investor's own profile on this lease, matched by id against the lease's investor reference. */
+  get ownInvestorProfile(): User | null {
+    if (!this.isInvestorRole || !this.investmentPackage) {
+      return null;
+    }
+    const currentUserId = this.authService.getCurrentUser()?.id;
+    if (!currentUserId || this.investmentPackage.investorId !== currentUserId) {
+      return null;
+    }
+    return this.investmentPackage.investorUser ?? null;
   }
 
   hasTab(key: string): boolean {
@@ -81,30 +172,117 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     if (tab === 'extension-worker' && this.extensionWorkers.length === 0 && !this.loadingExtensionWorkers) {
       this.loadExtensionWorkers();
     }
+    if (tab === 'investor' || tab === 'choose-candidate') {
+      this.maybeLoadClosedLeaseInvestors();
+    }
+    if (tab === 'contract') {
+      this.maybeLoadAgreement();
+    }
+  }
+
+  get canConfirmCandidates(): boolean {
+    return !!this.investmentPackage?.attachmentIdList?.length && this.investmentPackage?.paymentStatus === 'PENDING';
+  }
+
+  get canCreateAgreement(): boolean {
+    return !!this.investmentPackage?.attachmentIdList?.length;
+  }
+
+  getInvestorAvatarUrl(profileImageUuid: string | null | undefined): string | null {
+    return this.getFileUrl(profileImageUuid);
+  }
+
+  getFileUrl(fileId: string | null | undefined): string | null {
+    return fileId ? `${environment.apiUrl}${Endpoints.STORAGE_ENDPOINT}/${fileId}` : null;
+  }
+
+  openAttachmentPreview(attachmentId: string): void {
+    const attachmentIds = this.investmentPackage?.attachmentIdList ?? [];
+    this.attachmentModalUrls = attachmentIds
+      .map((id) => this.getFileUrl(id))
+      .filter((url): url is string => !!url);
+    this.attachmentModalIndex = Math.max(0, attachmentIds.indexOf(attachmentId));
+    this.showAttachmentModal = true;
   }
 
   assignExtensionWorker(): void {
-    if (!this.investmentPackage?.id || !this.selectedExtensionWorkerId) {
+    const investmentPackageId = this.investmentPackage?.id;
+    const farmPlotId = this.investmentPackage?.farmPlotId || this.investmentPackage?.farmPlot?.id;
+    const agreementId = this.investmentPackage?.agreementId;
+    if (!investmentPackageId || !farmPlotId || !agreementId || !this.selectedExtensionWorkerId) {
       return;
     }
 
     this.assigningExtensionWorker = true;
-    this.investmentPackageService.assignExtensionWorker({
-      externalId: this.investmentPackage.id,
-      extensionWorkerId: this.selectedExtensionWorkerId,
-    }).subscribe({
-      next: (res) => {
+    this.investmentPackageService.getInvestmentRecordByPackageId(investmentPackageId).subscribe({
+      next: (record) => {
+        const request: AssignExtensionWorkerRequest = {
+          extensionWorkerId: this.selectedExtensionWorkerId!,
+          investmentPackageId,
+          agreementId,
+          farmPlotId,
+          investmentRecordId: record?.id ?? '',
+        };
+        this.investmentPackageService.assignExtensionWorker(request).subscribe({
+          next: (updated) => {
+            this.assigningExtensionWorker = false;
+            this.selectedExtensionWorkerId = null;
+            if (updated) {
+              this.extensionWorkerAssigned.emit(updated);
+            }
+            this.toastService.success('Extension Worker assigned successfully');
+          },
+          error: (error) => {
+            this.assigningExtensionWorker = false;
+            this.toastService.error(error.message || 'Failed to assign Extension Worker');
+          },
+        });
+      },
+      error: (error) => {
         this.assigningExtensionWorker = false;
-        const updated = res?.data ?? null;
-        this.selectedExtensionWorkerId = null;
+        this.toastService.error(error.message || 'Failed to load investment record for assignment');
+      },
+    });
+  }
+
+  toggleChangeExtensionWorkerForm(): void {
+    this.showChangeExtensionWorkerForm = !this.showChangeExtensionWorkerForm;
+    this.changeExtensionWorkerId = null;
+    this.changeExtensionWorkerDescription = '';
+    if (this.showChangeExtensionWorkerForm && this.extensionWorkers.length === 0 && !this.loadingExtensionWorkers) {
+      this.loadExtensionWorkers();
+    }
+  }
+
+  changeExtensionWorker(): void {
+    const investmentPackageId = this.investmentPackage?.id;
+    const agreementId = this.investmentPackage?.agreementId;
+    if (!investmentPackageId || !agreementId || !this.changeExtensionWorkerId || this.changingExtensionWorker) {
+      return;
+    }
+
+    const request: ChangeExtensionWorkerRequest = {
+      investmentPackageId,
+      agreementId,
+      extensionWorkerId: this.changeExtensionWorkerId,
+      description: this.changeExtensionWorkerDescription || undefined,
+    };
+
+    this.changingExtensionWorker = true;
+    this.investmentPackageService.changeExtensionWorker(request).subscribe({
+      next: (updated) => {
+        this.changingExtensionWorker = false;
+        this.showChangeExtensionWorkerForm = false;
+        this.changeExtensionWorkerId = null;
+        this.changeExtensionWorkerDescription = '';
         if (updated) {
           this.extensionWorkerAssigned.emit(updated);
         }
-        this.toastService.success('Extension Worker assigned successfully');
+        this.toastService.success('Extension worker changed successfully');
       },
-      error: () => {
-        this.assigningExtensionWorker = false;
-        this.toastService.error('Failed to assign Extension Worker');
+      error: (error) => {
+        this.changingExtensionWorker = false;
+        this.toastService.error(error.message || 'Failed to change extension worker');
       },
     });
   }
@@ -134,6 +312,156 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     if (!this.tabs.some((tab) => tab.key === this.activeTab)) {
       this.activeTab = this.tabs[0].key;
     }
+  }
+
+  private getClosedLeaseInvestorIds(): string[] {
+    const pkg = this.investmentPackage as (InvestmentPackage & {investorIdList?: string[]}) | null;
+    if (!pkg || pkg.fundingStatus !== FundingStatus.CLOSED) {
+      return [];
+    }
+    return pkg.investorIdList ?? [];
+  }
+
+  private maybeLoadClosedLeaseInvestors(): void {
+    const investorIds = this.getClosedLeaseInvestorIds();
+    // asInvestmentPackage() rebuilds a new object on every CD cycle, so investmentPackage
+    // changes by reference far more often than the underlying data actually changes.
+    // Key on the package id + investor ids so we only re-fetch when they actually differ.
+    const key = investorIds.length
+      ? `${this.investmentPackage?.id ?? ''}:${investorIds.slice().sort().join(',')}`
+      : null;
+
+    if (key === this.loadedClosedLeaseInvestorsKey) {
+      return;
+    }
+    this.loadedClosedLeaseInvestorsKey = key;
+
+    if (!key) {
+      this.closedLeaseInvestors = [];
+      return;
+    }
+
+    this.closedLeaseInvestorsLoading = true;
+    forkJoin(investorIds.map((id) => this.userService.getUserById(id))).subscribe({
+      next: (users) => {
+        this.closedLeaseInvestors = users;
+        this.closedLeaseInvestorsLoading = false;
+        // Candidates start out all-selected; the admin removes the ones they don't want.
+        if (!this.candidatesConfirmedView) {
+          this.selectedCandidateIds = users.map((u) => u.id);
+        }
+      },
+      error: () => {
+        this.closedLeaseInvestors = [];
+        this.closedLeaseInvestorsLoading = false;
+        this.toastService.error('Failed to load investor details', 'Investor');
+      },
+    });
+  }
+
+  isCandidateSelected(investorId: string | undefined | null): boolean {
+    return !!investorId && this.selectedCandidateIds.includes(investorId);
+  }
+
+  toggleCandidate(investorId: string | undefined | null): void {
+    if (!investorId) {
+      return;
+    }
+    this.selectedCandidateIds = this.isCandidateSelected(investorId)
+      ? this.selectedCandidateIds.filter((id) => id !== investorId)
+      : [...this.selectedCandidateIds, investorId];
+  }
+
+  confirmCandidates(): void {
+    const investmentPackageId = this.investmentPackage?.id;
+    const farmPlotId = this.investmentPackage?.farmPlotId || this.investmentPackage?.farmPlot?.id;
+    if (
+      !investmentPackageId ||
+      !farmPlotId ||
+      this.selectedCandidateIds.length === 0 ||
+      this.choosingCandidates ||
+      !this.canConfirmCandidates
+    ) {
+      return;
+    }
+
+    const chosenIds = this.selectedCandidateIds;
+    const request: ChooseCandidatesRequest = {
+      investmentPackageId,
+      farmPlotId,
+      investorIds: chosenIds,
+    };
+
+    this.choosingCandidates = true;
+    this.investmentPackageService.chooseCandidates(request).subscribe({
+      next: () => {
+        this.choosingCandidates = false;
+        this.confirmedCandidates = this.closedLeaseInvestors.filter((u) => chosenIds.includes(u.id));
+        this.candidatesConfirmedView = true;
+        this.toastService.success('Candidates chosen successfully', 'Choose Candidate');
+        this.candidatesChosen.emit();
+      },
+      error: (error) => {
+        this.choosingCandidates = false;
+        this.toastService.error(error.message || 'Failed to choose candidates', 'Choose Candidate');
+      },
+    });
+  }
+
+  private maybeLoadAgreement(): void {
+    const agreementId = this.investmentPackage?.agreementId;
+    if (!agreementId) {
+      this.agreement = null;
+      this.loadedAgreementId = null;
+      return;
+    }
+
+    if (agreementId === this.loadedAgreementId) {
+      return;
+    }
+    this.loadedAgreementId = agreementId;
+
+    this.agreementLoading = true;
+    this.investmentPackageService.getAgreementById(agreementId).subscribe({
+      next: (agreement) => {
+        this.agreement = agreement ?? null;
+        this.agreementLoading = false;
+      },
+      error: (error) => {
+        this.agreement = null;
+        this.agreementLoading = false;
+        this.toastService.error(error.message || 'Failed to load agreement', 'Contract');
+      },
+    });
+  }
+
+  createAgreement(): void {
+    const investmentPackageId = this.investmentPackage?.id;
+    const farmPlotId = this.investmentPackage?.farmPlotId || this.investmentPackage?.farmPlot?.id;
+    if (!investmentPackageId || !farmPlotId || this.creatingAgreement || !this.canCreateAgreement) {
+      return;
+    }
+
+    const request: CreateInvestmentAgreementRequest = {
+      farmPlotId,
+      investmentPackageId,
+      paymentStatus: 'PAID',
+    };
+
+    this.creatingAgreement = true;
+    this.investmentPackageService.createAgreement(request).subscribe({
+      next: (agreement) => {
+        this.creatingAgreement = false;
+        this.agreement = agreement ?? null;
+        this.loadedAgreementId = this.agreement?.id ?? null;
+        this.toastService.success('Contract created successfully', 'Contract');
+        this.agreementCreated.emit();
+      },
+      error: (error) => {
+        this.creatingAgreement = false;
+        this.toastService.error(error.message || 'Failed to create contract', 'Contract');
+      },
+    });
   }
 
   private loadExtensionWorkers(): void {

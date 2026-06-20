@@ -21,7 +21,6 @@ import {ConfirmationModalComponent} from "../../shared/modals/confirmation-modal
 import {ModalComponent} from "../../shared/modals/modal/modal.component";
 import {FarmPlotFilterComponent} from '../farm-plots/pages/farm-plot-filter/farm-plot-filter.component';
 import {InvestmentPackageTypePlotDetailComponent} from './pages/investment-package-type-plot-detail/investment-package-type-plot-detail.component';
-import {InvestmentPackageTypeMobileDetailComponent} from './pages/investment-package-type-mobile-detail/investment-package-type-mobile-detail.component';
 import {
   PreviouslyManagedInvestmentPackageTypeFarmPlotsComponent
 } from './components/previously-managed-investment-package-type-farm-plots/previously-managed-investment-package-type-farm-plots.component';
@@ -36,7 +35,6 @@ import {InvestmentPackageEditModalComponent} from '../investment-package/modals/
   declarations: [
     InvestmentPackageTypeListComponent,
     InvestmentPackageTypePlotDetailComponent,
-    InvestmentPackageTypeMobileDetailComponent,
     PreviouslyManagedInvestmentPackageTypeFarmPlotsComponent
   ],
   imports: [

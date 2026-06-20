@@ -19,41 +19,440 @@
   </div>
 
   <div *ngIf="activeTab === 'investor' && hasTab('investor')" class="space-y-4">
-    <p *ngIf="packageInvestmentsLoading" class="text-sm text-gray-500">Loading investors...</p>
-
-    <p
-      *ngIf="!packageInvestmentsLoading && packageInvestments.length === 0"
-      class="text-sm text-gray-500"
-    >
-      No investors have applied for this package yet.
-    </p>
-
-    <div
-      *ngFor="let investment of packageInvestments"
-      class="rounded-lg border border-gray-200 bg-white p-4 space-y-3"
-    >
-      <app-user-view *ngIf="investment.investorUser" [user]="investment.investorUser"></app-user-view>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
-        <div>
-          <p class="text-gray-500">Amount</p>
-          <p class="text-gray-900 font-medium">{{ formatAmount(investment.amount) }}</p>
+    <!-- Investor viewing their own lease: show only their own profile, matched by id. -->
+    <ng-container *ngIf="isInvestorRole">
+      <p *ngIf="!ownInvestorProfile" class="text-sm text-gray-500">
+        Your investor profile is not yet linked to this package.
+      </p>
+      <div *ngIf="ownInvestorProfile" class="rounded-lg border border-gray-200 bg-white p-4">
+        <div class="flex items-center gap-4">
+          <img
+            *ngIf="getInvestorAvatarUrl(ownInvestorProfile.profileImageUuid) as avatarUrl"
+            [src]="avatarUrl"
+            class="w-14 h-14 rounded-full object-cover flex-shrink-0"
+            alt=""
+          />
+          <div *ngIf="!getInvestorAvatarUrl(ownInvestorProfile.profileImageUuid)" class="w-14 h-14 rounded-full bg-indigo-500 text-white flex items-center justify-center text-lg font-semibold flex-shrink-0">
+            {{ (ownInvestorProfile.firstName || ownInvestorProfile.username || '?').charAt(0).toUpperCase() }}
+          </div>
+          <div>
+            <p class="text-base font-semibold text-gray-900">{{ formatWorkerName(ownInvestorProfile) }}</p>
+            <p class="text-sm text-gray-500">{{ ownInvestorProfile.email }}</p>
+            <p class="text-xs text-gray-400">{{ ownInvestorProfile.username }}</p>
+          </div>
         </div>
-        <div>
-          <p class="text-gray-500">Payment method</p>
-          <p class="text-gray-900 font-medium">{{ investment.paymentMethod || '-' }}</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm mt-4 pt-4 border-t border-gray-100">
+          <div>
+            <p class="text-gray-500">Middle Name</p>
+            <p class="text-gray-900 font-medium">{{ ownInvestorProfile.middleName || '-' }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Gender</p>
+            <p class="text-gray-900 font-medium">{{ ownInvestorProfile.gender || '-' }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Status</p>
+            <p class="text-gray-900 font-medium">{{ ownInvestorProfile.accountNonLocked ? 'Active' : 'Locked' }}</p>
+          </div>
         </div>
-        <div>
-          <p class="text-gray-500">Status</p>
-          <p class="text-gray-900 font-medium">{{ investment.status || '-' }}</p>
+      </div>
+    </ng-container>
+
+    <!-- Admin / extension worker: broader candidate and investment-record views. -->
+    <ng-container *ngIf="!isInvestorRole">
+      <p *ngIf="packageInvestmentsLoading || closedLeaseInvestorsLoading" class="text-sm text-gray-500">Loading investors...</p>
+
+      <p
+        *ngIf="!packageInvestmentsLoading && !closedLeaseInvestorsLoading && packageInvestments.length === 0 && closedLeaseInvestors.length === 0"
+        class="text-sm text-gray-500"
+      >
+        No investors have applied for this package yet.
+      </p>
+
+      <div
+        *ngFor="let investorUser of closedLeaseInvestors"
+        class="rounded-lg border border-gray-200 bg-white p-4"
+      >
+        <div class="flex items-center gap-4">
+          <img
+            *ngIf="getInvestorAvatarUrl(investorUser.profileImageUuid) as avatarUrl"
+            [src]="avatarUrl"
+            class="w-14 h-14 rounded-full object-cover flex-shrink-0"
+            alt=""
+          />
+          <div *ngIf="!getInvestorAvatarUrl(investorUser.profileImageUuid)" class="w-14 h-14 rounded-full bg-indigo-500 text-white flex items-center justify-center text-lg font-semibold flex-shrink-0">
+            {{ (investorUser.firstName || investorUser.username || '?').charAt(0).toUpperCase() }}
+          </div>
+          <div>
+            <p class="text-base font-semibold text-gray-900">{{ formatWorkerName(investorUser) }}</p>
+            <p class="text-sm text-gray-500">{{ investorUser.email }}</p>
+            <p class="text-xs text-gray-400">{{ investorUser.username }}</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm mt-4 pt-4 border-t border-gray-100">
+          <div>
+            <p class="text-gray-500">Middle Name</p>
+            <p class="text-gray-900 font-medium">{{ investorUser.middleName || '-' }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Gender</p>
+            <p class="text-gray-900 font-medium">{{ investorUser.gender || '-' }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Status</p>
+            <p class="text-gray-900 font-medium">{{ investorUser.accountNonLocked ? 'Active' : 'Locked' }}</p>
+          </div>
+        </div>
+
+        <!-- Admin-only audit/account fields. -->
+        <div *ngIf="isAdminRole" class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm mt-3 pt-3 border-t border-gray-100">
+          <div>
+            <p class="text-gray-500">Role</p>
+            <p class="text-gray-900 font-medium">{{ investorUser.role || '-' }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Created</p>
+            <p class="text-gray-900 font-medium">{{ investorUser.createdAt ? (investorUser.createdAt | date:'medium') : '-' }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Updated</p>
+            <p class="text-gray-900 font-medium">{{ investorUser.updatedAt ? (investorUser.updatedAt | date:'medium') : '-' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div
+        *ngFor="let investment of packageInvestments"
+        class="rounded-lg border border-gray-200 bg-white p-4 space-y-3"
+      >
+        <app-user-view *ngIf="investment.investorUser" [user]="investment.investorUser"></app-user-view>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+          <div>
+            <p class="text-gray-500">Amount</p>
+            <p class="text-gray-900 font-medium">{{ formatAmount(investment.amount) }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Payment method</p>
+            <p class="text-gray-900 font-medium">{{ investment.paymentMethod || '-' }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Status</p>
+            <p class="text-gray-900 font-medium">{{ investment.status || '-' }}</p>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <div *ngIf="activeTab === 'choose-candidate' && hasTab('choose-candidate')" class="space-y-4">
+    <div class="rounded-lg border border-gray-200 bg-white p-4 space-y-3">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium text-gray-700">Payment Status</p>
+        <p class="text-sm text-gray-900 font-medium">{{ investmentPackage?.paymentStatus || '-' }}</p>
+      </div>
+
+      <div>
+        <p class="text-sm font-medium text-gray-700 mb-2">Attachment Proofs for Payment</p>
+        <p *ngIf="!investmentPackage?.attachmentIdList?.length" class="text-sm text-gray-500">
+          No attachments uploaded.
+        </p>
+        <div
+          *ngFor="let attachmentId of investmentPackage?.attachmentIdList"
+          class="flex items-center justify-between gap-4 py-1.5 border-t border-gray-100 first:border-t-0 first:pt-0"
+        >
+          <p class="text-sm text-gray-700">Document</p>
+          <button
+            type="button"
+            class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors"
+            title="View attachment"
+            (click)="openAttachmentPreview(attachmentId)"
+          >
+            <img [src]="getFileUrl(attachmentId)" class="w-10 h-10 rounded-md object-cover border border-gray-200" alt="" />
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
+
+    <p *ngIf="investmentPackage?.fundingStatus !== 'CLOSED'" class="text-sm text-gray-500">
+      Candidate selection becomes available once the funding status is Closed.
+    </p>
+
+    <ng-container *ngIf="investmentPackage?.fundingStatus === 'CLOSED'">
+      <!-- After a successful submission: show only the chosen investor(s), minimal. -->
+      <div *ngIf="candidatesConfirmedView" class="rounded-lg border border-gray-200 bg-white p-4 space-y-3">
+        <p class="text-sm font-medium text-gray-700">Chosen Investor(s)</p>
+        <div *ngFor="let investor of confirmedCandidates" class="flex items-center gap-3">
+          <img
+            *ngIf="getInvestorAvatarUrl(investor.profileImageUuid) as avatarUrl"
+            [src]="avatarUrl"
+            class="w-10 h-10 rounded-full object-cover flex-shrink-0"
+            alt=""
+          />
+          <div *ngIf="!getInvestorAvatarUrl(investor.profileImageUuid)" class="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center text-sm font-semibold flex-shrink-0">
+            {{ (investor.firstName || investor.username || '?').charAt(0).toUpperCase() }}
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-900">{{ formatWorkerName(investor) }}</p>
+            <p class="text-xs text-gray-500">{{ investor.email }}</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-500">Go to the Investor tab to view full investor information.</p>
+      </div>
+
+      <ng-container *ngIf="!candidatesConfirmedView">
+        <p *ngIf="closedLeaseInvestorsLoading" class="text-sm text-gray-500">Loading candidates...</p>
+        <p
+          *ngIf="!closedLeaseInvestorsLoading && closedLeaseInvestors.length === 0"
+          class="text-sm text-gray-500"
+        >
+          No candidates have applied for this package.
+        </p>
+
+        <p
+          *ngIf="!closedLeaseInvestorsLoading && closedLeaseInvestors.length > 0 && !canConfirmCandidates"
+          class="text-sm text-amber-600"
+        >
+          Candidate selection requires an uploaded attachment proof and a Pending payment status.
+        </p>
+
+        <div
+          *ngFor="let investor of closedLeaseInvestors"
+          class="rounded-lg border border-gray-200 bg-white p-4 flex items-center gap-3"
+        >
+          <input
+            type="checkbox"
+            [checked]="isCandidateSelected(investor.id)"
+            (change)="toggleCandidate(investor.id)"
+            [disabled]="!canConfirmCandidates"
+          />
+          <img
+            *ngIf="getInvestorAvatarUrl(investor.profileImageUuid) as avatarUrl"
+            [src]="avatarUrl"
+            class="w-10 h-10 rounded-full object-cover flex-shrink-0"
+            alt=""
+          />
+          <div *ngIf="!getInvestorAvatarUrl(investor.profileImageUuid)" class="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center text-sm font-semibold flex-shrink-0">
+            {{ (investor.firstName || investor.username || '?').charAt(0).toUpperCase() }}
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-900">{{ formatWorkerName(investor) }}</p>
+            <p class="text-xs text-gray-500">{{ investor.email }}</p>
+          </div>
+        </div>
+
+        <button
+          *ngIf="closedLeaseInvestors.length > 0"
+          type="button"
+          class="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="selectedCandidateIds.length === 0 || choosingCandidates || !canConfirmCandidates"
+          (click)="confirmCandidates()"
+        >
+          {{ choosingCandidates ? 'Submitting...' : 'Confirm Candidates' }}
+        </button>
+      </ng-container>
+    </ng-container>
+  </div>
+
+  <div *ngIf="activeTab === 'contract' && hasTab('contract')" class="space-y-4">
+    <div class="rounded-lg border border-gray-200 bg-white p-4 space-y-3">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium text-gray-700">Payment Status</p>
+        <p class="text-sm text-gray-900 font-medium">{{ investmentPackage?.paymentStatus || '-' }}</p>
+      </div>
+
+      <div>
+        <p class="text-sm font-medium text-gray-700 mb-2">Attachment Proofs for Payment</p>
+        <p *ngIf="!investmentPackage?.attachmentIdList?.length" class="text-sm text-gray-500">
+          No attachments uploaded.
+        </p>
+        <div
+          *ngFor="let attachmentId of investmentPackage?.attachmentIdList"
+          class="flex items-center justify-between gap-4 py-1.5 border-t border-gray-100 first:border-t-0 first:pt-0"
+        >
+          <p class="text-sm text-gray-700">Document</p>
+          <button
+            type="button"
+            class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors"
+            title="View attachment"
+            (click)="openAttachmentPreview(attachmentId)"
+          >
+            <img [src]="getFileUrl(attachmentId)" class="w-10 h-10 rounded-md object-cover border border-gray-200" alt="" />
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p *ngIf="investmentPackage?.fundingStatus !== 'CLOSED'" class="text-sm text-gray-500">
+      Contract creation becomes available once the funding status is Closed.
+    </p>
+
+    <ng-container *ngIf="investmentPackage?.fundingStatus === 'CLOSED'">
+      <p *ngIf="agreementLoading" class="text-sm text-gray-500">Loading contract...</p>
+
+      <!-- Agreement already exists: show a read-only summary. -->
+      <div *ngIf="!agreementLoading && agreement" class="rounded-lg border border-gray-200 bg-white p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <p class="text-base font-semibold text-gray-900">Contract</p>
+          <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium border-gray-200 bg-gray-50 text-gray-700">
+            {{ agreement.status }}
+          </span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+          <div>
+            <p class="text-gray-500">Start Date</p>
+            <p class="text-gray-900 font-medium">{{ agreement.startDate || '-' }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">End Date</p>
+            <p class="text-gray-900 font-medium">{{ agreement.endDate || '-' }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Duration</p>
+            <p class="text-gray-900 font-medium">{{ agreement.totalDurationMonths }} months</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Total Amount</p>
+            <p class="text-gray-900 font-medium">{{ formatAmount(agreement.totalAmount) }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Farm Plot</p>
+            <p class="text-gray-900 font-medium">{{ agreement.farmPlot.title || '-' }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Extension Worker</p>
+            <p class="text-gray-900 font-medium">{{ agreement.extensionWorker ? formatWorkerName(agreement.extensionWorker) : 'Not assigned' }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="agreement.investorUser" class="flex items-center gap-3 pt-3 border-t border-gray-100">
+          <img
+            *ngIf="getInvestorAvatarUrl(agreement.investorUser.profileImageUuid) as avatarUrl"
+            [src]="avatarUrl"
+            class="w-10 h-10 rounded-full object-cover flex-shrink-0"
+            alt=""
+          />
+          <div *ngIf="!getInvestorAvatarUrl(agreement.investorUser.profileImageUuid)" class="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center text-sm font-semibold flex-shrink-0">
+            {{ (agreement.investorUser.firstName || agreement.investorUser.username || '?').charAt(0).toUpperCase() }}
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-900">{{ formatWorkerName(agreement.investorUser) }}</p>
+            <p class="text-xs text-gray-500">{{ agreement.investorUser.email }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- No agreement yet: let the admin create one. -->
+      <ng-container *ngIf="!agreementLoading && !agreement">
+        <p *ngIf="isAdminRole && !canCreateAgreement" class="text-sm text-amber-600">
+          Creating a contract requires an uploaded attachment proof.
+        </p>
+        <p *ngIf="!isAdminRole" class="text-sm text-gray-500">
+          No contract has been created yet.
+        </p>
+        <button
+          *ngIf="isAdminRole"
+          type="button"
+          class="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="creatingAgreement || !canCreateAgreement"
+          (click)="createAgreement()"
+        >
+          {{ creatingAgreement ? 'Creating...' : 'Create Contract' }}
+        </button>
+      </ng-container>
+    </ng-container>
   </div>
 
   <div *ngIf="activeTab === 'extension-worker' && hasTab('extension-worker')" class="space-y-4">
     <div *ngIf="investmentPackage?.extensionWorker" class="rounded-lg border border-gray-200 bg-white p-4">
-      <p class="text-sm font-medium text-gray-700 mb-1">Assigned to</p>
-      <p class="text-sm text-gray-900">{{ formatWorkerName(investmentPackage?.extensionWorker) }}</p>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <img
+            *ngIf="getInvestorAvatarUrl(investmentPackage?.extensionWorker?.profileImageUuid) as avatarUrl"
+            [src]="avatarUrl"
+            class="w-12 h-12 rounded-full object-cover flex-shrink-0"
+            alt=""
+          />
+          <div *ngIf="!getInvestorAvatarUrl(investmentPackage?.extensionWorker?.profileImageUuid)" class="w-12 h-12 rounded-full bg-indigo-500 text-white flex items-center justify-center text-base font-semibold flex-shrink-0">
+            {{ (investmentPackage?.extensionWorker?.firstName || investmentPackage?.extensionWorker?.username || '?').charAt(0).toUpperCase() }}
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-700 mb-1">Assigned to</p>
+            <p class="text-sm text-gray-900">{{ formatWorkerName(investmentPackage?.extensionWorker) }}</p>
+            <p class="text-xs text-gray-500">{{ investmentPackage?.extensionWorker?.email }}</p>
+          </div>
+        </div>
+        <button
+          *ngIf="canChangeExtensionWorker"
+          type="button"
+          class="px-3 py-1.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          (click)="toggleChangeExtensionWorkerForm()"
+        >
+          {{ showChangeExtensionWorkerForm ? 'Cancel' : 'Change' }}
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="canChangeExtensionWorker && showChangeExtensionWorkerForm" class="rounded-lg border border-gray-200 bg-white p-4 space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          New extension worker <span class="text-red-500">*</span>
+        </label>
+        <select
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+          [(ngModel)]="changeExtensionWorkerId"
+          [disabled]="loadingExtensionWorkers || changingExtensionWorker"
+        >
+          <option [ngValue]="null">Select extension worker...</option>
+          <option *ngFor="let worker of extensionWorkers" [ngValue]="worker.id">
+            {{ getExtensionWorkerDisplayName(worker) }}
+          </option>
+        </select>
+      </div>
+
+      <div *ngIf="selectedChangeExtensionWorkerDetail" class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
+        <img
+          *ngIf="getInvestorAvatarUrl(selectedChangeExtensionWorkerDetail.profileImageUuid) as avatarUrl"
+          [src]="avatarUrl"
+          class="w-12 h-12 rounded-full object-cover flex-shrink-0"
+          alt=""
+        />
+        <div *ngIf="!getInvestorAvatarUrl(selectedChangeExtensionWorkerDetail.profileImageUuid)" class="w-12 h-12 rounded-full bg-indigo-500 text-white flex items-center justify-center text-base font-semibold flex-shrink-0">
+          {{ (selectedChangeExtensionWorkerDetail.firstName || selectedChangeExtensionWorkerDetail.username || '?').charAt(0).toUpperCase() }}
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-900">{{ formatWorkerName(selectedChangeExtensionWorkerDetail) }}</p>
+          <p class="text-xs text-gray-500">{{ selectedChangeExtensionWorkerDetail.email }}</p>
+          <p class="text-xs text-gray-400">{{ selectedChangeExtensionWorkerDetail.gender }}</p>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Remarks (optional)</label>
+        <textarea
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+          rows="2"
+          [(ngModel)]="changeExtensionWorkerDescription"
+          [disabled]="changingExtensionWorker"
+        ></textarea>
+      </div>
+      <button
+        type="button"
+        class="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="!changeExtensionWorkerId || changingExtensionWorker"
+        (click)="changeExtensionWorker()"
+      >
+        {{ changingExtensionWorker ? 'Saving...' : 'Save Change' }}
+      </button>
     </div>
 
     <div *ngIf="canAssignExtensionWorker" class="rounded-lg border border-gray-200 bg-white p-4 space-y-4">
@@ -73,6 +472,24 @@
         </select>
         <p *ngIf="loadingExtensionWorkers" class="text-xs text-gray-500 mt-2">Loading extension workers...</p>
       </div>
+
+      <div *ngIf="selectedExtensionWorkerDetail" class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
+        <img
+          *ngIf="getInvestorAvatarUrl(selectedExtensionWorkerDetail.profileImageUuid) as avatarUrl"
+          [src]="avatarUrl"
+          class="w-12 h-12 rounded-full object-cover flex-shrink-0"
+          alt=""
+        />
+        <div *ngIf="!getInvestorAvatarUrl(selectedExtensionWorkerDetail.profileImageUuid)" class="w-12 h-12 rounded-full bg-indigo-500 text-white flex items-center justify-center text-base font-semibold flex-shrink-0">
+          {{ (selectedExtensionWorkerDetail.firstName || selectedExtensionWorkerDetail.username || '?').charAt(0).toUpperCase() }}
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-900">{{ formatWorkerName(selectedExtensionWorkerDetail) }}</p>
+          <p class="text-xs text-gray-500">{{ selectedExtensionWorkerDetail.email }}</p>
+          <p class="text-xs text-gray-400">{{ selectedExtensionWorkerDetail.gender }}</p>
+        </div>
+      </div>
+
       <button
         type="button"
         class="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -98,3 +515,10 @@
     ></app-farm-followup-list>
   </div>
 </app-tabs>
+
+<app-image-gallery-modal
+  [(visible)]="showAttachmentModal"
+  title="Attachment Proof"
+  [imageUrls]="attachmentModalUrls"
+  [initialIndex]="attachmentModalIndex"
+></app-image-gallery-modal>

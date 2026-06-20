@@ -12,8 +12,11 @@ import {
   InvestmentFilterRequest,
   InvestmentRecord,
   InvestmentRecordCreateRequest,
+  ChooseCandidatesRequest,
+  InvestmentAgreement,
+  CreateInvestmentAgreementRequest,
 } from '../models/investment-package.model';
-import {AssignExtensionWorkerRequest} from "../../assign-extension-worker-request";
+import {AssignExtensionWorkerRequest, ChangeExtensionWorkerRequest} from "../../assign-extension-worker-request";
 
 @Injectable({providedIn: 'root'})
 export class InvestmentPackageService {
@@ -68,7 +71,7 @@ export class InvestmentPackageService {
   // Investments
   filterInvestments(request: InvestmentFilterRequest): Observable<PageResponse<InvestmentRecord>> {
     return this.httpService.put<PageResponse<InvestmentRecord>>(
-      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investments/filter`,
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investmentRecord/filter`,
       request,
     );
   }
@@ -116,10 +119,43 @@ export class InvestmentPackageService {
     );
   }
 
-  assignExtensionWorker(request: AssignExtensionWorkerRequest): Observable<ApiResponse<InvestmentPackage>> {
-    return this.httpService.post<ApiResponse<InvestmentPackage>>(
+  assignExtensionWorker(request: AssignExtensionWorkerRequest): Observable<InvestmentPackage> {
+    return this.httpService.post<InvestmentPackage>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/assign-extension-worker`,
       request,
+    );
+  }
+
+  changeExtensionWorker(request: ChangeExtensionWorkerRequest): Observable<InvestmentPackage> {
+    return this.httpService.post<InvestmentPackage>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/assign-extension-worker/change`,
+      request,
+    );
+  }
+
+  getInvestmentRecordByPackageId(investmentPackageId: string): Observable<InvestmentRecord> {
+    return this.httpService.get<InvestmentRecord>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investmentRecord/${investmentPackageId}`,
+    );
+  }
+
+  chooseCandidates(request: ChooseCandidatesRequest): Observable<ApiResponse<InvestmentPackage>> {
+    return this.httpService.put<ApiResponse<InvestmentPackage>>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investmentRecord/choose-candidates`,
+      request,
+    );
+  }
+
+  createAgreement(request: CreateInvestmentAgreementRequest): Observable<InvestmentAgreement> {
+    return this.httpService.post<InvestmentAgreement>(
+      Endpoints.INVESTMENT_AGGREMENT_ENDPOINT,
+      request,
+    );
+  }
+
+  getAgreementById(agreementId: string): Observable<InvestmentAgreement> {
+    return this.httpService.get<InvestmentAgreement>(
+      `${Endpoints.INVESTMENT_AGGREMENT_ENDPOINT}/${agreementId}`,
     );
   }
 }

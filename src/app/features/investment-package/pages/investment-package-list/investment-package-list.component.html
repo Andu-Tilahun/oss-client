@@ -19,16 +19,16 @@
       [showAddButton]="isAdmin"
       [showRefreshButton]="true"
       [showViewButton]="false"
-      [showEditButton]="isAdmin"
+      [showEditButton]="false"
       [showDeleteButton]="false"
       [showActionColumn]="isAdmin"
+      [rowActions]="tableRowActions"
       [rowClickable]="true"
       [addButtonText]="'Create Investment Package'"
       (pageChange)="onPageChange($event)"
       (addClick)="onAdd()"
       (refreshClick)="onRefresh()"
       (rowClick)="onView($event)"
-      (editClick)="onEdit($event)"
     >
 
       <div extraTableHeader class="w-full min-w-0">
