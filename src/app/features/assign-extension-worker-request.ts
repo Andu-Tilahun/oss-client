@@ -3,7 +3,6 @@ export interface AssignExtensionWorkerRequest {
   investmentPackageId: string;
   agreementId: string;
   farmPlotId: string;
-  investmentRecordId: string;
 }
 
 export interface ChangeExtensionWorkerRequest {

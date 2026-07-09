@@ -216,6 +216,32 @@ export const routes: Routes = [
     data: { roles: ['ADMIN'] },
   },
   {
+    path: 'system-config',
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] },
+    children: [
+      {
+        path: 'organization',
+        loadComponent: () =>
+          import('./features/system-config/pages/organization-config-page/organization-config-page.component')
+            .then(m => m.OrganizationConfigPageComponent),
+      },
+      {
+        path: 'news',
+        loadComponent: () =>
+          import('./features/system-config/pages/news-management-page/news-management-page.component')
+            .then(m => m.NewsManagementPageComponent),
+      },
+      {
+        path: 'social-media',
+        loadComponent: () =>
+          import('./features/system-config/pages/social-media-page/social-media-page.component')
+            .then(m => m.SocialMediaPageComponent),
+      },
+      { path: '', redirectTo: 'organization', pathMatch: 'full' },
+    ],
+  },
+  {
     path: 'farm-company',
     loadChildren: () => import('./features/farm-company/farm-company.module').then(m => m.FarmCompanyModule),
     canActivate: [AuthGuard, RoleGuard],

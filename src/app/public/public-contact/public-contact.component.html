@@ -11,16 +11,10 @@
         <p class="contact-sidebar-desc">Follow us or get in touch directly.</p>
 
         <ul class="contact-social-list">
-          <li>
-            <a class="contact-social-link" [href]="facebookUrl" target="_blank" rel="noopener noreferrer">
-              <span class="contact-social-icon contact-social-icon--facebook" aria-hidden="true">f</span>
-              <span>Facebook</span>
-            </a>
-          </li>
-          <li>
-            <a class="contact-social-link" [href]="tiktokUrl" target="_blank" rel="noopener noreferrer">
-              <span class="contact-social-icon contact-social-icon--tiktok" aria-hidden="true">♪</span>
-              <span>TikTok</span>
+          <li *ngFor="let link of socialLinks">
+            <a class="contact-social-link" [href]="link.url" target="_blank" rel="noopener noreferrer">
+              <span class="contact-social-icon" [ngClass]="getSocialClass(link.platform)" aria-hidden="true">{{ getSocialIcon(link.platform) }}</span>
+              <span>{{ link.platform | titlecase }}</span>
             </a>
           </li>
           <li>

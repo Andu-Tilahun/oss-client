@@ -1,0 +1,195 @@
+<div class="p-6 max-w-2xl">
+  <h2 class="text-xl font-semibold text-gray-800 mb-6">Organization Settings</h2>
+
+  <div *ngIf="loading" class="text-sm text-gray-500">Loading...</div>
+  <div *ngIf="error" class="mb-4 text-sm text-red-600">{{ error }}</div>
+
+  <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSave()" class="space-y-4">
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Logo</label>
+      <app-profile-picture-upload
+        [currentFileId]="form.value.logoUuid"
+        [deferUpload]="false"
+        [showInlineUploadButton]="false"
+        size="large"
+        (fileUploaded)="onLogoUploaded($event)"
+        (fileRemoved)="onLogoRemoved()"
+      ></app-profile-picture-upload>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Organization Name *</label>
+      <input formControlName="name" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Tagline</label>
+      <input formControlName="tagline" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Modern Agricultural Investment Center" />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+      <textarea formControlName="address" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Operating Hours</label>
+      <input formControlName="operatingHours" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Mon-Fri 8:30 AM – 7:00 PM" />
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input formControlName="email" type="email" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+        <input formControlName="phone" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Mobile Phone</label>
+        <input formControlName="contactMobilePhone" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. +251 91 123 4567" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Office Phone</label>
+        <input formControlName="officePhone" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. +251 11 123 4567" />
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Bank Account</label>
+      <input formControlName="bankAccount" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. CBE 1000123456789" />
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+        <input formControlName="latitude" type="number" step="any" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+        <input formControlName="longitude" type="number" step="any" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">About Us</label>
+      <textarea formControlName="aboutUs" rows="5" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Write about your organization..."></textarea>
+    </div>
+
+    <div class="flex items-center gap-3 pt-2">
+      <button type="submit" [disabled]="saving" class="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">
+        {{ saving ? 'Saving...' : 'Save Changes' }}
+      </button>
+      <span *ngIf="saved" class="text-sm text-green-600">Saved successfully!</span>
+    </div>
+  </form>
+
+  <!-- Branch Centers Section -->
+  <div *ngIf="!loading" class="mt-10">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-gray-800">Branch Centers</h3>
+      <button
+        type="button"
+        (click)="openAddBranch()"
+        class="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors"
+      >
+        + Add Branch Center
+      </button>
+    </div>
+
+    <div *ngIf="branchCenters.length === 0" class="text-sm text-gray-500 py-4 text-center border border-dashed border-gray-300 rounded-lg">
+      No branch centers yet. Click "+ Add Branch Center" to create one.
+    </div>
+
+    <div *ngIf="branchCenters.length > 0" class="overflow-x-auto rounded-lg border border-gray-200">
+      <table class="w-full text-sm text-left">
+        <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
+          <tr>
+            <th class="px-4 py-3">Name</th>
+            <th class="px-4 py-3">Address</th>
+            <th class="px-4 py-3">Phone</th>
+            <th class="px-4 py-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let branch of branchCenters" class="hover:bg-gray-50">
+            <td class="px-4 py-3 font-medium text-gray-900">{{ branch.name }}</td>
+            <td class="px-4 py-3 text-gray-600">{{ branch.address || '—' }}</td>
+            <td class="px-4 py-3 text-gray-600">{{ branch.phone || '—' }}</td>
+            <td class="px-4 py-3 text-right">
+              <button (click)="openEditBranch(branch)" class="text-blue-600 hover:underline text-xs mr-3">Edit</button>
+              <button (click)="deleteBranch(branch.id!)" class="text-red-500 hover:underline text-xs">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Branch Center Modal -->
+<div *ngIf="showBranchModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6">
+    <div class="flex items-center justify-between mb-5">
+      <h4 class="text-base font-semibold text-gray-800">
+        {{ editingBranch ? 'Edit Branch Center' : 'Add Branch Center' }}
+      </h4>
+      <button (click)="closeBranchModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+    </div>
+
+    <div *ngIf="branchError" class="mb-3 text-sm text-red-600">{{ branchError }}</div>
+
+    <form [formGroup]="branchForm" (ngSubmit)="saveBranch()" class="space-y-3">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Branch Name *</label>
+        <input formControlName="name" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+        <textarea formControlName="address" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+          <input formControlName="phone" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input formControlName="email" type="email" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Operating Hours</label>
+        <input formControlName="operatingHours" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Mon-Fri 8:30 AM – 6:00 PM" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+          <input formControlName="latitude" type="number" step="any" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+          <input formControlName="longitude" type="number" step="any" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" (click)="closeBranchModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+          Cancel
+        </button>
+        <button type="submit" [disabled]="savingBranch" class="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">
+          {{ savingBranch ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

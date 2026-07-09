@@ -1,12 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CompanyProfile } from '../../features/farm-company/models/company-profile.model';
+import { SystemConfigService } from '../../features/system-config/services/system-config.service';
+import { SocialMediaLink, SocialMediaPlatform } from '../../features/system-config/models/social-media.model';
 
 @Component({
   selector: 'app-public-contact',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TitleCasePipe],
   templateUrl: './public-contact.component.html',
   styleUrl: './public-contact.component.css',
 })
@@ -23,9 +25,11 @@ export class PublicContactComponent implements OnInit {
   submitted = false;
   isSubmitting = false;
 
+  socialLinks: SocialMediaLink[] = [];
+
   private readonly recipientEmail = 'ossethio@gmail.com';
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder, private systemConfigService: SystemConfigService) {}
 
   ngOnInit(): void {
     this.contactForm = this.fb.group({
@@ -37,6 +41,11 @@ export class PublicContactComponent implements OnInit {
     });
 
     this.refreshCaptcha();
+
+    this.systemConfigService.getVisibleSocialMedia().subscribe({
+      next: (links) => (this.socialLinks = links),
+      error: () => {},
+    });
   }
 
   get displayEmail(): string {
@@ -55,8 +64,24 @@ export class PublicContactComponent implements OnInit {
     return `mailto:${this.displayEmail}`;
   }
 
-  readonly facebookUrl = 'https://www.facebook.com/';
-  readonly tiktokUrl   = 'https://www.tiktok.com/';
+  getSocialIcon(platform: SocialMediaPlatform): string {
+    const icons: Record<SocialMediaPlatform, string> = {
+      FACEBOOK: 'f',
+      INSTAGRAM: '◉',
+      TIKTOK: '♪',
+      YOUTUBE: '▶',
+      LINKEDIN: 'in',
+      X: 'X',
+      TWITTER: '🐦',
+      TELEGRAM: '✈',
+      WHATSAPP: '💬',
+    };
+    return icons[platform] ?? platform[0];
+  }
+
+  getSocialClass(platform: SocialMediaPlatform): string {
+    return `contact-social-icon--${platform.toLowerCase()}`;
+  }
 
   refreshCaptcha(): void {
     const a = Math.floor(Math.random() * 9) + 1;

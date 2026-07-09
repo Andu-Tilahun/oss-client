@@ -19,6 +19,7 @@ import {FarmPlotViewComponent} from '../../../farm-plots/components/farm-plot-vi
 import {FarmFollowupsModule} from '../../../farm-followups/farm-followups.module';
 import {UserViewComponent} from '../../../users/components/user-view/user-view.component';
 import {ImageGalleryModalComponent} from '../../../../shared/modals/image-gallery-modal/image-gallery-modal.component';
+import {DocumentUploadComponent} from '../../../../shared/file-upload/document-upload/document-upload.component';
 import {AuthService} from '../../../auth/services/auth.service';
 import {UserService} from '../../../users/services/user.service';
 import {InvestmentPackageService} from '../../services/investment-package.service';
@@ -38,6 +39,7 @@ import {AssignExtensionWorkerRequest, ChangeExtensionWorkerRequest} from '../../
     FarmFollowupsModule,
     UserViewComponent,
     ImageGalleryModalComponent,
+    DocumentUploadComponent,
   ],
   templateUrl: './investment-package-detail-panel.component.html',
 })
@@ -75,6 +77,9 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   agreement: InvestmentAgreement | null = null;
   agreementLoading = false;
   creatingAgreement = false;
+  investorAgreeAttachmentId: string | null = null;
+  investorAgreeing = false;
+  investorAgreed = false;
   private loadedClosedLeaseInvestorsKey: string | null = null;
   private lastPackageIdForCandidates: string | null = null;
   private loadedAgreementId: string | null = null;
@@ -103,8 +108,11 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
         this.showChangeExtensionWorkerForm = false;
         this.changeExtensionWorkerId = null;
         this.changeExtensionWorkerDescription = '';
+        this.investorAgreeAttachmentId = null;
+        this.investorAgreeing = false;
+        this.investorAgreed = false;
       }
-      if (this.activeTab === 'investor' || this.activeTab === 'choose-candidate') {
+      if (!this.isInvestorRole && (this.activeTab === 'investor' || this.activeTab === 'choose-candidate')) {
         this.maybeLoadClosedLeaseInvestors();
       }
       if (this.activeTab === 'contract') {
@@ -121,13 +129,20 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
       return false;
     }
     if (this.investmentPackage.investmentPackageType === 'LEASING') {
-      return !!this.investmentPackage.agreementId;
+      return !!this.investmentPackage.agreementId && this.investmentPackage.status !== 'SENT';
     }
     return this.investmentPackage.fundingStatus === 'OPEN';
   }
 
   get canChangeExtensionWorker(): boolean {
     return this.authService.isAdmin() && !!this.investmentPackage?.extensionWorker;
+  }
+
+  get canInvestorAgreeOnContract(): boolean {
+    return this.isInvestorRole &&
+      !!this.ownInvestorProfile &&
+      !!this.investmentPackage?.agreementId &&
+      this.investmentPackage?.status === 'SENT';
   }
 
   get selectedExtensionWorkerDetail(): User | null {
@@ -172,7 +187,7 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     if (tab === 'extension-worker' && this.extensionWorkers.length === 0 && !this.loadingExtensionWorkers) {
       this.loadExtensionWorkers();
     }
-    if (tab === 'investor' || tab === 'choose-candidate') {
+    if (!this.isInvestorRole && (tab === 'investor' || tab === 'choose-candidate')) {
       this.maybeLoadClosedLeaseInvestors();
     }
     if (tab === 'contract') {
@@ -213,34 +228,26 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
       return;
     }
 
+    const request: AssignExtensionWorkerRequest = {
+      extensionWorkerId: this.selectedExtensionWorkerId!,
+      investmentPackageId,
+      agreementId,
+      farmPlotId,
+    };
+
     this.assigningExtensionWorker = true;
-    this.investmentPackageService.getInvestmentRecordByPackageId(investmentPackageId).subscribe({
-      next: (record) => {
-        const request: AssignExtensionWorkerRequest = {
-          extensionWorkerId: this.selectedExtensionWorkerId!,
-          investmentPackageId,
-          agreementId,
-          farmPlotId,
-          investmentRecordId: record?.id ?? '',
-        };
-        this.investmentPackageService.assignExtensionWorker(request).subscribe({
-          next: (updated) => {
-            this.assigningExtensionWorker = false;
-            this.selectedExtensionWorkerId = null;
-            if (updated) {
-              this.extensionWorkerAssigned.emit(updated);
-            }
-            this.toastService.success('Extension Worker assigned successfully');
-          },
-          error: (error) => {
-            this.assigningExtensionWorker = false;
-            this.toastService.error(error.message || 'Failed to assign Extension Worker');
-          },
-        });
+    this.investmentPackageService.assignExtensionWorker(request).subscribe({
+      next: (updated) => {
+        this.assigningExtensionWorker = false;
+        this.selectedExtensionWorkerId = null;
+        if (updated) {
+          this.extensionWorkerAssigned.emit(updated);
+        }
+        this.toastService.success('Extension Worker assigned successfully');
       },
       error: (error) => {
         this.assigningExtensionWorker = false;
-        this.toastService.error(error.message || 'Failed to load investment record for assignment');
+        this.toastService.error(error.message || 'Failed to assign Extension Worker');
       },
     });
   }
@@ -460,6 +467,28 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
       error: (error) => {
         this.creatingAgreement = false;
         this.toastService.error(error.message || 'Failed to create contract', 'Contract');
+      },
+    });
+  }
+
+  agreeOnContract(): void {
+    const agreementId = this.investmentPackage?.agreementId;
+    if (!agreementId || this.investorAgreeing) return;
+
+    this.investorAgreeing = true;
+    this.investmentPackageService.activateAgreement(agreementId).subscribe({
+      next: (updated) => {
+        this.investorAgreeing = false;
+        this.investorAgreed = true;
+        if (updated) {
+          this.agreement = updated;
+        }
+        this.toastService.success('Contract signed successfully');
+        this.agreementCreated.emit();
+      },
+      error: (err) => {
+        this.investorAgreeing = false;
+        this.toastService.error(err.message || 'Failed to sign contract');
       },
     });
   }

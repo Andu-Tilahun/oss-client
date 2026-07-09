@@ -4,7 +4,11 @@
       <h2>News</h2>
     </div>
 
-    <div class="news-layout">
+    <div *ngIf="loading" class="news-loading">Loading news...</div>
+    <div *ngIf="!loading && error" class="news-empty">Unable to load news at this time.</div>
+    <div *ngIf="!loading && !error && allNewsItems.length === 0" class="news-empty">No news articles published yet.</div>
+
+    <div *ngIf="!loading && !error && allNewsItems.length > 0 && activeItem" class="news-layout">
       <article class="news-feature">
         <div class="news-feature-image-wrap">
           <img class="news-feature-image" [src]="activeItem.imageUrl" [alt]="activeItem.title" loading="lazy" />
@@ -25,18 +29,6 @@
             {{ bodyExpanded ? 'View Less' : 'View More' }}
             <span class="news-chevron" [class.news-chevron--up]="bodyExpanded">&#9662;</span>
           </button>
-
-          <p *ngIf="activeItem.externalUrl" class="news-external">
-            Read more at:
-            <a [href]="activeItem.externalUrl" target="_blank" rel="noopener noreferrer" class="news-external-link">
-              &#8943;
-            </a>
-          </p>
-
-          <footer class="news-feature-footer">
-            <span>{{ activeItem.readTime }}</span>
-            <span>{{ activeItem.source }}</span>
-          </footer>
         </div>
       </article>
 
@@ -56,7 +48,6 @@
               <div class="news-sidebar-text">
                 <h5>{{ item.title }}</h5>
                 <p class="news-sidebar-excerpt">{{ item.excerpt }}</p>
-                <span class="news-sidebar-meta">{{ item.readTime }}</span>
               </div>
 
               <span class="news-sidebar-year">{{ item.year }}</span>
@@ -65,7 +56,7 @@
           </li>
         </ul>
 
-        <button type="button" class="news-next-btn" (click)="showNextNews()">
+        <button *ngIf="totalSidebarPages > 1" type="button" class="news-next-btn" (click)="showNextNews()">
           Next
           <span class="news-chevron">&#9662;</span>
         </button>

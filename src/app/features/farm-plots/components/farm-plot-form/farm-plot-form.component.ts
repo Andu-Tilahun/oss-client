@@ -12,7 +12,6 @@ import {forkJoin, Observable, of} from 'rxjs';
 import {filter, map, take} from 'rxjs/operators';
 import {ProfilePictureUploadComponent} from '../../../../shared/file-upload/profile-picture-upload/profile-picture-upload.component';
 import {FarmPlot, FarmPlotRequest, FarmPlotSizeType, FarmPlotSoilType, FarmPlotStatus} from '../../models/farm-plot.model';
-import {DocumentUploadComponent} from '../../../../shared/file-upload/document-upload/document-upload.component';
 import {FileUploadService} from '../../../../shared/file-upload/file-upload.service';
 import {ToastService} from '../../../../shared/toast/toast.service';
 
@@ -26,7 +25,7 @@ const MAX_GALLERY_FILE_SIZE = 10 * 1024 * 1024;
 @Component({
   selector: 'app-farm-plot-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ProfilePictureUploadComponent, DocumentUploadComponent],
+  imports: [CommonModule, ReactiveFormsModule, ProfilePictureUploadComponent],
   templateUrl: './farm-plot-form.component.html',
   styleUrls: ['./farm-plot-form.component.css'],
   providers: [

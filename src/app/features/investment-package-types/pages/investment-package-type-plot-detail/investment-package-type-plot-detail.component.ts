@@ -270,7 +270,7 @@ export class InvestmentPackageTypePlotDetailComponent implements OnInit, OnChang
   private loadPackageInvestments(packageId: string): void {
     this.internalPackageInvestmentsLoading = true;
     this.investmentPackageService.filterInvestments({
-      crowdFundingIds: [packageId],
+      investmentPackageIds: [packageId],
       sortBy: 'createdDate',
       sortDirection: 'DESC',
       page: 0,

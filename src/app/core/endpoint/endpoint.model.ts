@@ -49,4 +49,10 @@ export const Endpoints = {
 
   // storage
   STORAGE_ENDPOINT: '/files',
+
+  // System configuration
+  CONFIG_ORGANIZATION_ENDPOINT: '/config/organization',
+  CONFIG_NEWS_ENDPOINT: '/config/news',
+  CONFIG_SOCIAL_MEDIA_ENDPOINT: '/config/social-media',
+  CONFIG_BRANCH_CENTERS_ENDPOINT: '/config/branch-centers',
 }

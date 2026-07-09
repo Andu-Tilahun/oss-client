@@ -131,13 +131,12 @@ export const MENU: MenuItem[] = [
   {
     icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
     label: 'CMS',
-    route: '/farm-company',
+    route: '/system-config/organization',
     roles: ['ADMIN'],
     children: [
-      { icon: '', label: 'Company', route: '/', roles: ['ADMIN'] },
-      { icon: '', label: 'News & Events', route: '/', roles: ['ADMIN'] },
-      { icon: '', label: 'Gallery', route: '/', roles: ['ADMIN'] },
-      { icon: '', label: 'About Us', route: '/', roles: ['ADMIN'] },
+      { icon: '', label: 'Organization',  route: '/system-config/organization', roles: ['ADMIN'] },
+      { icon: '', label: 'News & Events', route: '/system-config/news',         roles: ['ADMIN'] },
+      { icon: '', label: 'Social Media',  route: '/system-config/social-media', roles: ['ADMIN'] },
     ],
     expanded: false
   }

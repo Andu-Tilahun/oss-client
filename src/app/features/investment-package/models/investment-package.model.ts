@@ -39,6 +39,7 @@ export interface InvestmentPackage {
   followUpDtoList?: FarmFollowUp[];
   description?: string;
   extensionWorker?: User;
+  status?: string;
 }
 
 export interface InvestmentPackageCreateRequest {
@@ -130,10 +131,17 @@ export interface CreateInvestmentAgreementRequest {
 export interface InvestmentFilterRequest {
   searchText?: string;
   statuses?: InvestmentStatus[];
-  crowdFundingIds?: string[];
+  investmentPackageIds?: string[];
   sortBy?: string;
   sortDirection?: 'ASC' | 'DESC';
   page: number;
   size: number;
+}
+
+export interface InvestorAgreeResponseRequest {
+  investmentPackageId: string;
+  investmentRecordId: string;
+  farmPlotId: string;
+  attachmentId: string;
 }
 

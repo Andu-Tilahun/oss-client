@@ -85,7 +85,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     } else if (
       this.isInvestorUser &&
       this.investmentPackageType === 'LEASING' &&
-      this.selectedAgreement?.paymentStatus === 'PAID'
+      !!this.selectedAgreement?.agreementId
     ) {
       tabs.splice(3, 0, {key: 'contract', label: 'Contract'});
     }
@@ -184,10 +184,45 @@ export class InvestmentPackageTypeListComponent implements OnInit {
         },
         {
           id: 'contract',
-          icon: 'assign',
+          icon: 'send',
           title: 'Create Contract',
-          visible: (l) => this.investmentPackageType === 'LEASING' && l.fundingStatus === FundingStatus.CLOSED,
+          visible: (l) =>
+            this.investmentPackageType === 'LEASING' &&
+            l.fundingStatus === FundingStatus.CLOSED &&
+            !l.agreementId,
           action: (l) => this.onContractAction(l),
+        },
+        {
+          id: 'view-contract',
+          icon: 'document',
+          title: 'View Contract',
+          visible: (l) =>
+            this.investmentPackageType === 'LEASING' &&
+            !!l.agreementId &&
+            l.status !== 'ACTIVE',
+          action: (l) => this.onContractAction(l),
+        },
+        {
+          id: 'assign-extension-worker',
+          icon: 'assign',
+          title: 'Assign Extension Worker',
+          visible: (l) =>
+            this.investmentPackageType === 'LEASING' &&
+            l.fundingStatus === FundingStatus.CLOSED &&
+            !!l.agreementId &&
+            l.status === 'ACTIVE' &&
+            !l.extensionWorker,
+          action: (l) => this.onAssignExtensionWorkerAction(l),
+        },
+        {
+          id: 'change-extension-worker',
+          icon: 'refresh',
+          title: 'Change Extension Worker',
+          visible: (l) =>
+            this.investmentPackageType === 'LEASING' &&
+            l.fundingStatus === FundingStatus.CLOSED &&
+            !!l.extensionWorker,
+          action: (l) => this.onAssignExtensionWorkerAction(l),
         },
       ];
       return;
@@ -201,6 +236,16 @@ export class InvestmentPackageTypeListComponent implements OnInit {
           title: 'Invest',
           visible: (r) => r.fundingStatus === FundingStatus.OPEN,
           action: (r) => this.onInvest(r),
+        },
+        {
+          id: 'agree-contract',
+          icon: 'check',
+          title: 'Agree on Contract',
+          visible: (r) =>
+            this.investmentPackageType === 'LEASING' &&
+            !!r.agreementId &&
+            r.status === 'SENT',
+          action: (r) => this.onAgreeOnContractAction(r),
         },
         {
           id: 'download',
@@ -278,7 +323,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   loadPackageInvestments(packageId: string): void {
     this.packageInvestmentsLoading = true;
     this.investmentPackageService.filterInvestments({
-      crowdFundingIds: [packageId],
+      investmentPackageIds: [packageId],
       sortBy: 'createdDate',
       sortDirection: 'DESC',
       page: 0,
@@ -579,6 +624,18 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     this.onView(lease);
     this.pendingForcedTab = 'contract';
     this.activeTab = 'contract';
+  }
+
+  onAssignExtensionWorkerAction(lease: InvestmentPackageTypeAgreement): void {
+    this.onView(lease);
+    this.pendingForcedTab = 'extension-worker';
+    this.activeTab = 'extension-worker';
+  }
+
+  onAgreeOnContractAction(lease: InvestmentPackageTypeAgreement): void {
+    this.onView(lease);
+    this.pendingForcedTab = 'investor';
+    this.activeTab = 'investor';
   }
 
   onCandidatesChosen(): void {

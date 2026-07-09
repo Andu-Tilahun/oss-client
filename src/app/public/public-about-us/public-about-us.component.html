@@ -12,9 +12,9 @@
             [latitude]="latitude"
             [longitude]="longitude"
             [locations]="mapLocations"
-            [zoom]="14"
+            [zoom]="9"
             [height]="'100%'"
-            [fitBounds]="true"
+            [fitBounds]="mapLocations.length > 1"
           ></app-oss-map>
         </div>
         <a
@@ -98,5 +98,42 @@
         </a>
       </div>
     </div>
+
+    <!-- Branch Centers -->
+    <div *ngIf="branchCenters.length > 0" class="branch-section">
+      <h3 class="branch-section-title">Our Branch Offices</h3>
+      <div class="branch-grid">
+        <div *ngFor="let branch of branchCenters" class="branch-card">
+          <div class="branch-card-header">
+            <span class="branch-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11z" />
+                <circle cx="12" cy="10" r="2.5" />
+              </svg>
+            </span>
+            <h4>{{ branch.name }}</h4>
+          </div>
+          <ul class="branch-details">
+            <li *ngIf="branch.address">
+              <span class="branch-detail-label">Address</span>
+              <span>{{ branch.address }}</span>
+            </li>
+            <li *ngIf="branch.operatingHours">
+              <span class="branch-detail-label">Hours</span>
+              <span>{{ branch.operatingHours }}</span>
+            </li>
+            <li *ngIf="branch.phone">
+              <span class="branch-detail-label">Phone</span>
+              <span>{{ branch.phone }}</span>
+            </li>
+            <li *ngIf="branch.email">
+              <span class="branch-detail-label">Email</span>
+              <span>{{ branch.email }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>

@@ -11,6 +11,7 @@ export type ActionIconType =
   | 'send'
   | 'assign'
   | 'download'
+  | 'document'
   | 'check'
   | 'cancel'
   | 'delete';
@@ -72,6 +73,8 @@ export class ActionIconButtonComponent {
         return 'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8M17 13.5l2 2 4-4';
       case 'download':
         return 'M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 3v12m-4-4l4 4 4-4';
+      case 'document':
+        return 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z';
       case 'export':
         return 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4';
       case 'save':

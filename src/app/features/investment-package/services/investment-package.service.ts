@@ -15,6 +15,7 @@ import {
   ChooseCandidatesRequest,
   InvestmentAgreement,
   CreateInvestmentAgreementRequest,
+  InvestorAgreeResponseRequest,
 } from '../models/investment-package.model';
 import {AssignExtensionWorkerRequest, ChangeExtensionWorkerRequest} from "../../assign-extension-worker-request";
 
@@ -146,6 +147,13 @@ export class InvestmentPackageService {
     );
   }
 
+  investorAgreeResponse(request: InvestorAgreeResponseRequest): Observable<ApiResponse<InvestmentRecord>> {
+    return this.httpService.post<ApiResponse<InvestmentRecord>>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investmentRecord/choose-candidates/investor-agree-response`,
+      request,
+    );
+  }
+
   createAgreement(request: CreateInvestmentAgreementRequest): Observable<InvestmentAgreement> {
     return this.httpService.post<InvestmentAgreement>(
       Endpoints.INVESTMENT_AGGREMENT_ENDPOINT,
@@ -156,6 +164,13 @@ export class InvestmentPackageService {
   getAgreementById(agreementId: string): Observable<InvestmentAgreement> {
     return this.httpService.get<InvestmentAgreement>(
       `${Endpoints.INVESTMENT_AGGREMENT_ENDPOINT}/${agreementId}`,
+    );
+  }
+
+  activateAgreement(agreementId: string): Observable<InvestmentAgreement> {
+    return this.httpService.put<InvestmentAgreement>(
+      `${Endpoints.INVESTMENT_AGGREMENT_ENDPOINT}/${agreementId}/activate`,
+      null,
     );
   }
 }

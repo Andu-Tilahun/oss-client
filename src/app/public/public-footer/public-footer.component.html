@@ -4,6 +4,16 @@
     <div>
       <h4>AgriVest</h4>
       <p>Smart agricultural investment opportunities for sustainable growth.</p>
+      <div *ngIf="socialLinks.length > 0" class="footer-social">
+        <a
+          *ngFor="let link of socialLinks"
+          [href]="link.url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="footer-social-link"
+          [attr.aria-label]="link.platform"
+        >{{ getSocialIcon(link.platform) }}</a>
+      </div>
     </div>
     <div>
       <h5>Quick Links</h5>

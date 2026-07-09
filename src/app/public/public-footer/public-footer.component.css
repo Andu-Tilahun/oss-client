@@ -69,6 +69,34 @@
   color: #ffffff;
 }
 
+.footer-social {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.footer-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  color: #e2e8f0 !important;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none !important;
+  transition: background 0.2s;
+  margin-bottom: 0 !important;
+}
+
+.footer-social-link:hover {
+  background: rgba(255,255,255,0.28);
+  color: #fff !important;
+}
+
 @media (max-width: 720px) {
   .site-footer {
     text-align: center;
