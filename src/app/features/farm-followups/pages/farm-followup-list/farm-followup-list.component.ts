@@ -18,7 +18,8 @@ export class FarmFollowUpListComponent {
 
   showCreateButton = false;
   showEditButton = false;
-  showViewButton = true;
+  showViewButton = false;
+  showActionColumn = false;
 
   showCreateModal = false;
   showViewModal = false;
@@ -26,7 +27,8 @@ export class FarmFollowUpListComponent {
 
   columns: DataTableColumn<FarmFollowUp>[] = [
     {header: 'Remark', value: (x) => x.remark},
-    {header: 'Created At', value: (x) => this.formatCreatedAt(x.createdAt)},
+    {header: 'Start Date', value: (x) => this.formatDate(x.startDate)},
+    {header: 'End Date', value: (x) => this.formatDate(x.endDate)},
   ];
 
   constructor(
@@ -34,8 +36,10 @@ export class FarmFollowUpListComponent {
     private authService: AuthService,
     private toastService: ToastService,
   ) {
-    this.showCreateButton = this.authService.isExtensionWorker();
-    this.showEditButton = this.authService.isExtensionWorker();
+    const isWorker = this.authService.isExtensionWorker();
+    this.showCreateButton = isWorker;
+    this.showEditButton = isWorker;
+    this.showActionColumn = isWorker;
   }
 
   onSearch(): void {
@@ -94,10 +98,10 @@ export class FarmFollowUpListComponent {
     this.onRefresh();
   }
 
-  private formatCreatedAt(value?: string | null): string {
-    if (!value) return '';
+  private formatDate(value?: string | null): string {
+    if (!value) return '-';
     const d = new Date(value);
-    if (!Number.isFinite(d.getTime())) return '';
+    if (!Number.isFinite(d.getTime())) return '-';
     const day = String(d.getDate()).padStart(2, '0');
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();

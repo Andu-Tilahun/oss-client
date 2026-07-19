@@ -118,7 +118,6 @@ export class FarmPlotListComponent {
         this.plots = response.content;
         this.total = response.totalElements;
         this.loading = false;
-        this.toastService.success('Farm plots retrieved successfully');
 
         // Default selection: show first element only when nothing is selected.
         // If a plot was already selected, keep it if it still exists in the new page data.
@@ -145,8 +144,7 @@ export class FarmPlotListComponent {
         this.selectedPlot = {...this.plots[0]};
         this.detailRefreshKey++;
       },
-      error: (error) => {
-        this.toastService.error(error.message || 'Failed to fetch farm plots', 'Fetch Farm Plots');
+      error: () => {
         this.loading = false;
       },
     });
@@ -198,9 +196,7 @@ export class FarmPlotListComponent {
         this.showDeleteModal = false;
         this.showEditModal = true;
       },
-      error: (error) => {
-        this.toastService.error(error.message || 'Failed to load plot gallery for editing', 'Edit Farm Plot');
-      },
+      error: () => {},
     });
   }
 
@@ -233,9 +229,7 @@ export class FarmPlotListComponent {
         this.loadPlots();
         this.toastService.success('Farm plot deactivated successfully');
       },
-      error: (error) => {
-        this.toastService.error(error.message || 'Failed to deactivate farm plot', 'Deactivate Farm Plot');
-      },
+      error: () => {},
     });
   }
 
@@ -262,9 +256,8 @@ export class FarmPlotListComponent {
           .filter((url): url is string => !!url);
         this.galleryLoading = false;
       },
-      error: (error) => {
+      error: () => {
         this.galleryLoading = false;
-        this.toastService.error(error.message || 'Failed to load farm plot gallery', 'Farm Plot Gallery');
       },
     });
   }

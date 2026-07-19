@@ -44,7 +44,6 @@ export class DepartmentCreateModalComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        this.toastService.error(err.message || 'Failed to create department', 'Create Department');
       },
     });
   }

@@ -32,14 +32,12 @@ export class PaymentByOrderComponent {
         this.payment = data ?? null;
         this.loading = false;
         if (this.payment) {
-          this.toastService.success('Payment detail retrieved');
         } else {
           this.toastService.info('No payment found for this order number');
         }
       },
-      error: (err) => {
+      error: () => {
         this.loading = false;
-        this.toastService.error(err?.message || 'Failed to fetch payment');
       }
     });
   }
@@ -62,9 +60,8 @@ export class PaymentByOrderComponent {
         this.processing = false;
         this.toastService.success('Payment processed successfully');
       },
-      error: (err) => {
+      error: () => {
         this.processing = false;
-        this.toastService.error(err?.message || 'Failed to process payment');
       }
     });
   }

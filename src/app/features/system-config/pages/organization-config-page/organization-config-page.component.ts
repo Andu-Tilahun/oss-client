@@ -5,6 +5,7 @@ import { SystemConfigService } from '../../services/system-config.service';
 import { OrganizationConfig } from '../../models/organization-config.model';
 import { BranchCenter, BranchCenterRequest } from '../../models/branch-center.model';
 import { ProfilePictureUploadComponent } from '../../../../shared/file-upload/profile-picture-upload/profile-picture-upload.component';
+import { ToastService } from '../../../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-organization-config-page',
@@ -19,7 +20,6 @@ export class OrganizationConfigPageComponent implements OnInit {
   loading = true;
   saving = false;
   saved = false;
-  error = '';
 
   config: OrganizationConfig | null = null;
 
@@ -27,9 +27,12 @@ export class OrganizationConfigPageComponent implements OnInit {
   showBranchModal = false;
   editingBranch: BranchCenter | null = null;
   savingBranch = false;
-  branchError = '';
 
-  constructor(private fb: FormBuilder, private systemConfigService: SystemConfigService) {}
+  constructor(
+    private fb: FormBuilder,
+    private systemConfigService: SystemConfigService,
+    private toastService: ToastService,
+  ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -66,7 +69,6 @@ export class OrganizationConfigPageComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
-        this.error = 'Failed to load organization config.';
       },
     });
 
@@ -95,17 +97,16 @@ export class OrganizationConfigPageComponent implements OnInit {
     }
 
     this.saving = true;
-    this.error = '';
 
     this.systemConfigService.updateOrganizationConfig(this.form.value).subscribe({
       next: () => {
         this.saving = false;
         this.saved = true;
         setTimeout(() => (this.saved = false), 3000);
+        this.toastService.success('Organization settings updated successfully');
       },
       error: () => {
         this.saving = false;
-        this.error = 'Failed to save. Please try again.';
       },
     });
   }
@@ -113,14 +114,12 @@ export class OrganizationConfigPageComponent implements OnInit {
   openAddBranch(): void {
     this.editingBranch = null;
     this.branchForm.reset();
-    this.branchError = '';
     this.showBranchModal = true;
   }
 
   openEditBranch(branch: BranchCenter): void {
     this.editingBranch = branch;
     this.branchForm.patchValue(branch);
-    this.branchError = '';
     this.showBranchModal = true;
   }
 
@@ -131,7 +130,6 @@ export class OrganizationConfigPageComponent implements OnInit {
     }
 
     this.savingBranch = true;
-    this.branchError = '';
     const request: BranchCenterRequest = this.branchForm.value;
 
     const obs = this.editingBranch
@@ -143,10 +141,10 @@ export class OrganizationConfigPageComponent implements OnInit {
         this.savingBranch = false;
         this.showBranchModal = false;
         this.loadBranchCenters();
+        this.toastService.success(this.editingBranch ? 'Branch center updated' : 'Branch center created');
       },
       error: () => {
         this.savingBranch = false;
-        this.branchError = 'Failed to save branch center.';
       },
     });
   }
@@ -154,13 +152,15 @@ export class OrganizationConfigPageComponent implements OnInit {
   deleteBranch(id: string): void {
     if (!confirm('Delete this branch center?')) return;
     this.systemConfigService.deleteBranchCenter(id).subscribe({
-      next: () => this.loadBranchCenters(),
+      next: () => {
+        this.loadBranchCenters();
+        this.toastService.success('Branch center deleted');
+      },
       error: () => {},
     });
   }
 
   closeBranchModal(): void {
     this.showBranchModal = false;
-    this.branchError = '';
   }
 }

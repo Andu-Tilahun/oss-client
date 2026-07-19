@@ -8,6 +8,7 @@ import { OrganizationConfig, OrganizationConfigRequest } from '../models/organiz
 import { NewsArticle, NewsArticleRequest, NewsPage } from '../models/news-article.model';
 import { SocialMediaLink, SocialMediaLinkRequest } from '../models/social-media.model';
 import { BranchCenter, BranchCenterRequest } from '../models/branch-center.model';
+import { MessageTemplate, MessageTemplateRequest, TemplateType } from '../models/message-template.model';
 
 @Injectable({ providedIn: 'root' })
 export class SystemConfigService {
@@ -88,5 +89,27 @@ export class SystemConfigService {
 
   deleteBranchCenter(id: string): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${Endpoints.CONFIG_BRANCH_CENTERS_ENDPOINT}/${id}`);
+  }
+
+  // Templates
+  getTemplates(type?: TemplateType): Observable<MessageTemplate[]> {
+    const params = type ? new HttpParams().set('type', type) : undefined;
+    return this.http.get<MessageTemplate[]>(Endpoints.CONFIG_TEMPLATES_ENDPOINT, undefined, params);
+  }
+
+  getTemplateById(id: string): Observable<MessageTemplate> {
+    return this.http.get<MessageTemplate>(`${Endpoints.CONFIG_TEMPLATES_ENDPOINT}/${id}`);
+  }
+
+  createTemplate(request: MessageTemplateRequest): Observable<ApiResponse<MessageTemplate>> {
+    return this.http.post<ApiResponse<MessageTemplate>>(Endpoints.CONFIG_TEMPLATES_ENDPOINT, request);
+  }
+
+  updateTemplate(id: string, request: MessageTemplateRequest): Observable<ApiResponse<MessageTemplate>> {
+    return this.http.put<ApiResponse<MessageTemplate>>(`${Endpoints.CONFIG_TEMPLATES_ENDPOINT}/${id}`, request);
+  }
+
+  deleteTemplate(id: string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${Endpoints.CONFIG_TEMPLATES_ENDPOINT}/${id}`);
   }
 }

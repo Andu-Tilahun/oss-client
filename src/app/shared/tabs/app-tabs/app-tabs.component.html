@@ -1,15 +1,21 @@
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-  <div class="border-b border-gray-200 px-6 flex items-center justify-between gap-4">
-    <nav class="-mb-px flex space-x-8 flex-1" aria-label="Tabs">
+  <div class="border-b border-gray-200 px-6 flex items-center justify-between gap-4"
+       [class.justify-center]="centered">
+    <nav [class]="centered ? 'flex gap-2 justify-center py-3 flex-1' : '-mb-px flex space-x-8 flex-1'"
+         aria-label="Tabs">
       <button
         *ngFor="let tab of tabs"
         (click)="setTab(tab.key)"
-        [class.border-blue-500]="activeTab === tab.key"
-        [class.text-blue-600]="activeTab === tab.key"
-        [class.text-gray-500]="activeTab !== tab.key"
-        [class.border-transparent]="activeTab !== tab.key"
-        class="whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium
-               hover:text-gray-700 hover:border-gray-300 transition-all duration-200"
+        [ngClass]="centered ? {
+          'bg-blue-600 text-white shadow-sm': activeTab === tab.key,
+          'text-gray-500 hover:text-gray-700 hover:bg-gray-100': activeTab !== tab.key
+        } : {
+          'border-blue-500 text-blue-600': activeTab === tab.key,
+          'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300': activeTab !== tab.key
+        }"
+        [class]="centered
+          ? 'whitespace-nowrap py-2 px-5 rounded-full text-sm font-semibold transition-all duration-200'
+          : 'whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium transition-all duration-200'"
       >
         <span class="flex items-center gap-2">
           <svg

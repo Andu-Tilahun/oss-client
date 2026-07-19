@@ -46,7 +46,6 @@ export class ItemCreateModalComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        this.toastService.error(err.message || 'Failed to create item', 'Create Item');
       },
     });
   }

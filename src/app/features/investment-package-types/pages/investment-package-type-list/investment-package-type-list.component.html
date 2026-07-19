@@ -10,20 +10,95 @@
   (rightEdit)="onEdit($event)"
 >
   <ng-template #leftContent>
-    <div class="space-y-8">
-      <!-- Section 1: Leases -->
+    <!-- Investor: tabbed view -->
+    <ng-container *ngIf="isInvestorUser; else staffSections">
+      <app-tabs
+        [tabs]="investorTabs"
+        [activeTab]="investorActiveTab"
+        [centered]="true"
+        (activeTabChange)="onInvestorTabChange($event)"
+      >
+        <!-- Tab 1: My Farm Leases -->
+        <div *ngIf="investorActiveTab === 'my-leases'">
+          <app-data-table
+            [columns]="columns"
+            [data]="subscribedPackageTypes"
+            [loading]="subscribedLoading"
+            [total]="subscribedPackageTypes.length"
+            [pageSize]="subscribedPackageTypes.length || 10"
+            [pageIndex]="1"
+            [showColumnPickerControl]="false"
+            [showAddButton]="false"
+            [showRefreshButton]="false"
+            [showViewButton]="false"
+            [showEditButton]="false"
+            [showDeleteButton]="false"
+            [showActionColumn]="true"
+            [rowActions]="tableRowActions"
+            [rowClickable]="true"
+            (rowClick)="onView($event)"
+          >
+            <div extraTableHeader class="w-full min-w-0">
+              <app-investment-package-type-filter
+                [(searchText)]="searchText"
+                [(status)]="fundingStatus"
+                [(paymentStatus)]="paymentStatus"
+                (filterChange)="onFilterChange()"
+                (searchChange)="onFilterChange()"
+                (clearFilters)="clearFilters()"
+              ></app-investment-package-type-filter>
+            </div>
+          </app-data-table>
+        </div>
+
+        <!-- Tab 2: Explore More Farm Plots -->
+        <div *ngIf="investorActiveTab === 'explore'">
+          <app-data-table
+            [columns]="columns"
+            [data]="availablePackageTypes"
+            [loading]="availableLoading"
+            [total]="availableTotal"
+            [pageSize]="availablePageSize"
+            [pageIndex]="availablePageIndex"
+            [showColumnPickerControl]="false"
+            [showAddButton]="false"
+            [showRefreshButton]="false"
+            [showViewButton]="false"
+            [showEditButton]="false"
+            [showDeleteButton]="false"
+            [showActionColumn]="true"
+            [rowActions]="tableRowActions"
+            [rowClickable]="true"
+            [noDataMessage]="'No available investment packages found.'"
+            (pageChange)="onAvailablePageChange($event)"
+            (rowClick)="onView($event)"
+          >
+            <div extraTableHeader class="w-full min-w-0">
+              <app-investment-package-type-filter
+                [(searchText)]="availableSearchText"
+                (filterChange)="onAvailableFilterChange()"
+                (searchChange)="onAvailableFilterChange()"
+                (clearFilters)="clearAvailableFilters()"
+              ></app-investment-package-type-filter>
+            </div>
+          </app-data-table>
+        </div>
+      </app-tabs>
+    </ng-container>
+
+    <!-- Admin / extension worker: plain table, no tabs -->
+    <ng-template #staffSections>
       <section>
-        <h3 *ngIf="isInvestorUser" class="text-base font-semibold text-gray-900 mb-3">My farm leases</h3>
         <app-data-table
           [columns]="columns"
-          [data]="packageTypes"
-          [loading]="loading"
-          [total]="total"
-          [pageSize]="pageSize"
-          [pageIndex]="pageIndex"
+          [data]="subscribedPackageTypes"
+          [loading]="subscribedLoading"
+          [total]="subscribedPackageTypes.length"
+          [pageSize]="subscribedPackageTypes.length || 10"
+          [pageIndex]="1"
           [showColumnPickerControl]="false"
           [showAddButton]="false"
-          [showRefreshButton]="!isInvestorUser"
+          [showRefreshButton]="true"
           [showViewButton]="false"
           [showEditButton]="false"
           [showDeleteButton]="false"
@@ -31,7 +106,6 @@
           [rowActions]="tableRowActions"
           [actionCellLabel]="isAdmin ? getAdminActionCellLabel : undefined"
           [rowClickable]="true"
-          (pageChange)="onPageChange($event)"
           (refreshClick)="onRefresh()"
           (rowClick)="onView($event)"
         >
@@ -47,65 +121,8 @@
           </div>
         </app-data-table>
       </section>
-
-      <!-- Section 2 (investors): plots below the table -->
-      <section *ngIf="isInvestorUser" class="border-t border-gray-200 pt-6 space-y-4 flex flex-col items-center">
-        <div class="flex justify-center">
-          <h3 class="text-base font-semibold text-gray-900">Explore More Farm Plots</h3>
-        </div>
-
-        <app-farm-plot-filter
-          [showSearch]="true"
-          [showStatus]="false"
-          [(searchText)]="investorPlotSearchText"
-          [(soilType)]="investorPlotSoilType"
-          [(sizeType)]="investorPlotSizeType"
-          (filterChange)="onInvestorPlotSearch()"
-          (searchChange)="onInvestorPlotSearch()"
-          (clearFilters)="onInvestorPlotClearFilters()"
-        ></app-farm-plot-filter>
-
-        <div class="[&_.bg-white]:!bg-transparent">
-          <app-data-card-layout
-            [data]="investorFarmPlots"
-            [loading]="investorPlotsLoading"
-            [total]="investorFarmPlots.length"
-            [pageSize]="investorFarmPlots.length || 10"
-            [pageIndex]="1"
-            [showAddButton]="false"
-            [showRefreshButton]="false"
-            [showDownloadButton]="false"
-            [showViewButton]="false"
-            [showEditButton]="false"
-            [showDeleteButton]="false"
-            [titleAccessor]="getInvestorPlotCardTitle"
-            [showCreatedDate]="false"
-            [thumbnailUrlAccessor]="getInvestorPlotThumbnailUrl"
-            [thumbnailAltAccessor]="getInvestorPlotThumbnailAlt"
-            [cardClickEnabled]="true"
-            (cardClick)="onChoosePlot($event)"
-            [noDataMessage]="'No available plots found.'"
-          >
-            <ng-template cardHeaderRightTemplate let-plot>
-              <button
-                type="button"
-                class="action-link action-link--view p-1 ml-2"
-                aria-label="View plot details"
-                title="View"
-                (click)="onViewPlot(plot, $event)"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7S3.732 16.057 2.458 12z"></path>
-                </svg>
-              </button>
-            </ng-template>
-          </app-data-card-layout>
-        </div>
-      </section>
-
       <app-previously-managed-investment-package-type-farm-plots *ngIf="isExtensionWorkerUser"></app-previously-managed-investment-package-type-farm-plots>
-    </div>
+    </ng-template>
   </ng-template>
 
   <ng-template #rightContent let-item>
@@ -125,22 +142,11 @@
       (candidatesChosen)="onCandidatesChosen()"
       (agreementCreated)="onAgreementCreated()"
     ></app-investment-package-type-plot-detail>
-
-    <app-investment-package-type-plot-detail
-      *ngIf="!selectedAgreement && plot"
-      mode="plot"
-      [embedded]="true"
-      [plot]="plot"
-      [investmentPackageType]="investmentPackageType"
-      [showCreateLeaseButton]="true"
-      (createLease)="openCreatePackageTypeFromPreview()"
-    ></app-investment-package-type-plot-detail>
   </ng-template>
 </app-page-split-layout>
 
 <app-investment-package-type-create-modal
   [(visible)]="showCreateModal"
-  [selectedFarmPlot]="plot"
   (packageTypeCreated)="onPackageTypeCreated()"
 ></app-investment-package-type-create-modal>
 

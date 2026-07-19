@@ -47,7 +47,6 @@ export class EmployeeEditModalComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        this.toastService.error(err.message || 'Failed to update employee', 'Update Employee');
       },
     });
   }

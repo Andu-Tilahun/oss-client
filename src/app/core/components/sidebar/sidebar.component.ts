@@ -55,13 +55,6 @@ export class SidebarComponent implements OnInit {
     this.mobileOpenChange.emit(false);
   }
 
-  logout(): void {
-    this.authService.logout().subscribe({
-      next: () => console.log('Logged out successfully'),
-      error: (error) => console.error('Logout error:', error)
-    });
-  }
-
   userAvatar(user: User | null): string {
     if (user?.profileImageUuid) {
       return this.fileUploadService.getFileUrl(user.profileImageUuid);
@@ -76,11 +69,6 @@ export class SidebarComponent implements OnInit {
 
   userEmail(user: User | null): string {
     return user?.email || '';
-  }
-
-  openEditProfile(): void {
-    this.closeMobileDrawer();
-    void this.router.navigateByUrl('/profile');
   }
 
   ngOnInit() {

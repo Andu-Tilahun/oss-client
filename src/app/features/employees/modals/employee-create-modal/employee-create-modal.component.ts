@@ -46,7 +46,6 @@ export class EmployeeCreateModalComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        this.toastService.error(err.message || 'Failed to create employee', 'Create Employee');
       },
     });
   }

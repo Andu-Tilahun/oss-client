@@ -22,8 +22,6 @@ import {
 import {AuthService} from '../../../auth/services/auth.service';
 import {AdminInvestmentPackageTypeDecision} from '../../modals/investment-package-type-admin-action-modal/investment-package-type-admin-action-modal.component';
 import {TabItem} from "../../../../shared/tabs/models/tab-item.model";
-import {FarmPlot, FarmPlotFilterRequest, FarmPlotSizeType, FarmPlotSoilType, FarmPlotStatus} from "../../../farm-plots/models/farm-plot.model";
-import {FarmPlotService} from "../../../farm-plots/services/farm-plot.service";
 import {environment} from '../../../../../environments/environment';
 
 @Component({
@@ -35,17 +33,22 @@ import {environment} from '../../../../../environments/environment';
 export class InvestmentPackageTypeListComponent implements OnInit {
   private readonly storageApiUrl = `${environment.apiUrl}/files`;
 
-  packageTypes: InvestmentPackageTypeAgreement[] = [];
-  loading = false;
-  total = 0;
-  pageSize = 10;
-  pageIndex = 1;
-  currentPage = 0;
+  // Subscribed packages ("My farm leases" section)
+  subscribedPackageTypes: InvestmentPackageTypeAgreement[] = [];
+  subscribedLoading = false;
+
+  // Available packages ("Explore More Farm Plots" section, investor only)
+  availablePackageTypes: InvestmentPackageTypeAgreement[] = [];
+  availableLoading = false;
+  availableTotal = 0;
+  availablePageSize = 10;
+  availablePageIndex = 1;
+  availablePage = 0;
+  availableSearchText = '';
 
   searchText = '';
   fundingStatus: FundingStatus | '' = '';
   paymentStatus: InvestmentPaymentStatus | '' = '';
-  soilType: FarmPlotSoilType | '' = '';
 
   showCreateModal = false;
   showEditModal = false;
@@ -67,6 +70,31 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   columns: DataTableColumn<InvestmentPackageTypeAgreement>[] = [];
 
   activeTab = 'detail';
+
+  investorActiveTab = 'my-leases';
+  readonly investorTabs: TabItem[] = [
+    {
+      key: 'my-leases',
+      label: 'My Farm Leases',
+      iconPath: [
+        'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2',
+        'M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
+        'M9 12h6m-6 4h6',
+      ],
+    },
+    {
+      key: 'explore',
+      label: 'Explore More Farm Plots',
+      iconPath: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
+    },
+  ];
+
+  onInvestorTabChange(key: string): void {
+    this.investorActiveTab = key;
+    if (key === 'explore') {
+      this.loadAvailablePackageTypes();
+    }
+  }
 
   get tabs(): TabItem[] {
     const tabs: TabItem[] = [
@@ -97,21 +125,6 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
   tableRowActions: PageSplitRightAction<InvestmentPackageTypeAgreement>[] = [];
   readonly rightActions: PageSplitRightAction<InvestmentPackageTypeAgreement>[] = [];
-  plot: FarmPlot | null = null;
-  investorFarmPlots: FarmPlot[] = [];
-  investorPlotsLoading = false;
-
-  investorPlotSearchText = '';
-  investorPlotStatus: FarmPlotStatus | '' = '';
-  investorPlotSoilType: FarmPlotSoilType | '' = '';
-  investorPlotSizeType: FarmPlotSizeType | '' = '';
-
-  readonly getInvestorPlotCardTitle = (plot: FarmPlot): string =>
-    plot.title.length > 30 ? `${plot.title.slice(0, 28)}..` : plot.title;
-  readonly getInvestorPlotCreatedDate = (plot: FarmPlot): Date | undefined => plot.createdAt;
-  readonly getInvestorPlotThumbnailAlt = (plot: FarmPlot): string => `${plot.title} thumbnail`;
-  readonly getInvestorPlotThumbnailUrl = (plot: FarmPlot): string | null =>
-    plot.imageUuid ? `${this.storageApiUrl}/${plot.imageUuid}` : null;
 
   myRequest = true;
 
@@ -125,7 +138,6 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     private investmentPackageService: InvestmentPackageService,
     private toastService: ToastService,
     private authService: AuthService,
-    private farmPlotService: FarmPlotService,
     private router: Router,
     private route: ActivatedRoute,
     private destroyRef: DestroyRef,
@@ -283,15 +295,12 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     return false;
   }
 
-  get rightPanelItem(): InvestmentPackageTypeAgreement | FarmPlot | null {
-    return this.selectedAgreement ?? this.plot;
+  get rightPanelItem(): InvestmentPackageTypeAgreement | null {
+    return this.selectedAgreement;
   }
 
   get rightPanelTitle(): string {
-    const packageDetailTitle = this.getPackageDetailTitle();
-    if (this.selectedAgreement) return packageDetailTitle;
-    if (this.isInvestorUser && this.plot) return 'Farm Plot Detail';
-    return packageDetailTitle;
+    return this.getPackageDetailTitle();
   }
 
   private getPackageDetailTitle(): string {
@@ -358,10 +367,6 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.isInvestorUser) {
-      this.loadInvestorPlots();
-    }
-
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data) => {
       this.applyRouteData(data);
     });
@@ -386,18 +391,13 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
   private resetListStateForPackageTypeChange(): void {
     this.selectedAgreement = null;
-    this.plot = null;
     this.packageInvestments = [];
     this.searchText = '';
     this.fundingStatus = '';
     this.paymentStatus = '';
-    this.soilType = '';
-    this.currentPage = 0;
-    this.pageIndex = 1;
-
-    if (this.isInvestorUser) {
-      this.loadInvestorPlots();
-    }
+    this.availableSearchText = '';
+    this.availablePage = 0;
+    this.availablePageIndex = 1;
   }
 
   public get isInvestorUser(): boolean {
@@ -429,12 +429,11 @@ export class InvestmentPackageTypeListComponent implements OnInit {
       searchText: this.searchText.trim() || undefined,
       statuses: this.resolveStatusFilter(),
       paymentStatuses: this.resolvePaymentStatusFilter(),
-      soilTypes: this.soilType ? [this.soilType] : undefined,
       investmentPackageType: this.investmentPackageType,
       sortBy: 'fundingDeadline',
       sortDirection: 'DESC',
-      page: this.currentPage,
-      size: this.pageSize,
+      page: 0,
+      size: 100,
     };
   }
 
@@ -446,13 +445,13 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   }
 
   private syncSelectedAgreementAfterLoad(previousId?: string | null): void {
-    if (this.packageTypes.length === 0) {
+    if (this.subscribedPackageTypes.length === 0) {
       this.selectedAgreement = null;
       return;
     }
 
     if (previousId) {
-      const match = this.packageTypes.find((l) => l.id === previousId);
+      const match = this.subscribedPackageTypes.find((l) => l.id === previousId);
       if (match) {
         this.selectedAgreement = {...match};
         this.refreshPackageInvestmentsIfNeeded();
@@ -460,7 +459,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
       }
     }
 
-    this.selectedAgreement = {...this.packageTypes[0]};
+    this.selectedAgreement = {...this.subscribedPackageTypes[0]};
     this.detailRefreshKey++;
     this.refreshPackageInvestmentsIfNeeded();
   }
@@ -483,69 +482,125 @@ export class InvestmentPackageTypeListComponent implements OnInit {
         return !!currentUserId && (item.investorId === currentUserId || item.investorIdList?.includes(currentUserId));
       }
       if (this.isExtensionWorkerUser) {
-        return !!currentUserId && item.extensionWorker?.id === currentUserId;
+        return true; // backend InvestmentPackageSpecification already filters by assignedExtensionWorkerId
       }
       return false;
     });
   }
 
   loadPackageTypes(): void {
-    this.loading = true;
+    this.loadSubscribedPackageTypes();
+    if (this.isInvestorUser && this.investorActiveTab === 'explore') {
+      this.loadAvailablePackageTypes();
+    }
+  }
+
+  private loadSubscribedPackageTypes(): void {
+    this.subscribedLoading = true;
+    const currentUserId = this.authService.getCurrentUser()?.id;
     const request = this.buildFilterRequest();
     this.investmentPackageTypeService.filter(request).subscribe({
       next: (response: PageResponse<InvestmentPackageTypeAgreement>) => {
         const rawContent = response.content ?? [];
         const previousSelectedId = this.selectedAgreement?.id;
+        const filtered = this.filterVisiblePackageTypes(rawContent);
 
-        this.packageTypes = this.filterVisiblePackageTypes(rawContent);
-        this.total = response.totalElements ?? rawContent.length;
-        this.loading = false;
-        this.toastService.success('Leases retrieved successfully');
+        if (this.isInvestorUser && currentUserId) {
+          // Show only packages the investor has applied to (in investorIdList or investorId)
+          // After filterVisiblePackageTypes, CLOSED packages are always the user's own.
+          // For OPEN packages, check membership in investorIdList.
+          this.subscribedPackageTypes = filtered.filter(
+            (p) =>
+              p.fundingStatus !== FundingStatus.OPEN ||
+              p.investorIdList?.includes(currentUserId) ||
+              p.investorId === currentUserId,
+          );
+        } else {
+          this.subscribedPackageTypes = filtered;
+        }
+
+        this.subscribedLoading = false;
         this.syncSelectedAgreementAfterLoad(previousSelectedId);
       },
-      error: (error) => {
-        this.toastService.error(error.message || 'Failed to fetch leases', 'Fetch Leases');
-        this.loading = false;
+      error: () => {
+        this.subscribedLoading = false;
       },
     });
   }
 
-  onPageChange(params: TableQueryParams) {
-    this.pageIndex = params.pageIndex;
-    this.currentPage = this.pageIndex - 1;
-    this.pageSize = params.pageSize;
-    this.loadPackageTypes();
+  private loadAvailablePackageTypes(): void {
+    this.availableLoading = true;
+    const currentUserId = this.authService.getCurrentUser()?.id;
+    this.investmentPackageTypeService.filter({
+      searchText: this.availableSearchText.trim() || undefined,
+      statuses: [FundingStatus.OPEN],
+      investmentPackageType: this.investmentPackageType,
+      sortBy: 'fundingDeadline',
+      sortDirection: 'DESC',
+      page: this.availablePage,
+      size: this.availablePageSize,
+    }).subscribe({
+      next: (response: PageResponse<InvestmentPackageTypeAgreement>) => {
+        const raw = response.content ?? [];
+        this.availablePackageTypes = currentUserId
+          ? raw.filter(
+              (p) =>
+                !p.investorIdList?.includes(currentUserId) &&
+                p.investorId !== currentUserId,
+            )
+          : raw;
+        this.availableTotal = response.totalElements ?? raw.length;
+        this.availableLoading = false;
+      },
+      error: (error) => {
+        this.availableLoading = false;
+        this.toastService.error(
+          error.message || 'Failed to fetch available packages',
+          'Fetch Available',
+        );
+      },
+    });
   }
 
   onRefresh(): void {
     this.loadPackageTypes();
   }
 
-  onSearch(): void {
-    this.currentPage = 0;
-    this.pageIndex = 1;
-    this.loadPackageTypes();
-  }
-
   onFilterChange(): void {
-    this.onSearch();
+    this.loadSubscribedPackageTypes();
   }
 
   clearFilters(): void {
     this.searchText = '';
     this.fundingStatus = '';
     this.paymentStatus = '';
-    this.soilType = '';
-    this.currentPage = 0;
-    this.pageIndex = 1;
-    this.loadPackageTypes();
+    this.loadSubscribedPackageTypes();
+  }
+
+  onAvailablePageChange(params: TableQueryParams): void {
+    this.availablePageIndex = params.pageIndex;
+    this.availablePage = this.availablePageIndex - 1;
+    this.availablePageSize = params.pageSize;
+    this.loadAvailablePackageTypes();
+  }
+
+  onAvailableFilterChange(): void {
+    this.availablePage = 0;
+    this.availablePageIndex = 1;
+    this.loadAvailablePackageTypes();
+  }
+
+  clearAvailableFilters(): void {
+    this.availableSearchText = '';
+    this.availablePage = 0;
+    this.availablePageIndex = 1;
+    this.loadAvailablePackageTypes();
   }
 
   onView(lease: InvestmentPackageTypeAgreement): void {
     this.pendingForcedTab = null;
     this.selectedAgreement = {...lease};
     this.detailRefreshKey++;
-    this.plot = null;
     this.packageInvestments = [];
     this.showCreateModal = false;
     this.showEditModal = false;
@@ -685,97 +740,14 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
   onPackageTypeCreated(): void {
     this.showCreateModal = false;
-    this.plot = null;
     this.detailRefreshKey++;
     this.loadPackageTypes();
-    this.loadInvestorPlots();
   }
 
   onPackageTypeUpdated(): void {
     this.showEditModal = false;
     this.detailRefreshKey++;
     this.loadPackageTypes();
-  }
-
-  private loadInvestorPlots(): void {
-    if (!this.authService.isInvestor()) return;
-
-    this.investorPlotsLoading = true;
-    const filterRequest: FarmPlotFilterRequest = {
-      searchText: this.investorPlotSearchText || undefined,
-      statuses: ['ACTIVE'],
-      soilTypes: this.investorPlotSoilType ? [this.investorPlotSoilType] : undefined,
-      sizeTypes: this.investorPlotSizeType ? [this.investorPlotSizeType] : undefined,
-      sortBy: 'title',
-      sortDirection: 'ASC',
-      page: 0,
-      size: 1000000000,
-    };
-
-    this.farmPlotService.filterFarmPlots(filterRequest).subscribe({
-      next: (response) => {
-        this.investorFarmPlots = response.content;
-        this.investorPlotsLoading = false;
-      },
-      error: (error) => {
-        this.investorPlotsLoading = false;
-        this.toastService.error(error.message || 'Failed to fetch farm plots', 'Load Farm Plots');
-      },
-    });
-  }
-
-  public onInvestorPlotSearch(): void {
-    // Called from the filter bar apply/enter actions.
-    this.loadInvestorPlots();
-  }
-
-  public onInvestorPlotClearFilters(): void {
-    this.investorPlotSearchText = '';
-    this.investorPlotStatus = '';
-    this.investorPlotSoilType = '';
-    this.investorPlotSizeType = '';
-    this.loadInvestorPlots();
-  }
-
-  public plotStatusPillClass(status: FarmPlot['status']): string {
-    switch (status) {
-      case 'ACTIVE':
-        return 'bg-green-50 text-green-700 border-green-200';
-      case 'INACTIVE':
-        return 'bg-slate-50 text-slate-700 border-slate-200';
-      case 'UNDER_MAINTENANCE':
-        return 'bg-yellow-50 text-yellow-700 border-yellow-200';
-      case 'ASSIGNED_TO_LEASE':
-      case 'ASSIGNED_TO_INVESTMENT_PACKAGE':
-        return 'bg-gray-50 text-gray-700 border-gray-200';
-      default:
-        return 'bg-slate-50 text-slate-700 border-slate-200';
-    }
-  }
-
-  public onViewPlot(plot: FarmPlot, event?: Event): void {
-    event?.preventDefault();
-    event?.stopPropagation();
-
-    if (window.innerWidth < 1080) {
-      void this.router.navigate(['/investment-package-types', this.routeSegment, 'plot', plot.id]);
-      return;
-    }
-
-    this.plot = {...plot};
-    this.selectedAgreement = null;
-  }
-
-  public onChoosePlot(plot: FarmPlot): void {
-    this.plot = {...plot};
-    this.selectedAgreement = null;
-    this.showCreateModal = true;
-  }
-
-  public openCreatePackageTypeFromPreview(): void {
-    if (!this.plot) return;
-    this.selectedAgreement = null;
-    this.showCreateModal = true;
   }
 
   formatAmount(value: number | undefined): string {

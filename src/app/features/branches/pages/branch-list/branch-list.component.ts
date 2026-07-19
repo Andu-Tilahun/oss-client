@@ -55,14 +55,9 @@ export class BranchListComponent {
           this.branches = response.content;
           this.total = response.totalElements;
           this.loading = false;
-          this.toastService.success(`Branches retrieved successfully`);
         }
       },
-      error: (error) => {
-        this.toastService.error(
-          error.message || 'Failed to fetch branches',
-          'Fetch Branches'
-        );
+      error: () => {
         this.loading = false;
       }
     });
@@ -116,12 +111,7 @@ export class BranchListComponent {
         this.selectedBranch = null;
         this.loadBranches();
       },
-      error: (error) => {
-        this.toastService.error(
-          error.message || 'Failed to delete branch',
-          'Delete Branch'
-        );
-      }
+      error: () => {}
     });
   }
 

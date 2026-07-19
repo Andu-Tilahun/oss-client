@@ -315,6 +315,32 @@ export const routes: Routes = [
   //   loadComponent: () => import('./features/users/pages/user-detail/user-detail.component').then(m => m.UserDetailComponent)
   // },
   {
+    path: 'templates',
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] },
+    children: [
+      {
+        path: 'email',
+        loadComponent: () =>
+          import('./features/templates/pages/email-templates-page/email-templates-page.component')
+            .then(m => m.EmailTemplatesPageComponent),
+      },
+      {
+        path: 'sms',
+        loadComponent: () =>
+          import('./features/templates/pages/sms-templates-page/sms-templates-page.component')
+            .then(m => m.SmsTemplatesPageComponent),
+      },
+      {
+        path: 'contract',
+        loadComponent: () =>
+          import('./features/templates/pages/contract-templates-page/contract-templates-page.component')
+            .then(m => m.ContractTemplatesPageComponent),
+      },
+      { path: '', redirectTo: 'email', pathMatch: 'full' },
+    ],
+  },
+  {
     path: '403',
     canActivate: [AuthGuard],
     loadComponent: () => import('./features/errors/forbidden/forbidden.component').then(m => m.ForbiddenComponent)

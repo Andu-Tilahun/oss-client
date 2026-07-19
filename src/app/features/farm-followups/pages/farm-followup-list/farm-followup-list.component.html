@@ -13,12 +13,14 @@
       [showPagination]="false"
       [showAddButton]="showCreateButton"
       [showRefreshButton]="false"
-      [showViewButton]="showViewButton"
+      [showViewButton]="false"
       [showEditButton]="showEditButton"
       [showDeleteButton]="false"
+      [showActionColumn]="showActionColumn"
+      [rowClickable]="true"
       (addClick)="onAdd()"
       (refreshClick)="onRefresh()"
-      (viewClick)="onView($event)"
+      (rowClick)="onView($event)"
       (editClick)="onEdit($event)"
     ></app-data-table>
   </ng-template>

@@ -44,7 +44,6 @@ export class DepartmentEditModalComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        this.toastService.error(err.message || 'Failed to update department', 'Update Department');
       },
     });
   }

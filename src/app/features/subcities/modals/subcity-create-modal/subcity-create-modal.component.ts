@@ -41,12 +41,7 @@ export class SubcityCreateModalComponent implements OnInit {
       next: response => {
         this.regions = response.content;
       },
-      error: error => {
-        this.toastService.error(
-          error.message || 'Failed to load regions',
-          'Load Regions'
-        );
-      }
+      error: () => {}
     });
   }
 
@@ -70,10 +65,6 @@ export class SubcityCreateModalComponent implements OnInit {
       },
       error: (error) => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to create subcity/zone',
-          'Create Subcity/Zone'
-        );
       }
     });
   }

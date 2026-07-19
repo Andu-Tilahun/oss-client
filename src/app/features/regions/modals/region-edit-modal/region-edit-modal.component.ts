@@ -43,12 +43,8 @@ export class RegionEditModalComponent {
         this.toastService.success(`Region updated successfully`);
         this.regionUpdated.emit();
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to update region',
-          'Update Region'
-        );
       }
     });
   }

@@ -59,14 +59,9 @@ export class OrganizationListComponent {
           this.organizations = response.content;
           this.total = response.totalElements;
           this.loading = false;
-          this.toastService.success(`Organizations retrieved successfully`);
         }
       },
-      error: (error) => {
-        this.toastService.error(
-          error.message || 'Failed to fetch organizations',
-          'Fetch Organizations'
-        );
+      error: () => {
         this.loading = false;
       }
     });
@@ -126,13 +121,7 @@ export class OrganizationListComponent {
         this.selectedOrganization = null;
         this.loadOrganizations();
       },
-      error: (error) => {
-        console.error('Error deleting organization:', error);
-        this.toastService.error(
-          error.message || 'Failed to delete organization',
-          'Delete Organization'
-        );
-      }
+      error: () => {}
     });
   }
 

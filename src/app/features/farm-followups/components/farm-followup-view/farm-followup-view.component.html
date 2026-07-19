@@ -4,17 +4,191 @@
 
     <app-detail-section title="Follow-up">
       <app-detail-field label="Remark" [value]="followUp.remark || '-'"/>
+      <app-detail-field label="Start Date" [value]="followUp.startDate || '-'"/>
+      <app-detail-field label="End Date" [value]="followUp.endDate || '-'"/>
     </app-detail-section>
 
     <app-detail-section title="Attachment">
       <div class="col-span-full">
-        <app-document-upload
-          label="Image"
-          [currentFileId]="followUp.attachment"
-          [viewOnly]="true"
-          [required]="false"
-        ></app-document-upload>
+        <ng-container *ngIf="followUp.attachment; else noAttachment">
+          <img
+            [src]="getFileUrl(followUp.attachment)"
+            alt="Follow-up attachment"
+            class="max-h-64 w-auto rounded-lg object-contain border border-gray-200 cursor-pointer"
+            (click)="openAttachment(followUp.attachment)"
+          />
+          <a
+            [href]="getFileUrl(followUp.attachment)"
+            target="_blank"
+            rel="noopener"
+            class="mt-2 inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+          >
+            Open in new tab
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+            </svg>
+          </a>
+        </ng-container>
+        <ng-template #noAttachment>
+          <p class="text-xs text-gray-500">No attachment.</p>
+        </ng-template>
       </div>
+    </app-detail-section>
+
+    <!-- Reports section -->
+    <app-detail-section title="Reports">
+
+      <!-- Video retention warning -->
+      <div class="col-span-full flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-700">
+        <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        </svg>
+        Videos will be automatically removed from the system after 2 years.
+      </div>
+
+      <!-- Loading state -->
+      <div *ngIf="reportsLoading" class="col-span-full text-sm text-gray-500">
+        Loading reports...
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="!reportsLoading && reports.length === 0 && !showAddReportForm"
+           class="col-span-full text-sm text-gray-500">
+        No reports yet.
+      </div>
+
+      <!-- Report cards -->
+      <div *ngFor="let report of reports"
+           class="col-span-full border border-gray-200 rounded-lg p-4 space-y-3 bg-white">
+        <p *ngIf="report.content" class="text-sm text-gray-800 whitespace-pre-wrap">{{ report.content }}</p>
+        <div *ngIf="report.fileUuids?.length" class="flex flex-wrap gap-3">
+          <ng-container *ngFor="let uuid of report.fileUuids">
+            <div class="rounded-lg border border-gray-200 overflow-hidden bg-gray-50">
+
+              <!-- Loading spinner while metadata resolves -->
+              <div *ngIf="isFileMetadataLoading(uuid)"
+                   class="flex items-center justify-center w-48 h-36 text-gray-400">
+                <svg class="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+              </div>
+
+              <!-- Video -->
+              <ng-container *ngIf="!isFileMetadataLoading(uuid) && isVideo(uuid)">
+                <video [src]="getStreamUrl(uuid)" controls class="max-h-52 max-w-xs rounded-t-lg"></video>
+                <div class="flex gap-3 px-2 py-1.5 bg-white border-t border-gray-100">
+                  <button type="button" (click)="openInNewTab(uuid)"
+                          class="flex items-center gap-1 text-xs text-blue-600 hover:underline">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                    Open
+                  </button>
+                  <button type="button" (click)="downloadFile(uuid)"
+                          class="flex items-center gap-1 text-xs text-gray-600 hover:underline">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download
+                  </button>
+                </div>
+              </ng-container>
+
+              <!-- Image -->
+              <ng-container *ngIf="!isFileMetadataLoading(uuid) && !isVideo(uuid)">
+                <img [src]="getFileUrl(uuid)" alt="Report file"
+                     class="max-h-52 w-auto object-contain rounded-t-lg cursor-pointer"
+                     (click)="openInNewTab(uuid)"/>
+                <div class="flex gap-3 px-2 py-1.5 bg-white border-t border-gray-100">
+                  <button type="button" (click)="openInNewTab(uuid)"
+                          class="flex items-center gap-1 text-xs text-blue-600 hover:underline">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                    Open
+                  </button>
+                  <button type="button" (click)="downloadFile(uuid)"
+                          class="flex items-center gap-1 text-xs text-gray-600 hover:underline">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download
+                  </button>
+                </div>
+              </ng-container>
+
+            </div>
+          </ng-container>
+        </div>
+        <p class="text-xs text-gray-400">{{ report.createdAt | date:'dd-MM-yyyy HH:mm' }}</p>
+      </div>
+
+      <!-- Add Report (extension worker only) -->
+      <div *ngIf="isExtensionWorker" class="col-span-full">
+        <button
+          *ngIf="!showAddReportForm"
+          type="button"
+          (click)="showAddReportForm = true"
+          class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
+        >
+          + Add Report
+        </button>
+
+        <div *ngIf="showAddReportForm" class="border border-gray-200 rounded-lg p-4 space-y-4 bg-gray-50">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Report Content</label>
+            <textarea
+              [(ngModel)]="reportContent"
+              rows="4"
+              placeholder="Describe findings, progress, or issues..."
+              class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            ></textarea>
+          </div>
+
+          <div class="space-y-3">
+            <label class="block text-sm font-medium text-gray-700">Files (images / videos)</label>
+            <div *ngFor="let slotIndex of reportFileSlots">
+              <app-document-upload
+                [label]="'File ' + (slotIndex + 1)"
+                [accept]="'image/*,video/*'"
+                [maxSizeMb]="60"
+                [required]="false"
+                (fileUploaded)="onReportFileUploaded(slotIndex, $event)"
+                (fileRemoved)="onReportFileRemoved(slotIndex)"
+              ></app-document-upload>
+            </div>
+            <button type="button" (click)="addFileSlot()" class="text-sm text-blue-600 hover:underline">
+              + Add Another File
+            </button>
+          </div>
+
+          <div class="flex gap-2 pt-1">
+            <button
+              type="button"
+              (click)="onAddReport()"
+              [disabled]="isSubmittingReport"
+              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 transition-colors"
+            >
+              {{ isSubmittingReport ? 'Saving...' : 'Submit Report' }}
+            </button>
+            <button
+              type="button"
+              (click)="cancelAddReport()"
+              class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
     </app-detail-section>
 
     <app-detail-section title="Audit">
@@ -25,4 +199,3 @@
     </app-detail-section>
   </ng-container>
 </app-detail-card>
-

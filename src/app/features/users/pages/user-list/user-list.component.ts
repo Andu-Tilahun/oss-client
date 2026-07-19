@@ -115,7 +115,6 @@ export class UserListComponent implements OnInit {
         this.users = response.content;
         this.total = response.totalElements;
         this.loading = false;
-        this.toastService.success(`Users retrieved successfully`);
 
         // Default selection (mirrors the farm-plot behavior)
         // 1) If the list is empty => no selection
@@ -141,11 +140,7 @@ export class UserListComponent implements OnInit {
         this.selectedUser = {...this.users[0]};
         this.detailRefreshKey++;
       },
-      error: (error) => {
-        this.toastService.error(
-          error.message || 'Failed to fetch users',
-          'Fetch Users'
-        );
+      error: () => {
         this.loading = false;
       }
     });
@@ -223,12 +218,8 @@ export class UserListComponent implements OnInit {
         this.toastService.success(`User locked successfully`);
         this.loadUsers();
       },
-      error: (error) => {
+      error: () => {
         this.lockLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to lock user',
-          'Lock User'
-        );
       }
     });
   }
@@ -249,12 +240,8 @@ export class UserListComponent implements OnInit {
 
         this.loadUsers();
       },
-      error: (error) => {
+      error: () => {
         this.lockLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to unlock user',
-          'Unlock User'
-        );
       }
     });
   }
@@ -278,12 +265,7 @@ export class UserListComponent implements OnInit {
         this.toastService.success(`User deleted successfully`);
         this.loadUsers();
       },
-      error: (error) => {
-        this.toastService.error(
-          error.message || 'Failed to delete user',
-          'Delete User'
-        );
-      }
+      error: () => {}
     });
   }
 

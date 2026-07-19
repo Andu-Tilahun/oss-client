@@ -53,17 +53,12 @@ export class PaymentListComponent implements OnInit {
     ).subscribe({
       next: (response: PageResponse<PaymentDetail>) => {
         if (response) {
-          this.toastService.success('Payments retrieved successfully');
           this.payments = response.content || [];
           this.total = response.totalElements ?? 0;
         }
         this.loading = false;
       },
-      error: (error) => {
-        this.toastService.error(
-          error?.message || 'Failed to fetch payments',
-          'Fetch Payments'
-        );
+      error: () => {
         this.loading = false;
       }
     });

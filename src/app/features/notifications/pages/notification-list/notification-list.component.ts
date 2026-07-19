@@ -61,7 +61,6 @@ export class NotificationListComponent implements OnInit {
     ).subscribe({
       next: (response: PageResponse<NotificationLog>) => {
         if (response) {
-          this.toastService.success(`Notification retrieved successfully`);
           this.notifications = response.content;
           this.total = response.totalElements;
           const previousSelectedId = this.selectedNotification?.id;
@@ -77,17 +76,7 @@ export class NotificationListComponent implements OnInit {
         }
         this.loading = false;
       },
-      error: (error) => {
-        const errorCode =
-          error?.error?.error?.code ||
-          error?.error?.code ||
-          error?.code ||
-          error?.status ||
-          'UNKNOWN_ERROR';
-        this.toastService.error(
-          `Failed to load notifications (Error code: ${errorCode})`,
-          'Notification Error'
-        );
+      error: () => {
         this.loading = false;
       }
     });

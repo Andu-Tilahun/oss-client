@@ -43,12 +43,8 @@ export class ServiceFeeEditModalComponent {
         this.toastService.success(`Service fee updated successfully`);
         this.serviceFeeUpdated.emit();
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to update service fee',
-          'Update Service Fee'
-        );
       }
     });
   }

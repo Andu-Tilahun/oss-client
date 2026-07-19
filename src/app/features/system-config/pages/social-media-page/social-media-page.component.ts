@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SystemConfigService } from '../../services/system-config.service';
 import { SocialMediaLink, SocialMediaPlatform } from '../../models/social-media.model';
+import { ToastService } from '../../../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-social-media-page',
@@ -18,7 +19,6 @@ export class SocialMediaPageComponent implements OnInit {
   togglingId: string | null = null;
   deletingId: string | null = null;
   editingId: string | null = null;
-  error = '';
 
   form!: FormGroup;
 
@@ -26,7 +26,11 @@ export class SocialMediaPageComponent implements OnInit {
     'FACEBOOK', 'INSTAGRAM', 'TIKTOK', 'YOUTUBE', 'LINKEDIN', 'X', 'TWITTER', 'TELEGRAM', 'WHATSAPP',
   ];
 
-  constructor(private fb: FormBuilder, private systemConfigService: SystemConfigService) {}
+  constructor(
+    private fb: FormBuilder,
+    private systemConfigService: SystemConfigService,
+    private toastService: ToastService,
+  ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -47,7 +51,6 @@ export class SocialMediaPageComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
-        this.error = 'Failed to load social media links.';
       },
     });
   }
@@ -85,10 +88,10 @@ export class SocialMediaPageComponent implements OnInit {
         this.saving = false;
         this.showModal = false;
         this.loadLinks();
+        this.toastService.success(this.editingId ? 'Social media link updated' : 'Social media link created');
       },
       error: () => {
         this.saving = false;
-        this.error = 'Save failed.';
       },
     });
   }
@@ -102,7 +105,6 @@ export class SocialMediaPageComponent implements OnInit {
       },
       error: () => {
         this.togglingId = null;
-        this.error = 'Toggle failed.';
       },
     });
   }
@@ -114,10 +116,10 @@ export class SocialMediaPageComponent implements OnInit {
       next: () => {
         this.deletingId = null;
         this.links = this.links.filter(l => l.id !== id);
+        this.toastService.success('Social media link deleted');
       },
       error: () => {
         this.deletingId = null;
-        this.error = 'Delete failed.';
       },
     });
   }

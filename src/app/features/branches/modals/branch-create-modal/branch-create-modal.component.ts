@@ -42,12 +42,8 @@ export class BranchCreateModalComponent {
         this.toastService.success('Branch created successfully');
         this.branchCreated.emit();
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to create branch',
-          'Create Branch'
-        );
       }
     });
   }

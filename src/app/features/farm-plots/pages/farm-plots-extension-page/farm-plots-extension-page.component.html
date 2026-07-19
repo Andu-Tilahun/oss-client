@@ -1,92 +1,128 @@
 <app-page-split-layout
   [showLeftTitle]="true"
   [showRightTitle]="true"
-  leftTitle="Assigned Farm Plots"
+  leftTitle="Assigned Investments"
   rightTitle="Assigned Plot Workspace"
   [rightItem]="selectedAgreement"
   [showRightEditButton]="false"
   [showRightCloseButton]="false"
   [rightActions]="[]"
-  [rightEmptyMessage]="'Select an assigned plot to view farm plot details, lease agreement, and follow-ups.'"
+  [rightEmptyMessage]="'Select an assigned investment to view farm plot details, lease agreement, and follow-ups.'"
 >
   <ng-template #leftContent>
-    <div class="space-y-8">
-      <section class="space-y-3">
-        <div class="grid items-center justify-center text-center">
-          <h3 class="text-base font-semibold text-gray-900">Current Active Farm Plot</h3>
-          <p class="text-sm text-gray-500 ">Open assignment currently in progress.</p>
+    <div class="space-y-6">
+
+      <p *ngIf="loading" class="text-sm text-gray-500">Loading assignments...</p>
+
+      <p *ngIf="!loading && allAgreements.length === 0" class="text-sm text-gray-500">
+        No assigned investments found.
+      </p>
+
+      <!-- LEASING -->
+      <section *ngIf="leasingAgreements.length > 0" class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">Leasing</span>
+          <span class="text-xs text-gray-400">({{ leasingAgreements.length }})</span>
         </div>
-
-        <div *ngIf="!currentActivePlot" class="text-sm text-gray-500">No active assigned farm plots found.</div>
-
-        <div *ngIf="currentActivePlotList.length > 0" class="[&_.bg-white]:!bg-transparent">
-          <app-data-card-layout
-            [data]="currentActivePlotList"
-            [loading]="false"
-            [total]="currentActivePlotList.length"
-            [pageSize]="currentActivePlotList.length || 1"
-            [pageIndex]="1"
-            [showPagination]="false"
-            [showAddButton]="false"
-            [showRefreshButton]="false"
-            [showDownloadButton]="false"
-            [showViewButton]="false"
-            [showEditButton]="false"
-            [showDeleteButton]="false"
-            [showCreatedDate]="false"
-            [titleAccessor]="getCurrentPlotCardTitle"
-            [thumbnailUrlAccessor]="getCurrentPlotThumbnailUrl"
-            [thumbnailAltAccessor]="getCurrentPlotThumbnailAlt"
-            [cardClickEnabled]="true"
-            [noDataMessage]="'No active assigned farm plots found.'"
-            (cardClick)="selectPlot($event)"
-          ></app-data-card-layout>
-        </div>
-      </section>
-
-      <section class="space-y-3 border-t border-slate-200 pt-6">
-        <div class="grid items-center justify-center text-center">
-          <h3 class="text-base font-semibold text-gray-900">Previously Assigned Farm Plots</h3>
-          <p class="text-sm text-gray-500">Completed or non-active assignments and their details.</p>
-        </div>
-
-        <div *ngIf="previousAssignedAgreements.length === 0" class="text-sm text-gray-500">
-          No previously assigned farm plots found.
-        </div>
-
-        <div *ngIf="previousAssignedAgreements.length > 0" class="overflow-x-auto rounded-lg border border-slate-200">
-          <table class="min-w-full divide-y divide-slate-200 text-sm">
-            <thead class="bg-slate-50">
-              <tr>
-                <th class="px-3 py-2 text-left font-semibold text-slate-700">Farm Plot</th>
-                <th class="px-3 py-2 text-left font-semibold text-slate-700">Start</th>
-                <th class="px-3 py-2 text-left font-semibold text-slate-700">End</th>
-                <th class="px-3 py-2 text-left font-semibold text-slate-700">Status</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr
-                *ngFor="let agreement of previousAssignedAgreements"
-                class="cursor-pointer hover:bg-slate-50"
-                (click)="selectPreviousAgreement(agreement)"
-              >
-                <td class="px-3 py-2 text-slate-800">{{ agreement.farmPlot.title || '-' }}</td>
-                <td class="px-3 py-2 text-slate-600">{{ agreement.startDate | date : 'mediumDate' }}</td>
-                <td class="px-3 py-2 text-slate-600">{{ agreement.endDate | date : 'mediumDate' }}</td>
-                <td class="px-3 py-2">
-                  <span class="inline-flex rounded-full border border-slate-200 px-2 py-0.5 text-xs font-medium text-slate-700">
-                    {{ agreement.status }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="flex items-center justify-between border-t border-slate-200 bg-white px-3 py-2 text-xs text-slate-500">
-            <span>Show {{ previousAssignedAgreements.length }} entries</span>
-            <span>Showing 1 to {{ previousAssignedAgreements.length }} of {{ previousAssignedAgreements.length }} results</span>
+        <div class="space-y-1">
+          <div
+            *ngFor="let agreement of leasingAgreements"
+            class="flex items-center justify-between rounded-lg border px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors"
+            [class.border-blue-300]="selectedAgreement?.id === agreement.id"
+            [class.bg-blue-50]="selectedAgreement?.id === agreement.id"
+            [class.border-gray-200]="selectedAgreement?.id !== agreement.id"
+            (click)="selectAgreement(agreement)"
+          >
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-gray-900 truncate">{{ agreement.title }}</p>
+              <p class="text-xs text-gray-500">{{ agreement.farmPlot?.title || '-' }}</p>
+              <p class="text-xs text-gray-400">
+                {{ agreement.startDate | date:'mediumDate' }} – {{ agreement.endDate | date:'mediumDate' }}
+              </p>
+            </div>
+            <span
+              class="ml-2 flex-shrink-0 inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+              [class.bg-green-100]="isActiveStatus(agreement)"
+              [class.text-green-700]="isActiveStatus(agreement)"
+              [class.bg-gray-100]="!isActiveStatus(agreement)"
+              [class.text-gray-500]="!isActiveStatus(agreement)"
+            >
+              {{ agreement.status || agreement.fundingStatus }}
+            </span>
           </div>
         </div>
       </section>
+
+      <!-- BIDDING -->
+      <section *ngIf="biddingAgreements.length > 0" class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">Bidding</span>
+          <span class="text-xs text-gray-400">({{ biddingAgreements.length }})</span>
+        </div>
+        <div class="space-y-1">
+          <div
+            *ngFor="let agreement of biddingAgreements"
+            class="flex items-center justify-between rounded-lg border px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors"
+            [class.border-blue-300]="selectedAgreement?.id === agreement.id"
+            [class.bg-blue-50]="selectedAgreement?.id === agreement.id"
+            [class.border-gray-200]="selectedAgreement?.id !== agreement.id"
+            (click)="selectAgreement(agreement)"
+          >
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-gray-900 truncate">{{ agreement.title }}</p>
+              <p class="text-xs text-gray-500">{{ agreement.farmPlot?.title || '-' }}</p>
+              <p class="text-xs text-gray-400">
+                {{ agreement.startDate | date:'mediumDate' }} – {{ agreement.endDate | date:'mediumDate' }}
+              </p>
+            </div>
+            <span
+              class="ml-2 flex-shrink-0 inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+              [class.bg-green-100]="isActiveStatus(agreement)"
+              [class.text-green-700]="isActiveStatus(agreement)"
+              [class.bg-gray-100]="!isActiveStatus(agreement)"
+              [class.text-gray-500]="!isActiveStatus(agreement)"
+            >
+              {{ agreement.status || agreement.fundingStatus }}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- CROWDFUNDING -->
+      <section *ngIf="crowdfundingAgreements.length > 0" class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">Crowdfunding</span>
+          <span class="text-xs text-gray-400">({{ crowdfundingAgreements.length }})</span>
+        </div>
+        <div class="space-y-1">
+          <div
+            *ngFor="let agreement of crowdfundingAgreements"
+            class="flex items-center justify-between rounded-lg border px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors"
+            [class.border-blue-300]="selectedAgreement?.id === agreement.id"
+            [class.bg-blue-50]="selectedAgreement?.id === agreement.id"
+            [class.border-gray-200]="selectedAgreement?.id !== agreement.id"
+            (click)="selectAgreement(agreement)"
+          >
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-gray-900 truncate">{{ agreement.title }}</p>
+              <p class="text-xs text-gray-500">{{ agreement.farmPlot?.title || '-' }}</p>
+              <p class="text-xs text-gray-400">
+                {{ agreement.startDate | date:'mediumDate' }} – {{ agreement.endDate | date:'mediumDate' }}
+              </p>
+            </div>
+            <span
+              class="ml-2 flex-shrink-0 inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+              [class.bg-green-100]="isActiveStatus(agreement)"
+              [class.text-green-700]="isActiveStatus(agreement)"
+              [class.bg-gray-100]="!isActiveStatus(agreement)"
+              [class.text-gray-500]="!isActiveStatus(agreement)"
+            >
+              {{ agreement.status || agreement.fundingStatus }}
+            </span>
+          </div>
+        </div>
+      </section>
+
     </div>
   </ng-template>
 
@@ -109,7 +145,7 @@
     </div>
 
     <ng-template #noSelection>
-      <div class="text-sm text-gray-500">Select an assigned plot to open details.</div>
+      <div class="text-sm text-gray-500">Select an assigned investment to open details.</div>
     </ng-template>
   </ng-template>
 </app-page-split-layout>

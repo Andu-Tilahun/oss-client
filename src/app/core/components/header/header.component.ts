@@ -12,11 +12,13 @@ import {
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {CommonModule} from '@angular/common';
 import {Router, RouterModule} from '@angular/router';
-import {filter, switchMap, take} from 'rxjs/operators';
+import {switchMap, take} from 'rxjs/operators';
 import {NotificationLogService} from '../../../features/notifications/services/notification.service';
 import {NotificationLog} from '../../../features/notifications/models/notification.model';
 import {AuthService} from '../../../features/auth/services/auth.service';
 import {RequestType} from '../../services/http.service';
+import {User} from '../../../features/users/models/user.model';
+import {FileUploadService} from '../../../shared/file-upload/file-upload.service';
 
 @Component({
   selector: 'app-header',
@@ -31,6 +33,7 @@ export class HeaderComponent implements OnInit {
   private readonly notificationService = inject(NotificationLogService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly fileUploadService = inject(FileUploadService);
 
   private readonly notificationPreviewOptions = {
     requestType: RequestType.NON_BLOCKING,
@@ -41,6 +44,7 @@ export class HeaderComponent implements OnInit {
   @Input() mobileNavOpen = false;
   @Output() menuToggle = new EventEmitter<void>();
 
+  currentUser: User | null = null;
   showNotificationPanel = false;
   previewItems: NotificationLog[] = [];
   previewTotal = 0;
@@ -51,21 +55,14 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit(): void {
     this.authService.currentUser$
-      .pipe(
-        filter((user) => !!user),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe(() => {
-        this.refreshBadgeCount();
-      });
-
-    this.authService.currentUser$
-      .pipe(
-        filter((user) => !user),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe(() => {
-        this.clearNotificationState();
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((user) => {
+        this.currentUser = user;
+        if (user) {
+          this.refreshBadgeCount();
+        } else {
+          this.clearNotificationState();
+        }
       });
   }
 
@@ -88,6 +85,23 @@ export class HeaderComponent implements OnInit {
     this.previewError = null;
     this.previewLoading = false;
     this.showNotificationPanel = false;
+  }
+
+  userAvatar(): string {
+    const user = this.currentUser;
+    if (user?.profileImageUuid) {
+      return this.fileUploadService.getFileUrl(user.profileImageUuid);
+    }
+    const name = user ? `${user.firstName}+${user.lastName}` : 'User';
+    return `https://ui-avatars.com/api/?name=${name}&background=6366f1&color=fff`;
+  }
+
+  editProfile(): void {
+    void this.router.navigateByUrl('/profile');
+  }
+
+  logout(): void {
+    this.authService.logout().subscribe();
   }
 
   private refreshBadgeCount(): void {
@@ -136,9 +150,7 @@ export class HeaderComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(ev: MouseEvent): void {
-    if (!this.showNotificationPanel) {
-      return;
-    }
+    if (!this.showNotificationPanel) return;
     if (!this.host.nativeElement.contains(ev.target as Node)) {
       this.showNotificationPanel = false;
     }

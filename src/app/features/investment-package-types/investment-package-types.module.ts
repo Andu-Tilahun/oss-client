@@ -19,7 +19,6 @@ import {
 } from "../extension-worker-assign-modal/extension-worker-assign-modal.component";
 import {ConfirmationModalComponent} from "../../shared/modals/confirmation-modal/confirmation-modal.component";
 import {ModalComponent} from "../../shared/modals/modal/modal.component";
-import {FarmPlotFilterComponent} from '../farm-plots/pages/farm-plot-filter/farm-plot-filter.component';
 import {InvestmentPackageTypePlotDetailComponent} from './pages/investment-package-type-plot-detail/investment-package-type-plot-detail.component';
 import {
   PreviouslyManagedInvestmentPackageTypeFarmPlotsComponent
@@ -59,7 +58,6 @@ import {InvestmentPackageEditModalComponent} from '../investment-package/modals/
     ExtensionWorkerAssignModalComponent,
     ConfirmationModalComponent,
     ModalComponent,
-    FarmPlotFilterComponent,
   ],
 })
 export class InvestmentPackageTypesModule {}

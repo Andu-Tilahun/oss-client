@@ -43,12 +43,8 @@ export class RegionCreateModalComponent {
         this.toastService.success(`Region created successfully`);
         this.regionCreated.emit();
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to create region',
-          'Create Region'
-        );
       }
     });
   }

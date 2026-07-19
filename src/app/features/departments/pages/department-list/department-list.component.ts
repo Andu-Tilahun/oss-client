@@ -47,11 +47,9 @@ export class DepartmentListComponent implements OnInit {
         this.departments = list ?? [];
         this.applyFilter();
         this.loading = false;
-        this.toastService.success('Departments retrieved successfully');
       },
-      error: (err) => {
+      error: () => {
         this.loading = false;
-        this.toastService.error(err.message || 'Failed to fetch departments', 'Fetch Departments');
       },
     });
   }
@@ -117,9 +115,7 @@ export class DepartmentListComponent implements OnInit {
         this.selectedDepartment = null;
         this.loadDepartments();
       },
-      error: (err) => {
-        this.toastService.error(err.message || 'Failed to delete department', 'Delete Department');
-      },
+      error: () => {},
     });
   }
 

@@ -2,7 +2,6 @@
   <h2 class="text-xl font-semibold text-gray-800 mb-6">Organization Settings</h2>
 
   <div *ngIf="loading" class="text-sm text-gray-500">Loading...</div>
-  <div *ngIf="error" class="mb-4 text-sm text-red-600">{{ error }}</div>
 
   <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSave()" class="space-y-4">
 

@@ -43,12 +43,8 @@ export class BranchEditModalComponent {
         this.toastService.success('Branch updated successfully');
         this.branchUpdated.emit();
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to update branch',
-          'Update Branch'
-        );
       }
     });
   }

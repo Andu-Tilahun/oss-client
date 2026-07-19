@@ -74,6 +74,32 @@
         </div>
       </div>
 
+      <!-- Profile: clicking navigates to edit profile -->
+      <button
+        type="button"
+        *ngIf="currentUser"
+        (click)="editProfile()"
+        class="flex items-center justify-center w-9 h-9 rounded-full overflow-hidden shrink-0 ring-2 ring-transparent hover:ring-emerald-400 transition-all focus:outline-none"
+        aria-label="Edit profile"
+      >
+        <img [src]="userAvatar()" alt="Profile" class="w-full h-full object-cover" />
+      </button>
+
+      <!-- Logout: always visible -->
+      <button
+        type="button"
+        *ngIf="currentUser"
+        (click)="logout()"
+        class="flex items-center gap-1.5 shrink-0 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+        aria-label="Logout"
+      >
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        Logout
+      </button>
+
       <!-- Mobile menu -->
       <button
         type="button"

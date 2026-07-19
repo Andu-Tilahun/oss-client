@@ -92,7 +92,6 @@ export class UserFormComponent implements OnInit, OnChanges, ControlValueAccesso
       middleName: [''],
       username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', this.mode === 'create' ? [Validators.required, Validators.minLength(6)] : []],
       gender: ['', Validators.required],
       profileImageUuid: [''],
       roleId: ['', Validators.required],
@@ -121,10 +120,6 @@ export class UserFormComponent implements OnInit, OnChanges, ControlValueAccesso
     // Disable username in edit mode (usually shouldn't be changed)
     if (this.mode === 'edit') {
       this.userForm.get('username')?.disable();
-      // Remove password requirement in edit mode
-      this.userForm.get('password')?.clearValidators();
-      this.userForm.get('password')?.updateValueAndValidity();
-
       // Role is assigned at creation time only for now
       this.userForm.get('roleId')?.clearValidators();
       this.userForm.get('roleId')?.updateValueAndValidity();
@@ -171,10 +166,6 @@ export class UserFormComponent implements OnInit, OnChanges, ControlValueAccesso
     this.userForm.reset();
   }
 
-  get showPasswordField(): boolean {
-    return this.mode === 'create';
-  }
-
   get showBranchField(): boolean {
     return !this.isEmployee;
   }
@@ -214,9 +205,10 @@ export class UserFormComponent implements OnInit, OnChanges, ControlValueAccesso
   }
 
   private loadRoles(): void {
+    const ALLOWED_ROLES = ['ADMIN', 'OPERATOR', 'EXTENSION_WORKER'];
     this.roleService.getRoles(0, 100, 'id', 'ASC').subscribe({
       next: (page) => {
-        this.roles = page.content;
+        this.roles = page.content.filter(r => ALLOWED_ROLES.includes(r.roleName));
       },
       error: (error) => {
         console.error('Failed to load roles', error);

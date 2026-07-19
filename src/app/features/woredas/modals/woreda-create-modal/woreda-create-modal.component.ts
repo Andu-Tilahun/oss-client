@@ -41,12 +41,7 @@ export class WoredaCreateModalComponent implements OnInit {
       next: response => {
         this.subcities = response.content;
       },
-      error: error => {
-        this.toastService.error(
-          error.message || 'Failed to load subcities/zones',
-          'Load Subcities/Zones'
-        );
-      }
+      error: () => {}
     });
   }
 
@@ -70,10 +65,6 @@ export class WoredaCreateModalComponent implements OnInit {
       },
       error: (error) => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to create woreda',
-          'Create Woreda'
-        );
       }
     });
   }

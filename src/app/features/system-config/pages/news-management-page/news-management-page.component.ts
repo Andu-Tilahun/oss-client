@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SystemConfigService } from '../../services/system-config.service';
 import { NewsArticle, NewsStatus } from '../../models/news-article.model';
+import { ToastService } from '../../../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-news-management-page',
@@ -17,13 +18,16 @@ export class NewsManagementPageComponent implements OnInit {
   saving = false;
   deleting: string | null = null;
   editingId: string | null = null;
-  error = '';
 
   form!: FormGroup;
 
   readonly statusOptions: NewsStatus[] = ['DRAFT', 'PUBLISHED'];
 
-  constructor(private fb: FormBuilder, private systemConfigService: SystemConfigService) {}
+  constructor(
+    private fb: FormBuilder,
+    private systemConfigService: SystemConfigService,
+    private toastService: ToastService,
+  ) {}
 
   ngOnInit(): void {
     this.buildForm();
@@ -50,7 +54,6 @@ export class NewsManagementPageComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
-        this.error = 'Failed to load articles.';
       },
     });
   }
@@ -104,10 +107,10 @@ export class NewsManagementPageComponent implements OnInit {
         this.saving = false;
         this.showModal = false;
         this.loadArticles();
+        this.toastService.success(this.editingId ? 'Article updated successfully' : 'Article created successfully');
       },
       error: () => {
         this.saving = false;
-        this.error = 'Save failed.';
       },
     });
   }
@@ -119,10 +122,10 @@ export class NewsManagementPageComponent implements OnInit {
       next: () => {
         this.deleting = null;
         this.articles = this.articles.filter(a => a.id !== id);
+        this.toastService.success('Article deleted');
       },
       error: () => {
         this.deleting = null;
-        this.error = 'Delete failed.';
       },
     });
   }

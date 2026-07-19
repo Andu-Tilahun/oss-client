@@ -46,12 +46,8 @@ export class ServiceFeeCreateModalComponent {
         }
         this.serviceFeeCreated.emit();
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to create service fee',
-          'Create Service Fee'
-        );
       }
     });
   }

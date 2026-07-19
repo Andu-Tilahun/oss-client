@@ -59,12 +59,8 @@ export class UserCreateModalComponent {
         this.userForm.reset();
         this.userCreated.emit();
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to create user',
-          'Create User'
-        );
       }
     });
   }

@@ -43,12 +43,8 @@ export class OrganizationCreateModalComponent {
         this.toastService.success(`Organization created successfully`);
         this.organizationCreated.emit();
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to create organization',
-          'Create Organization'
-        );
       }
     });
   }

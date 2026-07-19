@@ -22,6 +22,9 @@ export class TabsComponent {
   /** Key of the currently active tab */
   @Input() activeTab = '';
 
+  /** When true, renders tabs as centered pills instead of left-aligned underlines */
+  @Input() centered = false;
+
   /** Emits the key of the tab that was clicked */
   @Output() activeTabChange = new EventEmitter<string>();
 
