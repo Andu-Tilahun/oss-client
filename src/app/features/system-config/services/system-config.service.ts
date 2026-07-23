@@ -9,6 +9,7 @@ import { NewsArticle, NewsArticleRequest, NewsPage } from '../models/news-articl
 import { SocialMediaLink, SocialMediaLinkRequest } from '../models/social-media.model';
 import { BranchCenter, BranchCenterRequest } from '../models/branch-center.model';
 import { MessageTemplate, MessageTemplateRequest, TemplateType } from '../models/message-template.model';
+import { BankAccount, BankAccountRequest } from '../models/bank-account.model';
 
 @Injectable({ providedIn: 'root' })
 export class SystemConfigService {
@@ -89,6 +90,28 @@ export class SystemConfigService {
 
   deleteBranchCenter(id: string): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${Endpoints.CONFIG_BRANCH_CENTERS_ENDPOINT}/${id}`);
+  }
+
+  // Bank accounts – public (active only, no auth required)
+  getActiveBankAccounts(): Observable<BankAccount[]> {
+    return this.http.get<BankAccount[]>(Endpoints.CONFIG_BANK_ACCOUNTS_ENDPOINT);
+  }
+
+  // Bank accounts – admin
+  getAllBankAccounts(): Observable<BankAccount[]> {
+    return this.http.get<BankAccount[]>(`${Endpoints.CONFIG_BANK_ACCOUNTS_ENDPOINT}/all`);
+  }
+
+  createBankAccount(request: BankAccountRequest): Observable<ApiResponse<BankAccount>> {
+    return this.http.post<ApiResponse<BankAccount>>(Endpoints.CONFIG_BANK_ACCOUNTS_ENDPOINT, request);
+  }
+
+  updateBankAccount(id: string, request: BankAccountRequest): Observable<ApiResponse<BankAccount>> {
+    return this.http.put<ApiResponse<BankAccount>>(`${Endpoints.CONFIG_BANK_ACCOUNTS_ENDPOINT}/${id}`, request);
+  }
+
+  deleteBankAccount(id: string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${Endpoints.CONFIG_BANK_ACCOUNTS_ENDPOINT}/${id}`);
   }
 
   // Templates

@@ -23,6 +23,7 @@ export interface FarmPlot {
   soilType: FarmPlotSoilType;
   status?: FarmPlotStatus;
   imageUuid?: string;
+  regionId?: string;
   gallery?: FarmGallery[];
 
   createdBy?: string;
@@ -41,6 +42,7 @@ export interface FarmPlotRequest {
   soilType: FarmPlotSoilType;
   status?: FarmPlotStatus;
   imageUuid?: string;
+  regionId: string;
 }
 
 export interface FarmPlotFilterRequest {

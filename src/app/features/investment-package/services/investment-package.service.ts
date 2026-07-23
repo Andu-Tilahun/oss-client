@@ -107,7 +107,7 @@ export class InvestmentPackageService {
 
   cancel(investmentId: string): Observable<ApiResponse<InvestmentRecord>> {
     return this.httpService.put<ApiResponse<InvestmentRecord>>(
-      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investments/${investmentId}/cancel`,
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investmentRecord/${investmentId}/cancel`,
       null,
     );
   }
@@ -148,7 +148,7 @@ export class InvestmentPackageService {
   }
 
   investorAgreeResponse(request: InvestorAgreeResponseRequest): Observable<ApiResponse<InvestmentRecord>> {
-    return this.httpService.post<ApiResponse<InvestmentRecord>>(
+    return this.httpService.put<ApiResponse<InvestmentRecord>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investmentRecord/choose-candidates/investor-agree-response`,
       request,
     );

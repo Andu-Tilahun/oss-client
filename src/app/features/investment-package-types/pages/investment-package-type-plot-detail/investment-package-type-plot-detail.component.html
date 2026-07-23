@@ -25,6 +25,7 @@
     <app-investment-package-detail-panel
       *ngIf="effectiveAgreement && !loading"
       [investmentPackage]="asInvestmentPackage(effectiveAgreement)"
+      [investmentPackageType]="investmentPackageType"
       [refreshKey]="effectiveRefreshKey"
       [tabs]="effectiveTabs"
       [forcedTab]="forcedTab"
@@ -34,6 +35,7 @@
       (extensionWorkerAssigned)="onExtensionWorkerAssigned($event)"
       (candidatesChosen)="onCandidatesChosen()"
       (agreementCreated)="onAgreementCreated()"
+      (investClicked)="onInvestClicked()"
     ></app-investment-package-detail-panel>
   </ng-container>
 </div>

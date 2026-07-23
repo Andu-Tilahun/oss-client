@@ -56,4 +56,5 @@ export const Endpoints = {
   CONFIG_SOCIAL_MEDIA_ENDPOINT: '/config/social-media',
   CONFIG_BRANCH_CENTERS_ENDPOINT: '/config/branch-centers',
   CONFIG_TEMPLATES_ENDPOINT: '/config/templates',
+  CONFIG_BANK_ACCOUNTS_ENDPOINT: '/config/bank-accounts',
 }

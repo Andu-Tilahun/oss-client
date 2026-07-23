@@ -9,6 +9,7 @@ import {
 } from '@angular/common/http';
 import {BehaviorSubject, Observable, throwError} from 'rxjs';
 import {catchError, filter, switchMap, take} from 'rxjs/operators';
+import {Router} from '@angular/router';
 import {AuthService} from '../../features/auth/services/auth.service';
 import {SKIP_AUTH_REDIRECT} from '../services/http.service';
 import {isAuthBypassUrl} from './auth-http.util';
@@ -20,7 +21,7 @@ export class AuthRefreshInterceptor implements HttpInterceptor {
   private isRefreshing = false;
   private readonly refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     if (request.context.get(SKIP_TOKEN_REFRESH) || isAuthBypassUrl(request.url)) {
@@ -29,6 +30,14 @@ export class AuthRefreshInterceptor implements HttpInterceptor {
 
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
+        if (error.status === 403) {
+          const skipAuthRedirect = request.context.get(SKIP_AUTH_REDIRECT);
+          if (!skipAuthRedirect) {
+            this.router.navigate(['/403']);
+          }
+          return throwError(() => error);
+        }
+
         if (error.status !== 401 || !this.authService.getRefreshToken()) {
           return throwError(() => error);
         }

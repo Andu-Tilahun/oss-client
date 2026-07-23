@@ -34,6 +34,12 @@
             />
           </svg>
           {{ tab.label }}
+          <span *ngIf="tab.badge != null && tab.badge > 0" class="relative flex-shrink-0 inline-flex items-center">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span class="relative bg-green-600 text-white text-xs font-bold rounded-full px-1.5 py-0.5 min-w-[1.25rem] leading-tight text-center">
+              {{ tab.badge }}
+            </span>
+          </span>
         </span>
       </button>
     </nav>

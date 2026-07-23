@@ -1,0 +1,70 @@
+<div class="p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-xl font-semibold text-gray-800">Payment Analysis</h2>
+    <button (click)="load()" class="px-3 py-1.5 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+      Refresh
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="text-sm text-gray-500">Loading...</div>
+
+  <ng-container *ngIf="!loading">
+    <!-- Summary cards -->
+    <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8">
+      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total (loaded)</p>
+        <p class="mt-1 text-2xl font-bold text-gray-900">{{ totalCount }}</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+        <p class="text-xs font-medium text-green-600 uppercase tracking-wide">Paid</p>
+        <p class="mt-1 text-2xl font-bold text-green-700">{{ paidCount }}</p>
+        <p class="text-xs text-gray-500 mt-0.5">{{ formatAmount(totalAmount) }}</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+        <p class="text-xs font-medium text-yellow-600 uppercase tracking-wide">Pending</p>
+        <p class="mt-1 text-2xl font-bold text-yellow-700">{{ pendingCount }}</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+        <p class="text-xs font-medium text-red-500 uppercase tracking-wide">Expired / Cancelled</p>
+        <p class="mt-1 text-2xl font-bold text-red-600">{{ expiredCount }}</p>
+      </div>
+    </div>
+
+    <!-- Recent payments table -->
+    <h3 class="text-sm font-semibold text-gray-700 mb-3">Recent Payments</h3>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utility</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let p of payments" class="hover:bg-gray-50">
+            <td class="px-4 py-3 font-mono text-xs text-gray-700">{{ p.orderNumber }}</td>
+            <td class="px-4 py-3 text-gray-900">
+              <div>{{ p.fullName }}</div>
+              <div class="text-xs text-gray-400">{{ p.email }}</div>
+            </td>
+            <td class="px-4 py-3 text-gray-500">{{ p.utility }}</td>
+            <td class="px-4 py-3 text-right font-medium text-gray-900">{{ formatAmount(p.amount) }}</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-0.5 rounded text-xs font-medium" [ngClass]="statusClass(p.paymentDetailStatus)">
+                {{ p.paymentDetailStatus }}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-gray-500 text-xs">{{ p.createdAt | date: 'medium' }}</td>
+          </tr>
+          <tr *ngIf="payments.length === 0">
+            <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-400">No payments found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+</div>

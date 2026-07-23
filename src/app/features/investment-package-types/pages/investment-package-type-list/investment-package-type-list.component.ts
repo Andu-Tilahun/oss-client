@@ -57,6 +57,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   deleting = false;
   showCreateInvestmentModal = false;
   selectedAgreement: InvestmentPackageTypeAgreement | null = null;
+  investorBidRecord: InvestmentRecord | null = null;
   detailRefreshKey = 0;
   pendingForcedTab: string | null = null;
   showAdminActionModal = false;
@@ -72,7 +73,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   activeTab = 'detail';
 
   investorActiveTab = 'my-leases';
-  readonly investorTabs: TabItem[] = [
+  investorTabs: TabItem[] = [
     {
       key: 'my-leases',
       label: 'My Farm Leases',
@@ -245,9 +246,21 @@ export class InvestmentPackageTypeListComponent implements OnInit {
         {
           id: 'invest',
           icon: 'plus',
-          title: 'Invest',
-          visible: (r) => r.fundingStatus === FundingStatus.OPEN,
+          title: this.investmentPackageType === 'BIDDING' ? 'Bid' : 'Invest',
+          visible: (r) =>
+            r.fundingStatus === FundingStatus.OPEN &&
+            (this.investmentPackageType !== 'BIDDING' || !this.investorBidRecord),
           action: (r) => this.onInvest(r),
+        },
+        {
+          id: 'update-bid',
+          icon: 'edit',
+          title: 'Update Bid',
+          visible: (r) =>
+            this.investmentPackageType === 'BIDDING' &&
+            r.fundingStatus === FundingStatus.OPEN &&
+            !!this.investorBidRecord,
+          action: (r) => this.onUpdateBid(r),
         },
         {
           id: 'agree-contract',
@@ -490,7 +503,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
   loadPackageTypes(): void {
     this.loadSubscribedPackageTypes();
-    if (this.isInvestorUser && this.investorActiveTab === 'explore') {
+    if (this.isInvestorUser) {
       this.loadAvailablePackageTypes();
     }
   }
@@ -521,6 +534,10 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
         this.subscribedLoading = false;
         this.syncSelectedAgreementAfterLoad(previousSelectedId);
+
+        if (this.isInvestorUser && this.subscribedPackageTypes.length === 0) {
+          this.onInvestorTabChange('explore');
+        }
       },
       error: () => {
         this.subscribedLoading = false;
@@ -550,7 +567,15 @@ export class InvestmentPackageTypeListComponent implements OnInit {
             )
           : raw;
         this.availableTotal = response.totalElements ?? raw.length;
+        this.investorTabs = this.investorTabs.map(t =>
+          t.key === 'explore' ? { ...t, badge: this.availableTotal || undefined } : t
+        );
         this.availableLoading = false;
+        if (this.availablePackageTypes.length > 0) {
+          this.selectedAgreement = {...this.availablePackageTypes[0]};
+          this.detailRefreshKey++;
+          this.refreshPackageInvestmentsIfNeeded();
+        }
       },
       error: (error) => {
         this.availableLoading = false;
@@ -602,11 +627,31 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     this.selectedAgreement = {...lease};
     this.detailRefreshKey++;
     this.packageInvestments = [];
+    this.investorBidRecord = null;
     this.showCreateModal = false;
     this.showEditModal = false;
     if (this.activeTab === 'investor') {
       this.loadPackageInvestments(lease.id);
     }
+    if (this.isInvestorUser && this.investmentPackageType === 'BIDDING' && lease.fundingStatus === FundingStatus.OPEN) {
+      this.loadInvestorBidRecord(lease.id);
+    }
+  }
+
+  private loadInvestorBidRecord(packageId: string): void {
+    this.investmentPackageService.filterInvestments({
+      investmentPackageIds: [packageId],
+      page: 0,
+      size: 1,
+    }).subscribe({
+      next: (response) => {
+        this.investorBidRecord = response.content?.[0] ?? null;
+        this.buildTableRowActions();
+      },
+      error: () => {
+        this.investorBidRecord = null;
+      },
+    });
   }
 
   private refreshPackageInvestmentsIfNeeded(): void {
@@ -727,15 +772,33 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     });
   }
 
+  onDetailPanelInvestClicked(): void {
+    this.showCreateInvestmentModal = true;
+  }
+
   onInvest(lease: InvestmentPackageTypeAgreement): void {
+    this.selectedAgreement = {...lease};
+    this.investorBidRecord = null;
+    this.showCreateInvestmentModal = true;
+  }
+
+  onUpdateBid(lease: InvestmentPackageTypeAgreement): void {
     this.selectedAgreement = {...lease};
     this.showCreateInvestmentModal = true;
   }
 
   onInvestmentCreated(): void {
     this.showCreateInvestmentModal = false;
-    this.toastService.success('Investment registered successfully');
+    this.investorBidRecord = null;
+    if (this.investmentPackageType === 'BIDDING') {
+      this.toastService.success('Bid registered successfully');
+    } else {
+      this.toastService.success('Investment registered successfully');
+    }
     this.loadPackageTypes();
+    if (this.selectedAgreement && this.isInvestorUser && this.investmentPackageType === 'BIDDING') {
+      this.loadInvestorBidRecord(this.selectedAgreement.id);
+    }
   }
 
   onPackageTypeCreated(): void {

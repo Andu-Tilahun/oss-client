@@ -35,7 +35,7 @@
           >
             <div class="min-w-0">
               <p class="text-sm font-medium text-gray-900 truncate">{{ agreement.title }}</p>
-              <p class="text-xs text-gray-500">{{ agreement.farmPlot?.title || '-' }}</p>
+              <p class="text-xs text-gray-500">{{ agreement.farmPlot.title || '-' }}</p>
               <p class="text-xs text-gray-400">
                 {{ agreement.startDate | date:'mediumDate' }} – {{ agreement.endDate | date:'mediumDate' }}
               </p>
@@ -70,7 +70,7 @@
           >
             <div class="min-w-0">
               <p class="text-sm font-medium text-gray-900 truncate">{{ agreement.title }}</p>
-              <p class="text-xs text-gray-500">{{ agreement.farmPlot?.title || '-' }}</p>
+              <p class="text-xs text-gray-500">{{ agreement.farmPlot.title || '-' }}</p>
               <p class="text-xs text-gray-400">
                 {{ agreement.startDate | date:'mediumDate' }} – {{ agreement.endDate | date:'mediumDate' }}
               </p>
@@ -105,7 +105,7 @@
           >
             <div class="min-w-0">
               <p class="text-sm font-medium text-gray-900 truncate">{{ agreement.title }}</p>
-              <p class="text-xs text-gray-500">{{ agreement.farmPlot?.title || '-' }}</p>
+              <p class="text-xs text-gray-500">{{ agreement.farmPlot.title || '-' }}</p>
               <p class="text-xs text-gray-400">
                 {{ agreement.startDate | date:'mediumDate' }} – {{ agreement.endDate | date:'mediumDate' }}
               </p>

@@ -81,12 +81,15 @@ export interface InvestmentRecord {
   paymentStatus?: InvestmentPaymentStatus;
   investmentPackage?: InvestmentPackage;
   investorUser: User;
+  bankAccountId?: string;
+  paymentReference?: string;
 }
 
 export interface InvestmentCreateRequest {
-  crowdFundingId: string;
+  investmentPackageId: string;
   amount: number;
   paymentMethod: InvestmentPaymentMethod;
+  bankAccountId?: string;
 }
 
 export interface InvestmentRecordCreateRequest {

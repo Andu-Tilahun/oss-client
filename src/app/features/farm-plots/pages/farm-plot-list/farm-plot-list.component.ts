@@ -14,6 +14,7 @@ import {TableQueryParams} from '../../../../shared/data-table/models/table-query
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
 import {ColumnType} from '../../../../shared/data-table/models/column-types.model';
 import {environment} from '../../../../../environments/environment';
+import {RegionService} from '../../../regions/services/region.service';
 
 @Component({
   selector: 'app-farm-plot-list',
@@ -23,6 +24,8 @@ import {environment} from '../../../../../environments/environment';
 })
 export class FarmPlotListComponent {
   private readonly storageApiUrl = `${environment.apiUrl}/files`;
+
+  regionsMap = new Map<string, string>();
 
   plots: FarmPlot[] = [];
   loading = false;
@@ -67,6 +70,11 @@ export class FarmPlotListComponent {
       defaultVisible: true,
     },
     {
+      header: 'Region',
+      value: (plot) => this.regionsMap.get(plot.regionId ?? '') ?? '—',
+      defaultVisible: true,
+    },
+    {
       header: 'Image',
       columnType: ColumnType.IMAGE,
       value: (plot) => this.getPlotImageUrl(plot),
@@ -89,11 +97,17 @@ export class FarmPlotListComponent {
 
   constructor(
     private farmPlotService: FarmPlotService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private regionService: RegionService,
   ) {
   }
 
   ngOnInit(): void {
+    this.regionService.filterRegions({ page: 0, size: 100 }).subscribe({
+      next: (res) => {
+        this.regionsMap = new Map((res.content ?? []).map(r => [r.id, r.name]));
+      },
+    });
     this.loadPlots();
   }
 

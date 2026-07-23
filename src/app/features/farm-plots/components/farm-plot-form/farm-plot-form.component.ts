@@ -14,6 +14,8 @@ import {ProfilePictureUploadComponent} from '../../../../shared/file-upload/prof
 import {FarmPlot, FarmPlotRequest, FarmPlotSizeType, FarmPlotSoilType, FarmPlotStatus} from '../../models/farm-plot.model';
 import {FileUploadService} from '../../../../shared/file-upload/file-upload.service';
 import {ToastService} from '../../../../shared/toast/toast.service';
+import {RegionService} from '../../../regions/services/region.service';
+import {Region} from '../../../regions/models/region.model';
 
 interface GalleryImageItem {
   id: string;
@@ -51,6 +53,8 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
   readonly soilTypes: Array<FarmPlotSoilType> = ['SANDY', 'CLAY', 'LOAMY'];
   readonly statuses: Array<FarmPlotStatus> = ['ACTIVE', 'INACTIVE', 'UNDER_MAINTENANCE', 'ASSIGNED_TO_LEASE'];
 
+  regions: Region[] = [];
+
   profileImageUuid?: string;
   galleryImages: GalleryImageItem[] = [];
   galleryUploading = false;
@@ -59,6 +63,7 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
     private fb: FormBuilder,
     private fileUploadService: FileUploadService,
     private toastService: ToastService,
+    private regionService: RegionService,
   ) {
     this.farmPlotForm = this.createForm();
   }
@@ -66,6 +71,9 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
   ngOnInit(): void {
     this.farmPlotForm.valueChanges.subscribe((value) => {
       this.onChange(value);
+    });
+    this.regionService.filterRegions({ page: 0, size: 100 }).subscribe({
+      next: (res) => { this.regions = res.content ?? []; },
     });
     if (this.farmPlot) {
       this.patchFormValues(this.farmPlot);
@@ -89,6 +97,7 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
       soilType: ['', Validators.required],
       status: [this.mode === 'create' ? 'ACTIVE' : '', Validators.required],
       imageUuid: [''],
+      regionId: ['', Validators.required],
     });
   }
 
@@ -130,6 +139,7 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
       soilType: plot.soilType,
       status: plot.status,
       imageUuid: plot.imageUuid ?? '',
+      regionId: plot.regionId ?? '',
     });
   }
 

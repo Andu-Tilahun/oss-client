@@ -41,6 +41,7 @@ export class InvestmentPackageTypePlotDetailComponent implements OnInit, OnChang
   @Output() extensionWorkerAssigned = new EventEmitter<InvestmentPackage>();
   @Output() candidatesChosen = new EventEmitter<void>();
   @Output() agreementCreated = new EventEmitter<void>();
+  @Output() investClicked = new EventEmitter<void>();
 
   readonly routeId: string = this.route.snapshot.paramMap.get('id') ?? '';
 
@@ -265,6 +266,10 @@ export class InvestmentPackageTypePlotDetailComponent implements OnInit, OnChang
     }
 
     this.internalRefreshKey++;
+  }
+
+  onInvestClicked(): void {
+    this.investClicked.emit();
   }
 
   private loadPackageInvestments(packageId: string): void {

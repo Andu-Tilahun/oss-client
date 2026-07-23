@@ -13,7 +13,7 @@ export class GuestGuard implements CanActivate {
   ) {}
 
   canActivate(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): boolean {
-    if (!this.authService.isLoggedIn()) {
+    if (!this.authService.isSessionValid()) {
       return true;
     }
     this.router.navigate(['/users'], { replaceUrl: true });

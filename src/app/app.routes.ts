@@ -242,6 +242,26 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'payment-config',
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] },
+    children: [
+      {
+        path: 'bank-accounts',
+        loadComponent: () =>
+          import('./features/system-config/pages/bank-accounts-page/bank-accounts-page.component')
+            .then(m => m.BankAccountsPageComponent),
+      },
+      {
+        path: 'analysis',
+        loadComponent: () =>
+          import('./features/system-config/pages/payment-analysis-page/payment-analysis-page.component')
+            .then(m => m.PaymentAnalysisPageComponent),
+      },
+      { path: '', redirectTo: 'bank-accounts', pathMatch: 'full' },
+    ],
+  },
+  {
     path: 'farm-company',
     loadChildren: () => import('./features/farm-company/farm-company.module').then(m => m.FarmCompanyModule),
     canActivate: [AuthGuard, RoleGuard],

@@ -141,6 +141,7 @@
       (extensionWorkerAssigned)="onExtensionWorkerAssigned($event)"
       (candidatesChosen)="onCandidatesChosen()"
       (agreementCreated)="onAgreementCreated()"
+      (investClicked)="onDetailPanelInvestClicked()"
     ></app-investment-package-type-plot-detail>
   </ng-template>
 </app-page-split-layout>
@@ -165,7 +166,9 @@
 <app-investment-package-create-investment-modal
   [(visible)]="showCreateInvestmentModal"
   [investmentPackage]="asInvestmentPackage(selectedAgreement)"
-  [leasePaymentMode]="true"
+  [leasePaymentMode]="investmentPackageType === 'LEASING'"
+  [biddingMode]="investmentPackageType === 'BIDDING'"
+  [existingBidRecord]="investorBidRecord"
   (investmentCreated)="onInvestmentCreated()"
 ></app-investment-package-create-investment-modal>
 

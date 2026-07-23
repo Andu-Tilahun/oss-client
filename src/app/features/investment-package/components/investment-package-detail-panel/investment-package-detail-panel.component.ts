@@ -7,7 +7,9 @@ import {
   CreateInvestmentAgreementRequest,
   InvestmentAgreement,
   InvestmentPackage,
+  InvestmentPackageType,
   InvestmentRecord,
+  InvestorAgreeResponseRequest,
 } from '../../models/investment-package.model';
 import {FundingStatus} from '../../../../shared/models/funding-status.model';
 import {Endpoints} from '../../../../core/endpoint/endpoint.model';
@@ -45,6 +47,7 @@ import {AssignExtensionWorkerRequest, ChangeExtensionWorkerRequest} from '../../
 })
 export class InvestmentPackageDetailPanelComponent implements OnChanges {
   @Input() investmentPackage: InvestmentPackage | null = null;
+  @Input() investmentPackageType: InvestmentPackageType = 'LEASING';
   @Input() refreshKey = 0;
   @Input() tabs: TabItem[] = [];
   @Input() forcedTab: string | null = null;
@@ -55,6 +58,7 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   @Output() extensionWorkerAssigned = new EventEmitter<InvestmentPackage>();
   @Output() candidatesChosen = new EventEmitter<void>();
   @Output() agreementCreated = new EventEmitter<void>();
+  @Output() investClicked = new EventEmitter<void>();
 
   activeTab = '';
   extensionWorkers: User[] = [];
@@ -80,6 +84,12 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   investorAgreeAttachmentId: string | null = null;
   investorAgreeing = false;
   investorAgreed = false;
+  // BIDDING: chosen investor payment receipt
+  paymentReceiptAttachmentId: string | null = null;
+  submittingPayment = false;
+  paymentSubmitted = false;
+  private ownBidRecordId: string | null = null;
+  private ownBidRecordPackageId: string | null = null;
   private loadedClosedLeaseInvestorsKey: string | null = null;
   private lastPackageIdForCandidates: string | null = null;
   private loadedAgreementId: string | null = null;
@@ -111,6 +121,14 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
         this.investorAgreeAttachmentId = null;
         this.investorAgreeing = false;
         this.investorAgreed = false;
+        this.paymentReceiptAttachmentId = null;
+        this.submittingPayment = false;
+        this.paymentSubmitted = false;
+        this.ownBidRecordId = null;
+        this.ownBidRecordPackageId = null;
+      }
+      if (this.isChosenBidder && this.ownBidRecordPackageId !== this.investmentPackage?.id) {
+        this.loadOwnBidRecord();
       }
       if (!this.isInvestorRole && (this.activeTab === 'investor' || this.activeTab === 'choose-candidate')) {
         this.maybeLoadClosedLeaseInvestors();
@@ -165,6 +183,45 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     return this.authService.isExtensionWorker();
   }
 
+  get isBiddingType(): boolean {
+    return this.investmentPackageType === 'BIDDING';
+  }
+
+  get investTypeLabel(): string {
+    switch (this.investmentPackageType) {
+      case 'BIDDING':      return 'Bidding';
+      case 'CROWDFUNDING': return 'Crowdfunding';
+      default:             return 'Lease';
+    }
+  }
+
+  get investButtonLabel(): string {
+    return this.investmentPackageType === 'BIDDING' ? 'Place a Bid' : 'Invest Now';
+  }
+
+  get isChosenBidder(): boolean {
+    if (!this.isInvestorRole || !this.isBiddingType || !this.investmentPackage) return false;
+    const currentUserId = this.authService.getCurrentUser()?.id;
+    if (!currentUserId) return false;
+    const ownRecord = this.packageInvestments.find(r => r.investorId === currentUserId);
+    return ownRecord?.status === 'PENDING';
+  }
+
+  get biddingCandidates(): InvestmentRecord[] {
+    return [...this.packageInvestments].sort((a, b) => (b.amount ?? 0) - (a.amount ?? 0));
+  }
+
+  get currentUserId(): string | undefined {
+    return this.authService.getCurrentUser()?.id;
+  }
+
+  get myBidRank(): number {
+    const uid = this.currentUserId;
+    if (!uid) return -1;
+    const idx = this.biddingCandidates.findIndex(r => r.investorId === uid);
+    return idx === -1 ? -1 : idx + 1;
+  }
+
   /** The logged-in investor's own profile on this lease, matched by id against the lease's investor reference. */
   get ownInvestorProfile(): User | null {
     if (!this.isInvestorRole || !this.investmentPackage) {
@@ -196,6 +253,9 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   }
 
   get canConfirmCandidates(): boolean {
+    if (this.isBiddingType) {
+      return this.selectedCandidateIds.length === 1;
+    }
     return !!this.investmentPackage?.attachmentIdList?.length && this.investmentPackage?.paymentStatus === 'PENDING';
   }
 
@@ -371,12 +431,15 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   }
 
   toggleCandidate(investorId: string | undefined | null): void {
-    if (!investorId) {
-      return;
+    if (!investorId) return;
+    if (this.isBiddingType) {
+      // Single-select for BIDDING
+      this.selectedCandidateIds = this.isCandidateSelected(investorId) ? [] : [investorId];
+    } else {
+      this.selectedCandidateIds = this.isCandidateSelected(investorId)
+        ? this.selectedCandidateIds.filter((id) => id !== investorId)
+        : [...this.selectedCandidateIds, investorId];
     }
-    this.selectedCandidateIds = this.isCandidateSelected(investorId)
-      ? this.selectedCandidateIds.filter((id) => id !== investorId)
-      : [...this.selectedCandidateIds, investorId];
   }
 
   confirmCandidates(): void {
@@ -489,6 +552,53 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
       error: (err) => {
         this.investorAgreeing = false;
         this.toastService.error(err.message || 'Failed to sign contract');
+      },
+    });
+  }
+
+  private loadOwnBidRecord(): void {
+    const packageId = this.investmentPackage?.id;
+    if (!packageId) return;
+    this.ownBidRecordPackageId = packageId;
+    this.investmentPackageService.filterInvestments({
+      investmentPackageIds: [packageId],
+      page: 0,
+      size: 1,
+    }).subscribe({
+      next: (response) => {
+        this.ownBidRecordId = response.content?.[0]?.id ?? null;
+      },
+      error: () => {
+        this.ownBidRecordId = null;
+      },
+    });
+  }
+
+  submitBidPayment(): void {
+    const packageId = this.investmentPackage?.id;
+    const farmPlotId = this.investmentPackage?.farmPlotId || this.investmentPackage?.farmPlot?.id;
+    if (!packageId || !farmPlotId || !this.ownBidRecordId || !this.paymentReceiptAttachmentId || this.submittingPayment) {
+      return;
+    }
+
+    const request: InvestorAgreeResponseRequest = {
+      investmentPackageId: packageId,
+      investmentRecordId: this.ownBidRecordId,
+      farmPlotId,
+      attachmentId: this.paymentReceiptAttachmentId,
+    };
+
+    this.submittingPayment = true;
+    this.investmentPackageService.investorAgreeResponse(request).subscribe({
+      next: () => {
+        this.submittingPayment = false;
+        this.paymentSubmitted = true;
+        this.toastService.success('Payment receipt submitted successfully');
+        this.agreementCreated.emit();
+      },
+      error: (error) => {
+        this.submittingPayment = false;
+        this.toastService.error(error.message || 'Failed to submit payment receipt', 'Payment Receipt');
       },
     });
   }

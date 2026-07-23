@@ -141,6 +141,17 @@ export const MENU: MenuItem[] = [
     expanded: false
   },
   {
+    icon: 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9m-4-3h2M7 7h10M7 11h10M7 15h10',
+    label: 'Payment',
+    route: '/payment-config/bank-accounts',
+    roles: ['ADMIN'],
+    children: [
+      { icon: '', label: 'Configurations', route: '/payment-config/bank-accounts', roles: ['ADMIN'] },
+      { icon: '', label: 'Analysis',       route: '/payment-config/analysis',      roles: ['ADMIN'] },
+    ],
+    expanded: false,
+  },
+  {
     icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
     label: 'Templates',
     route: '/templates/email',
