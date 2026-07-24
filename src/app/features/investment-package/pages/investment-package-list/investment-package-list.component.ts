@@ -42,7 +42,8 @@ export class InvestmentPackageListComponent implements OnInit {
 
   columns: DataTableColumn<InvestmentPackage>[] = [
     {header: 'Title', value: (c) => c.title},
-    {header: 'Status', value: (c) => c.fundingStatus, defaultVisible: false},
+    {header: 'Package Status', value: (c) => c.packageStatus ?? 'ACTIVE'},
+    {header: 'Funding Status', value: (c) => c.fundingStatus, defaultVisible: false},
     {header: 'Type', value: (c) => this.formatPackageType(c.investmentPackageType)},
     {header: 'Deadline', value: (c) => this.formatDeadline(c.fundingDeadline), defaultVisible: false},
     {header: 'Target', value: (c) => this.formatAmount(c.targetAmount)},
@@ -78,8 +79,15 @@ export class InvestmentPackageListComponent implements OnInit {
         id: 'edit',
         icon: 'edit',
         title: 'Edit',
-        visible: (c) => this.isAdmin && c.fundingStatus !== 'CLOSED',
+        visible: (c) => this.isAdmin && c.fundingStatus !== 'CLOSED' && c.packageStatus !== 'IN_USE' && c.packageStatus !== 'INACTIVE',
         action: (c) => this.onEdit(c),
+      },
+      {
+        id: 'toggle-status',
+        icon: 'power',
+        title: 'Toggle Status',
+        visible: (c) => this.isAdmin && c.packageStatus !== 'IN_USE',
+        action: (c) => this.onToggleStatus(c),
       },
     ];
   }
@@ -188,6 +196,13 @@ export class InvestmentPackageListComponent implements OnInit {
   onInvest(c: InvestmentPackage): void {
     this.selectedInvestmentPackage = {...c};
     this.showCreateInvestmentModal = true;
+  }
+
+  onToggleStatus(pkg: InvestmentPackage): void {
+    this.investmentPackageService.togglePackageStatus(pkg.id).subscribe({
+      next: () => this.loadInvestmentPackages(),
+      error: (err) => this.toastService.error(err.message || 'Failed to update status', 'Status Update'),
+    });
   }
 
   onInvestmentPackageCreated(): void {

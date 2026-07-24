@@ -195,14 +195,14 @@ export class InvestmentPackageTypeListComponent implements OnInit {
           id: 'edit',
           icon: 'edit',
           title: 'Edit',
-          visible: (l) => l.fundingStatus !== FundingStatus.CLOSED,
+          visible: (l) => l.fundingStatus !== FundingStatus.CLOSED && l.packageStatus !== 'IN_USE' && l.packageStatus !== 'INACTIVE',
           action: (l) => this.onEditPackage(l),
         },
         {
           id: 'delete',
           icon: 'delete',
           title: 'Delete',
-          visible: (l) => l.fundingStatus !== FundingStatus.CLOSED,
+          visible: (l) => l.fundingStatus !== FundingStatus.CLOSED && l.packageStatus !== 'IN_USE' && l.packageStatus !== 'INACTIVE',
           action: (l) => this.onDeletePackage(l),
         },
         {

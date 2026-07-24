@@ -130,6 +130,29 @@ export class HttpService {
     );
   }
 
+  patch<T>(
+    url: string,
+    body: any,
+    headers?: HttpHeaders,
+    requestOptions?: RequestOption,
+  ): Observable<T> {
+    const apiUrl = this.getApiUrl(url);
+    return this.prepareRequestOption(requestOptions).pipe(
+      take(1),
+      switchMap(httpContext =>
+        this.http
+          .patch<ApiResponse<T>>(apiUrl, body, {
+            headers,
+            context: httpContext,
+          })
+          .pipe(
+            map(response => this.extractData(response)),
+            catchError(error => this.handleErrorResponse(error, httpContext)),
+          ),
+      ),
+    );
+  }
+
   delete<T>(
     url: string,
     headers?: HttpHeaders,

@@ -63,6 +63,13 @@ export class InvestmentPackageService {
     );
   }
 
+  togglePackageStatus(id: string): Observable<ApiResponse<InvestmentPackage>> {
+    return this.httpService.patch<ApiResponse<InvestmentPackage>>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${id}/status`,
+      {},
+    );
+  }
+
   getInvestmentPackageById(crowdFundingId: string): Observable<ApiResponse<InvestmentPackage>> {
     return this.httpService.get<ApiResponse<InvestmentPackage>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${crowdFundingId}`,

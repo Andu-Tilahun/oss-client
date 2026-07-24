@@ -3,6 +3,7 @@ import {FarmPlot, FarmPlotSoilType} from "../../farm-plots/models/farm-plot.mode
 import {FarmFollowUp} from "../../farm-followups/models/farm-followup.model";
 import {
   FarmActivity,
+  InvestmentPackageStatus,
   InvestmentPackageType,
   InvestmentPaymentStatus,
   WaterSource,
@@ -49,6 +50,7 @@ export interface InvestmentPackageTypeAgreement {
   investorUser?: User;
   totalDurationMonths?: number;
   status?: InvestmentPackageTypeStatus;
+  packageStatus?: InvestmentPackageStatus;
   totalAmount?: number;
   terms?: InvestmentPackageTypeTerm[];
 }

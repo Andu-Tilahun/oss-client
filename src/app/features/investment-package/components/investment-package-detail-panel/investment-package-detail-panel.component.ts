@@ -188,6 +188,10 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     return this.investmentPackageType === 'BIDDING';
   }
 
+  get isCrowdfundingType(): boolean {
+    return this.investmentPackageType === 'CROWDFUNDING';
+  }
+
   get investTypeLabel(): string {
     switch (this.investmentPackageType) {
       case 'BIDDING':      return 'Bidding';

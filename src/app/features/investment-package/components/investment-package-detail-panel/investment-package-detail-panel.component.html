@@ -215,25 +215,60 @@
         </div>
       </div>
 
-      <div
-        *ngFor="let investment of packageInvestments"
-        class="rounded-lg border border-gray-200 bg-white p-4 space-y-3"
-      >
-        <app-user-view *ngIf="investment.investorUser" [user]="investment.investorUser"></app-user-view>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
-          <div>
-            <p class="text-gray-500">Amount</p>
-            <p class="text-gray-900 font-medium">{{ formatAmount(investment.amount) }}</p>
-          </div>
-          <div>
-            <p class="text-gray-500">Payment method</p>
-            <p class="text-gray-900 font-medium">{{ investment.paymentMethod || '-' }}</p>
-          </div>
-          <div>
-            <p class="text-gray-500">Status</p>
-            <p class="text-gray-900 font-medium">{{ investment.status || '-' }}</p>
-          </div>
-        </div>
+      <!-- BIDDING / CROWDFUNDING: ranked table sorted by amount desc -->
+      <div *ngIf="(isBiddingType || isCrowdfundingType) && biddingCandidates.length > 0" class="overflow-x-auto rounded-lg border border-gray-200">
+        <table class="min-w-full divide-y divide-gray-200 text-sm">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600 w-10">#</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600">Investor</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600">Email</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600">Username</th>
+              <th class="px-4 py-3 text-right font-semibold text-gray-600">{{ isBiddingType ? 'Bid Price' : 'Amount' }}</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600">Payment Method</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 bg-white">
+            <tr
+              *ngFor="let investment of biddingCandidates; let i = index"
+              [ngClass]="{
+                'bg-yellow-50': i === 0,
+                'bg-white': i > 0
+              }"
+            >
+              <td class="px-4 py-3 font-bold text-gray-700">
+                <span
+                  class="inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold"
+                  [ngClass]="{
+                    'bg-yellow-400 text-yellow-900': i === 0,
+                    'bg-gray-300 text-gray-700': i === 1,
+                    'bg-amber-600 text-white': i === 2,
+                    'bg-gray-100 text-gray-500': i > 2
+                  }"
+                >{{ i + 1 }}</span>
+              </td>
+              <td class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
+                {{ investment.investorUser ? (investment.investorUser.firstName || '') + ' ' + (investment.investorUser.lastName || '') : '-' }}
+              </td>
+              <td class="px-4 py-3 text-gray-600">{{ investment.investorUser?.email || '-' }}</td>
+              <td class="px-4 py-3 text-gray-500">{{ investment.investorUser?.username || '-' }}</td>
+              <td class="px-4 py-3 text-right font-semibold text-gray-900">{{ formatAmount(investment.amount) }}</td>
+              <td class="px-4 py-3 text-gray-600">{{ investment.paymentMethod || '-' }}</td>
+              <td class="px-4 py-3">
+                <span class="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
+                  [ngClass]="{
+                    'bg-green-100 text-green-700': investment.status === 'ACTIVE' || investment.status === 'ACCEPTED',
+                    'bg-yellow-100 text-yellow-700': investment.status === 'PENDING',
+                    'bg-blue-100 text-blue-700': investment.status === 'PAID' || investment.status === 'SENT',
+                    'bg-red-100 text-red-700': investment.status === 'FAILED' || investment.status === 'REJECTED',
+                    'bg-gray-100 text-gray-600': !investment.status
+                  }"
+                >{{ investment.status || '-' }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </ng-container>
   </div>
