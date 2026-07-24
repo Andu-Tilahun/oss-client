@@ -106,16 +106,42 @@ export class HeaderComponent implements OnInit {
 
   private refreshBadgeCount(): void {
     this.authService.ensureValidSession().pipe(
-      switchMap(() => this.notificationService.getInboxNotifications(0, 1, this.notificationPreviewOptions)),
+      switchMap(() => this.notificationService.getUnreadCount(this.notificationPreviewOptions)),
       take(1),
     ).subscribe({
-      next: (res) => {
-        this.badgeTotal = res.totalElements ?? 0;
+      next: (count) => {
+        this.badgeTotal = count ?? 0;
       },
       error: () => {
         this.badgeTotal = null;
       },
     });
+  }
+
+  onNotificationClick(notification: NotificationLog): void {
+    this.notificationService.markAsRead(notification.id, this.notificationPreviewOptions).subscribe({
+      next: () => {
+        notification.isRead = true;
+        if (this.badgeTotal !== null && this.badgeTotal > 0) {
+          this.badgeTotal--;
+        }
+      },
+    });
+    this.showNotificationPanel = false;
+    const eventData = this.parseEventData(notification.eventData);
+    const type = (eventData['investmentPackageType'] as string)?.toLowerCase();
+    if (type) {
+      void this.router.navigate([`/investment-package-types/${type}`]);
+    }
+  }
+
+  private parseEventData(raw: string | undefined): Record<string, unknown> {
+    if (!raw) return {};
+    try {
+      return JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
   }
 
   private loadPreview(): void {
@@ -128,7 +154,6 @@ export class HeaderComponent implements OnInit {
       next: (res) => {
         this.previewItems = res.content ?? [];
         this.previewTotal = res.totalElements ?? 0;
-        this.badgeTotal = this.previewTotal;
         this.previewLoading = false;
       },
       error: () => {

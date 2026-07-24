@@ -35,6 +35,7 @@ export class InvestmentPackageTypePlotDetailComponent implements OnInit, OnChang
   @Input() forcedTab: string | null = null;
   @Input() packageInvestments: InvestmentRecord[] = [];
   @Input() packageInvestmentsLoading = false;
+  @Input() biddingLeaderboard: InvestmentRecord[] = [];
 
   @Output() createLease = new EventEmitter<void>();
   @Output() tabChange = new EventEmitter<string>();

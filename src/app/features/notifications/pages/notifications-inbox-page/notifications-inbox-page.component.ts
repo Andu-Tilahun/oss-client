@@ -1,6 +1,6 @@
 import {Component, OnInit, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {RouterModule} from '@angular/router';
+import {Router, RouterModule} from '@angular/router';
 import {switchMap} from 'rxjs/operators';
 import {NotificationLogService} from '../../services/notification.service';
 import {NotificationLog} from '../../models/notification.model';
@@ -15,6 +15,7 @@ import {AuthService} from '../../../auth/services/auth.service';
 export class NotificationsInboxPageComponent implements OnInit {
   private readonly notificationService = inject(NotificationLogService);
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   notifications: NotificationLog[] = [];
   loading = false;
@@ -65,5 +66,27 @@ export class NotificationsInboxPageComponent implements OnInit {
 
   formatCreated(n: NotificationLog): string {
     return new Date(n.createdAt).toLocaleString();
+  }
+
+  onNotificationClick(notification: NotificationLog): void {
+    if (!notification.isRead) {
+      this.notificationService.markAsRead(notification.id).subscribe({
+        next: () => { notification.isRead = true; },
+      });
+    }
+    const eventData = this.parseEventData(notification.eventData);
+    const type = (eventData['investmentPackageType'] as string)?.toLowerCase();
+    if (type) {
+      void this.router.navigate([`/investment-package-types/${type}`]);
+    }
+  }
+
+  private parseEventData(raw: string | undefined): Record<string, unknown> {
+    if (!raw) return {};
+    try {
+      return JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
   }
 }

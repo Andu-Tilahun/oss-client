@@ -53,6 +53,7 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   @Input() forcedTab: string | null = null;
   @Input() packageInvestments: InvestmentRecord[] = [];
   @Input() packageInvestmentsLoading = false;
+  @Input() biddingLeaderboard: InvestmentRecord[] = [];
 
   @Output() tabChange = new EventEmitter<string>();
   @Output() extensionWorkerAssigned = new EventEmitter<InvestmentPackage>();
@@ -208,7 +209,8 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   }
 
   get biddingCandidates(): InvestmentRecord[] {
-    return [...this.packageInvestments].sort((a, b) => (b.amount ?? 0) - (a.amount ?? 0));
+    const source = this.isInvestorRole ? this.biddingLeaderboard : this.packageInvestments;
+    return [...source].sort((a, b) => (b.amount ?? 0) - (a.amount ?? 0));
   }
 
   get currentUserId(): string | undefined {

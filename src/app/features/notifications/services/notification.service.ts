@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { HttpService, RequestOption } from '../../../core/services/http.service';
+import { HttpService, RequestOption, RequestType } from '../../../core/services/http.service';
 import { Endpoints } from '../../../core/endpoint/endpoint.model';
 import { PageResponse } from '../../../shared/models/api-response.model';
 import {
@@ -58,6 +58,24 @@ export class NotificationLogService {
     requestOptions?: RequestOption,
   ): Observable<PageResponse<NotificationLog>> {
     return this.getNotifications(page, size, NotificationStatus.SENT, undefined, requestOptions);
+  }
+
+  getUnreadCount(requestOptions?: RequestOption): Observable<number> {
+    return this.httpService.get<number>(
+      `${Endpoints.NOTIFICATIONS_ENDPOINT}/unread-count`,
+      undefined,
+      undefined,
+      requestOptions ?? { requestType: RequestType.NON_BLOCKING, skipAuthRedirect: true },
+    );
+  }
+
+  markAsRead(id: number, requestOptions?: RequestOption): Observable<void> {
+    return this.httpService.put<void>(
+      `${Endpoints.NOTIFICATIONS_ENDPOINT}/${id}/read`,
+      null,
+      undefined,
+      requestOptions ?? { requestType: RequestType.NON_BLOCKING, skipAuthRedirect: true },
+    );
   }
 }
 

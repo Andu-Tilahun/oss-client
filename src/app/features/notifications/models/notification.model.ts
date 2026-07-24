@@ -25,6 +25,10 @@ export interface NotificationLog {
   eventType?: string;
   errorMessage?: string;
   sentAt?: Date;
+  readAt?: Date;
+  isRead?: boolean;
+  entityId?: string;
+  eventData?: string;
   createdAt: Date;
   updatedAt: Date;
 }

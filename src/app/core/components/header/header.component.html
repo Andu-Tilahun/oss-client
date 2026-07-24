@@ -54,10 +54,22 @@
               No notifications yet.
             </div>
             <ul *ngIf="!previewLoading && !previewError && previewItems.length > 0" class="divide-y divide-gray-100">
-              <li *ngFor="let n of previewItems" class="px-4 py-3 hover:bg-gray-50 transition-colors">
-                <p class="text-sm font-medium text-gray-900 line-clamp-1">{{ n.subject || n.notificationType }}</p>
-                <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">{{ n.notificationType }}</p>
-                <p class="text-xs text-gray-400 mt-1">{{ formatPreviewWhen(n) }}</p>
+              <li
+                *ngFor="let n of previewItems"
+                (click)="onNotificationClick(n)"
+                class="flex items-start gap-2 px-4 py-3 cursor-pointer transition-colors"
+                [class.bg-blue-50]="!n.isRead"
+              >
+                <span
+                  *ngIf="!n.isRead"
+                  class="mt-1.5 shrink-0 w-2 h-2 rounded-full bg-blue-500"
+                ></span>
+                <span *ngIf="n.isRead" class="mt-1.5 shrink-0 w-2 h-2"></span>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-gray-900 line-clamp-1" [class.font-semibold]="!n.isRead">{{ n.subject || n.notificationType }}</p>
+                  <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">{{ n.notificationType }}</p>
+                  <p class="text-xs text-gray-400 mt-1">{{ formatPreviewWhen(n) }}</p>
+                </div>
               </li>
             </ul>
           </div>

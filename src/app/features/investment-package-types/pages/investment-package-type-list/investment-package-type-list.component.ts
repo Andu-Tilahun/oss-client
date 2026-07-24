@@ -33,6 +33,10 @@ import {environment} from '../../../../../environments/environment';
 export class InvestmentPackageTypeListComponent implements OnInit {
   private readonly storageApiUrl = `${environment.apiUrl}/files`;
 
+  // Bidding leaderboard (all investors' bids for the selected package)
+  biddingLeaderboard: InvestmentRecord[] = [];
+  biddingLeaderboardLoading = false;
+
   // Subscribed packages ("My farm leases" section)
   subscribedPackageTypes: InvestmentPackageTypeAgreement[] = [];
   subscribedLoading = false;
@@ -98,27 +102,47 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   }
 
   get tabs(): TabItem[] {
-    const tabs: TabItem[] = [
+    const isWinnerAnnounced = this.selectedAgreement?.fundingStatus === 'CLOSED';
+    const hasExtensionWorker = !!this.selectedAgreement?.extensionWorker;
+
+    const result: TabItem[] = [
       {key: 'detail', label: 'Detail'},
       {key: 'farm-plot', label: 'FarmPlot'},
       {key: 'investor', label: 'Investor'},
-      {key: 'extension-worker', label: 'Extension Worker'},
-      {key: 'follow-up', label: 'FollowUp'},
     ];
+
     if (this.isAdmin) {
       if (this.investmentPackageType === 'LEASING') {
-        tabs.splice(3, 0, {key: 'contract', label: 'Contract'});
+        result.push({key: 'contract', label: 'Contract'});
       } else {
-        tabs.splice(3, 0, {key: 'choose-candidate', label: 'Choose Candidate'});
+        result.push({key: 'choose-candidate', label: 'Choose Candidate'});
       }
     } else if (
       this.isInvestorUser &&
       this.investmentPackageType === 'LEASING' &&
       !!this.selectedAgreement?.agreementId
     ) {
-      tabs.splice(3, 0, {key: 'contract', label: 'Contract'});
+      result.push({key: 'contract', label: 'Contract'});
     }
-    return tabs;
+
+    if (isWinnerAnnounced) {
+      result.push({
+        key: 'extension-worker',
+        label: 'Extension Worker',
+        badge: hasExtensionWorker ? undefined : 1,
+      });
+    }
+
+    if (hasExtensionWorker) {
+      const followUpCount = this.selectedAgreement?.followUpDtoList?.length ?? 0;
+      result.push({
+        key: 'follow-up',
+        label: 'FollowUp',
+        badge: followUpCount === 0 ? 1 : undefined,
+      });
+    }
+
+    return result;
   }
 
   packageInvestments: InvestmentRecord[] = [];
@@ -333,6 +357,9 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     this.activeTab = tab;
     if (tab === 'investor' && this.selectedAgreement?.id) {
       this.loadPackageInvestments(this.selectedAgreement.id);
+      if (this.investmentPackageType === 'BIDDING') {
+        this.loadBiddingLeaderboard(this.selectedAgreement.id);
+      }
     }
   }
 
@@ -657,7 +684,24 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   private refreshPackageInvestmentsIfNeeded(): void {
     if (this.activeTab === 'investor' && this.selectedAgreement?.id) {
       this.loadPackageInvestments(this.selectedAgreement.id);
+      if (this.investmentPackageType === 'BIDDING') {
+        this.loadBiddingLeaderboard(this.selectedAgreement.id);
+      }
     }
+  }
+
+  loadBiddingLeaderboard(packageId: string): void {
+    this.biddingLeaderboardLoading = true;
+    this.investmentPackageService.getBiddingLeaderboard(packageId).subscribe({
+      next: (records) => {
+        this.biddingLeaderboard = records;
+        this.biddingLeaderboardLoading = false;
+      },
+      error: () => {
+        this.biddingLeaderboard = [];
+        this.biddingLeaderboardLoading = false;
+      },
+    });
   }
 
   onEdit(lease: InvestmentPackageTypeAgreement): void {

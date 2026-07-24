@@ -77,6 +77,12 @@ export class InvestmentPackageService {
     );
   }
 
+  getBiddingLeaderboard(packageId: string): Observable<InvestmentRecord[]> {
+    return this.httpService.get<InvestmentRecord[]>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${packageId}/leaderboard`,
+    );
+  }
+
   createInvestment(request: InvestmentCreateRequest): Observable<ApiResponse<InvestmentRecord>> {
     return this.httpService.post<ApiResponse<InvestmentRecord>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investmentRecord`,
