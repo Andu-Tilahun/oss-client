@@ -5,9 +5,8 @@
   rightTitle="Farm Plot Detail"
   [rightItem]="selectedPlot"
   [rightEmptyMessage]="'Select a row to view details.'"
-  (rightEdit)="onEdit($event)"
   (rightClose)="onCloseDetail()"
-  [showRightEditButton]="checkIfPlotIsNotAssigned"
+  [showRightEditButton]="false"
 >
   <ng-template #leftContent>
     <app-data-table
@@ -22,8 +21,9 @@
       [showRefreshButton]="true"
       [showExportButton]="true"
       [showViewButton]="false"
-      [showEditButton]="checkIfPlotIsNotAssigned"
-      [showDeleteButton]="checkIfPlotIsNotAssigned"
+      [showEditButton]="false"
+      [showDeleteButton]="false"
+      [rowActions]="tableRowActions"
       [rowClickable]="true"
       (pageChange)="onPageChange($event)"
       (addClick)="onAdd()"

@@ -8,7 +8,7 @@ export const Endpoints = {
   AUDITS_ENDPOINT: '/audits',
   NOTIFICATIONS_ENDPOINT: '/notifications',
   PAYMENTS_ENDPOINT: '/payments',
-  REGIONS_ENDPOINT: '/license/regions',
+  REGIONS_ENDPOINT: '/farm/regions',
   ORGANIZATIONS_ENDPOINT: '/license/organizations',
   BRANCHES_ENDPOINT: '/license/branches',
   TRAINING_PROGRAMS_ENDPOINT: '/license/training-programs',

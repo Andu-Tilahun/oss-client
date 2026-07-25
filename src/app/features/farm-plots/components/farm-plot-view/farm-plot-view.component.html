@@ -147,6 +147,40 @@
       </div>
     </app-detail-section>
 
+    <app-detail-section title="Investment Options">
+      <div class="col-span-full">
+        <div *ngIf="packagesLoading" class="text-sm text-gray-500">Loading...</div>
+        <p *ngIf="!packagesLoading && plotInvestmentPackages.length === 0"
+           class="text-sm text-gray-500">No investment options for this plot.</p>
+        <ul *ngIf="!packagesLoading && plotInvestmentPackages.length > 0" class="space-y-2">
+          <li *ngFor="let pkg of plotInvestmentPackages"
+              class="flex items-center justify-between rounded-lg border border-gray-100 bg-white px-4 py-3 text-sm cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors"
+              (click)="navigateToPackage(pkg)">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold bg-indigo-100 text-indigo-700 border border-indigo-200">
+                {{ pkg.investmentPackageType ?? 'LEASING' }}
+              </span>
+              <span class="font-medium text-gray-800 truncate">{{ pkg.title }}</span>
+            </div>
+            <div class="flex items-center gap-2 shrink-0 ml-3">
+              <span class="flex items-center gap-1 text-xs">
+                <span class="text-gray-400 font-normal">Investment:</span>
+                <span class="rounded-full px-2 py-0.5 font-medium border" [ngClass]="pkgStatusClass(pkg)">
+                  {{ formatStatus(pkg.packageStatus) }}
+                </span>
+              </span>
+              <span class="flex items-center gap-1 text-xs">
+                <span class="text-gray-400 font-normal">Funding:</span>
+                <span class="rounded-full px-2 py-0.5 font-medium border border-blue-200 bg-blue-50 text-blue-700">
+                  {{ formatStatus(pkg.fundingStatus) }}
+                </span>
+              </span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </app-detail-section>
+
   </ng-container>
 
   <!-- fallback handled by the "No farm plot selected" block above -->

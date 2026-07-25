@@ -12,9 +12,9 @@ import {PageResponse} from '../../../../shared/models/api-response.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
-import {ColumnType} from '../../../../shared/data-table/models/column-types.model';
 import {environment} from '../../../../../environments/environment';
 import {RegionService} from '../../../regions/services/region.service';
+import {PageSplitRightAction} from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
 
 @Component({
   selector: 'app-farm-plot-list',
@@ -74,25 +74,28 @@ export class FarmPlotListComponent {
       value: (plot) => this.regionsMap.get(plot.regionId ?? '') ?? '—',
       defaultVisible: true,
     },
-    {
-      header: 'Image',
-      columnType: ColumnType.IMAGE,
-      value: (plot) => this.getPlotImageUrl(plot),
-      imageAlt: (plot) => plot.title,
-      defaultVisible: true,
-    },
-    // {
-    //   header: 'Gallery',
-    //   columnType: ColumnType.LINK,
-    //   value: () => 'Gallery',
-    //   columnAction: (plot) => this.onOpenGallery(plot),
-    //   defaultVisible: true,
-    // },
   ];
 
-  get checkIfPlotIsNotAssigned() {
-    return true;
-    // return this.selectedPlot?.status != 'ASSIGNED_TO_LEASE'
+  tableRowActions: PageSplitRightAction<FarmPlot>[] = [
+    {
+      id: 'edit',
+      icon: 'edit',
+      title: 'Edit',
+      visible: (p) => p.status !== 'ASSIGNED_TO_LEASE' && p.status !== 'ASSIGNED_TO_INVESTMENT_PACKAGE',
+      action: (p) => this.onEdit(p),
+    },
+    {
+      id: 'delete',
+      icon: 'delete',
+      title: 'Deactivate',
+      visible: (p) => p.status !== 'ASSIGNED_TO_LEASE' && p.status !== 'ASSIGNED_TO_INVESTMENT_PACKAGE',
+      action: (p) => this.onDelete(p),
+    },
+  ];
+
+  get checkIfPlotIsNotAssigned(): boolean {
+    return this.selectedPlot?.status !== 'ASSIGNED_TO_LEASE'
+      && this.selectedPlot?.status !== 'ASSIGNED_TO_INVESTMENT_PACKAGE';
   }
 
   constructor(
@@ -282,10 +285,6 @@ export class FarmPlotListComponent {
       this.galleryImageUrls = [];
       this.galleryLoading = false;
     }
-  }
-
-  getPlotImageUrl(plot: FarmPlot): string | null {
-    return plot.imageUuid ? `${this.storageApiUrl}/${plot.imageUuid}` : null;
   }
 
   private toStorageUrl(imageUuid?: string): string | null {

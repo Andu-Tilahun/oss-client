@@ -1,4 +1,5 @@
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {Router} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {FarmGallery, FarmPlot, FarmPlotStatus} from '../../models/farm-plot.model';
 import {FarmPlotService} from '../../services/farm-plot.service';
@@ -10,6 +11,8 @@ import {ImageGalleryModalComponent} from '../../../../shared/modals/image-galler
 import {ImageUploadModalComponent} from '../../../../shared/modals/image-upload-modal/image-upload-modal.component';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {environment} from '../../../../../environments/environment';
+import {InvestmentPackageService} from '../../../investment-package/services/investment-package.service';
+import {InvestmentPackage} from '../../../investment-package/models/investment-package.model';
 
 @Component({
   selector: 'app-farm-plot-view',
@@ -52,11 +55,16 @@ export class FarmPlotViewComponent implements OnChanges {
   showUploadModal = false;
   galleryUploading = false;
 
+  plotInvestmentPackages: InvestmentPackage[] = [];
+  packagesLoading = false;
+
   private readonly storageApiUrl = `${environment.apiUrl}/files`;
 
   constructor(
     private farmPlotService: FarmPlotService,
     private toastService: ToastService,
+    private investmentPackageService: InvestmentPackageService,
+    private router: Router,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -65,11 +73,13 @@ export class FarmPlotViewComponent implements OnChanges {
         this.loading = false;
         this.error = null;
         this.loadGallery(this.plot.id);
+        this.loadInvestmentPackages(this.plot.id);
       } else if (this.id) {
         this.clearGallery();
         this.loadFromApi();
       } else {
         this.clearGallery();
+        this.plotInvestmentPackages = [];
       }
       return;
     }
@@ -96,8 +106,10 @@ export class FarmPlotViewComponent implements OnChanges {
         this.loading = false;
         if (this.plot?.id) {
           this.loadGallery(this.plot.id);
+          this.loadInvestmentPackages(this.plot.id);
         } else {
           this.clearGallery();
+          this.plotInvestmentPackages = [];
         }
       },
       error: () => {
@@ -105,6 +117,21 @@ export class FarmPlotViewComponent implements OnChanges {
         this.error = 'Failed to load farm plot';
         this.loading = false;
         this.clearGallery();
+        this.plotInvestmentPackages = [];
+      },
+    });
+  }
+
+  private loadInvestmentPackages(plotId: string): void {
+    this.packagesLoading = true;
+    this.investmentPackageService.filterInvestmentPackages({ farmPlotId: plotId, page: 0, size: 50 }).subscribe({
+      next: (res) => {
+        this.plotInvestmentPackages = res.content;
+        this.packagesLoading = false;
+      },
+      error: () => {
+        this.plotInvestmentPackages = [];
+        this.packagesLoading = false;
       },
     });
   }
@@ -209,5 +236,25 @@ export class FarmPlotViewComponent implements OnChanges {
 
   onCreateLease(): void {
     this.createLease.emit();
+  }
+
+  navigateToPackage(pkg: InvestmentPackage): void {
+    const typeSegment = (pkg.investmentPackageType ?? 'LEASING').toLowerCase();
+    this.router.navigate(['/investment-package-types', typeSegment]);
+  }
+
+  formatStatus(status: string | undefined): string {
+    return (status ?? 'ACTIVE')
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  pkgStatusClass(pkg: InvestmentPackage): Record<string, boolean> {
+    return {
+      'bg-green-50 text-green-700 border-green-200': pkg.packageStatus === 'ACTIVE' || !pkg.packageStatus,
+      'bg-slate-50 text-slate-700 border-slate-200': pkg.packageStatus === 'INACTIVE',
+      'bg-blue-50 text-blue-700 border-blue-200': pkg.packageStatus === 'IN_USE',
+    };
   }
 }

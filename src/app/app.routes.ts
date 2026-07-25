@@ -238,6 +238,12 @@ export const routes: Routes = [
           import('./features/system-config/pages/social-media-page/social-media-page.component')
             .then(m => m.SocialMediaPageComponent),
       },
+      {
+        path: 'regions',
+        loadComponent: () =>
+          import('./features/system-config/pages/regions-management-page/regions-management-page.component')
+            .then(m => m.RegionsManagementPageComponent),
+      },
       { path: '', redirectTo: 'organization', pathMatch: 'full' },
     ],
   },

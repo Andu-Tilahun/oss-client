@@ -66,6 +66,7 @@ export interface InvestmentPackageFilterRequest {
   statuses?: FundingStatus[];
   paymentStatuses?: InvestmentPaymentStatus[];
   soilTypes?: FarmPlotSoilType[];
+  farmPlotId?: string;
   sortBy?: string;
   sortDirection?: 'ASC' | 'DESC';
   page: number;
@@ -82,7 +83,7 @@ export interface InvestmentRecord {
   status: InvestmentStatus;
   paymentStatus?: InvestmentPaymentStatus;
   investmentPackage?: InvestmentPackage;
-  investorUser: User;
+  investorUser?: User;
   bankAccountId?: string;
   paymentReference?: string;
 }

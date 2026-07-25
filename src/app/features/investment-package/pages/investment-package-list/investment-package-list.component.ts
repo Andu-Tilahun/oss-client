@@ -79,14 +79,20 @@ export class InvestmentPackageListComponent implements OnInit {
         id: 'edit',
         icon: 'edit',
         title: 'Edit',
-        visible: (c) => this.isAdmin && c.fundingStatus !== 'CLOSED' && c.packageStatus !== 'IN_USE' && c.packageStatus !== 'INACTIVE',
+        visible: (c) => this.isAdmin
+          && c.fundingStatus !== 'CLOSED'
+          && c.packageStatus !== 'IN_USE'
+          && c.packageStatus !== 'INACTIVE'
+          && !(c.investorIdList && c.investorIdList.length > 0),
         action: (c) => this.onEdit(c),
       },
       {
         id: 'toggle-status',
         icon: 'power',
         title: 'Toggle Status',
-        visible: (c) => this.isAdmin && c.packageStatus !== 'IN_USE',
+        visible: (c) => this.isAdmin
+          && c.packageStatus !== 'IN_USE'
+          && !(c.investorIdList && c.investorIdList.length > 0),
         action: (c) => this.onToggleStatus(c),
       },
     ];
