@@ -9,6 +9,7 @@ import {
   InvestmentPackage,
   InvestmentPackageType,
   InvestmentRecord,
+  InvestmentStatus,
   InvestorAgreeResponseRequest,
 } from '../../models/investment-package.model';
 import {FundingStatus} from '../../../../shared/models/funding-status.model';
@@ -22,10 +23,14 @@ import {FarmFollowupsModule} from '../../../farm-followups/farm-followups.module
 import {UserViewComponent} from '../../../users/components/user-view/user-view.component';
 import {ImageGalleryModalComponent} from '../../../../shared/modals/image-gallery-modal/image-gallery-modal.component';
 import {DocumentUploadComponent} from '../../../../shared/file-upload/document-upload/document-upload.component';
+import {
+  InvestmentPackageChooseWinnerModalComponent
+} from '../../modals/investment-package-choose-winner-modal/investment-package-choose-winner-modal.component';
 import {AuthService} from '../../../auth/services/auth.service';
 import {UserService} from '../../../users/services/user.service';
 import {InvestmentPackageService} from '../../services/investment-package.service';
 import {ToastService} from '../../../../shared/toast/toast.service';
+import {FileMetadata, FileUploadService} from '../../../../shared/file-upload/file-upload.service';
 import {User} from '../../../users/models/user.model';
 import {AssignExtensionWorkerRequest, ChangeExtensionWorkerRequest} from '../../../assign-extension-worker-request';
 
@@ -42,6 +47,7 @@ import {AssignExtensionWorkerRequest, ChangeExtensionWorkerRequest} from '../../
     UserViewComponent,
     ImageGalleryModalComponent,
     DocumentUploadComponent,
+    InvestmentPackageChooseWinnerModalComponent,
   ],
   templateUrl: './investment-package-detail-panel.component.html',
 })
@@ -60,6 +66,7 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   @Output() candidatesChosen = new EventEmitter<void>();
   @Output() agreementCreated = new EventEmitter<void>();
   @Output() investClicked = new EventEmitter<void>();
+  @Output() agreementStatusChanged = new EventEmitter<string | null>();
 
   activeTab = '';
   extensionWorkers: User[] = [];
@@ -74,12 +81,13 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   closedLeaseInvestorsLoading = false;
   selectedCandidateIds: string[] = [];
   choosingCandidates = false;
-  confirmedCandidates: User[] = [];
-  candidatesConfirmedView = false;
+  showChooseWinnerModal = false;
+  chooseWinnerRemark = '';
   showAttachmentModal = false;
   attachmentModalUrls: string[] = [];
   attachmentModalIndex = 0;
-  agreement: InvestmentAgreement | null = null;
+  attachmentMetadata: Partial<Record<string, FileMetadata>> = {};
+  private _agreement: InvestmentAgreement | null = null;
   agreementLoading = false;
   creatingAgreement = false;
   investorAgreeAttachmentId: string | null = null;
@@ -100,6 +108,7 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     private userService: UserService,
     private investmentPackageService: InvestmentPackageService,
     private toastService: ToastService,
+    private fileUploadService: FileUploadService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -113,8 +122,8 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
       if (this.investmentPackage?.id !== this.lastPackageIdForCandidates) {
         this.lastPackageIdForCandidates = this.investmentPackage?.id ?? null;
         this.selectedCandidateIds = [];
-        this.confirmedCandidates = [];
-        this.candidatesConfirmedView = false;
+        this.showChooseWinnerModal = false;
+        this.chooseWinnerRemark = '';
         this.selectedExtensionWorkerId = null;
         this.showChangeExtensionWorkerForm = false;
         this.changeExtensionWorkerId = null;
@@ -131,26 +140,31 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
       if (this.isChosenBidder && this.ownBidRecordPackageId !== this.investmentPackage?.id) {
         this.loadOwnBidRecord();
       }
-      if (!this.isInvestorRole && (this.activeTab === 'investor' || this.activeTab === 'choose-candidate')) {
+      if (!this.isInvestorRole && this.activeTab === 'investor') {
         this.maybeLoadClosedLeaseInvestors();
       }
-      if (this.activeTab === 'contract') {
-        this.maybeLoadAgreement();
-      }
+      this.maybeLoadAgreement();
+      this.maybeLoadAttachmentMetadata();
     }
     if (changes['refreshKey'] && this.forcedTab && this.hasTab(this.forcedTab)) {
       this.onTabChange(this.forcedTab);
     }
   }
 
+  get agreement(): InvestmentAgreement | null {
+    return this._agreement;
+  }
+
+  set agreement(value: InvestmentAgreement | null) {
+    this._agreement = value;
+    this.agreementStatusChanged.emit(value?.status ?? null);
+  }
+
   get canAssignExtensionWorker(): boolean {
     if (!this.investmentPackage || !this.authService.isAdmin() || this.investmentPackage.extensionWorker) {
       return false;
     }
-    if (this.investmentPackage.investmentPackageType === 'LEASING') {
-      return !!this.investmentPackage.agreementId && this.investmentPackage.status !== 'SENT';
-    }
-    return this.investmentPackage.fundingStatus === 'OPEN';
+    return !!this.investmentPackage.agreementId && this.agreement?.status === 'ACTIVE';
   }
 
   get canChangeExtensionWorker(): boolean {
@@ -212,6 +226,23 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     return ownRecord?.status === 'PENDING';
   }
 
+  get isLosingBidder(): boolean {
+    if (!this.isInvestorRole || !this.isBiddingType || !this.investmentPackage) return false;
+    const currentUserId = this.authService.getCurrentUser()?.id;
+    if (!currentUserId) return false;
+    const ownRecord = this.packageInvestments.find(r => r.investorId === currentUserId);
+    return ownRecord?.status === 'BACKUP';
+  }
+
+  /** True whenever the current investor already has a live (non-canceled) bid on this package,
+   * regardless of its outcome — used to keep "Invest Now" from reappearing once they've bid. */
+  get hasAppliedForBidding(): boolean {
+    if (!this.isInvestorRole || !this.isBiddingType || !this.investmentPackage) return false;
+    const currentUserId = this.authService.getCurrentUser()?.id;
+    if (!currentUserId) return false;
+    return this.packageInvestments.some(r => r.investorId === currentUserId && r.status !== 'CANCELED');
+  }
+
   get biddingCandidates(): InvestmentRecord[] {
     const source = this.isInvestorRole ? this.biddingLeaderboard : this.packageInvestments;
     return [...source].sort((a, b) => (b.amount ?? 0) - (a.amount ?? 0));
@@ -226,6 +257,13 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     if (!uid) return -1;
     const idx = this.biddingCandidates.findIndex(r => r.investorId === uid);
     return idx === -1 ? -1 : idx + 1;
+  }
+
+  get investorProgressPercent(): number {
+    const current = this.investmentPackage?.investorIdList?.length ?? 0;
+    const expected = this.investmentPackage?.expectedInvestorNumber ?? 0;
+    if (!expected) return 0;
+    return Math.min(100, Math.round((current / expected) * 100));
   }
 
   /** The logged-in investor's own profile on this lease, matched by id against the lease's investor reference. */
@@ -250,7 +288,7 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     if (tab === 'extension-worker' && this.extensionWorkers.length === 0 && !this.loadingExtensionWorkers) {
       this.loadExtensionWorkers();
     }
-    if (!this.isInvestorRole && (tab === 'investor' || tab === 'choose-candidate')) {
+    if (!this.isInvestorRole && tab === 'investor') {
       this.maybeLoadClosedLeaseInvestors();
     }
     if (tab === 'contract') {
@@ -278,11 +316,21 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   }
 
   openAttachmentPreview(attachmentId: string): void {
-    const attachmentIds = this.investmentPackage?.attachmentIdList ?? [];
-    this.attachmentModalUrls = attachmentIds
-      .map((id) => this.getFileUrl(id))
+    if (this.getAttachmentIcon(attachmentId) !== 'image') {
+      const url = this.attachmentMetadata[attachmentId]?.presignedUrl || this.getFileUrl(attachmentId);
+      if (url) {
+        window.open(url, '_blank');
+      }
+      return;
+    }
+
+    const imageIds = (this.investmentPackage?.attachmentIdList ?? []).filter(
+      (id) => this.getAttachmentIcon(id) === 'image',
+    );
+    this.attachmentModalUrls = imageIds
+      .map((id) => this.attachmentMetadata[id]?.presignedUrl || this.getFileUrl(id))
       .filter((url): url is string => !!url);
-    this.attachmentModalIndex = Math.max(0, attachmentIds.indexOf(attachmentId));
+    this.attachmentModalIndex = Math.max(0, imageIds.indexOf(attachmentId));
     this.showAttachmentModal = true;
   }
 
@@ -377,6 +425,31 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     return new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(value);
   }
 
+  candidateStatusLabel(status: InvestmentStatus | undefined): string {
+    switch (status) {
+      case 'PENDING': return 'Winner (Awaiting Response)';
+      case 'PAID': return 'Responded';
+      case 'BACKUP': return 'Backup';
+      case 'ACTIVE': return 'Active';
+      case 'ACCEPTED': return 'Accepted';
+      case 'REJECTED': return 'Rejected';
+      case 'CANCELED': return 'Canceled';
+      case 'FAILED': return 'Failed';
+      case 'SENT': return 'Applied';
+      default: return '-';
+    }
+  }
+
+  candidateStatusBadgeClass(status: InvestmentStatus | undefined): Record<string, boolean> {
+    return {
+      'bg-green-100 text-green-700': status === 'ACTIVE' || status === 'ACCEPTED',
+      'bg-yellow-100 text-yellow-700': status === 'PENDING',
+      'bg-blue-100 text-blue-700': status === 'PAID',
+      'bg-gray-200 text-gray-700': status === 'BACKUP' || status === 'SENT',
+      'bg-red-100 text-red-700': status === 'FAILED' || status === 'REJECTED' || status === 'CANCELED',
+    };
+  }
+
   private ensureActiveTab(): void {
     if (this.tabs.length === 0) {
       this.activeTab = '';
@@ -419,10 +492,6 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
       next: (users) => {
         this.closedLeaseInvestors = users;
         this.closedLeaseInvestorsLoading = false;
-        // Candidates start out all-selected; the admin removes the ones they don't want.
-        if (!this.candidatesConfirmedView) {
-          this.selectedCandidateIds = users.map((u) => u.id);
-        }
       },
       error: () => {
         this.closedLeaseInvestors = [];
@@ -448,12 +517,32 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     }
   }
 
+  get isWinnerChange(): boolean {
+    return this.investmentPackage?.fundingStatus === 'CLOSED';
+  }
+
+  get selectedCandidateNames(): string[] {
+    return this.biddingCandidates
+      .filter((record) => this.isCandidateSelected(record.investorId))
+      .map((record) => this.formatWorkerName(record.investorUser));
+  }
+
+  openChooseWinnerModal(): void {
+    if (this.selectedCandidateIds.length === 0 || this.choosingCandidates || !this.canConfirmCandidates) {
+      return;
+    }
+    this.chooseWinnerRemark = '';
+    this.showChooseWinnerModal = true;
+  }
+
   confirmCandidates(): void {
     const investmentPackageId = this.investmentPackage?.id;
     const farmPlotId = this.investmentPackage?.farmPlotId || this.investmentPackage?.farmPlot?.id;
+    const remark = this.chooseWinnerRemark.trim();
     if (
       !investmentPackageId ||
       !farmPlotId ||
+      !remark ||
       this.selectedCandidateIds.length === 0 ||
       this.choosingCandidates ||
       !this.canConfirmCandidates
@@ -466,20 +555,22 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
       investmentPackageId,
       farmPlotId,
       investorIds: chosenIds,
+      remark,
     };
 
     this.choosingCandidates = true;
     this.investmentPackageService.chooseCandidates(request).subscribe({
       next: () => {
         this.choosingCandidates = false;
-        this.confirmedCandidates = this.closedLeaseInvestors.filter((u) => chosenIds.includes(u.id));
-        this.candidatesConfirmedView = true;
-        this.toastService.success('Candidates chosen successfully', 'Choose Candidate');
+        this.showChooseWinnerModal = false;
+        this.chooseWinnerRemark = '';
+        this.selectedCandidateIds = chosenIds;
+        this.toastService.success('Winning investor confirmed successfully', 'Winning Investor');
         this.candidatesChosen.emit();
       },
       error: (error) => {
         this.choosingCandidates = false;
-        this.toastService.error(error.message || 'Failed to choose candidates', 'Choose Candidate');
+        this.toastService.error(error.message || 'Failed to confirm winning investor', 'Winning Investor');
       },
     });
   }
@@ -509,6 +600,31 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
         this.toastService.error(error.message || 'Failed to load agreement', 'Contract');
       },
     });
+  }
+
+  private maybeLoadAttachmentMetadata(): void {
+    const ids = (this.investmentPackage?.attachmentIdList ?? []).filter((id) => !this.attachmentMetadata[id]);
+    if (ids.length === 0) {
+      return;
+    }
+    forkJoin(ids.map((id) => this.fileUploadService.getFileMetadata(id))).subscribe({
+      next: (results) => {
+        results.forEach((metadata, i) => {
+          this.attachmentMetadata[ids[i]] = metadata;
+        });
+      },
+      error: () => {
+        // Leave missing entries out of the map; getAttachmentIcon() falls back to a generic icon.
+      },
+    });
+  }
+
+  getAttachmentIcon(attachmentId: string): 'image' | 'pdf' | 'document' {
+    const contentType = this.attachmentMetadata[attachmentId]?.contentType;
+    if (!contentType) return 'document';
+    if (contentType === 'application/pdf') return 'pdf';
+    if (contentType.startsWith('image/')) return 'image';
+    return 'document';
   }
 
   createAgreement(): void {

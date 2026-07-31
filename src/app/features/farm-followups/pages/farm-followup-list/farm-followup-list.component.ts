@@ -74,8 +74,8 @@ export class FarmFollowUpListComponent {
     this.showViewModal = true;
   }
 
-  onEdit(_item: FarmFollowUp): void {
-    this.toastService.warning('Edit follow-up is not implemented', 'Follow Ups');
+  onEdit(item: FarmFollowUp): void {
+    this.onView(item);
   }
 
   private loadFollowUps(externalId: string): void {

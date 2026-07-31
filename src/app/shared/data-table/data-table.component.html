@@ -181,7 +181,10 @@
 
               <!-- Default Text -->
               <ng-container *ngSwitchDefault>
-                {{ column.value ? column.value(item) : '' }}
+                <span [class]="column.cellClass ?? ''"
+                      [title]="column.cellClass ? (column.value ? column.value(item) : '') : ''">
+                  {{ column.value ? column.value(item) : '' }}
+                </span>
               </ng-container>
             </ng-container>
           </td>

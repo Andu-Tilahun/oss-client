@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
-import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {AuthService} from '../../../auth/services/auth.service';
 import {
@@ -24,14 +23,18 @@ import {TabItem} from '../../../../shared/tabs/models/tab-item.model';
 })
 export class InvestmentPackageListComponent implements OnInit {
   investmentPackages: InvestmentPackage[] = [];
+  publishedPackages: InvestmentPackage[] = [];
+  archivedPackages: InvestmentPackage[] = [];
   selectedInvestmentPackage: InvestmentPackage | null = null;
   detailRefreshKey = 0;
 
   loading = false;
-  total = 0;
-  pageSize = 10;
-  pageIndex = 1;
-  currentPage = 0;
+
+  adminActiveTab = 'published';
+  adminTabs: TabItem[] = [
+    {key: 'published', label: 'Published Investments'},
+    {key: 'archived', label: 'Archived Investments'},
+  ];
 
   searchText = '';
   status: FundingStatus | '' = '';
@@ -39,9 +42,13 @@ export class InvestmentPackageListComponent implements OnInit {
   showCreateInvestmentPackageModal = false;
   showEditInvestmentPackageModal = false;
   showCreateInvestmentModal = false;
+  showDeactivateModal = false;
+  deactivating = false;
+  deactivateReason = '';
+  packageToDeactivate: InvestmentPackage | null = null;
 
   columns: DataTableColumn<InvestmentPackage>[] = [
-    {header: 'Title', value: (c) => c.title},
+    {header: 'Title', value: (c) => c.title, cellClass: 'block max-w-[200px] truncate'},
     {header: 'Package Status', value: (c) => c.packageStatus ?? 'ACTIVE'},
     {header: 'Funding Status', value: (c) => c.fundingStatus, defaultVisible: false},
     {header: 'Type', value: (c) => this.formatPackageType(c.investmentPackageType)},
@@ -87,13 +94,13 @@ export class InvestmentPackageListComponent implements OnInit {
         action: (c) => this.onEdit(c),
       },
       {
-        id: 'toggle-status',
-        icon: 'power',
-        title: 'Toggle Status',
+        id: 'deactivate',
+        icon: 'ban',
+        title: 'Deactivate',
         visible: (c) => this.isAdmin
-          && c.packageStatus !== 'IN_USE'
-          && !(c.investorIdList && c.investorIdList.length > 0),
-        action: (c) => this.onToggleStatus(c),
+          && c.packageStatus === 'ACTIVE'
+          && c.fundingStatus === 'OPEN',
+        action: (c) => this.onDeactivate(c),
       },
     ];
   }
@@ -104,6 +111,13 @@ export class InvestmentPackageListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadInvestmentPackages();
+  }
+
+  onAdminTabChange(key: string): void {
+    this.adminActiveTab = key;
+    const packages = key === 'archived' ? this.archivedPackages : this.publishedPackages;
+    this.selectedInvestmentPackage = packages.length > 0 ? {...packages[0]} : null;
+    if (this.selectedInvestmentPackage) this.detailRefreshKey++;
   }
 
   onExtensionWorkerAssigned(pkg: InvestmentPackage): void {
@@ -117,8 +131,8 @@ export class InvestmentPackageListComponent implements OnInit {
       statuses: this.status ? [this.status] : FUNDING_STATUSES,
       sortBy: 'fundingDeadline',
       sortDirection: 'DESC',
-      page: this.currentPage,
-      size: this.pageSize,
+      page: 0,
+      size: 500,
     };
   }
 
@@ -128,39 +142,27 @@ export class InvestmentPackageListComponent implements OnInit {
     this.investmentPackageService.filterInvestmentPackages(request).subscribe({
       next: (response: PageResponse<InvestmentPackage>) => {
         this.investmentPackages = response.content;
-        this.total = response.totalElements;
+        this.publishedPackages = this.investmentPackages.filter((c) => c.packageStatus !== 'INACTIVE');
+        this.archivedPackages = this.investmentPackages.filter((c) => c.packageStatus === 'INACTIVE');
         this.loading = false;
 
+        const activeList = this.adminActiveTab === 'archived' ? this.archivedPackages : this.publishedPackages;
         const previousSelectedId = this.selectedInvestmentPackage?.id;
-        if (this.investmentPackages.length === 0) {
-          this.selectedInvestmentPackage = null;
-          return;
+        if (previousSelectedId) {
+          const match = this.investmentPackages.find((c) => c.id === previousSelectedId);
+          if (match) {
+            this.selectedInvestmentPackage = {...match};
+            return;
+          }
         }
-        if (!previousSelectedId) {
-          this.selectedInvestmentPackage = {...this.investmentPackages[0]};
-          this.detailRefreshKey++;
-          return;
-        }
-        const match = this.investmentPackages.find((c) => c.id === previousSelectedId);
-        if (match) {
-          this.selectedInvestmentPackage = {...match};
-          return;
-        }
-        this.selectedInvestmentPackage = {...this.investmentPackages[0]};
-        this.detailRefreshKey++;
+        this.selectedInvestmentPackage = activeList.length > 0 ? {...activeList[0]} : null;
+        if (this.selectedInvestmentPackage) this.detailRefreshKey++;
       },
       error: (error) => {
         this.loading = false;
         this.toastService.error(error.message || 'Failed to fetch investment packages', 'Fetch Investment Packages');
       },
     });
-  }
-
-  onPageChange(params: TableQueryParams) {
-    this.pageIndex = params.pageIndex;
-    this.currentPage = this.pageIndex - 1;
-    this.pageSize = params.pageSize;
-    this.loadInvestmentPackages();
   }
 
   onAdd(): void {
@@ -172,20 +174,16 @@ export class InvestmentPackageListComponent implements OnInit {
   }
 
   onSearch(): void {
-    this.currentPage = 0;
-    this.pageIndex = 1;
     this.loadInvestmentPackages();
   }
 
   onFilterChange(): void {
-    this.onSearch();
+    this.loadInvestmentPackages();
   }
 
   clearFilters(): void {
     this.searchText = '';
     this.status = '';
-    this.currentPage = 0;
-    this.pageIndex = 1;
     this.loadInvestmentPackages();
   }
 
@@ -204,10 +202,32 @@ export class InvestmentPackageListComponent implements OnInit {
     this.showCreateInvestmentModal = true;
   }
 
-  onToggleStatus(pkg: InvestmentPackage): void {
-    this.investmentPackageService.togglePackageStatus(pkg.id).subscribe({
-      next: () => this.loadInvestmentPackages(),
-      error: (err) => this.toastService.error(err.message || 'Failed to update status', 'Status Update'),
+  onDeactivate(pkg: InvestmentPackage): void {
+    this.packageToDeactivate = {...pkg};
+    this.deactivateReason = '';
+    this.showDeactivateModal = true;
+  }
+
+  handleDeactivateConfirmation(): void {
+    if (!this.packageToDeactivate?.id || !this.deactivateReason.trim()) return;
+    this.deactivating = true;
+    this.investmentPackageService.closeInvestmentPackage(
+      this.packageToDeactivate.id,
+      this.deactivateReason.trim(),
+    ).subscribe({
+      next: () => {
+        this.deactivating = false;
+        this.showDeactivateModal = false;
+        this.deactivateReason = '';
+        this.packageToDeactivate = null;
+        this.toastService.success('Investment package deactivated successfully');
+        this.detailRefreshKey++;
+        this.loadInvestmentPackages();
+      },
+      error: (err) => {
+        this.deactivating = false;
+        this.toastService.error(err.message || 'Failed to deactivate investment package', 'Deactivate');
+      },
     });
   }
 

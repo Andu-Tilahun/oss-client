@@ -57,9 +57,10 @@ export class InvestmentPackageService {
     );
   }
 
-  deleteInvestmentPackage(id: string): Observable<ApiResponse<void>> {
-    return this.httpService.delete<ApiResponse<void>>(
-      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${id}`,
+  closeInvestmentPackage(id: string, reason: string): Observable<ApiResponse<InvestmentPackage>> {
+    return this.httpService.put<ApiResponse<InvestmentPackage>>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${id}/close`,
+      {reason},
     );
   }
 

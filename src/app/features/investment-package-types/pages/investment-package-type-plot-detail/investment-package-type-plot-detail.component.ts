@@ -43,6 +43,7 @@ export class InvestmentPackageTypePlotDetailComponent implements OnInit, OnChang
   @Output() candidatesChosen = new EventEmitter<void>();
   @Output() agreementCreated = new EventEmitter<void>();
   @Output() investClicked = new EventEmitter<void>();
+  @Output() agreementStatusChanged = new EventEmitter<string | null>();
 
   readonly routeId: string = this.route.snapshot.paramMap.get('id') ?? '';
 
@@ -271,6 +272,12 @@ export class InvestmentPackageTypePlotDetailComponent implements OnInit, OnChang
 
   onInvestClicked(): void {
     this.investClicked.emit();
+  }
+
+  onAgreementStatusChanged(status: string | null): void {
+    if (this.embedded) {
+      this.agreementStatusChanged.emit(status);
+    }
   }
 
   private loadPackageInvestments(packageId: string): void {

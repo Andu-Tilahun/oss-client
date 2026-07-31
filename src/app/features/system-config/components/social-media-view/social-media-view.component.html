@@ -1,0 +1,27 @@
+<div *ngIf="!link" class="p-6 text-sm text-gray-400 text-center">Select a link to view details.</div>
+
+<div *ngIf="link">
+  <app-detail-card>
+    <div class="flex items-center justify-between mb-8">
+      <h3 class="text-xl font-bold text-gray-900">{{ link.platform }}</h3>
+      <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
+            [ngClass]="link.visible ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-500 border-gray-200'">
+        {{ link.visible ? 'Visible' : 'Hidden' }}
+      </span>
+    </div>
+    <hr class="border-gray-200 mb-8" />
+
+    <app-detail-section title="Details">
+      <app-detail-field label="Platform" [value]="link.platform"></app-detail-field>
+      <app-detail-field label="Display Order" [value]="link.displayOrder"></app-detail-field>
+      <app-detail-field label="Visibility" [value]="link.visible ? 'Public' : 'Hidden'"></app-detail-field>
+      <div class="col-span-full">
+        <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">URL</p>
+        <a [href]="link.url" target="_blank" rel="noopener noreferrer"
+           class="text-sm font-medium text-blue-600 hover:underline break-all">
+          {{ link.url }}
+        </a>
+      </div>
+    </app-detail-section>
+  </app-detail-card>
+</div>

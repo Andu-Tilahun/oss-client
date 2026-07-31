@@ -11,7 +11,7 @@ export type WaterSource = 'IRRIGATION' | 'RIVER_ACCESS' | 'RAIN_FED';
 export type InvestmentPackageType = 'CROWDFUNDING' | 'BIDDING' | 'LEASING';
 
 export type InvestmentPaymentMethod = 'CREDIT' | 'BANK_TRANSFER' | 'CRYPTO';
-export type InvestmentStatus = 'PAID' | 'SENT' | 'ACTIVE' | 'PENDING' | 'FAILED' | 'ACCEPTED'| 'REJECTED';
+export type InvestmentStatus = 'PAID' | 'SENT' | 'ACTIVE' | 'PENDING' | 'FAILED' | 'ACCEPTED'| 'REJECTED' | 'CANCELED' | 'BACKUP';
 export type InvestmentPaymentStatus = 'PENDING' | 'PAID' | 'FAILED';
 
 export interface InvestmentPackage {
@@ -42,6 +42,9 @@ export interface InvestmentPackage {
   extensionWorker?: User;
   status?: string;
   packageStatus?: InvestmentPackageStatus;
+  closureReason?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface InvestmentPackageCreateRequest {
@@ -106,6 +109,7 @@ export interface ChooseCandidatesRequest {
   investmentPackageId: string;
   farmPlotId: string;
   investorIds: string[];
+  remark: string;
 }
 
 export interface InvestmentAgreement {

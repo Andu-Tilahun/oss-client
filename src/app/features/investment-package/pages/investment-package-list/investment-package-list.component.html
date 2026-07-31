@@ -9,39 +9,78 @@
   [rightActions]="rightActions"
 >
   <ng-template #leftContent>
-    <app-data-table
-      [columns]="columns"
-      [data]="investmentPackages"
-      [loading]="loading"
-      [total]="total"
-      [pageSize]="pageSize"
-      [pageIndex]="pageIndex"
-      [showAddButton]="isAdmin"
-      [showRefreshButton]="true"
-      [showViewButton]="false"
-      [showEditButton]="false"
-      [showDeleteButton]="false"
-      [showActionColumn]="isAdmin"
-      [rowActions]="tableRowActions"
-      [rowClickable]="true"
-      [addButtonText]="'Create Investment Package'"
-      (pageChange)="onPageChange($event)"
-      (addClick)="onAdd()"
-      (refreshClick)="onRefresh()"
-      (rowClick)="onView($event)"
+    <app-tabs
+      [tabs]="adminTabs"
+      [activeTab]="adminActiveTab"
+      [centered]="true"
+      (activeTabChange)="onAdminTabChange($event)"
     >
-
-      <div extraTableHeader class="w-full min-w-0">
-        <app-investment-package-filter
-          [(searchText)]="searchText"
-          [(status)]="status"
-          (filterChange)="onFilterChange()"
-          (searchChange)="onFilterChange()"
-          (clearFilters)="clearFilters()"
-        ></app-investment-package-filter>
+      <!-- Published Investments -->
+      <div *ngIf="adminActiveTab === 'published'">
+        <app-data-table
+          [columns]="columns"
+          [data]="publishedPackages"
+          [loading]="loading"
+          [total]="publishedPackages.length"
+          [pageSize]="publishedPackages.length || 10"
+          [pageIndex]="1"
+          [showAddButton]="isAdmin"
+          [showRefreshButton]="true"
+          [showViewButton]="false"
+          [showEditButton]="false"
+          [showDeleteButton]="false"
+          [showActionColumn]="isAdmin"
+          [rowActions]="tableRowActions"
+          [rowClickable]="true"
+          [addButtonText]="'Create Investment Package'"
+          (addClick)="onAdd()"
+          (refreshClick)="onRefresh()"
+          (rowClick)="onView($event)"
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-investment-package-filter
+              [(searchText)]="searchText"
+              [(status)]="status"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onFilterChange()"
+              (clearFilters)="clearFilters()"
+            ></app-investment-package-filter>
+          </div>
+        </app-data-table>
       </div>
 
-    </app-data-table>
+      <!-- Archived Investments -->
+      <div *ngIf="adminActiveTab === 'archived'">
+        <app-data-table
+          [columns]="columns"
+          [data]="archivedPackages"
+          [loading]="loading"
+          [total]="archivedPackages.length"
+          [pageSize]="archivedPackages.length || 10"
+          [pageIndex]="1"
+          [showAddButton]="false"
+          [showRefreshButton]="false"
+          [showViewButton]="false"
+          [showEditButton]="false"
+          [showDeleteButton]="false"
+          [showActionColumn]="isAdmin"
+          [rowActions]="tableRowActions"
+          [rowClickable]="true"
+          [noDataMessage]="'No archived investment packages found.'"
+          (rowClick)="onView($event)"
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-investment-package-filter
+              [(searchText)]="searchText"
+              [(status)]="status"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onFilterChange()"
+              (clearFilters)="clearFilters()"
+            ></app-investment-package-filter>
+          </div>
+        </app-data-table>
+      </div>
+    </app-tabs>
   </ng-template>
 
   <ng-template #rightContent let-investmentPackage>
@@ -70,3 +109,11 @@
   [investmentPackage]="selectedInvestmentPackage"
   (investmentCreated)="onInvestmentCreated()"
 ></app-investment-package-create-investment-modal>
+
+<app-investment-package-type-close-modal
+  [(visible)]="showDeactivateModal"
+  [packageTitle]="packageToDeactivate?.title || ''"
+  [confirmLoading]="deactivating"
+  [(reason)]="deactivateReason"
+  (confirm)="handleDeactivateConfirmation()"
+></app-investment-package-type-close-modal>

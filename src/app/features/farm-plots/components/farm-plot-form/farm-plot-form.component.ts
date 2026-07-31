@@ -16,6 +16,7 @@ import {FileUploadService} from '../../../../shared/file-upload/file-upload.serv
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {RegionService} from '../../../regions/services/region.service';
 import {Region} from '../../../regions/models/region.model';
+import {CoordinateInputComponent} from '../../../../shared/components/coordinate-input/coordinate-input.component';
 
 interface GalleryImageItem {
   id: string;
@@ -27,7 +28,7 @@ const MAX_GALLERY_FILE_SIZE = 10 * 1024 * 1024;
 @Component({
   selector: 'app-farm-plot-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ProfilePictureUploadComponent],
+  imports: [CommonModule, ReactiveFormsModule, ProfilePictureUploadComponent, CoordinateInputComponent],
   templateUrl: './farm-plot-form.component.html',
   styleUrls: ['./farm-plot-form.component.css'],
   providers: [
@@ -43,6 +44,7 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
   @Input() farmPlot: FarmPlot | null = null;
 
   @ViewChild('mainImageUpload') mainImageUpload?: ProfilePictureUploadComponent;
+  @ViewChild(CoordinateInputComponent) coordinateInput?: CoordinateInputComponent;
 
   farmPlotForm: FormGroup;
 
@@ -92,8 +94,7 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
       description: [''],
       size: ['', [Validators.required, Validators.min(0)]],
       sizeType: ['', Validators.required],
-      latitude: ['', Validators.required],
-      longitude: ['', Validators.required],
+      coordinates: [null, Validators.required],
       soilType: ['', Validators.required],
       status: [this.mode === 'create' ? 'ACTIVE' : '', Validators.required],
       imageUuid: [''],
@@ -134,8 +135,9 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
       description: plot.description ?? '',
       size: plot.size,
       sizeType: plot.sizeType,
-      latitude: plot.latitude,
-      longitude: plot.longitude,
+      coordinates: plot.latitude != null && plot.longitude != null
+        ? { latitude: plot.latitude, longitude: plot.longitude }
+        : null,
       soilType: plot.soilType,
       status: plot.status,
       imageUuid: plot.imageUuid ?? '',
@@ -167,13 +169,19 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
   }
 
   getValue(): FarmPlotRequest {
-    return this.farmPlotForm.getRawValue();
+    const { coordinates, ...rest } = this.farmPlotForm.getRawValue();
+    return {
+      ...rest,
+      latitude: coordinates?.latitude ?? null,
+      longitude: coordinates?.longitude ?? null,
+    };
   }
 
   markAllAsTouched(): void {
     Object.keys(this.farmPlotForm.controls).forEach((key) => {
       this.farmPlotForm.get(key)?.markAsTouched();
     });
+    this.coordinateInput?.markAllAsTouched();
   }
 
   reset(): void {

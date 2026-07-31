@@ -29,17 +29,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Search -->
-    <div *ngIf="!isCollapsed" class="relative">
-      <input
-        type="text"
-        [(ngModel)]="searchTerm"
-        (ngModelChange)="applySearch()"
-        placeholder="Search menu..."
-        class="w-full px-3 py-2 text-sm bg-gray-800 border border-gray-700 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-      />
-    </div>
   </div>
 
   <!-- Menu Items -->

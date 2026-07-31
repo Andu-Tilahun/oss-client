@@ -51,8 +51,11 @@ export interface InvestmentPackageTypeAgreement {
   totalDurationMonths?: number;
   status?: InvestmentPackageTypeStatus;
   packageStatus?: InvestmentPackageStatus;
+  closureReason?: string;
   totalAmount?: number;
   terms?: InvestmentPackageTypeTerm[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface InvestmentPackageTypeCreateRequest {

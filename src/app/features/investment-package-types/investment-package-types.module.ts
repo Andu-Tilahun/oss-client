@@ -17,7 +17,6 @@ import {FarmFollowupsModule} from "../farm-followups/farm-followups.module";
 import {
     ExtensionWorkerAssignModalComponent
 } from "../extension-worker-assign-modal/extension-worker-assign-modal.component";
-import {ConfirmationModalComponent} from "../../shared/modals/confirmation-modal/confirmation-modal.component";
 import {ModalComponent} from "../../shared/modals/modal/modal.component";
 import {InvestmentPackageTypePlotDetailComponent} from './pages/investment-package-type-plot-detail/investment-package-type-plot-detail.component';
 import {
@@ -29,6 +28,9 @@ import {
   InvestmentPackageCreateInvestmentModalComponent
 } from '../investment-package/modals/investment-package-create-investment-modal/investment-package-create-investment-modal.component';
 import {InvestmentPackageEditModalComponent} from '../investment-package/modals/investment-package-edit-modal/investment-package-edit-modal.component';
+import {
+  InvestmentPackageTypeCloseModalComponent
+} from './modals/investment-package-type-close-modal/investment-package-type-close-modal.component';
 
 @NgModule({
   declarations: [
@@ -56,8 +58,8 @@ import {InvestmentPackageEditModalComponent} from '../investment-package/modals/
     UserViewComponent,
     FarmFollowupsModule,
     ExtensionWorkerAssignModalComponent,
-    ConfirmationModalComponent,
     ModalComponent,
+    InvestmentPackageTypeCloseModalComponent,
   ],
 })
 export class InvestmentPackageTypesModule {}

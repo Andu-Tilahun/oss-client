@@ -4,15 +4,20 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { RegionService } from '../../../regions/services/region.service';
 import { Region } from '../../../regions/models/region.model';
 import { ToastService } from '../../../../shared/toast/toast.service';
+import { PageSplitLayoutComponent } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
+import { RegionViewComponent } from '../../../regions/components/region-view/region-view.component';
 
 @Component({
   selector: 'app-regions-management-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, PageSplitLayoutComponent, RegionViewComponent],
   templateUrl: './regions-management-page.component.html',
 })
 export class RegionsManagementPageComponent implements OnInit {
   regions: Region[] = [];
+  selectedRegion: Region | null = null;
+  detailRefreshKey = 0;
+
   loading = true;
   showModal = false;
   saving = false;
@@ -36,15 +41,25 @@ export class RegionsManagementPageComponent implements OnInit {
 
   loadRegions(): void {
     this.loading = true;
+    const previousId = this.selectedRegion?.id;
     this.regionService.filterRegions({ page: 0, size: 200 }).subscribe({
       next: (page) => {
         this.regions = page.content;
         this.loading = false;
+        if (this.regions.length === 0) { this.selectedRegion = null; return; }
+        if (previousId) {
+          const match = this.regions.find(r => r.id === previousId);
+          if (match) { this.selectedRegion = { ...match }; return; }
+        }
+        this.selectedRegion = { ...this.regions[0] };
+        this.detailRefreshKey++;
       },
-      error: () => {
-        this.loading = false;
-      },
+      error: () => { this.loading = false; },
     });
+  }
+
+  onView(region: Region): void {
+    this.selectedRegion = { ...region };
   }
 
   openCreate(): void {
@@ -64,10 +79,7 @@ export class RegionsManagementPageComponent implements OnInit {
   }
 
   onSave(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving = true;
     const request = this.form.value;
 
@@ -82,9 +94,7 @@ export class RegionsManagementPageComponent implements OnInit {
         this.loadRegions();
         this.toastService.success(this.editingId ? 'Region updated' : 'Region created');
       },
-      error: () => {
-        this.saving = false;
-      },
+      error: () => { this.saving = false; },
     });
   }
 
@@ -94,12 +104,11 @@ export class RegionsManagementPageComponent implements OnInit {
     this.regionService.deleteRegion(id).subscribe({
       next: () => {
         this.deleting = null;
+        if (this.selectedRegion?.id === id) this.selectedRegion = null;
         this.regions = this.regions.filter(r => r.id !== id);
         this.toastService.success('Region deleted');
       },
-      error: () => {
-        this.deleting = null;
-      },
+      error: () => { this.deleting = null; },
     });
   }
 }

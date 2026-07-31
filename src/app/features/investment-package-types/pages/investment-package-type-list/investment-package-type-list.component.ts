@@ -13,14 +13,13 @@ import {FundingStatus} from '../../../../shared/models/funding-status.model';
 import {InvestmentPackageService} from '../../../investment-package/services/investment-package.service';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
 import {InvestmentPackageTypeService} from '../../services/investment-package-type.service';
-import {ApiResponse, PageResponse} from '../../../../shared/models/api-response.model';
+import {PageResponse} from '../../../../shared/models/api-response.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
 import {
   PageSplitRightAction
 } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
 import {AuthService} from '../../../auth/services/auth.service';
-import {AdminInvestmentPackageTypeDecision} from '../../modals/investment-package-type-admin-action-modal/investment-package-type-admin-action-modal.component';
 import {TabItem} from "../../../../shared/tabs/models/tab-item.model";
 import {environment} from '../../../../../environments/environment';
 
@@ -54,25 +53,34 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   fundingStatus: FundingStatus | '' = '';
   paymentStatus: InvestmentPaymentStatus | '' = '';
 
+  adminActiveTab = 'published';
+  adminTabs: TabItem[] = [
+    {key: 'published', label: 'Published Investments'},
+    {key: 'archived', label: 'Archived Investments'},
+  ];
+  publishedPackages: InvestmentPackageTypeAgreement[] = [];
+  archivedPackages: InvestmentPackageTypeAgreement[] = [];
+
   showCreateModal = false;
   showEditModal = false;
   showEditInvestmentPackageModal = false;
-  showDeleteModal = false;
-  deleting = false;
+  showCloseModal = false;
+  closing = false;
+  closeReason = '';
   showCreateInvestmentModal = false;
   selectedAgreement: InvestmentPackageTypeAgreement | null = null;
   investorBidRecord: InvestmentRecord | null = null;
+  selectedAgreementStatus: string | null = null;
   detailRefreshKey = 0;
   pendingForcedTab: string | null = null;
-  showAdminActionModal = false;
 
-  private adminActionLoading = false;
   showContractModal = false;
   contractLoading = false;
   contractHtml = '';
   contractFileName = 'lease-contract.html';
 
   columns: DataTableColumn<InvestmentPackageTypeAgreement>[] = [];
+  archivedColumns: DataTableColumn<InvestmentPackageTypeAgreement>[] = [];
 
   activeTab = 'detail';
 
@@ -101,9 +109,31 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     }
   }
 
+  onAdminTabChange(key: string): void {
+    this.adminActiveTab = key;
+    const packages = key === 'archived' ? this.archivedPackages : this.publishedPackages;
+    this.selectedAgreement = packages.length > 0 ? {...packages[0]} : null;
+    if (this.selectedAgreement) this.detailRefreshKey++;
+  }
+
+  get isLosingBidder(): boolean {
+    return this.isInvestorUser
+      && this.investmentPackageType === 'BIDDING'
+      && this.investorBidRecord?.status === 'BACKUP';
+  }
+
+  /** Winning bidder who has already submitted payment proof, before the admin has created the contract. */
+  get isAwaitingContract(): boolean {
+    return this.isInvestorUser
+      && this.investmentPackageType === 'BIDDING'
+      && this.investorBidRecord?.status === 'PAID';
+  }
+
   get tabs(): TabItem[] {
-    const isWinnerAnnounced = this.selectedAgreement?.fundingStatus === 'CLOSED';
+    const contractSigned = this.selectedAgreementStatus === 'ACTIVE';
+    const isWinnerAnnounced = this.selectedAgreement?.fundingStatus === 'CLOSED' && contractSigned;
     const hasExtensionWorker = !!this.selectedAgreement?.extensionWorker;
+    const isLosingBidder = this.isLosingBidder;
 
     const result: TabItem[] = [
       {key: 'detail', label: 'Detail'},
@@ -111,21 +141,13 @@ export class InvestmentPackageTypeListComponent implements OnInit {
       {key: 'investor', label: 'Investor'},
     ];
 
-    if (this.isAdmin) {
-      if (this.investmentPackageType === 'LEASING') {
-        result.push({key: 'contract', label: 'Contract'});
-      } else {
-        result.push({key: 'choose-candidate', label: 'Choose Candidate'});
-      }
-    } else if (
-      this.isInvestorUser &&
-      this.investmentPackageType === 'LEASING' &&
-      !!this.selectedAgreement?.agreementId
-    ) {
+    if (this.isAdmin && this.selectedAgreement?.fundingStatus === 'CLOSED') {
+      result.push({key: 'contract', label: 'Contract'});
+    } else if (this.isInvestorUser && !isLosingBidder && (!!this.selectedAgreement?.agreementId || this.isAwaitingContract)) {
       result.push({key: 'contract', label: 'Contract'});
     }
 
-    if (isWinnerAnnounced) {
+    if (isWinnerAnnounced && !isLosingBidder) {
       result.push({
         key: 'extension-worker',
         label: 'Extension Worker',
@@ -133,7 +155,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
       });
     }
 
-    if (hasExtensionWorker) {
+    if (hasExtensionWorker && !isLosingBidder) {
       const followUpCount = this.selectedAgreement?.followUpDtoList?.length ?? 0;
       result.push({
         key: 'follow-up',
@@ -179,13 +201,14 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   }
 
   private buildColumns(): void {
-    this.columns = [
-      {header: 'Title', value: (l) => l.title},
+    const base: DataTableColumn<InvestmentPackageTypeAgreement>[] = [
+      {header: 'Title', value: (l) => l.title, cellClass: 'block max-w-[200px] truncate'},
       {header: 'Farm activity', value: (l) => l.farmActivity},
       {header: 'Water source', value: (l) => l.waterSource},
       {header: 'Target', value: (l) => this.formatAmount(l.targetAmount)},
-      {header: 'Funding Status', value: (l) => l.fundingStatus},
     ];
+    this.columns = [...base, {header: 'Funding Status', value: (l) => l.fundingStatus}];
+    this.archivedColumns = [...base, {header: 'Package Status', value: (l) => l.packageStatus ?? 'ACTIVE'}];
   }
 
   private buildTableRowActions(): void {
@@ -199,24 +222,17 @@ export class InvestmentPackageTypeListComponent implements OnInit {
           action: (l) => this.onEditPackage(l),
         },
         {
-          id: 'delete',
+          id: 'close',
           icon: 'delete',
-          title: 'Delete',
-          visible: (l) => l.fundingStatus !== FundingStatus.CLOSED && l.packageStatus !== 'IN_USE' && l.packageStatus !== 'INACTIVE',
-          action: (l) => this.onDeletePackage(l),
+          title: 'Close',
+          visible: (l) => l.fundingStatus === FundingStatus.OPEN && l.packageStatus !== 'INACTIVE',
+          action: (l) => this.onClosePackage(l),
         },
         {
           id: 'review',
           icon: 'check',
-          title: 'Review',
+          title: this.investmentPackageType === 'BIDDING' ? 'Winning Investor' : 'Winning Investors',
           visible: (l) => this.canAdminReview(l),
-          action: (l) => this.onApprovePackageType(l),
-        },
-        {
-          id: 'choose-candidate',
-          icon: 'assign',
-          title: 'Choose Candidate',
-          visible: (l) => this.investmentPackageType !== 'LEASING' && l.fundingStatus === FundingStatus.CLOSED,
           action: (l) => this.onChooseCandidateAction(l),
         },
         {
@@ -224,7 +240,6 @@ export class InvestmentPackageTypeListComponent implements OnInit {
           icon: 'send',
           title: 'Create Contract',
           visible: (l) =>
-            this.investmentPackageType === 'LEASING' &&
             l.fundingStatus === FundingStatus.CLOSED &&
             !l.agreementId,
           action: (l) => this.onContractAction(l),
@@ -234,7 +249,6 @@ export class InvestmentPackageTypeListComponent implements OnInit {
           icon: 'document',
           title: 'View Contract',
           visible: (l) =>
-            this.investmentPackageType === 'LEASING' &&
             !!l.agreementId &&
             l.status !== 'ACTIVE',
           action: (l) => this.onContractAction(l),
@@ -244,7 +258,6 @@ export class InvestmentPackageTypeListComponent implements OnInit {
           icon: 'assign',
           title: 'Assign Extension Worker',
           visible: (l) =>
-            this.investmentPackageType === 'LEASING' &&
             l.fundingStatus === FundingStatus.CLOSED &&
             !!l.agreementId &&
             l.status === 'ACTIVE' &&
@@ -256,10 +269,17 @@ export class InvestmentPackageTypeListComponent implements OnInit {
           icon: 'refresh',
           title: 'Change Extension Worker',
           visible: (l) =>
-            this.investmentPackageType === 'LEASING' &&
             l.fundingStatus === FundingStatus.CLOSED &&
             !!l.extensionWorker,
           action: (l) => this.onAssignExtensionWorkerAction(l),
+        },
+        {
+          id: 'closed-by-admin',
+          icon: 'ban',
+          title: 'Closed by admin',
+          visible: (l) => l.packageStatus === 'INACTIVE' && l.fundingStatus === FundingStatus.FAILED,
+          disabled: () => true,
+          action: () => {},
         },
       ];
       return;
@@ -291,7 +311,6 @@ export class InvestmentPackageTypeListComponent implements OnInit {
           icon: 'check',
           title: 'Agree on Contract',
           visible: (r) =>
-            this.investmentPackageType === 'LEASING' &&
             !!r.agreementId &&
             r.status === 'SENT',
           action: (r) => this.onAgreeOnContractAction(r),
@@ -324,8 +343,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   };
 
   canAdminReview(lease: InvestmentPackageTypeAgreement): boolean {
-    return this.hasAppliedInvestors(lease)
-      && lease.fundingStatus === FundingStatus.OPEN;
+    return this.investmentPackageType !== 'LEASING' && this.hasAppliedInvestors(lease);
   }
 
   public shouldShowPackageTypeEditButton(_lease: InvestmentPackageTypeAgreement | null | undefined): boolean {
@@ -438,6 +456,9 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     this.availableSearchText = '';
     this.availablePage = 0;
     this.availablePageIndex = 1;
+    this.adminActiveTab = 'published';
+    this.publishedPackages = [];
+    this.archivedPackages = [];
   }
 
   public get isInvestorUser(): boolean {
@@ -485,6 +506,26 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   }
 
   private syncSelectedAgreementAfterLoad(previousId?: string | null): void {
+    if (this.isAdmin) {
+      if (previousId) {
+        const match = [...this.publishedPackages, ...this.archivedPackages].find((l) => l.id === previousId);
+        if (match) {
+          this.selectedAgreement = {...match};
+          this.refreshPackageInvestmentsIfNeeded();
+          this.refreshInvestorBidRecordIfNeeded();
+          return;
+        }
+      }
+      const activeList = this.adminActiveTab === 'archived' ? this.archivedPackages : this.publishedPackages;
+      this.selectedAgreement = activeList.length > 0 ? {...activeList[0]} : null;
+      if (this.selectedAgreement) {
+        this.detailRefreshKey++;
+        this.refreshPackageInvestmentsIfNeeded();
+        this.refreshInvestorBidRecordIfNeeded();
+      }
+      return;
+    }
+
     if (this.subscribedPackageTypes.length === 0) {
       this.selectedAgreement = null;
       return;
@@ -495,6 +536,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
       if (match) {
         this.selectedAgreement = {...match};
         this.refreshPackageInvestmentsIfNeeded();
+        this.refreshInvestorBidRecordIfNeeded();
         return;
       }
     }
@@ -502,6 +544,13 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     this.selectedAgreement = {...this.subscribedPackageTypes[0]};
     this.detailRefreshKey++;
     this.refreshPackageInvestmentsIfNeeded();
+    this.refreshInvestorBidRecordIfNeeded();
+  }
+
+  private refreshInvestorBidRecordIfNeeded(): void {
+    if (this.isInvestorUser && this.investmentPackageType === 'BIDDING' && this.selectedAgreement?.id) {
+      this.loadInvestorBidRecord(this.selectedAgreement.id);
+    }
   }
 
   /**
@@ -557,6 +606,15 @@ export class InvestmentPackageTypeListComponent implements OnInit {
           );
         } else {
           this.subscribedPackageTypes = filtered;
+        }
+
+        if (this.isAdmin) {
+          this.publishedPackages = this.subscribedPackageTypes.filter(
+            (p) => p.packageStatus !== 'INACTIVE',
+          );
+          this.archivedPackages = this.subscribedPackageTypes.filter(
+            (p) => p.packageStatus === 'INACTIVE',
+          );
         }
 
         this.subscribedLoading = false;
@@ -650,17 +708,24 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   }
 
   onView(lease: InvestmentPackageTypeAgreement): void {
+    // The detail panel's own agreement-loading is deduped per agreementId (it never re-fetches or
+    // re-emits agreementStatusChanged for an agreement it already loaded), so reselecting the *same*
+    // package must not throw away the status we already have — there'd be nothing left to repopulate it.
+    const isSamePackage = this.selectedAgreement?.id === lease.id;
     this.pendingForcedTab = null;
     this.selectedAgreement = {...lease};
+    if (!isSamePackage) {
+      this.selectedAgreementStatus = null;
+      this.packageInvestments = [];
+      this.investorBidRecord = null;
+    }
     this.detailRefreshKey++;
-    this.packageInvestments = [];
-    this.investorBidRecord = null;
     this.showCreateModal = false;
     this.showEditModal = false;
     if (this.activeTab === 'investor') {
       this.loadPackageInvestments(lease.id);
     }
-    if (this.isInvestorUser && this.investmentPackageType === 'BIDDING' && lease.fundingStatus === FundingStatus.OPEN) {
+    if (this.isInvestorUser && this.investmentPackageType === 'BIDDING') {
       this.loadInvestorBidRecord(lease.id);
     }
   }
@@ -712,33 +777,35 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
   onEditPackage(lease: InvestmentPackageTypeAgreement): void {
     this.selectedAgreement = {...lease};
-    this.showDeleteModal = false;
+    this.showCloseModal = false;
     this.showEditInvestmentPackageModal = true;
   }
 
-  onDeletePackage(lease: InvestmentPackageTypeAgreement): void {
+  onClosePackage(lease: InvestmentPackageTypeAgreement): void {
     this.selectedAgreement = {...lease};
     this.showEditInvestmentPackageModal = false;
-    this.showDeleteModal = true;
+    this.closeReason = '';
+    this.showCloseModal = true;
   }
 
-  handleDeleteConfirmation(): void {
-    if (!this.selectedAgreement?.id) return;
+  handleCloseConfirmation(): void {
+    if (!this.selectedAgreement?.id || !this.closeReason.trim()) return;
 
-    this.deleting = true;
-    this.investmentPackageService.deleteInvestmentPackage(this.selectedAgreement.id).subscribe({
+    this.closing = true;
+    this.investmentPackageService.closeInvestmentPackage(this.selectedAgreement.id, this.closeReason.trim()).subscribe({
       next: () => {
-        this.deleting = false;
-        this.showDeleteModal = false;
-        this.selectedAgreement = null;
-        this.toastService.success('Investment package deleted successfully');
+        this.closing = false;
+        this.showCloseModal = false;
+        this.closeReason = '';
+        this.toastService.success('Investment package closed successfully');
+        this.detailRefreshKey++;
         this.loadPackageTypes();
       },
       error: (error) => {
-        this.deleting = false;
+        this.closing = false;
         this.toastService.error(
-          error.message || 'Failed to delete investment package',
-          'Delete Investment Package',
+          error.message || 'Failed to close investment package',
+          'Close Investment Package',
         );
       },
     });
@@ -750,18 +817,14 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     this.loadPackageTypes();
   }
 
-  onApprovePackageType(lease: InvestmentPackageTypeAgreement): void {
-    // Open admin action modal (Approve/Reject).
-    this.selectedAgreement = {...lease};
-    this.showEditModal = false;
-    this.showCreateModal = false;
-    this.showAdminActionModal = true;
-  }
-
   onChooseCandidateAction(lease: InvestmentPackageTypeAgreement): void {
     this.onView(lease);
-    this.pendingForcedTab = 'choose-candidate';
-    this.activeTab = 'choose-candidate';
+    this.pendingForcedTab = 'investor';
+    this.activeTab = 'investor';
+    this.loadPackageInvestments(lease.id);
+    if (this.investmentPackageType === 'BIDDING') {
+      this.loadBiddingLeaderboard(lease.id);
+    }
   }
 
   onContractAction(lease: InvestmentPackageTypeAgreement): void {
@@ -778,42 +841,24 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
   onAgreeOnContractAction(lease: InvestmentPackageTypeAgreement): void {
     this.onView(lease);
-    this.pendingForcedTab = 'investor';
-    this.activeTab = 'investor';
+    this.pendingForcedTab = 'contract';
+    this.activeTab = 'contract';
   }
 
   onCandidatesChosen(): void {
     this.detailRefreshKey++;
     this.loadPackageTypes();
+    if (this.selectedAgreement?.id) {
+      this.loadPackageInvestments(this.selectedAgreement.id);
+      if (this.investmentPackageType === 'BIDDING') {
+        this.loadBiddingLeaderboard(this.selectedAgreement.id);
+      }
+    }
   }
 
   onAgreementCreated(): void {
     this.detailRefreshKey++;
     this.loadPackageTypes();
-  }
-
-  onAdminDecision(decision: AdminInvestmentPackageTypeDecision): void {
-    const leaseId = this.getPackageTypeAgreementId(this.selectedAgreement);
-    if (!leaseId) return;
-
-    if (this.adminActionLoading) return;
-    this.adminActionLoading = true;
-
-    this.investmentPackageTypeService.adminDecide(leaseId, decision).subscribe({
-      next: (res: ApiResponse<InvestmentPackageTypeAgreement>) => {
-        this.adminActionLoading = false;
-        this.toastService.success(
-          decision === 'ACCEPTED' ? 'Lease activated successfully' : 'Lease rejected successfully',
-          'Admin Lease Action',
-        );
-        this.detailRefreshKey++;
-        this.selectedAgreement = res?.data ?? null;
-        this.loadPackageTypes();
-      },
-      error: () => {
-        this.adminActionLoading = false;
-      },
-    });
   }
 
   onDetailPanelInvestClicked(): void {

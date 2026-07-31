@@ -2,11 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaymentService } from '../../../payments/services/payment.service';
 import { PaymentDetail } from '../../../payments/models/payment.model';
+import { PageSplitLayoutComponent } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
+import { PaymentDetailViewComponent } from '../../components/payment-detail-view/payment-detail-view.component';
 
 @Component({
   selector: 'app-payment-analysis-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PageSplitLayoutComponent, PaymentDetailViewComponent],
   templateUrl: './payment-analysis-page.component.html',
 })
 export class PaymentAnalysisPageComponent implements OnInit {
@@ -14,6 +16,7 @@ export class PaymentAnalysisPageComponent implements OnInit {
   loading = true;
   totalCount = 0;
   pageSize = 20;
+  selectedPayment: PaymentDetail | null = null;
 
   constructor(private paymentService: PaymentService) {}
 
@@ -28,9 +31,16 @@ export class PaymentAnalysisPageComponent implements OnInit {
         this.payments = page.content;
         this.totalCount = page.totalElements;
         this.loading = false;
+        if (page.content.length > 0 && !this.selectedPayment) {
+          this.selectedPayment = { ...page.content[0] };
+        }
       },
       error: () => { this.loading = false; },
     });
+  }
+
+  onView(payment: PaymentDetail): void {
+    this.selectedPayment = { ...payment };
   }
 
   get paidCount(): number {

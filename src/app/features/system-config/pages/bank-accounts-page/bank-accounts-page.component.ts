@@ -4,11 +4,13 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { SystemConfigService } from '../../services/system-config.service';
 import { BankAccount } from '../../models/bank-account.model';
 import { ToastService } from '../../../../shared/toast/toast.service';
+import { PageSplitLayoutComponent } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
+import { BankAccountViewComponent } from '../../components/bank-account-view/bank-account-view.component';
 
 @Component({
   selector: 'app-bank-accounts-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, PageSplitLayoutComponent, BankAccountViewComponent],
   templateUrl: './bank-accounts-page.component.html',
 })
 export class BankAccountsPageComponent implements OnInit {
@@ -18,6 +20,7 @@ export class BankAccountsPageComponent implements OnInit {
   saving = false;
   deletingId: string | null = null;
   editingId: string | null = null;
+  selectedAccount: BankAccount | null = null;
 
   form!: FormGroup;
 
@@ -43,10 +46,14 @@ export class BankAccountsPageComponent implements OnInit {
 
   loadAccounts(): void {
     this.loading = true;
+    const previousId = this.selectedAccount?.id;
     this.systemConfigService.getAllBankAccounts().subscribe({
       next: (accounts) => {
         this.accounts = accounts;
         this.loading = false;
+        if (accounts.length === 0) { this.selectedAccount = null; return; }
+        const match = accounts.find(a => a.id === previousId);
+        this.selectedAccount = match ? { ...match } : { ...accounts[0] };
       },
       error: () => {
         this.toastService.error('Failed to load bank accounts');
@@ -55,13 +62,18 @@ export class BankAccountsPageComponent implements OnInit {
     });
   }
 
+  onView(account: BankAccount): void {
+    this.selectedAccount = { ...account };
+  }
+
   openCreate(): void {
     this.editingId = null;
     this.form.reset({ active: true, displayOrder: 0 });
     this.showModal = true;
   }
 
-  openEdit(account: BankAccount): void {
+  openEdit(account: BankAccount | null): void {
+    if (!account) return;
     this.editingId = account.id;
     this.form.patchValue({
       bankName:          account.bankName,
@@ -121,6 +133,7 @@ export class BankAccountsPageComponent implements OnInit {
   onDelete(id: string): void {
     if (!confirm('Delete this bank account?')) return;
     this.deletingId = id;
+    if (this.selectedAccount?.id === id) this.selectedAccount = null;
     this.systemConfigService.deleteBankAccount(id).subscribe({
       next: () => {
         this.deletingId = null;

@@ -4,15 +4,20 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { SystemConfigService } from '../../services/system-config.service';
 import { SocialMediaLink, SocialMediaPlatform } from '../../models/social-media.model';
 import { ToastService } from '../../../../shared/toast/toast.service';
+import { PageSplitLayoutComponent } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
+import { SocialMediaViewComponent } from '../../components/social-media-view/social-media-view.component';
 
 @Component({
   selector: 'app-social-media-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, PageSplitLayoutComponent, SocialMediaViewComponent],
   templateUrl: './social-media-page.component.html',
 })
 export class SocialMediaPageComponent implements OnInit {
   links: SocialMediaLink[] = [];
+  selectedLink: SocialMediaLink | null = null;
+  detailRefreshKey = 0;
+
   loading = true;
   showModal = false;
   saving = false;
@@ -44,15 +49,25 @@ export class SocialMediaPageComponent implements OnInit {
 
   loadLinks(): void {
     this.loading = true;
+    const previousId = this.selectedLink?.id;
     this.systemConfigService.getAllSocialMedia().subscribe({
       next: (links) => {
         this.links = links;
         this.loading = false;
+        if (this.links.length === 0) { this.selectedLink = null; return; }
+        if (previousId) {
+          const match = this.links.find(l => l.id === previousId);
+          if (match) { this.selectedLink = { ...match }; return; }
+        }
+        this.selectedLink = { ...this.links[0] };
+        this.detailRefreshKey++;
       },
-      error: () => {
-        this.loading = false;
-      },
+      error: () => { this.loading = false; },
     });
+  }
+
+  onView(link: SocialMediaLink): void {
+    this.selectedLink = { ...link };
   }
 
   openCreate(): void {
@@ -72,10 +87,7 @@ export class SocialMediaPageComponent implements OnInit {
   }
 
   onSave(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving = true;
     const request = this.form.value;
 
@@ -90,22 +102,20 @@ export class SocialMediaPageComponent implements OnInit {
         this.loadLinks();
         this.toastService.success(this.editingId ? 'Social media link updated' : 'Social media link created');
       },
-      error: () => {
-        this.saving = false;
-      },
+      error: () => { this.saving = false; },
     });
   }
 
   toggleVisible(link: SocialMediaLink): void {
     this.togglingId = link.id;
-    this.systemConfigService.updateSocialMedia(link.id, { ...link, visible: !link.visible }).subscribe({
+    const updated = { ...link, visible: !link.visible };
+    this.systemConfigService.updateSocialMedia(link.id, updated).subscribe({
       next: () => {
         this.togglingId = null;
         link.visible = !link.visible;
+        if (this.selectedLink?.id === link.id) this.selectedLink = { ...link };
       },
-      error: () => {
-        this.togglingId = null;
-      },
+      error: () => { this.togglingId = null; },
     });
   }
 
@@ -115,12 +125,11 @@ export class SocialMediaPageComponent implements OnInit {
     this.systemConfigService.deleteSocialMedia(id).subscribe({
       next: () => {
         this.deletingId = null;
+        if (this.selectedLink?.id === id) this.selectedLink = null;
         this.links = this.links.filter(l => l.id !== id);
         this.toastService.success('Social media link deleted');
       },
-      error: () => {
-        this.deletingId = null;
-      },
+      error: () => { this.deletingId = null; },
     });
   }
 }

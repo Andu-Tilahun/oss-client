@@ -4,7 +4,7 @@ import { HttpParams } from '@angular/common/http';
 import { HttpService } from '../../../core/services/http.service';
 import { ApiResponse } from '../../../shared/models/api-response.model';
 import { Endpoints } from '../../../core/endpoint/endpoint.model';
-import { OrganizationConfig, OrganizationConfigRequest } from '../models/organization-config.model';
+import { OrganizationAboutRequest, OrganizationBasicInfoRequest, OrganizationConfig, OrganizationConfigRequest, OrganizationContactRequest } from '../models/organization-config.model';
 import { NewsArticle, NewsArticleRequest, NewsPage } from '../models/news-article.model';
 import { SocialMediaLink, SocialMediaLinkRequest } from '../models/social-media.model';
 import { BranchCenter, BranchCenterRequest } from '../models/branch-center.model';
@@ -22,6 +22,18 @@ export class SystemConfigService {
 
   updateOrganizationConfig(request: OrganizationConfigRequest): Observable<ApiResponse<OrganizationConfig>> {
     return this.http.put<ApiResponse<OrganizationConfig>>(Endpoints.CONFIG_ORGANIZATION_ENDPOINT, request);
+  }
+
+  updateOrganizationBasicInfo(request: OrganizationBasicInfoRequest): Observable<ApiResponse<OrganizationConfig>> {
+    return this.http.patch<ApiResponse<OrganizationConfig>>(`${Endpoints.CONFIG_ORGANIZATION_ENDPOINT}/basic-info`, request);
+  }
+
+  updateOrganizationContact(request: OrganizationContactRequest): Observable<ApiResponse<OrganizationConfig>> {
+    return this.http.patch<ApiResponse<OrganizationConfig>>(`${Endpoints.CONFIG_ORGANIZATION_ENDPOINT}/contact`, request);
+  }
+
+  updateOrganizationAboutUs(request: OrganizationAboutRequest): Observable<ApiResponse<OrganizationConfig>> {
+    return this.http.patch<ApiResponse<OrganizationConfig>>(`${Endpoints.CONFIG_ORGANIZATION_ENDPOINT}/about`, request);
   }
 
   // News – public

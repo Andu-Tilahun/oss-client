@@ -21,6 +21,7 @@ import {TabsComponent} from "../../shared/tabs/app-tabs/app-tabs.component";
 import {FarmPlotViewComponent} from "../farm-plots/components/farm-plot-view/farm-plot-view.component";
 import {FarmFollowupsModule} from "../farm-followups/farm-followups.module";
 import {UserViewComponent} from "../users/components/user-view/user-view.component";
+import {InvestmentPackageTypeCloseModalComponent} from "../investment-package-types/modals/investment-package-type-close-modal/investment-package-type-close-modal.component";
 
 @NgModule({
   declarations: [
@@ -49,6 +50,7 @@ import {UserViewComponent} from "../users/components/user-view/user-view.compone
         FarmPlotViewComponent,
         FarmFollowupsModule,
         UserViewComponent,
+        InvestmentPackageTypeCloseModalComponent,
     ],
 })
 export class InvestmentPackageModule {}

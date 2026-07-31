@@ -15,4 +15,6 @@ export interface DataTableColumn<T> {
   defaultVisible?: boolean;
   /** Hide this column when viewport width is below this value (px). */
   hiddenBelowPx?: number;
+  /** Tailwind classes applied to the inner span in the default (text) cell renderer. */
+  cellClass?: string;
 }

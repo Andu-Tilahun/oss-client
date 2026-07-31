@@ -7,12 +7,26 @@
         <h3 class="text-2xl font-bold text-gray-900">{{ investmentPackage.title || 'Investment Package' }}</h3>
       </div>
 
-      <span
-        class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
-        [ngClass]="statusPillClass(investmentPackage.fundingStatus)"
-      >
-        {{ investmentPackage.fundingStatus || '-' }}
-      </span>
+      <div class="flex items-start gap-3 flex-wrap">
+        <div class="flex flex-col items-center gap-1">
+          <span class="text-xs text-gray-400 font-medium">Funding</span>
+          <span
+            class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
+            [ngClass]="statusPillClass(investmentPackage.fundingStatus)"
+          >
+            {{ investmentPackage.fundingStatus || '-' }}
+          </span>
+        </div>
+        <div class="flex flex-col items-center gap-1">
+          <span class="text-xs text-gray-400 font-medium">Package</span>
+          <span
+            class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
+            [ngClass]="packageStatusPillClass(investmentPackage.packageStatus)"
+          >
+            {{ investmentPackage.packageStatus || '-' }}
+          </span>
+        </div>
+      </div>
     </div>
 
     <hr class="border-gray-200 mb-8"/>
@@ -21,6 +35,11 @@
       <app-detail-field label="Deadline" [value]="investmentPackage.fundingDeadline || '-'"/>
       <app-detail-field label="Target" [value]="formatAmount(investmentPackage.targetAmount)"/>
       <app-detail-field label="Minimum" [value]="formatAmount(investmentPackage.minimumContribution)"/>
+      <app-detail-field
+        *ngIf="investmentPackage.investmentPackageType === 'CROWDFUNDING'"
+        label="Expected Investors"
+        [value]="(investmentPackage.expectedInvestorNumber ?? '-').toString()"
+      />
     </app-detail-section>
 
     <app-detail-section title="Farm operation">
@@ -32,6 +51,14 @@
 
     <app-detail-section *ngIf="investmentPackage.description" title="Description">
       <div class="col-span-full text-sm text-slate-800 whitespace-pre-wrap">{{ investmentPackage.description }}</div>
+    </app-detail-section>
+
+    <app-detail-section *ngIf="investmentPackage.packageStatus === 'INACTIVE'" title="Closed">
+      <div class="col-span-full rounded-lg bg-slate-50 border border-slate-200 px-4 py-3">
+        <p class="text-sm font-medium text-slate-700">This investment package has been closed.</p>
+        <p class="mt-1 text-sm text-slate-600 whitespace-pre-wrap">{{ investmentPackage.closureReason || 'No reason provided.' }}</p>
+        <p *ngIf="investmentPackage.updatedAt" class="mt-2 text-xs text-slate-400">Closed on {{ investmentPackage.updatedAt | date:'medium' }}</p>
+      </div>
     </app-detail-section>
 
   </ng-container>

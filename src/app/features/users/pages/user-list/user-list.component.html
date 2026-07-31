@@ -5,7 +5,7 @@
   rightTitle="User Detail"
   [rightItem]="selectedUser"
   [rightEmptyMessage]="'Select a row to view details.'"
-  (rightEdit)="onEdit($event)"
+  [showRightEditButton]="false"
   (rightClose)="onCloseDetail()"
 >
   <ng-template #leftContent>

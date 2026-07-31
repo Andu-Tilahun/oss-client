@@ -3,12 +3,15 @@
 
     <!-- Left: platform logo + name -->
     <a routerLink="/home" class="flex items-center gap-3 min-w-0 shrink-0 text-inherit no-underline hover:opacity-90 transition-opacity">
-      <div class="w-10 h-10 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-lg flex items-center justify-center shadow-sm">
+      <img *ngIf="orgLogoUrl" [src]="orgLogoUrl" alt="Logo"
+        class="w-10 h-10 rounded-lg object-cover shadow-sm" />
+      <div *ngIf="!orgLogoUrl"
+        class="w-10 h-10 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-lg flex items-center justify-center shadow-sm">
         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
         </svg>
       </div>
-      <span class="text-xl font-bold text-emerald-800 tracking-tight">AgriVest</span>
+      <span class="text-xl font-bold text-emerald-800 tracking-tight">{{ orgName }}</span>
     </a>
 
     <!-- Right: Notifications, mobile nav -->

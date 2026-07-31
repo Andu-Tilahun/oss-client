@@ -17,6 +17,16 @@ export class InvestmentPackageViewComponent {
   @Input() investmentPackage: InvestmentPackage | null = null;
   @Input() refreshKey = 0;
 
+  packageStatusPillClass(status: string | null | undefined): string {
+    const s = (status ?? '').toString().trim().toUpperCase();
+    switch (s) {
+      case 'ACTIVE':   return 'bg-green-50 text-green-700 border-green-200';
+      case 'IN_USE':   return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'INACTIVE': return 'bg-slate-50 text-slate-700 border-slate-200';
+      default:         return 'bg-slate-50 text-slate-700 border-slate-200';
+    }
+  }
+
   statusPillClass(status: FundingStatus | string | null | undefined): string {
     const s = (status ?? '').toString().trim().toUpperCase();
     switch (s) {

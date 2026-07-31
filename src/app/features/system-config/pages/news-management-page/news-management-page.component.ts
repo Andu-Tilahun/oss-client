@@ -4,15 +4,20 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { SystemConfigService } from '../../services/system-config.service';
 import { NewsArticle, NewsStatus } from '../../models/news-article.model';
 import { ToastService } from '../../../../shared/toast/toast.service';
+import { PageSplitLayoutComponent } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
+import { NewsArticleViewComponent } from '../../components/news-article-view/news-article-view.component';
 
 @Component({
   selector: 'app-news-management-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, PageSplitLayoutComponent, NewsArticleViewComponent],
   templateUrl: './news-management-page.component.html',
 })
 export class NewsManagementPageComponent implements OnInit {
   articles: NewsArticle[] = [];
+  selectedArticle: NewsArticle | null = null;
+  detailRefreshKey = 0;
+
   loading = true;
   showModal = false;
   saving = false;
@@ -47,15 +52,25 @@ export class NewsManagementPageComponent implements OnInit {
 
   loadArticles(): void {
     this.loading = true;
+    const previousId = this.selectedArticle?.id;
     this.systemConfigService.getAllNews(0, 50).subscribe({
       next: (page) => {
         this.articles = page.content;
         this.loading = false;
+        if (this.articles.length === 0) { this.selectedArticle = null; return; }
+        if (previousId) {
+          const match = this.articles.find(a => a.id === previousId);
+          if (match) { this.selectedArticle = { ...match }; return; }
+        }
+        this.selectedArticle = { ...this.articles[0] };
+        this.detailRefreshKey++;
       },
-      error: () => {
-        this.loading = false;
-      },
+      error: () => { this.loading = false; },
     });
+  }
+
+  onView(article: NewsArticle): void {
+    this.selectedArticle = { ...article };
   }
 
   openCreate(): void {
@@ -82,10 +97,7 @@ export class NewsManagementPageComponent implements OnInit {
   }
 
   onSave(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
 
     this.saving = true;
     const value = this.form.value;
@@ -109,9 +121,7 @@ export class NewsManagementPageComponent implements OnInit {
         this.loadArticles();
         this.toastService.success(this.editingId ? 'Article updated successfully' : 'Article created successfully');
       },
-      error: () => {
-        this.saving = false;
-      },
+      error: () => { this.saving = false; },
     });
   }
 
@@ -121,12 +131,11 @@ export class NewsManagementPageComponent implements OnInit {
     this.systemConfigService.deleteNews(id).subscribe({
       next: () => {
         this.deleting = null;
+        if (this.selectedArticle?.id === id) this.selectedArticle = null;
         this.articles = this.articles.filter(a => a.id !== id);
         this.toastService.success('Article deleted');
       },
-      error: () => {
-        this.deleting = null;
-      },
+      error: () => { this.deleting = null; },
     });
   }
 

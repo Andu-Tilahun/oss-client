@@ -67,6 +67,8 @@ export class InvestmentPackageCreateInvestmentModalComponent implements OnChange
         this.form.patchValue({amount: this.existingBidRecord.amount});
       } else if (this.biddingMode && !this.existingBidRecord && this.investmentPackage) {
         this.form.patchValue({amount: this.investmentPackage.minimumContribution});
+      } else if (!this.biddingMode && !this.leasePaymentMode && this.investmentPackage) {
+        this.form.patchValue({amount: this.investmentPackage.minimumContribution});
       }
     }
     if (changes['visible']) {
@@ -77,6 +79,8 @@ export class InvestmentPackageCreateInvestmentModalComponent implements OnChange
         this.placedBidAmount = null;
       } else if (this.biddingMode && !this.existingBidRecord && this.investmentPackage) {
         this.form.patchValue({amount: this.investmentPackage.minimumContribution});
+      } else if (!this.biddingMode && !this.leasePaymentMode && this.investmentPackage) {
+        this.form.patchValue({amount: this.investmentPackage.minimumContribution});
       }
     }
   }
@@ -84,7 +88,13 @@ export class InvestmentPackageCreateInvestmentModalComponent implements OnChange
   get modalTitle(): string {
     if (this.placedBidReference) return 'Bid Placed';
     if (this.biddingMode) return this.existingBidRecord ? 'Update Bid' : 'Place Bid';
-    return this.leasePaymentMode ? 'Confirm Payment' : 'Create Investment';
+    if (this.leasePaymentMode) return 'Confirm Payment';
+    return `Add ${this.formatPackageType()} Investment`;
+  }
+
+  private formatPackageType(): string {
+    const type = this.investmentPackage?.investmentPackageType ?? '';
+    return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
   }
 
   get confirmLabel(): string {

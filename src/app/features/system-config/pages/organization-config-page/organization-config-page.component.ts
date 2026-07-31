@@ -6,20 +6,48 @@ import { OrganizationConfig } from '../../models/organization-config.model';
 import { BranchCenter, BranchCenterRequest } from '../../models/branch-center.model';
 import { ProfilePictureUploadComponent } from '../../../../shared/file-upload/profile-picture-upload/profile-picture-upload.component';
 import { ToastService } from '../../../../shared/toast/toast.service';
+import { PageSplitLayoutComponent } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
+import { OrganizationConfigViewComponent } from '../../components/organization-config-view/organization-config-view.component';
+import { TabsComponent } from '../../../../shared/tabs/app-tabs/app-tabs.component';
+import { TabItem } from '../../../../shared/tabs/models/tab-item.model';
+import { CoordinateInputComponent } from '../../../../shared/components/coordinate-input/coordinate-input.component';
 
 @Component({
   selector: 'app-organization-config-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ProfilePictureUploadComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    ProfilePictureUploadComponent,
+    PageSplitLayoutComponent,
+    OrganizationConfigViewComponent,
+    TabsComponent,
+    CoordinateInputComponent,
+  ],
   templateUrl: './organization-config-page.component.html',
 })
 export class OrganizationConfigPageComponent implements OnInit {
-  form!: FormGroup;
+  basicInfoForm!: FormGroup;
+  contactForm!: FormGroup;
+  aboutForm!: FormGroup;
   branchForm!: FormGroup;
 
   loading = true;
-  saving = false;
-  saved = false;
+
+  activeTab = 'identity';
+  tabs: TabItem[] = [
+    { key: 'identity', label: 'Identity' },
+    { key: 'contact', label: 'Contact Information' },
+    { key: 'about', label: 'About Us' },
+    { key: 'branches', label: 'Branch Centers' },
+  ];
+
+  savingBasic = false;
+  savedBasic = false;
+  savingContact = false;
+  savedContact = false;
+  savingAbout = false;
+  savedAbout = false;
 
   config: OrganizationConfig | null = null;
 
@@ -35,20 +63,24 @@ export class OrganizationConfigPageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.form = this.fb.group({
-      name:                ['', [Validators.required, Validators.maxLength(200)]],
-      tagline:             ['', Validators.maxLength(500)],
-      address:             [''],
-      operatingHours:      [''],
-      email:               ['', Validators.email],
-      phone:               [''],
-      contactMobilePhone:  [''],
-      officePhone:         [''],
-      bankAccount:         [''],
-      latitude:            [null],
-      longitude:           [null],
-      aboutUs:             [''],
-      logoUuid:            [null],
+    this.basicInfoForm = this.fb.group({
+      name:           ['', [Validators.required, Validators.maxLength(200)]],
+      tagline:        ['', Validators.maxLength(500)],
+      address:        [''],
+      operatingHours: [''],
+      logoUuid:       [null],
+      coordinates:    [null],
+    });
+
+    this.contactForm = this.fb.group({
+      email:              ['', Validators.email],
+      phone:              [''],
+      contactMobilePhone: [''],
+      officePhone:        [''],
+    });
+
+    this.aboutForm = this.fb.group({
+      aboutUs: [''],
     });
 
     this.branchForm = this.fb.group({
@@ -56,15 +88,21 @@ export class OrganizationConfigPageComponent implements OnInit {
       address:        [''],
       phone:          [''],
       email:          ['', Validators.email],
-      latitude:       [null],
-      longitude:      [null],
+      coordinates:    [null],
       operatingHours: [''],
     });
 
     this.systemConfigService.getOrganizationConfig().subscribe({
       next: (config) => {
         this.config = config;
-        this.form.patchValue(config);
+        this.basicInfoForm.patchValue({
+          ...config,
+          coordinates: config.latitude != null && config.longitude != null
+            ? { latitude: config.latitude, longitude: config.longitude }
+            : null,
+        });
+        this.contactForm.patchValue(config);
+        this.aboutForm.patchValue(config);
         this.loading = false;
       },
       error: () => {
@@ -83,32 +121,77 @@ export class OrganizationConfigPageComponent implements OnInit {
   }
 
   onLogoUploaded(fileId: string): void {
-    this.form.patchValue({ logoUuid: fileId });
+    this.basicInfoForm.patchValue({ logoUuid: fileId });
   }
 
   onLogoRemoved(): void {
-    this.form.patchValue({ logoUuid: null });
+    this.basicInfoForm.patchValue({ logoUuid: null });
   }
 
-  onSave(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+  onSaveBasicInfo(): void {
+    if (this.basicInfoForm.invalid) {
+      this.basicInfoForm.markAllAsTouched();
       return;
     }
-
-    this.saving = true;
-
-    this.systemConfigService.updateOrganizationConfig(this.form.value).subscribe({
-      next: () => {
-        this.saving = false;
-        this.saved = true;
-        setTimeout(() => (this.saved = false), 3000);
-        this.toastService.success('Organization settings updated successfully');
+    this.savingBasic = true;
+    const { coordinates, ...basicFields } = this.basicInfoForm.value;
+    const payload = {
+      ...basicFields,
+      latitude: coordinates?.latitude ?? null,
+      longitude: coordinates?.longitude ?? null,
+    };
+    this.systemConfigService.updateOrganizationBasicInfo(payload).subscribe({
+      next: (res) => {
+        this.savingBasic = false;
+        this.savedBasic = true;
+        this.config = res.data ?? this.config;
+        setTimeout(() => (this.savedBasic = false), 3000);
+        this.toastService.success('Identity info updated successfully');
       },
       error: () => {
-        this.saving = false;
+        this.savingBasic = false;
       },
     });
+  }
+
+  onSaveContact(): void {
+    if (this.contactForm.invalid) {
+      this.contactForm.markAllAsTouched();
+      return;
+    }
+    this.savingContact = true;
+    this.systemConfigService.updateOrganizationContact(this.contactForm.value).subscribe({
+      next: (res) => {
+        this.savingContact = false;
+        this.savedContact = true;
+        this.config = res.data ?? this.config;
+        setTimeout(() => (this.savedContact = false), 3000);
+        this.toastService.success('Contact info updated successfully');
+      },
+      error: () => {
+        this.savingContact = false;
+      },
+    });
+  }
+
+  onSaveAbout(): void {
+    this.savingAbout = true;
+    this.systemConfigService.updateOrganizationAboutUs(this.aboutForm.value).subscribe({
+      next: (res) => {
+        this.savingAbout = false;
+        this.savedAbout = true;
+        this.config = res.data ?? this.config;
+        setTimeout(() => (this.savedAbout = false), 3000);
+        this.toastService.success('About Us updated successfully');
+      },
+      error: () => {
+        this.savingAbout = false;
+      },
+    });
+  }
+
+  onTabChange(key: string): void {
+    this.activeTab = key;
   }
 
   openAddBranch(): void {
@@ -119,7 +202,12 @@ export class OrganizationConfigPageComponent implements OnInit {
 
   openEditBranch(branch: BranchCenter): void {
     this.editingBranch = branch;
-    this.branchForm.patchValue(branch);
+    this.branchForm.patchValue({
+      ...branch,
+      coordinates: branch.latitude != null && branch.longitude != null
+        ? { latitude: branch.latitude, longitude: branch.longitude }
+        : null,
+    });
     this.showBranchModal = true;
   }
 
@@ -130,7 +218,12 @@ export class OrganizationConfigPageComponent implements OnInit {
     }
 
     this.savingBranch = true;
-    const request: BranchCenterRequest = this.branchForm.value;
+    const { coordinates, ...branchFields } = this.branchForm.value;
+    const request: BranchCenterRequest = {
+      ...branchFields,
+      latitude: coordinates?.latitude ?? null,
+      longitude: coordinates?.longitude ?? null,
+    };
 
     const obs = this.editingBranch
       ? this.systemConfigService.updateBranchCenter(this.editingBranch.id!, request)

@@ -3,7 +3,6 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {CommonModule} from '@angular/common';
 import {NavigationEnd, Router, RouterModule} from '@angular/router';
 import {filter} from 'rxjs/operators';
-import {FormsModule} from '@angular/forms';
 import {MENU} from './menu';
 import {AuthService} from '../../../features/auth/services/auth.service';
 import {User} from '../../../features/users/models/user.model';
@@ -13,7 +12,7 @@ import {FileUploadService} from '../../../shared/file-upload/file-upload.service
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css']
 })
@@ -29,11 +28,8 @@ export class SidebarComponent implements OnInit {
   allMenuItems = MENU;
   /** Menu items filtered for the current user's role */
   visibleMenuItems: MenuItem[] = [];
-  /** Menu items actually rendered in the template (after search filter) */
-  displayedMenuItems: MenuItem[] = [];
   currentUser: User | null = null;
   currentUser$ = this.authService.currentUser$;
-  searchTerm = '';
 
   constructor(
     private authService: AuthService,
@@ -81,7 +77,6 @@ export class SidebarComponent implements OnInit {
   private updateMenuItemsForUser(): void {
     if (!this.currentUser) {
       this.visibleMenuItems = [];
-      this.displayedMenuItems = [];
       return;
     }
 
@@ -93,13 +88,10 @@ export class SidebarComponent implements OnInit {
         ...item,
         children: item.children?.filter(child => !child.roles || child.roles.includes(role))
       }));
-
-    // Initialize displayed items (no search applied yet)
-    this.displayedMenuItems = this.visibleMenuItems;
   }
 
   get menuItems(): MenuItem[] {
-    return this.displayedMenuItems;
+    return this.visibleMenuItems;
   }
 
   getItemRoute(item: MenuItem): string {
@@ -116,28 +108,6 @@ export class SidebarComponent implements OnInit {
 
   getItemFragment(item: MenuItem): string | undefined {
     return undefined;
-  }
-
-  applySearch(): void {
-    const term = this.searchTerm.trim().toLowerCase();
-    if (!term) {
-      // Reset to all visible items and collapse submenus
-      this.displayedMenuItems = this.visibleMenuItems;
-      this.visibleMenuItems.forEach(item => (item.expanded = false));
-      return;
-    }
-
-    this.displayedMenuItems = this.visibleMenuItems.filter(item => {
-      const matchesParent = item.label.toLowerCase().includes(term);
-      const hasMatchingChild = item.children?.some(child =>
-        child.label.toLowerCase().includes(term)
-      );
-
-      const matches = matchesParent || !!hasMatchingChild;
-      // Expand any menu that matches the search
-      item.expanded = matches;
-      return matches;
-    });
   }
 
   toggleSidebar() {

@@ -19,6 +19,7 @@ import {AuthService} from '../../../features/auth/services/auth.service';
 import {RequestType} from '../../services/http.service';
 import {User} from '../../../features/users/models/user.model';
 import {FileUploadService} from '../../../shared/file-upload/file-upload.service';
+import {SystemConfigService} from '../../../features/system-config/services/system-config.service';
 
 @Component({
   selector: 'app-header',
@@ -34,6 +35,7 @@ export class HeaderComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly fileUploadService = inject(FileUploadService);
+  private readonly systemConfigService = inject(SystemConfigService);
 
   private readonly notificationPreviewOptions = {
     requestType: RequestType.NON_BLOCKING,
@@ -45,6 +47,8 @@ export class HeaderComponent implements OnInit {
   @Output() menuToggle = new EventEmitter<void>();
 
   currentUser: User | null = null;
+  orgName = 'AgriVest';
+  orgLogoUrl: string | null = null;
   showNotificationPanel = false;
   previewItems: NotificationLog[] = [];
   previewTotal = 0;
@@ -60,9 +64,24 @@ export class HeaderComponent implements OnInit {
         this.currentUser = user;
         if (user) {
           this.refreshBadgeCount();
+          this.loadOrgBranding();
         } else {
           this.clearNotificationState();
         }
+      });
+  }
+
+  private loadOrgBranding(): void {
+    this.systemConfigService.getOrganizationConfig()
+      .pipe(take(1))
+      .subscribe({
+        next: (config) => {
+          this.orgName = config.name || 'AgriVest';
+          this.orgLogoUrl = config.logoUuid
+            ? this.fileUploadService.getFileUrl(config.logoUuid)
+            : null;
+        },
+        error: () => {},
       });
   }
 

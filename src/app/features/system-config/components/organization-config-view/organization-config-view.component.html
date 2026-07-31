@@ -1,0 +1,39 @@
+<div *ngIf="!config" class="p-6 text-sm text-gray-400 text-center">Loading...</div>
+
+<div *ngIf="config">
+  <app-detail-card>
+    <!-- Header: logo + name + tagline -->
+    <div class="flex items-center gap-5 mb-8">
+      <app-profile-picture-upload
+        [currentFileId]="config.logoUuid"
+        [viewOnly]="true"
+        size="large"
+      ></app-profile-picture-upload>
+      <div>
+        <h3 class="text-xl font-bold text-gray-900">{{ config.name }}</h3>
+        <p class="text-sm text-gray-500 mt-0.5">{{ config.tagline || '—' }}</p>
+      </div>
+    </div>
+    <hr class="border-gray-200 mb-8" />
+
+    <app-detail-section title="Identity">
+      <app-detail-field label="Address" [value]="config.address"></app-detail-field>
+      <app-detail-field label="Operating Hours" [value]="config.operatingHours"></app-detail-field>
+      <app-detail-field label="Latitude" [value]="config.latitude"></app-detail-field>
+      <app-detail-field label="Longitude" [value]="config.longitude"></app-detail-field>
+    </app-detail-section>
+
+    <app-detail-section title="Contact Information">
+      <app-detail-field label="Email" [value]="config.email"></app-detail-field>
+      <app-detail-field label="Phone" [value]="config.phone"></app-detail-field>
+      <app-detail-field label="Mobile Phone" [value]="config.contactMobilePhone"></app-detail-field>
+      <app-detail-field label="Office Phone" [value]="config.officePhone"></app-detail-field>
+    </app-detail-section>
+
+    <app-detail-section title="About Us">
+      <div class="col-span-full text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+        {{ config.aboutUs || '—' }}
+      </div>
+    </app-detail-section>
+  </app-detail-card>
+</div>

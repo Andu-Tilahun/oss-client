@@ -1,51 +1,75 @@
-<div class="p-6">
-  <div class="flex items-center justify-between mb-6">
-    <h2 class="text-xl font-semibold text-gray-800">News Articles</h2>
-    <button (click)="openCreate()" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors">
-      + New Article
-    </button>
-  </div>
+<app-page-split-layout
+  [showLeftTitle]="true"
+  leftTitle="News & Events"
+  [showRightTitle]="true"
+  rightTitle="Article Detail"
+  [rightItem]="selectedArticle"
+  [rightEmptyMessage]="'Select an article to view details.'"
+  [showRightEditButton]="true"
+  (rightEdit)="openEdit($event)"
+>
+  <ng-template #leftContent>
+    <div class="p-4">
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-sm text-gray-500">{{ articles.length }} article{{ articles.length !== 1 ? 's' : '' }}</span>
+        <button (click)="openCreate()"
+          class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors">
+          + New Article
+        </button>
+      </div>
 
-  <div *ngIf="loading" class="text-sm text-gray-500">Loading...</div>
+      <div *ngIf="loading" class="text-sm text-gray-500 py-4">Loading...</div>
 
-  <div *ngIf="!loading" class="overflow-x-auto">
-    <table class="w-full text-sm text-left border-collapse">
-      <thead>
-        <tr class="border-b border-gray-200">
-          <th class="py-2 pr-4 font-medium text-gray-600">Title</th>
-          <th class="py-2 pr-4 font-medium text-gray-600">Category</th>
-          <th class="py-2 pr-4 font-medium text-gray-600">Status</th>
-          <th class="py-2 pr-4 font-medium text-gray-600">Published</th>
-          <th class="py-2 font-medium text-gray-600">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let article of articles" class="border-b border-gray-100 hover:bg-gray-50">
-          <td class="py-2 pr-4 text-gray-800 max-w-xs truncate">{{ article.title }}</td>
-          <td class="py-2 pr-4 text-gray-500">{{ article.category || '—' }}</td>
-          <td class="py-2 pr-4">
-            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium"
-                  [ngClass]="article.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
-              {{ article.status }}
-            </span>
-          </td>
-          <td class="py-2 pr-4 text-gray-500">{{ formatDate(article.publishedAt) }}</td>
-          <td class="py-2 flex gap-2">
-            <button (click)="openEdit(article)" class="text-blue-600 hover:underline text-xs">Edit</button>
-            <button (click)="onDelete(article.id)" [disabled]="deleting === article.id" class="text-red-500 hover:underline text-xs disabled:opacity-50">
-              {{ deleting === article.id ? '...' : 'Delete' }}
-            </button>
-          </td>
-        </tr>
-        <tr *ngIf="articles.length === 0">
-          <td colspan="5" class="py-6 text-center text-sm text-gray-400">No articles yet. Create one above.</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
+      <div *ngIf="!loading" class="overflow-x-auto rounded-lg border border-gray-200">
+        <table class="w-full text-sm text-left">
+          <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
+            <tr>
+              <th class="px-4 py-3">Title</th>
+              <th class="px-4 py-3">Category</th>
+              <th class="px-4 py-3">Status</th>
+              <th class="px-4 py-3">Published</th>
+              <th class="px-4 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <tr *ngFor="let article of articles"
+                class="hover:bg-gray-50 cursor-pointer transition-colors"
+                [class.bg-blue-50]="selectedArticle?.id === article.id"
+                (click)="onView(article)">
+              <td class="px-4 py-3 font-medium text-gray-800 max-w-xs truncate">{{ article.title }}</td>
+              <td class="px-4 py-3 text-gray-500">{{ article.category || '—' }}</td>
+              <td class="px-4 py-3">
+                <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium"
+                      [ngClass]="article.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
+                  {{ article.status }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-gray-500">{{ formatDate(article.publishedAt) }}</td>
+              <td class="px-4 py-3 text-right">
+                <button (click)="openEdit(article); $event.stopPropagation()"
+                  class="text-blue-600 hover:underline text-xs mr-3">Edit</button>
+                <button (click)="onDelete(article.id); $event.stopPropagation()"
+                  [disabled]="deleting === article.id"
+                  class="text-red-500 hover:underline text-xs disabled:opacity-50">
+                  {{ deleting === article.id ? '...' : 'Delete' }}
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="articles.length === 0">
+              <td colspan="5" class="px-4 py-6 text-center text-sm text-gray-400">No articles yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-template>
 
-<!-- Modal -->
+  <ng-template #rightContent let-article>
+    <app-news-article-view [article]="article"></app-news-article-view>
+  </ng-template>
+</app-page-split-layout>
+
+<!-- Create / Edit Modal -->
 <div *ngIf="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
   <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6">
     <div class="flex items-center justify-between mb-4">
@@ -56,36 +80,45 @@
     <form [formGroup]="form" (ngSubmit)="onSave()" class="space-y-3">
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
-        <input formControlName="title" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <input formControlName="title" type="text"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-        <input formControlName="category" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. News, Sustainability" />
+        <input formControlName="category" type="text"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="e.g. News, Sustainability" />
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Summary</label>
-        <textarea formControlName="summary" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        <textarea formControlName="summary" rows="2"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Content</label>
-        <textarea formControlName="content" rows="5" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        <textarea formControlName="content" rows="5"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Published At</label>
-          <input formControlName="publishedAt" type="datetime-local" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input formControlName="publishedAt" type="datetime-local"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <select formControlName="status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <select formControlName="status"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
           </select>
         </div>
       </div>
 
       <div class="flex justify-end gap-3 pt-2">
-        <button type="button" (click)="closeModal()" class="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Cancel</button>
-        <button type="submit" [disabled]="saving" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+        <button type="button" (click)="closeModal()"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Cancel</button>
+        <button type="submit" [disabled]="saving"
+          class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
           {{ saving ? 'Saving...' : 'Save' }}
         </button>
       </div>
