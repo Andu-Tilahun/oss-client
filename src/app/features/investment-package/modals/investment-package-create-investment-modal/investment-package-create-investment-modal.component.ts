@@ -33,12 +33,23 @@ export class InvestmentPackageCreateInvestmentModalComponent implements OnChange
   isSaving = false;
   attachmentId: string | null = null;
   form: FormGroup;
-  paymentMethods: InvestmentPaymentMethod[] = ['CREDIT', 'BANK_TRANSFER', 'CRYPTO'];
 
   bankAccounts: BankAccount[] = [];
   bankAccountsLoading = false;
   placedBidReference: string | null = null;
   placedBidAmount: number | null = null;
+
+  get availablePaymentMethods(): InvestmentPaymentMethod[] {
+    const pkg = this.investmentPackage;
+    if (pkg?.allowedPaymentMethods?.length) return pkg.allowedPaymentMethods;
+    return ['CRYPTO'];
+  }
+
+  get availableBankAccounts(): BankAccount[] {
+    const ids = this.investmentPackage?.allowedBankAccountIds;
+    if (!ids?.length) return this.bankAccounts;
+    return this.bankAccounts.filter(b => ids.includes(b.id));
+  }
 
   constructor(
     private fb: FormBuilder,
@@ -69,6 +80,9 @@ export class InvestmentPackageCreateInvestmentModalComponent implements OnChange
         this.form.patchValue({amount: this.investmentPackage.minimumContribution});
       } else if (!this.biddingMode && !this.leasePaymentMode && this.investmentPackage) {
         this.form.patchValue({amount: this.investmentPackage.minimumContribution});
+      }
+      if (this.availablePaymentMethods.length === 1) {
+        this.form.patchValue({paymentMethod: this.availablePaymentMethods[0], bankAccountId: null});
       }
     }
     if (changes['visible']) {
@@ -272,12 +286,19 @@ export class InvestmentPackageCreateInvestmentModalComponent implements OnChange
       return;
     }
 
+    const v = this.form.value;
+    if (v.paymentMethod === 'BANK_TRANSFER' && !v.bankAccountId) {
+      this.toastService.error('Please select a bank account to transfer to', 'Bank Account Required');
+      return;
+    }
+
     this.isSaving = true;
     this.investmentPackageService.createInvestmentRecord({
       investmentPackageId: this.investmentPackage.id,
       amount: this.investmentPackage.targetAmount,
-      paymentMethod: 'CREDIT',
+      paymentMethod: v.paymentMethod ?? 'CREDIT',
       attachmentId: this.attachmentId,
+      bankAccountId: v.paymentMethod === 'BANK_TRANSFER' ? v.bankAccountId : undefined,
     }).subscribe({
       next: () => {
         this.isSaving = false;

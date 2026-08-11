@@ -199,4 +199,52 @@
       [disabled]="disabled"
     ></textarea>
   </div>
+
+  <div class="border border-gray-200 rounded-lg p-4 space-y-3">
+    <label class="block text-sm font-medium text-gray-700">
+      Allowed Payment Methods <span class="text-red-500">*</span>
+    </label>
+    <div class="flex flex-wrap gap-4">
+      <label *ngFor="let m of allPaymentMethods" class="flex items-center gap-2 cursor-pointer select-none">
+        <input
+          type="checkbox"
+          [checked]="isMethodAllowed(m)"
+          (change)="toggleMethod(m)"
+          [disabled]="disabled"
+          class="accent-indigo-600 w-4 h-4"
+        />
+        <span class="text-sm text-gray-800">{{ formatMethodLabel(m) }}</span>
+      </label>
+    </div>
+
+    <div *ngIf="showBankAccountPicker" class="space-y-2 pt-1">
+      <p class="text-xs font-medium text-gray-600">
+        Allowed Bank Accounts
+        <span class="font-normal text-gray-400">(leave empty to allow all active accounts)</span>
+      </p>
+      <div *ngIf="bankAccounts.length === 0" class="text-xs text-gray-400 py-1">
+        No bank accounts configured yet.
+      </div>
+      <label
+        *ngFor="let bank of bankAccounts"
+        class="flex items-start gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+        [ngClass]="{
+          'border-indigo-400 bg-indigo-50': isBankAllowed(bank.id),
+          'border-gray-200': !isBankAllowed(bank.id)
+        }"
+      >
+        <input
+          type="checkbox"
+          [checked]="isBankAllowed(bank.id)"
+          (change)="toggleBank(bank.id)"
+          [disabled]="disabled"
+          class="accent-indigo-600 w-4 h-4 mt-0.5"
+        />
+        <span class="text-sm leading-tight">
+          <span class="font-medium text-gray-900 block">{{ bank.bankName }}</span>
+          <span class="text-xs text-gray-500 block">{{ bank.accountNumber }} · {{ bank.accountHolderName }}</span>
+        </span>
+      </label>
+    </div>
+  </div>
 </form>

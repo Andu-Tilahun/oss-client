@@ -45,6 +45,8 @@ export interface InvestmentPackage {
   closureReason?: string;
   createdAt?: string;
   updatedAt?: string;
+  allowedPaymentMethods?: InvestmentPaymentMethod[];
+  allowedBankAccountIds?: string[];
 }
 
 export interface InvestmentPackageCreateRequest {
@@ -62,6 +64,8 @@ export interface InvestmentPackageCreateRequest {
   description?: string;
   remark?: string;
   fundingStatus?: FundingStatus;
+  allowedPaymentMethods?: InvestmentPaymentMethod[];
+  allowedBankAccountIds?: string[];
 }
 
 export interface InvestmentPackageFilterRequest {
@@ -89,6 +93,9 @@ export interface InvestmentRecord {
   investorUser?: User;
   bankAccountId?: string;
   paymentReference?: string;
+  attachmentId?: string;
+  signedAt?: string | null;
+  rejectionReason?: string | null;
 }
 
 export interface InvestmentCreateRequest {
@@ -103,6 +110,7 @@ export interface InvestmentRecordCreateRequest {
   amount: number;
   paymentMethod: InvestmentPaymentMethod;
   attachmentId: string;
+  bankAccountId?: string;
 }
 
 export interface ChooseCandidatesRequest {

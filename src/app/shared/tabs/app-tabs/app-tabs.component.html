@@ -4,7 +4,7 @@
     <nav [class]="centered ? 'flex gap-2 justify-center py-3 flex-1' : '-mb-px flex space-x-8 flex-1'"
          aria-label="Tabs">
       <button
-        *ngFor="let tab of tabs"
+        *ngFor="let tab of tabs; trackBy: trackByKey"
         (click)="setTab(tab.key)"
         [ngClass]="centered ? {
           'bg-blue-600 text-white shadow-sm': activeTab === tab.key,

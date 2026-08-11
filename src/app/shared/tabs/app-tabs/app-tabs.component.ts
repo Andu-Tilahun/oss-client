@@ -35,6 +35,10 @@ export class TabsComponent {
     }
   }
 
+  trackByKey(_: number, tab: TabItem): string {
+    return tab.key;
+  }
+
   /** Normalise iconPath to always be an array for *ngFor */
   paths(tab: TabItem): string[] {
     if (!tab.iconPath) return [];

@@ -15,10 +15,13 @@ import {
   InvestmentPackage,
   InvestmentPackageCreateRequest,
   InvestmentPackageType,
+  InvestmentPaymentMethod,
   WaterSource,
 } from '../../models/investment-package.model';
 import {FundingStatus, FUNDING_STATUSES} from '../../../../shared/models/funding-status.model';
 import {FarmPlot} from '../../../farm-plots/models/farm-plot.model';
+import {SystemConfigService} from '../../../system-config/services/system-config.service';
+import {BankAccount} from '../../../system-config/models/bank-account.model';
 
 @Component({
   selector: 'app-investment-package-form',
@@ -38,10 +41,12 @@ export class InvestmentPackageFormComponent implements OnInit, OnChanges, OnDest
   packageTypes: InvestmentPackageType[] = ['CROWDFUNDING', 'BIDDING', 'LEASING'];
   activities: FarmActivity[] = ['CROPS', 'LIVE_STOCKS', 'AGRO_FORESTRY'];
   waterSources: WaterSource[] = ['IRRIGATION', 'RIVER_ACCESS', 'RAIN_FED'];
+  readonly allPaymentMethods: InvestmentPaymentMethod[] = ['CREDIT', 'BANK_TRANSFER', 'CRYPTO'];
+  bankAccounts: BankAccount[] = [];
 
   private typeSubscription?: Subscription;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private systemConfigService: SystemConfigService) {
     this.form = this.fb.group(
       {
         farmPlotId: ['', Validators.required],
@@ -58,6 +63,8 @@ export class InvestmentPackageFormComponent implements OnInit, OnChanges, OnDest
         fundingStatus: [FundingStatus.OPEN, Validators.required],
         description: [''],
         remark: [''],
+        allowedPaymentMethods: [['CRYPTO']],
+        allowedBankAccountIds: [[]],
       },
       {validators: [investmentPackageFormValidator]},
     );
@@ -68,6 +75,10 @@ export class InvestmentPackageFormComponent implements OnInit, OnChanges, OnDest
       this.applyTypeValidators(type as InvestmentPackageType);
     });
     this.applyTypeValidators(this.form.get('investmentPackageType')?.value as InvestmentPackageType);
+    this.systemConfigService.getActiveBankAccounts().subscribe({
+      next: (accounts) => { this.bankAccounts = accounts; },
+      error: () => {},
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -88,6 +99,8 @@ export class InvestmentPackageFormComponent implements OnInit, OnChanges, OnDest
         fundingStatus: pkg.fundingStatus,
         description: pkg.description ?? '',
         remark: pkg.remark ?? '',
+        allowedPaymentMethods: pkg.allowedPaymentMethods?.length ? pkg.allowedPaymentMethods : ['CRYPTO'],
+        allowedBankAccountIds: pkg.allowedBankAccountIds ?? [],
       });
       this.applyTypeValidators(pkg.investmentPackageType ?? 'CROWDFUNDING');
     }
@@ -99,6 +112,42 @@ export class InvestmentPackageFormComponent implements OnInit, OnChanges, OnDest
 
   get isCrowdfunding(): boolean {
     return this.form.get('investmentPackageType')?.value === 'CROWDFUNDING';
+  }
+
+  get showBankAccountPicker(): boolean {
+    return this.isMethodAllowed('BANK_TRANSFER');
+  }
+
+  isMethodAllowed(m: InvestmentPaymentMethod): boolean {
+    return ((this.form.get('allowedPaymentMethods')?.value ?? []) as InvestmentPaymentMethod[]).includes(m);
+  }
+
+  toggleMethod(m: InvestmentPaymentMethod): void {
+    const current: InvestmentPaymentMethod[] = this.form.get('allowedPaymentMethods')?.value ?? [];
+    const updated = current.includes(m) ? current.filter(x => x !== m) : [...current, m];
+    this.form.get('allowedPaymentMethods')?.setValue(updated);
+    if (!updated.includes('BANK_TRANSFER')) {
+      this.form.get('allowedBankAccountIds')?.setValue([]);
+    }
+  }
+
+  isBankAllowed(id: string): boolean {
+    return ((this.form.get('allowedBankAccountIds')?.value ?? []) as string[]).includes(id);
+  }
+
+  toggleBank(id: string): void {
+    const current: string[] = this.form.get('allowedBankAccountIds')?.value ?? [];
+    const updated = current.includes(id) ? current.filter(x => x !== id) : [...current, id];
+    this.form.get('allowedBankAccountIds')?.setValue(updated);
+  }
+
+  formatMethodLabel(m: string): string {
+    const labels: Record<string, string> = {
+      CREDIT: 'Credit / Direct',
+      BANK_TRANSFER: 'Bank Transfer',
+      CRYPTO: 'Cryptocurrency',
+    };
+    return labels[m] ?? m;
   }
 
   hasFormError(errorKey: string): boolean {
@@ -132,6 +181,8 @@ export class InvestmentPackageFormComponent implements OnInit, OnChanges, OnDest
       waterSource: v.waterSource,
       description: v.description || undefined,
       remark: v.remark || undefined,
+      allowedPaymentMethods: v.allowedPaymentMethods?.length ? v.allowedPaymentMethods : ['CRYPTO'],
+      allowedBankAccountIds: v.allowedBankAccountIds ?? [],
     };
 
     if (this.mode === 'edit') {
@@ -157,6 +208,8 @@ export class InvestmentPackageFormComponent implements OnInit, OnChanges, OnDest
       fundingStatus: FundingStatus.OPEN,
       description: '',
       remark: '',
+      allowedPaymentMethods: ['CRYPTO'],
+      allowedBankAccountIds: [],
     });
     this.applyTypeValidators('CROWDFUNDING');
   }

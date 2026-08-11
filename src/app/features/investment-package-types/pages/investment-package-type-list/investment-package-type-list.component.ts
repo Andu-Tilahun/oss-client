@@ -71,6 +71,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   selectedAgreement: InvestmentPackageTypeAgreement | null = null;
   investorBidRecord: InvestmentRecord | null = null;
   selectedAgreementStatus: string | null = null;
+  tabs: TabItem[] = [];
   detailRefreshKey = 0;
   pendingForcedTab: string | null = null;
 
@@ -114,6 +115,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     const packages = key === 'archived' ? this.archivedPackages : this.publishedPackages;
     this.selectedAgreement = packages.length > 0 ? {...packages[0]} : null;
     if (this.selectedAgreement) this.detailRefreshKey++;
+    this.recomputeTabs();
   }
 
   get isLosingBidder(): boolean {
@@ -129,7 +131,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
       && this.investorBidRecord?.status === 'PAID';
   }
 
-  get tabs(): TabItem[] {
+  private computeTabs(): TabItem[] {
     const contractSigned = this.selectedAgreementStatus === 'ACTIVE';
     const isWinnerAnnounced = this.selectedAgreement?.fundingStatus === 'CLOSED' && contractSigned;
     const hasExtensionWorker = !!this.selectedAgreement?.extensionWorker;
@@ -140,6 +142,20 @@ export class InvestmentPackageTypeListComponent implements OnInit {
       {key: 'farm-plot', label: 'FarmPlot'},
       {key: 'investor', label: 'Investor'},
     ];
+
+    // CROWDFUNDING: show Payment tab for chosen investor (PENDING = needs to pay; PAID = submitted; REJECTED = must re-upload)
+    const isChosenCrowdfundingInvestor =
+      this.isInvestorUser &&
+      this.investmentPackageType === 'CROWDFUNDING' &&
+      (this.investorBidRecord?.status === 'PENDING' ||
+       this.investorBidRecord?.status === 'PAID' ||
+       this.investorBidRecord?.status === 'REJECTED' ||
+       this.investorBidRecord?.status === 'ACCEPTED');
+
+    if (isChosenCrowdfundingInvestor) {
+      const investorIdx = result.findIndex(t => t.key === 'investor');
+      result.splice(investorIdx + 1, 0, {key: 'payment', label: 'Payment'});
+    }
 
     if (this.isAdmin && this.selectedAgreement?.fundingStatus === 'CLOSED') {
       result.push({key: 'contract', label: 'Contract'});
@@ -165,6 +181,15 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     }
 
     return result;
+  }
+
+  private recomputeTabs(): void {
+    this.tabs = this.computeTabs();
+  }
+
+  onAgreementStatusChanged(status: string | null): void {
+    this.selectedAgreementStatus = status;
+    this.recomputeTabs();
   }
 
   packageInvestments: InvestmentRecord[] = [];
@@ -286,6 +311,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     }
 
     if (this.isInvestorUser) {
+      const currentUserId = this.authService.getCurrentUser()?.id;
       this.tableRowActions = [
         {
           id: 'invest',
@@ -307,12 +333,33 @@ export class InvestmentPackageTypeListComponent implements OnInit {
           action: (r) => this.onUpdateBid(r),
         },
         {
+          id: 'pay',
+          icon: 'currency',
+          title: 'Pay',
+          visible: (r) =>
+            this.investmentPackageType === 'CROWDFUNDING' &&
+            r.fundingStatus === FundingStatus.CLOSED &&
+            this.investorBidRecord?.status === 'PENDING',
+          action: (r) => this.onPayAction(r),
+        },
+        {
           id: 'agree-contract',
           icon: 'check',
           title: 'Agree on Contract',
           visible: (r) =>
+            this.investmentPackageType !== 'CROWDFUNDING' &&
             !!r.agreementId &&
             r.status === 'SENT',
+          action: (r) => this.onAgreeOnContractAction(r),
+        },
+        {
+          id: 'sign-contract',
+          icon: 'sign',
+          title: 'Sign Contract',
+          visible: (r) =>
+            this.investmentPackageType === 'CROWDFUNDING' &&
+            r.fundingStatus === FundingStatus.CLOSED &&
+            !!r.agreementId,
           action: (r) => this.onAgreeOnContractAction(r),
         },
         {
@@ -373,9 +420,9 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
   onTabChange(tab: string): void {
     this.activeTab = tab;
-    if (tab === 'investor' && this.selectedAgreement?.id) {
+    if ((tab === 'investor' || tab === 'payment' || tab === 'contract') && this.selectedAgreement?.id) {
       this.loadPackageInvestments(this.selectedAgreement.id);
-      if (this.investmentPackageType === 'BIDDING') {
+      if (this.investmentPackageType === 'BIDDING' || this.investmentPackageType === 'CROWDFUNDING') {
         this.loadBiddingLeaderboard(this.selectedAgreement.id);
       }
     }
@@ -384,6 +431,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   onExtensionWorkerAssigned(pkg: InvestmentPackage): void {
     this.selectedAgreement = pkg as InvestmentPackageTypeAgreement;
     this.detailRefreshKey++;
+    this.recomputeTabs();
     this.loadPackageTypes();
   }
 
@@ -444,6 +492,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     }
 
     this.buildTableRowActions();
+    this.recomputeTabs();
     this.loadPackageTypes();
   }
 
@@ -548,7 +597,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   }
 
   private refreshInvestorBidRecordIfNeeded(): void {
-    if (this.isInvestorUser && this.investmentPackageType === 'BIDDING' && this.selectedAgreement?.id) {
+    if (this.isInvestorUser && (this.investmentPackageType === 'BIDDING' || this.investmentPackageType === 'CROWDFUNDING') && this.selectedAgreement?.id) {
       this.loadInvestorBidRecord(this.selectedAgreement.id);
     }
   }
@@ -619,6 +668,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
         this.subscribedLoading = false;
         this.syncSelectedAgreementAfterLoad(previousSelectedId);
+        this.recomputeTabs();
 
         if (this.isInvestorUser && this.subscribedPackageTypes.length === 0) {
           this.onInvestorTabChange('explore');
@@ -656,10 +706,11 @@ export class InvestmentPackageTypeListComponent implements OnInit {
           t.key === 'explore' ? { ...t, badge: this.availableTotal || undefined } : t
         );
         this.availableLoading = false;
-        if (this.availablePackageTypes.length > 0) {
+        if (this.availablePackageTypes.length > 0 && this.investorActiveTab === 'explore') {
           this.selectedAgreement = {...this.availablePackageTypes[0]};
           this.detailRefreshKey++;
           this.refreshPackageInvestmentsIfNeeded();
+          this.recomputeTabs();
         }
       },
       error: (error) => {
@@ -722,12 +773,19 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     this.detailRefreshKey++;
     this.showCreateModal = false;
     this.showEditModal = false;
-    if (this.activeTab === 'investor') {
+    if (this.activeTab === 'investor' ||
+        this.activeTab === 'contract' ||
+        (this.isAdmin && this.investmentPackageType === 'CROWDFUNDING') ||
+        (this.isInvestorUser && this.investmentPackageType === 'CROWDFUNDING')) {
       this.loadPackageInvestments(lease.id);
+      if (this.investmentPackageType === 'CROWDFUNDING') {
+        this.loadBiddingLeaderboard(lease.id);
+      }
     }
-    if (this.isInvestorUser && this.investmentPackageType === 'BIDDING') {
+    if (this.isInvestorUser && (this.investmentPackageType === 'BIDDING' || this.investmentPackageType === 'CROWDFUNDING')) {
       this.loadInvestorBidRecord(lease.id);
     }
+    this.recomputeTabs();
   }
 
   private loadInvestorBidRecord(packageId: string): void {
@@ -739,17 +797,22 @@ export class InvestmentPackageTypeListComponent implements OnInit {
       next: (response) => {
         this.investorBidRecord = response.content?.[0] ?? null;
         this.buildTableRowActions();
+        this.recomputeTabs();
       },
       error: () => {
         this.investorBidRecord = null;
+        this.recomputeTabs();
       },
     });
   }
 
   private refreshPackageInvestmentsIfNeeded(): void {
-    if (this.activeTab === 'investor' && this.selectedAgreement?.id) {
+    if (this.selectedAgreement?.id &&
+        (this.activeTab === 'investor' ||
+         (this.isAdmin && this.investmentPackageType === 'CROWDFUNDING') ||
+         (this.isInvestorUser && this.investmentPackageType === 'CROWDFUNDING'))) {
       this.loadPackageInvestments(this.selectedAgreement.id);
-      if (this.investmentPackageType === 'BIDDING') {
+      if (this.investmentPackageType === 'BIDDING' || this.investmentPackageType === 'CROWDFUNDING') {
         this.loadBiddingLeaderboard(this.selectedAgreement.id);
       }
     }
@@ -845,6 +908,14 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     this.activeTab = 'contract';
   }
 
+  onPayAction(lease: InvestmentPackageTypeAgreement): void {
+    this.onView(lease);
+    this.pendingForcedTab = 'payment';
+    this.activeTab = 'payment';
+    this.loadPackageInvestments(lease.id);
+    this.loadBiddingLeaderboard(lease.id);
+  }
+
   onCandidatesChosen(): void {
     this.detailRefreshKey++;
     this.loadPackageTypes();
@@ -883,6 +954,9 @@ export class InvestmentPackageTypeListComponent implements OnInit {
       this.toastService.success('Bid registered successfully');
     } else {
       this.toastService.success('Investment registered successfully');
+    }
+    if (this.isInvestorUser && this.investmentPackageType !== 'BIDDING') {
+      this.investorActiveTab = 'my-leases';
     }
     this.loadPackageTypes();
     if (this.selectedAgreement && this.isInvestorUser && this.investmentPackageType === 'BIDDING') {

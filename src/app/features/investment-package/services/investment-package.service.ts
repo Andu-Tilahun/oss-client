@@ -127,10 +127,10 @@ export class InvestmentPackageService {
   }
 
 
-  investorDecision(investmentId: string, decision: 'ACCEPTED' | 'REJECTED'): Observable<ApiResponse<InvestmentRecord>> {
-    return this.httpService.post<ApiResponse<InvestmentRecord>>(
+  investorDecision(investmentId: string, decision: 'ACCEPTED' | 'REJECTED', reason?: string): Observable<ApiResponse<InvestmentRecord>> {
+    return this.httpService.put<ApiResponse<InvestmentRecord>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investments/${investmentId}/investor/decision`,
-      { investmentStatus: decision },
+      { investmentStatus: decision, ...(reason ? { reason } : {}) },
     );
   }
 

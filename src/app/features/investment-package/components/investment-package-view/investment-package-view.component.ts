@@ -1,21 +1,110 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {InvestmentPackage} from '../../models/investment-package.model';
+import {InvestmentPackage, InvestmentRecord} from '../../models/investment-package.model';
 import {FundingStatus} from '../../../../shared/models/funding-status.model';
 import {DetailCardComponent} from '../../../../shared/components/detail-field/detail-card/detail-card.component';
 import {DetailSectionComponent} from '../../../../shared/components/detail-field/detail-section/detail-section.component';
 import {DetailFieldComponent} from '../../../../shared/components/detail-field/detail-field/detail-field.component';
+import {NgxEchartsDirective} from 'ngx-echarts';
+import type {EChartsOption} from 'echarts';
 
 @Component({
   selector: 'app-investment-package-view',
   standalone: true,
-  imports: [CommonModule, DetailCardComponent, DetailSectionComponent, DetailFieldComponent],
+  imports: [CommonModule, DetailCardComponent, DetailSectionComponent, DetailFieldComponent, NgxEchartsDirective],
   templateUrl: './investment-package-view.component.html',
   styleUrl: './investment-package-view.component.css',
 })
-export class InvestmentPackageViewComponent {
+export class InvestmentPackageViewComponent implements OnChanges {
   @Input() investmentPackage: InvestmentPackage | null = null;
   @Input() refreshKey = 0;
+  @Input() packageInvestments: InvestmentRecord[] = [];
+  @Input() isAdminRole = false;
+
+  investorShareChartOption: EChartsOption = {};
+  fundingProgressChartOption: EChartsOption = {};
+
+  ngOnChanges(): void {
+    this.investorShareChartOption = {
+      tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+      legend: { orient: 'horizontal', bottom: 0 },
+      series: [{
+        type: 'pie',
+        radius: ['45%', '70%'],
+        center: ['50%', '45%'],
+        label: { show: false },
+        emphasis: { label: { show: true, fontWeight: 'bold' } },
+        data: this.activeInvestments.map(r => ({
+          name: this.formatInvestorName(r),
+          value: r.amount,
+        })),
+      }],
+    };
+    const planned = this.investmentPackage?.targetAmount ?? 0;
+    const collected = this.totalContributed;
+    const overFunded = planned > 0 && collected >= planned;
+    this.fundingProgressChartOption = {
+      tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+      legend: { orient: 'horizontal', bottom: 0 },
+      graphic: [{
+        type: 'text',
+        left: 'center',
+        top: '38%',
+        style: {
+          text: overFunded
+            ? `Target Exceeded\n+${this.formatAmount(collected - planned)}`
+            : `Planned\n${this.formatAmount(planned)}`,
+          fontSize: 12,
+          fontWeight: 'bold',
+          fill: overFunded ? '#16A34A' : '#374151',
+          textAlign: 'center',
+        },
+      }] as any[],
+      series: [{
+        type: 'pie',
+        radius: ['45%', '70%'],
+        center: ['50%', '45%'],
+        label: { show: false },
+        emphasis: { label: { show: true, fontWeight: 'bold' } },
+        data: overFunded
+          ? [
+              // Goal fully met: show planned (green) as the base, excess collected (indigo) on top
+              { name: 'Planned', value: planned, itemStyle: { color: '#16A34A' } },
+              { name: 'Collected', value: collected - planned, itemStyle: { color: '#4F46E5' } },
+            ]
+          : [
+              // In progress: show what's collected (indigo) and what remains to planned (green)
+              { name: 'Collected', value: collected, itemStyle: { color: '#4F46E5' } },
+              { name: 'Remaining', value: planned - collected, itemStyle: { color: '#16A34A' } },
+            ],
+      }],
+    };
+  }
+
+  get activeInvestments(): InvestmentRecord[] {
+    return this.packageInvestments.filter(
+      r => r.status !== 'CANCELED' && r.status !== 'FAILED' && r.status !== 'REJECTED'
+    );
+  }
+
+  get totalContributed(): number {
+    return this.activeInvestments.reduce((sum, r) => sum + (r.amount ?? 0), 0);
+  }
+
+  get exceedanceAmount(): number {
+    return Math.max(0, this.totalContributed - (this.investmentPackage?.targetAmount ?? 0));
+  }
+
+  get exceedancePercent(): string {
+    const planned = this.investmentPackage?.targetAmount ?? 0;
+    if (planned === 0) return '0.0';
+    return ((this.totalContributed - planned) / planned * 100).toFixed(1);
+  }
+
+  formatInvestorName(record: InvestmentRecord): string {
+    const u = record.investorUser;
+    return [u?.firstName, u?.lastName].filter(Boolean).join(' ') || u?.username || '-';
+  }
 
   packageStatusPillClass(status: string | null | undefined): string {
     const s = (status ?? '').toString().trim().toUpperCase();

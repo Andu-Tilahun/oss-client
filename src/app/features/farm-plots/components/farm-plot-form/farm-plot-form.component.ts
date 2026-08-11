@@ -53,7 +53,21 @@ export class FarmPlotFormComponent implements ControlValueAccessor, OnInit, OnCh
 
   readonly sizeTypes: Array<FarmPlotSizeType> = ['ACRES', 'HECTARES'];
   readonly soilTypes: Array<FarmPlotSoilType> = ['SANDY', 'CLAY', 'LOAMY'];
-  readonly statuses: Array<FarmPlotStatus> = ['ACTIVE', 'INACTIVE', 'UNDER_MAINTENANCE', 'ASSIGNED_TO_LEASE'];
+  readonly statuses: Array<FarmPlotStatus> = [
+    'ACTIVE', 'INACTIVE', 'UNDER_MAINTENANCE',
+    'ASSIGNED_TO_LEASE', 'ASSIGNED_TO_BIDDING', 'ASSIGNED_TO_CROWDFUNDING',
+    'ASSIGNED_TO_INVESTMENT_PACKAGE', 'ASSIGNED',
+  ];
+
+  /** These statuses are set automatically by the investment-package/agreement workflow —
+   * editing them manually here would desync the plot from its actual linked package. */
+  private readonly workflowManagedStatuses: ReadonlySet<FarmPlotStatus> = new Set([
+    'ASSIGNED_TO_LEASE', 'ASSIGNED_TO_BIDDING', 'ASSIGNED_TO_CROWDFUNDING', 'ASSIGNED_TO_INVESTMENT_PACKAGE',
+  ]);
+
+  get isStatusWorkflowManaged(): boolean {
+    return this.workflowManagedStatuses.has(this.farmPlotForm?.get('status')?.value);
+  }
 
   regions: Region[] = [];
 

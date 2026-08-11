@@ -22,6 +22,7 @@ import {FarmPlotViewComponent} from '../../../farm-plots/components/farm-plot-vi
 import {FarmFollowupsModule} from '../../../farm-followups/farm-followups.module';
 import {UserViewComponent} from '../../../users/components/user-view/user-view.component';
 import {ImageGalleryModalComponent} from '../../../../shared/modals/image-gallery-modal/image-gallery-modal.component';
+import {FilePreviewModalComponent} from '../../../../shared/modals/file-preview-modal/file-preview-modal.component';
 import {DocumentUploadComponent} from '../../../../shared/file-upload/document-upload/document-upload.component';
 import {
   InvestmentPackageChooseWinnerModalComponent
@@ -33,6 +34,10 @@ import {ToastService} from '../../../../shared/toast/toast.service';
 import {FileMetadata, FileUploadService} from '../../../../shared/file-upload/file-upload.service';
 import {User} from '../../../users/models/user.model';
 import {AssignExtensionWorkerRequest, ChangeExtensionWorkerRequest} from '../../../assign-extension-worker-request';
+import {NgxEchartsDirective} from 'ngx-echarts';
+import type {EChartsOption} from 'echarts';
+import {SystemConfigService} from '../../../system-config/services/system-config.service';
+import {BankAccount} from '../../../system-config/models/bank-account.model';
 
 @Component({
   selector: 'app-investment-package-detail-panel',
@@ -46,8 +51,10 @@ import {AssignExtensionWorkerRequest, ChangeExtensionWorkerRequest} from '../../
     FarmFollowupsModule,
     UserViewComponent,
     ImageGalleryModalComponent,
+    FilePreviewModalComponent,
     DocumentUploadComponent,
     InvestmentPackageChooseWinnerModalComponent,
+    NgxEchartsDirective,
   ],
   templateUrl: './investment-package-detail-panel.component.html',
 })
@@ -86,6 +93,9 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   showAttachmentModal = false;
   attachmentModalUrls: string[] = [];
   attachmentModalIndex = 0;
+  showFilePreviewModal = false;
+  filePreviewUrl: string | null = null;
+  approvingInvestorId: string | null = null;
   attachmentMetadata: Partial<Record<string, FileMetadata>> = {};
   private _agreement: InvestmentAgreement | null = null;
   agreementLoading = false;
@@ -93,15 +103,25 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   investorAgreeAttachmentId: string | null = null;
   investorAgreeing = false;
   investorAgreed = false;
+  rejectingInvestorId: string | null = null;
+  rejectionReasonInput = '';
   // BIDDING: chosen investor payment receipt
   paymentReceiptAttachmentId: string | null = null;
   submittingPayment = false;
   paymentSubmitted = false;
+  // CROWDFUNDING: chosen investor payment receipt
+  crowdfundingPaymentReceiptAttachmentId: string | null = null;
+  submittingCrowdfundingPayment = false;
+  crowdfundingPaymentSubmitted = false;
   private ownBidRecordId: string | null = null;
   private ownBidRecordPackageId: string | null = null;
   private loadedClosedLeaseInvestorsKey: string | null = null;
   private lastPackageIdForCandidates: string | null = null;
   private loadedAgreementId: string | null = null;
+  bankAccounts: BankAccount[] = [];
+  private bankAccountsLoaded = false;
+
+  crowdfundingShareChartOption: EChartsOption = {};
 
   constructor(
     private authService: AuthService,
@@ -109,6 +129,7 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     private investmentPackageService: InvestmentPackageService,
     private toastService: ToastService,
     private fileUploadService: FileUploadService,
+    private systemConfigService: SystemConfigService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -136,6 +157,9 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
         this.paymentSubmitted = false;
         this.ownBidRecordId = null;
         this.ownBidRecordPackageId = null;
+        this.crowdfundingPaymentReceiptAttachmentId = null;
+        this.submittingCrowdfundingPayment = false;
+        this.crowdfundingPaymentSubmitted = false;
       }
       if (this.isChosenBidder && this.ownBidRecordPackageId !== this.investmentPackage?.id) {
         this.loadOwnBidRecord();
@@ -145,9 +169,32 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
       }
       this.maybeLoadAgreement();
       this.maybeLoadAttachmentMetadata();
+      this.maybeLoadBankAccounts();
+    }
+    if (changes['packageInvestments']) {
+      this.maybeLoadInvestorRecordAttachmentMetadata();
     }
     if (changes['refreshKey'] && this.forcedTab && this.hasTab(this.forcedTab)) {
       this.onTabChange(this.forcedTab);
+    }
+    if (changes['biddingLeaderboard']) {
+      this.crowdfundingShareChartOption = {
+        tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+        legend: { orient: 'horizontal', bottom: 0 },
+        series: [{
+          type: 'pie',
+          radius: ['45%', '70%'],
+          center: ['50%', '45%'],
+          label: { show: false },
+          emphasis: { label: { show: true, fontWeight: 'bold' } },
+          data: this.biddingLeaderboard
+            .filter(r => r.status !== 'CANCELED' && r.status !== 'FAILED' && r.status !== 'REJECTED')
+            .map(r => ({
+              name: this.formatWorkerName(r.investorUser),
+              value: r.amount,
+            })),
+        }],
+      };
     }
   }
 
@@ -172,10 +219,35 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   }
 
   get canInvestorAgreeOnContract(): boolean {
-    return this.isInvestorRole &&
-      !!this.ownInvestorProfile &&
+    if (this.isCrowdfundingType) {
+      return this.isInvestorRole &&
+        this.agreement?.status === 'SENT' &&
+        this.ownInvestmentRecord?.status === 'ACCEPTED' &&
+        !this.currentInvestorHasSigned;
+    }
+    const base = this.isInvestorRole &&
       !!this.investmentPackage?.agreementId &&
-      this.investmentPackage?.status === 'SENT';
+      this.agreement?.status === 'SENT';
+    return base && !!this.ownInvestorProfile;
+  }
+
+  get currentInvestorHasSigned(): boolean {
+    return !!this.ownInvestmentRecord?.signedAt;
+  }
+
+  /** Accepted co-investors on this crowdfunding package — the actual set that must sign,
+   * as opposed to investmentPackage.investorIdList which includes every past applicant. */
+  get crowdfundingSigningRecords(): InvestmentRecord[] {
+    return this.packageInvestments.filter(r => r.status === 'ACCEPTED' || (r.status === 'ACTIVE' && !!r.signedAt));
+  }
+
+  get allCrowdfundingInvestorsSigned(): boolean {
+    const recs = this.crowdfundingSigningRecords;
+    return recs.length > 0 && recs.every(r => !!r.signedAt);
+  }
+
+  get crowdfundingPendingSignatureCount(): number {
+    return this.crowdfundingSigningRecords.filter(r => !r.signedAt).length;
   }
 
   get selectedExtensionWorkerDetail(): User | null {
@@ -223,7 +295,81 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     const currentUserId = this.authService.getCurrentUser()?.id;
     if (!currentUserId) return false;
     const ownRecord = this.packageInvestments.find(r => r.investorId === currentUserId);
-    return ownRecord?.status === 'PENDING';
+    return ownRecord?.status === 'PENDING'
+      || ownRecord?.status === 'PAID'
+      || ownRecord?.status === 'REJECTED'
+      || ownRecord?.status === 'ACCEPTED';
+  }
+
+  get isChosenCrowdfundingInvestor(): boolean {
+    if (!this.isInvestorRole || !this.isCrowdfundingType || !this.investmentPackage) return false;
+    const uid = this.authService.getCurrentUser()?.id;
+    if (!uid) return false;
+    const status = this.packageInvestments.find(r => r.investorId === uid)?.status;
+    return status === 'PENDING' || status === 'PAID' || status === 'REJECTED' || status === 'ACCEPTED';
+  }
+
+  get isInvestorPaymentRejected(): boolean {
+    return this.ownInvestmentRecord?.status === 'REJECTED';
+  }
+
+  get chosenInvestorRecords(): InvestmentRecord[] {
+    const ids = this.investmentPackage?.investorIdList ?? [];
+    if (!ids.length) return [];
+    return this.packageInvestments.filter(r => ids.includes(r.investorId));
+  }
+
+  get crowdfundingPaymentAlreadyPaid(): boolean {
+    if (!this.isInvestorRole || !this.isCrowdfundingType || !this.investmentPackage) return false;
+    const uid = this.authService.getCurrentUser()?.id;
+    if (!uid) return false;
+    return this.packageInvestments.find(r => r.investorId === uid)?.status === 'PAID';
+  }
+
+  get ownInvestmentRecord(): InvestmentRecord | null {
+    const uid = this.authService.getCurrentUser()?.id;
+    if (!uid) return null;
+    return this.packageInvestments.find(r => r.investorId === uid) ?? null;
+  }
+
+  get effectiveCrowdfundingAttachmentId(): string | null {
+    return this.ownInvestmentRecord?.attachmentId ?? this.crowdfundingPaymentReceiptAttachmentId;
+  }
+
+  get effectiveBiddingAttachmentId(): string | null {
+    return this.ownInvestmentRecord?.attachmentId ?? this.paymentReceiptAttachmentId;
+  }
+
+  get payingInvestorRecord(): InvestmentRecord | null {
+    if (!this.investmentPackage) return null;
+    if (!this.isBiddingType && !this.isCrowdfundingType) {
+      return this.packageInvestments[0] ?? null;
+    }
+    return this.packageInvestments.find(r => r.status === 'PENDING' || r.status === 'PAID') ?? null;
+  }
+
+  getBankAccountById(id?: string | null): BankAccount | undefined {
+    if (!id) return undefined;
+    return this.bankAccounts.find(b => b.id === id);
+  }
+
+  formatPaymentMethod(method?: string | null): string {
+    if (!method) return '-';
+    const labels: Record<string, string> = {
+      CREDIT: 'Credit / Direct',
+      BANK_TRANSFER: 'Bank Transfer',
+      CRYPTO: 'Cryptocurrency',
+    };
+    return labels[method] ?? method;
+  }
+
+  private maybeLoadBankAccounts(): void {
+    if (this.bankAccountsLoaded) return;
+    this.bankAccountsLoaded = true;
+    this.systemConfigService.getActiveBankAccounts().subscribe({
+      next: (accounts) => { this.bankAccounts = accounts; },
+      error: () => {},
+    });
   }
 
   get isLosingBidder(): boolean {
@@ -243,6 +389,14 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     return this.packageInvestments.some(r => r.investorId === currentUserId && r.status !== 'CANCELED');
   }
 
+  /** True once the current investor's ID appears in investorIdList for a CROWDFUNDING package. */
+  get hasAppliedForCrowdfunding(): boolean {
+    if (!this.isInvestorRole || !this.isCrowdfundingType || !this.investmentPackage) return false;
+    const currentUserId = this.authService.getCurrentUser()?.id;
+    if (!currentUserId) return false;
+    return this.investmentPackage.investorIdList?.includes(currentUserId) ?? false;
+  }
+
   get biddingCandidates(): InvestmentRecord[] {
     const source = this.isInvestorRole ? this.biddingLeaderboard : this.packageInvestments;
     return [...source].sort((a, b) => (b.amount ?? 0) - (a.amount ?? 0));
@@ -259,8 +413,13 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     return idx === -1 ? -1 : idx + 1;
   }
 
+  get confirmedInvestorCount(): number {
+    const ids = this.investmentPackage?.investorIdList ?? [];
+    return ids.filter(id => this.packageInvestments.find(r => r.investorId === id)?.status !== 'REJECTED').length;
+  }
+
   get investorProgressPercent(): number {
-    const current = this.investmentPackage?.investorIdList?.length ?? 0;
+    const current = this.confirmedInvestorCount;
     const expected = this.investmentPackage?.expectedInvestorNumber ?? 0;
     if (!expected) return 0;
     return Math.min(100, Math.round((current / expected) * 100));
@@ -300,10 +459,21 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     if (this.isBiddingType) {
       return this.selectedCandidateIds.length === 1;
     }
+    if (this.isCrowdfundingType) {
+      return this.selectedCandidateIds.length > 0;
+    }
     return !!this.investmentPackage?.attachmentIdList?.length && this.investmentPackage?.paymentStatus === 'PENDING';
   }
 
   get canCreateAgreement(): boolean {
+    if (this.isCrowdfundingType) {
+      const ids = this.investmentPackage?.investorIdList ?? [];
+      if (!ids.length) return false;
+      return ids.every(id => {
+        const rec = this.packageInvestments.find(r => r.investorId === id);
+        return rec?.status === 'ACCEPTED';
+      });
+    }
     return !!this.investmentPackage?.attachmentIdList?.length;
   }
 
@@ -316,22 +486,35 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   }
 
   openAttachmentPreview(attachmentId: string): void {
-    if (this.getAttachmentIcon(attachmentId) !== 'image') {
-      const url = this.attachmentMetadata[attachmentId]?.presignedUrl || this.getFileUrl(attachmentId);
-      if (url) {
-        window.open(url, '_blank');
-      }
-      return;
-    }
+    const url = this.attachmentMetadata[attachmentId]?.presignedUrl || this.getFileUrl(attachmentId);
+    if (!url) return;
 
-    const imageIds = (this.investmentPackage?.attachmentIdList ?? []).filter(
-      (id) => this.getAttachmentIcon(id) === 'image',
-    );
-    this.attachmentModalUrls = imageIds
-      .map((id) => this.attachmentMetadata[id]?.presignedUrl || this.getFileUrl(id))
-      .filter((url): url is string => !!url);
-    this.attachmentModalIndex = Math.max(0, imageIds.indexOf(attachmentId));
-    this.showAttachmentModal = true;
+    if (this.getAttachmentIcon(attachmentId) === 'image') {
+      const imageIds = (this.investmentPackage?.attachmentIdList ?? []).filter(
+        (id) => this.getAttachmentIcon(id) === 'image',
+      );
+      this.attachmentModalUrls = imageIds
+        .map((id) => this.attachmentMetadata[id]?.presignedUrl || this.getFileUrl(id))
+        .filter((u): u is string => !!u);
+      this.attachmentModalIndex = Math.max(0, imageIds.indexOf(attachmentId));
+      this.showAttachmentModal = true;
+    } else {
+      this.filePreviewUrl = url;
+      this.showFilePreviewModal = true;
+    }
+  }
+
+  openSingleAttachmentPreview(attachmentId: string): void {
+    const url = this.attachmentMetadata[attachmentId]?.presignedUrl || this.getFileUrl(attachmentId);
+    if (!url) return;
+    if (this.getAttachmentIcon(attachmentId) === 'image') {
+      this.attachmentModalUrls = [url];
+      this.attachmentModalIndex = 0;
+      this.showAttachmentModal = true;
+    } else {
+      this.filePreviewUrl = url;
+      this.showFilePreviewModal = true;
+    }
   }
 
   assignExtensionWorker(): void {
@@ -619,6 +802,19 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     });
   }
 
+  private maybeLoadInvestorRecordAttachmentMetadata(): void {
+    const ids = this.packageInvestments
+      .map(r => r.attachmentId)
+      .filter((id): id is string => !!id && !this.attachmentMetadata[id]);
+    if (ids.length === 0) return;
+    forkJoin(ids.map(id => this.fileUploadService.getFileMetadata(id))).subscribe({
+      next: (results) => {
+        results.forEach((metadata, i) => { this.attachmentMetadata[ids[i]] = metadata; });
+      },
+      error: () => {},
+    });
+  }
+
   getAttachmentIcon(attachmentId: string): 'image' | 'pdf' | 'document' {
     const contentType = this.attachmentMetadata[attachmentId]?.contentType;
     if (!contentType) return 'document';
@@ -725,6 +921,37 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     });
   }
 
+  submitCrowdfundingPayment(): void {
+    const packageId = this.investmentPackage?.id;
+    const farmPlotId = this.investmentPackage?.farmPlotId || this.investmentPackage?.farmPlot?.id;
+    const uid = this.authService.getCurrentUser()?.id;
+    const ownRecord = uid ? this.packageInvestments.find(r => r.investorId === uid) : null;
+    if (!packageId || !farmPlotId || !ownRecord?.id || !this.crowdfundingPaymentReceiptAttachmentId || this.submittingCrowdfundingPayment) {
+      return;
+    }
+
+    const request: InvestorAgreeResponseRequest = {
+      investmentPackageId: packageId,
+      investmentRecordId: ownRecord.id,
+      farmPlotId,
+      attachmentId: this.crowdfundingPaymentReceiptAttachmentId,
+    };
+
+    this.submittingCrowdfundingPayment = true;
+    this.investmentPackageService.investorAgreeResponse(request).subscribe({
+      next: () => {
+        this.submittingCrowdfundingPayment = false;
+        this.crowdfundingPaymentSubmitted = true;
+        this.toastService.success('Payment receipt submitted successfully');
+        this.agreementCreated.emit();
+      },
+      error: (error) => {
+        this.submittingCrowdfundingPayment = false;
+        this.toastService.error(error.message || 'Failed to submit payment receipt', 'Payment Receipt');
+      },
+    });
+  }
+
   private loadExtensionWorkers(): void {
     this.loadingExtensionWorkers = true;
     this.userService.getUsersByRole('EXTENSION_WORKER').subscribe({
@@ -738,5 +965,69 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
         this.toastService.error('Failed to load extension workers', 'Extension Worker');
       },
     });
+  }
+
+  approveInvestorPayment(record: InvestmentRecord): void {
+    this.approvingInvestorId = record.id;
+    this.investmentPackageService.investorDecision(record.id, 'ACCEPTED').subscribe({
+      next: () => {
+        this.approvingInvestorId = null;
+        this.candidatesChosen.emit();
+        this.toastService.success('Payment approved');
+      },
+      error: (e) => {
+        this.approvingInvestorId = null;
+        this.toastService.error(e.message || 'Failed to approve payment', 'Approve Payment');
+      },
+    });
+  }
+
+  showRejectForm(record: InvestmentRecord): void {
+    this.rejectingInvestorId = record.id;
+    this.rejectionReasonInput = '';
+  }
+
+  cancelRejectForm(): void {
+    this.rejectingInvestorId = null;
+    this.rejectionReasonInput = '';
+  }
+
+  rejectInvestorPayment(record: InvestmentRecord, reason: string): void {
+    if (!reason.trim()) return;
+    this.approvingInvestorId = record.id;
+    this.rejectingInvestorId = null;
+    this.rejectionReasonInput = '';
+    this.investmentPackageService.investorDecision(record.id, 'REJECTED', reason.trim()).subscribe({
+      next: () => {
+        this.approvingInvestorId = null;
+        this.candidatesChosen.emit();
+        this.toastService.success('Payment rejected — investor can re-upload');
+      },
+      error: (e) => {
+        this.approvingInvestorId = null;
+        this.toastService.error(e.message || 'Failed to reject payment', 'Reject Payment');
+      },
+    });
+  }
+
+  paymentStatusLabel(status: string | undefined): string {
+    const labels: Record<string, string> = {
+      PENDING: 'Waiting',
+      PAID: 'Submitted',
+      ACCEPTED: 'Approved',
+      REJECTED: 'Rejected',
+      ACTIVE: 'Active',
+    };
+    return labels[status ?? ''] ?? (status ?? '-');
+  }
+
+  paymentStatusBadgeClass(status: string | undefined): Record<string, boolean> {
+    return {
+      'bg-yellow-100 text-yellow-700': status === 'PENDING',
+      'bg-blue-100 text-blue-700': status === 'PAID',
+      'bg-green-100 text-green-700': status === 'ACCEPTED' || status === 'ACTIVE',
+      'bg-red-100 text-red-700': status === 'REJECTED',
+      'bg-gray-100 text-gray-600': !status,
+    };
   }
 }
