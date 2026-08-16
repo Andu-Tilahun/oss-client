@@ -64,6 +64,20 @@ export class InvestmentPackageService {
     );
   }
 
+  completeInvestmentPackage(id: string, remark: string): Observable<ApiResponse<InvestmentPackage>> {
+    return this.httpService.put<ApiResponse<InvestmentPackage>>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${id}/complete`,
+      {remark},
+    );
+  }
+
+  deactivateInvestmentPackage(id: string, reason: string): Observable<ApiResponse<InvestmentPackage>> {
+    return this.httpService.put<ApiResponse<InvestmentPackage>>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${id}/deactivate`,
+      {reason},
+    );
+  }
+
   togglePackageStatus(id: string): Observable<ApiResponse<InvestmentPackage>> {
     return this.httpService.patch<ApiResponse<InvestmentPackage>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${id}/status`,

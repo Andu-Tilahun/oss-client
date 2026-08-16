@@ -64,9 +64,9 @@ export class InvestmentPackageTypeService {
     );
   }
 
-  getContractHtml(packageTypeId: string): Observable<string> {
+  getContractHtml(agreementId: string): Observable<string> {
     return this.httpService.get<string>(
-      `${Endpoints.INVESTMENT_PACKAGE_TYPES_ENDPOINT}/${packageTypeId}/contract`,
+      `${Endpoints.INVESTMENT_AGGREMENT_ENDPOINT}/${agreementId}/contract`,
     );
   }
 }

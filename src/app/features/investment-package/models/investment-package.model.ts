@@ -5,7 +5,7 @@ import {FundingStatus} from "../../../shared/models/funding-status.model";
 
 export {FundingStatus, FUNDING_STATUSES} from "../../../shared/models/funding-status.model";
 
-export type InvestmentPackageStatus = 'ACTIVE' | 'INACTIVE' | 'IN_USE';
+export type InvestmentPackageStatus = 'ACTIVE' | 'INACTIVE' | 'IN_USE' | 'COMPLITED';
 export type FarmActivity = 'CROPS' | 'LIVE_STOCKS' | 'AGRO_FORESTRY';
 export type WaterSource = 'IRRIGATION' | 'RIVER_ACCESS' | 'RAIN_FED';
 export type InvestmentPackageType = 'CROWDFUNDING' | 'BIDDING' | 'LEASING';

@@ -18,7 +18,9 @@ export type ActionIconType =
   | 'power'
   | 'ban'
   | 'currency'
-  | 'sign';
+  | 'sign'
+  | 'eye'
+  | 'complete';
 
 @Component({
   selector: 'app-action-icon-button',
@@ -99,6 +101,10 @@ export class ActionIconButtonComponent {
         return 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
       case 'sign':
         return 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z';
+      case 'eye':
+        return 'M15 12a3 3 0 11-6 0 3 3 0 016 0z';
+      case 'complete':
+        return 'M5 13l4 4L19 7';
       default:
         return 'M12 4v16m8-8H4';
     }

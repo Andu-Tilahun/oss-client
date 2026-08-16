@@ -27,6 +27,12 @@ import {DocumentUploadComponent} from '../../../../shared/file-upload/document-u
 import {
   InvestmentPackageChooseWinnerModalComponent
 } from '../../modals/investment-package-choose-winner-modal/investment-package-choose-winner-modal.component';
+import {
+  InvestmentPackageTypeCompleteModalComponent
+} from '../../../investment-package-types/modals/investment-package-type-complete-modal/investment-package-type-complete-modal.component';
+import {
+  InvestmentPackageDeactivateModalComponent
+} from '../../../investment-package-types/modals/investment-package-deactivate-modal/investment-package-deactivate-modal.component';
 import {AuthService} from '../../../auth/services/auth.service';
 import {UserService} from '../../../users/services/user.service';
 import {InvestmentPackageService} from '../../services/investment-package.service';
@@ -54,6 +60,8 @@ import {BankAccount} from '../../../system-config/models/bank-account.model';
     FilePreviewModalComponent,
     DocumentUploadComponent,
     InvestmentPackageChooseWinnerModalComponent,
+    InvestmentPackageTypeCompleteModalComponent,
+    InvestmentPackageDeactivateModalComponent,
     NgxEchartsDirective,
   ],
   templateUrl: './investment-package-detail-panel.component.html',
@@ -74,6 +82,7 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   @Output() agreementCreated = new EventEmitter<void>();
   @Output() investClicked = new EventEmitter<void>();
   @Output() agreementStatusChanged = new EventEmitter<string | null>();
+  @Output() completed = new EventEmitter<void>();
 
   activeTab = '';
   extensionWorkers: User[] = [];
@@ -90,6 +99,12 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   choosingCandidates = false;
   showChooseWinnerModal = false;
   chooseWinnerRemark = '';
+  showCompleteModal = false;
+  completing = false;
+  completionRemark = '';
+  showDeactivateModal = false;
+  deactivating = false;
+  deactivationReason = '';
   showAttachmentModal = false;
   attachmentModalUrls: string[] = [];
   attachmentModalIndex = 0;
@@ -704,6 +719,95 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     return this.investmentPackage?.fundingStatus === 'CLOSED';
   }
 
+  /** Admin can complete once the contract is signed (agreement created) and an extension worker
+   *  is assigned (which flips fundingStatus to FUNDED), and the package is not already completed. */
+  get canCompleteInvestment(): boolean {
+    return this.isAdminRole
+      && !!this.investmentPackage?.id
+      && !!this.investmentPackage?.agreementId
+      && !!this.investmentPackage?.extensionWorker
+      && this.investmentPackage?.fundingStatus === FundingStatus.FUNDED
+      && this.investmentPackage?.packageStatus !== 'COMPLITED';
+  }
+
+  get isInvestmentCompleted(): boolean {
+    return this.investmentPackage?.packageStatus === 'COMPLITED';
+  }
+
+  openCompleteModal(): void {
+    if (!this.canCompleteInvestment) return;
+    this.completionRemark = '';
+    this.showCompleteModal = true;
+  }
+
+  confirmCompleteInvestment(): void {
+    const packageId = this.investmentPackage?.id;
+    const remark = this.completionRemark.trim();
+    if (!packageId || !remark || this.completing || !this.canCompleteInvestment) return;
+
+    this.completing = true;
+    this.investmentPackageService.completeInvestmentPackage(packageId, remark).subscribe({
+      next: () => {
+        this.completing = false;
+        this.showCompleteModal = false;
+        this.completionRemark = '';
+        this.toastService.success('Investment package completed successfully');
+        this.completed.emit();
+      },
+      error: (error) => {
+        this.completing = false;
+        this.toastService.error(error.message || 'Failed to complete investment package', 'Complete Investment Package');
+      },
+    });
+  }
+
+  /** Admin can deactivate once the contract is signed (agreement created) and an extension worker
+   *  is assigned (which flips fundingStatus to FUNDED), for as long as the package hasn't already
+   *  reached a terminal state (completed or already deactivated). Mirrors canCompleteInvestment —
+   *  both actions become available at the same point in the lifecycle, with opposite outcomes. */
+  get canDeactivateInvestment(): boolean {
+    return this.isAdminRole
+      && !!this.investmentPackage?.id
+      && !!this.investmentPackage?.agreementId
+      && !!this.investmentPackage?.extensionWorker
+      && this.investmentPackage?.fundingStatus === FundingStatus.FUNDED
+      && this.investmentPackage?.packageStatus !== 'COMPLITED'
+      && this.investmentPackage?.packageStatus !== 'INACTIVE';
+  }
+
+  /** Distinguishes "deactivated after going active" (had a signed contract) from a package closed
+   *  while still OPEN, which never had an agreement and uses the same INACTIVE packageStatus. */
+  get isInvestmentDeactivated(): boolean {
+    return this.investmentPackage?.packageStatus === 'INACTIVE' && !!this.investmentPackage?.agreementId;
+  }
+
+  openDeactivateModal(): void {
+    if (!this.canDeactivateInvestment) return;
+    this.deactivationReason = '';
+    this.showDeactivateModal = true;
+  }
+
+  confirmDeactivateInvestment(): void {
+    const packageId = this.investmentPackage?.id;
+    const reason = this.deactivationReason.trim();
+    if (!packageId || !reason || this.deactivating || !this.canDeactivateInvestment) return;
+
+    this.deactivating = true;
+    this.investmentPackageService.deactivateInvestmentPackage(packageId, reason).subscribe({
+      next: () => {
+        this.deactivating = false;
+        this.showDeactivateModal = false;
+        this.deactivationReason = '';
+        this.toastService.success('Investment package deactivated successfully');
+        this.completed.emit();
+      },
+      error: (error) => {
+        this.deactivating = false;
+        this.toastService.error(error.message || 'Failed to deactivate investment package', 'Deactivate Investment Package');
+      },
+    });
+  }
+
   get selectedCandidateNames(): string[] {
     return this.biddingCandidates
       .filter((record) => this.isCandidateSelected(record.investorId))
@@ -764,6 +868,15 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
       this.agreement = null;
       this.loadedAgreementId = null;
       return;
+    }
+
+    if (this.isInvestorRole) {
+      const currentUserId = this.authService.getCurrentUser()?.id;
+      if (!currentUserId || !this.investmentPackage?.investorIdList?.includes(currentUserId)) {
+        this.agreement = null;
+        this.loadedAgreementId = null;
+        return;
+      }
     }
 
     if (agreementId === this.loadedAgreementId) {

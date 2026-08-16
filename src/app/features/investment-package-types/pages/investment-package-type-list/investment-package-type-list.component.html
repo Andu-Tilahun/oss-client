@@ -22,10 +22,10 @@
         <div *ngIf="investorActiveTab === 'my-leases'">
           <app-data-table
             [columns]="columns"
-            [data]="subscribedPackageTypes"
-            [loading]="subscribedLoading"
-            [total]="subscribedPackageTypes.length"
-            [pageSize]="subscribedPackageTypes.length || 10"
+            [data]="myLeasesPackageTypes"
+            [loading]="myLeasesLoading"
+            [total]="myLeasesPackageTypes.length"
+            [pageSize]="myLeasesPackageTypes.length || 10"
             [pageIndex]="1"
             [showColumnPickerControl]="false"
             [showAddButton]="false"
@@ -83,6 +83,29 @@
             </div>
           </app-data-table>
         </div>
+
+        <!-- Tab 3: History (completed or deactivated investment options) -->
+        <div *ngIf="investorActiveTab === 'history'">
+          <app-data-table
+            [columns]="archivedColumns"
+            [data]="historyPackageTypes"
+            [loading]="historyLoading"
+            [total]="historyPackageTypes.length"
+            [pageSize]="historyPackageTypes.length || 10"
+            [pageIndex]="1"
+            [showColumnPickerControl]="false"
+            [showAddButton]="false"
+            [showRefreshButton]="false"
+            [showViewButton]="false"
+            [showEditButton]="false"
+            [showDeleteButton]="false"
+            [showActionColumn]="true"
+            [rowActions]="tableRowActions"
+            [rowClickable]="true"
+            [noDataMessage]="'No completed or deactivated investment options yet.'"
+            (rowClick)="onView($event)"
+          ></app-data-table>
+        </div>
       </app-tabs>
     </ng-container>
 
@@ -101,7 +124,7 @@
             <app-data-table
               [columns]="columns"
               [data]="publishedPackages"
-              [loading]="subscribedLoading"
+              [loading]="publishedLoading"
               [total]="publishedPackages.length"
               [pageSize]="publishedPackages.length || 10"
               [pageIndex]="1"
@@ -136,7 +159,7 @@
             <app-data-table
               [columns]="archivedColumns"
               [data]="archivedPackages"
-              [loading]="subscribedLoading"
+              [loading]="archivedLoading"
               [total]="archivedPackages.length"
               [pageSize]="archivedPackages.length || 10"
               [pageIndex]="1"
@@ -167,41 +190,82 @@
         </app-tabs>
       </ng-container>
 
-      <!-- Extension worker: plain list, no tabs -->
+      <!-- Extension worker: two-tab view (My Farm Plots / History) -->
       <ng-template #nonAdminStaff>
-        <section>
-          <app-data-table
-            [columns]="columns"
-            [data]="subscribedPackageTypes"
-            [loading]="subscribedLoading"
-            [total]="subscribedPackageTypes.length"
-            [pageSize]="subscribedPackageTypes.length || 10"
-            [pageIndex]="1"
-            [showColumnPickerControl]="false"
-            [showAddButton]="false"
-            [showRefreshButton]="true"
-            [showViewButton]="false"
-            [showEditButton]="false"
-            [showDeleteButton]="false"
-            [showActionColumn]="true"
-            [rowActions]="tableRowActions"
-            [rowClickable]="true"
-            (refreshClick)="onRefresh()"
-            (rowClick)="onView($event)"
-          >
-            <div extraTableHeader class="w-full min-w-0" *ngIf="myRequest">
-              <app-investment-package-type-filter
-                [(searchText)]="searchText"
-                [(status)]="fundingStatus"
-                [(paymentStatus)]="paymentStatus"
-                (filterChange)="onFilterChange()"
-                (searchChange)="onFilterChange()"
-                (clearFilters)="clearFilters()"
-              ></app-investment-package-type-filter>
-            </div>
-          </app-data-table>
-        </section>
-        <app-previously-managed-investment-package-type-farm-plots *ngIf="isExtensionWorkerUser"></app-previously-managed-investment-package-type-farm-plots>
+        <app-tabs
+          [tabs]="extensionWorkerTabs"
+          [activeTab]="extensionWorkerActiveTab"
+          [centered]="true"
+          (activeTabChange)="onExtensionWorkerTabChange($event)"
+        >
+          <!-- Tab 1: My Farm Plots -->
+          <div *ngIf="extensionWorkerActiveTab === 'current'">
+            <app-data-table
+              [columns]="columns"
+              [data]="subscribedPackageTypes"
+              [loading]="subscribedLoading"
+              [total]="subscribedPackageTypes.length"
+              [pageSize]="subscribedPackageTypes.length || 10"
+              [pageIndex]="1"
+              [showColumnPickerControl]="false"
+              [showAddButton]="false"
+              [showRefreshButton]="true"
+              [showViewButton]="false"
+              [showEditButton]="false"
+              [showDeleteButton]="false"
+              [showActionColumn]="true"
+              [rowActions]="tableRowActions"
+              [rowClickable]="true"
+              (refreshClick)="onRefresh()"
+              (rowClick)="onView($event)"
+            >
+              <div extraTableHeader class="w-full min-w-0">
+                <app-investment-package-type-filter
+                  [(searchText)]="searchText"
+                  [(status)]="fundingStatus"
+                  [(paymentStatus)]="paymentStatus"
+                  (filterChange)="onFilterChange()"
+                  (searchChange)="onFilterChange()"
+                  (clearFilters)="clearFilters()"
+                ></app-investment-package-type-filter>
+              </div>
+            </app-data-table>
+          </div>
+
+          <!-- Tab 2: History -->
+          <div *ngIf="extensionWorkerActiveTab === 'history'">
+            <app-data-table
+              [columns]="archivedColumns"
+              [data]="subscribedHistoryPackageTypes"
+              [loading]="subscribedHistoryLoading"
+              [total]="subscribedHistoryPackageTypes.length"
+              [pageSize]="subscribedHistoryPackageTypes.length || 10"
+              [pageIndex]="1"
+              [showColumnPickerControl]="false"
+              [showAddButton]="false"
+              [showRefreshButton]="false"
+              [showViewButton]="false"
+              [showEditButton]="false"
+              [showDeleteButton]="false"
+              [showActionColumn]="true"
+              [rowActions]="tableRowActions"
+              [rowClickable]="true"
+              [noDataMessage]="'No completed or deactivated assignments yet.'"
+              (rowClick)="onView($event)"
+            >
+              <div extraTableHeader class="w-full min-w-0">
+                <app-investment-package-type-filter
+                  [(searchText)]="searchText"
+                  [(status)]="fundingStatus"
+                  [(paymentStatus)]="paymentStatus"
+                  (filterChange)="onFilterChange()"
+                  (searchChange)="onFilterChange()"
+                  (clearFilters)="clearFilters()"
+                ></app-investment-package-type-filter>
+              </div>
+            </app-data-table>
+          </div>
+        </app-tabs>
       </ng-template>
     </ng-template>
   </ng-template>
@@ -225,6 +289,7 @@
       (agreementCreated)="onAgreementCreated()"
       (investClicked)="onDetailPanelInvestClicked()"
       (agreementStatusChanged)="onAgreementStatusChanged($event)"
+      (completed)="onCandidatesChosen()"
     ></app-investment-package-type-plot-detail>
   </ng-template>
 </app-page-split-layout>
@@ -262,6 +327,22 @@
   [(reason)]="closeReason"
   (confirm)="handleCloseConfirmation()"
 ></app-investment-package-type-close-modal>
+
+<app-investment-package-type-complete-modal
+  [(visible)]="showCompleteModal"
+  [packageTitle]="packageToComplete?.title || ''"
+  [confirmLoading]="completing"
+  [(remark)]="completionRemark"
+  (confirm)="handleCompleteConfirmation()"
+></app-investment-package-type-complete-modal>
+
+<app-investment-package-deactivate-modal
+  [(visible)]="showDeactivateModal"
+  [packageTitle]="packageToDeactivate?.title || ''"
+  [confirmLoading]="deactivating"
+  [(reason)]="deactivationReason"
+  (confirm)="handleDeactivateConfirmation()"
+></app-investment-package-deactivate-modal>
 
 <app-modal
   [(visible)]="showContractModal"

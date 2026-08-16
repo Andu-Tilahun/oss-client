@@ -17,7 +17,7 @@
     <app-detail-field label="Account Number" [value]="account.accountNumber" />
     <app-detail-field label="Branch" [value]="account.branchName || '—'" />
     <app-detail-field label="SWIFT / BIC" [value]="account.swiftCode || '—'" />
-    <app-detail-field label="Display Order" [value]="account.displayOrder?.toString()" />
+    <app-detail-field label="Display Order" [value]="account.displayOrder.toString()" />
     <app-detail-field label="Status" [value]="account.active ? 'Active' : 'Inactive'" />
   </app-detail-section>
   <app-detail-section *ngIf="account.description" title="Description">

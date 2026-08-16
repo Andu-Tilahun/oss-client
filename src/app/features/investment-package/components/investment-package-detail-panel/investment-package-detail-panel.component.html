@@ -11,6 +11,54 @@
       [packageInvestments]="packageInvestments"
       [isAdminRole]="isAdminRole"
     ></app-investment-package-view>
+
+    <!-- Investment completion/deactivation: admin actions when signed + worker assigned, or read-only info once resolved -->
+    <div *ngIf="canCompleteInvestment || isInvestmentCompleted || canDeactivateInvestment || isInvestmentDeactivated" class="mt-4 space-y-4">
+      <div *ngIf="canCompleteInvestment"
+           class="rounded-lg border border-green-200 bg-green-50 p-4 space-y-3">
+        <div class="flex items-start gap-3">
+          <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div class="flex-1">
+            <p class="text-sm font-semibold text-green-800">Investment Option Ready to Complete</p>
+            <p class="text-sm text-green-700">The contract is signed and an extension worker is assigned. Mark this investment option as complete to release the farm plot for new investment options, or deactivate it if something went wrong.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            [disabled]="completing"
+            (click)="openCompleteModal()"
+          >
+            {{ completing ? 'Completing...' : 'Complete Investment Option' }}
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 rounded-lg border border-red-300 text-red-700 text-sm font-medium hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            [disabled]="deactivating"
+            (click)="openDeactivateModal()"
+          >
+            {{ deactivating ? 'Deactivating...' : 'Deactivate' }}
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="isInvestmentCompleted"
+           class="rounded-lg border border-green-200 bg-green-50 p-4 space-y-1">
+        <p class="text-sm font-medium text-green-800">This investment option has been completed successfully.</p>
+        <p class="text-sm text-green-700 whitespace-pre-wrap">{{ investmentPackage?.remark || 'No remark provided.' }}</p>
+        <p *ngIf="investmentPackage?.updatedAt" class="text-xs text-green-600">Completed on {{ investmentPackage?.updatedAt | date:'medium' }}</p>
+      </div>
+
+      <div *ngIf="isInvestmentDeactivated"
+           class="rounded-lg border border-red-200 bg-red-50 p-4 space-y-1">
+        <p class="text-sm font-medium text-red-800">This investment option has been deactivated.</p>
+        <p class="text-sm text-red-700 whitespace-pre-wrap">{{ investmentPackage?.closureReason || 'No reason provided.' }}</p>
+        <p *ngIf="investmentPackage?.updatedAt" class="text-xs text-red-600">Deactivated on {{ investmentPackage?.updatedAt | date:'medium' }}</p>
+      </div>
+    </div>
   </div>
 
   <div *ngIf="activeTab === 'farm-plot' && hasTab('farm-plot')">
@@ -1349,3 +1397,19 @@
   [(remark)]="chooseWinnerRemark"
   (confirm)="confirmCandidates()"
 ></app-investment-package-choose-winner-modal>
+
+<app-investment-package-type-complete-modal
+  [(visible)]="showCompleteModal"
+  [packageTitle]="investmentPackage?.title || ''"
+  [confirmLoading]="completing"
+  [(remark)]="completionRemark"
+  (confirm)="confirmCompleteInvestment()"
+></app-investment-package-type-complete-modal>
+
+<app-investment-package-deactivate-modal
+  [(visible)]="showDeactivateModal"
+  [packageTitle]="investmentPackage?.title || ''"
+  [confirmLoading]="deactivating"
+  [(reason)]="deactivationReason"
+  (confirm)="confirmDeactivateInvestment()"
+></app-investment-package-deactivate-modal>

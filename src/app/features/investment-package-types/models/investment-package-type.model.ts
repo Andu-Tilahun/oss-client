@@ -85,6 +85,7 @@ export interface InvestmentPackageTypeDefineTermsRequest {
 export interface InvestmentPackageTypeFilterRequest {
   searchText?: string;
   statuses?: FundingStatus[];
+  packageStatuses?: InvestmentPackageStatus[];
   paymentStatuses?: InvestmentPaymentStatus[];
   soilTypes?: FarmPlotSoilType[];
   investmentPackageType?: InvestmentPackageType;

@@ -19,9 +19,6 @@ import {
 } from "../extension-worker-assign-modal/extension-worker-assign-modal.component";
 import {ModalComponent} from "../../shared/modals/modal/modal.component";
 import {InvestmentPackageTypePlotDetailComponent} from './pages/investment-package-type-plot-detail/investment-package-type-plot-detail.component';
-import {
-  PreviouslyManagedInvestmentPackageTypeFarmPlotsComponent
-} from './components/previously-managed-investment-package-type-farm-plots/previously-managed-investment-package-type-farm-plots.component';
 import {InvestmentPackageViewComponent} from '../investment-package/components/investment-package-view/investment-package-view.component';
 import {InvestmentPackageDetailPanelComponent} from '../investment-package/components/investment-package-detail-panel/investment-package-detail-panel.component';
 import {
@@ -31,12 +28,17 @@ import {InvestmentPackageEditModalComponent} from '../investment-package/modals/
 import {
   InvestmentPackageTypeCloseModalComponent
 } from './modals/investment-package-type-close-modal/investment-package-type-close-modal.component';
+import {
+  InvestmentPackageTypeCompleteModalComponent
+} from './modals/investment-package-type-complete-modal/investment-package-type-complete-modal.component';
+import {
+  InvestmentPackageDeactivateModalComponent
+} from './modals/investment-package-deactivate-modal/investment-package-deactivate-modal.component';
 
 @NgModule({
   declarations: [
     InvestmentPackageTypeListComponent,
     InvestmentPackageTypePlotDetailComponent,
-    PreviouslyManagedInvestmentPackageTypeFarmPlotsComponent
   ],
   imports: [
     CommonModule,
@@ -60,6 +62,8 @@ import {
     ExtensionWorkerAssignModalComponent,
     ModalComponent,
     InvestmentPackageTypeCloseModalComponent,
+    InvestmentPackageTypeCompleteModalComponent,
+    InvestmentPackageDeactivateModalComponent,
   ],
 })
 export class InvestmentPackageTypesModule {}
