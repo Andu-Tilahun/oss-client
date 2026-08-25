@@ -271,26 +271,38 @@
   </ng-template>
 
   <ng-template #rightContent let-item>
-    <app-investment-package-type-plot-detail
-      *ngIf="selectedAgreement"
-      mode="lease"
-      [embedded]="true"
-      [agreement]="item"
-      [investmentPackageType]="investmentPackageType"
-      [refreshKey]="detailRefreshKey"
-      [tabs]="tabs"
-      [forcedTab]="pendingForcedTab"
-      [packageInvestments]="packageInvestments"
-      [packageInvestmentsLoading]="packageInvestmentsLoading"
-      [biddingLeaderboard]="biddingLeaderboard"
-      (tabChange)="onTabChange($event)"
-      (extensionWorkerAssigned)="onExtensionWorkerAssigned($event)"
-      (candidatesChosen)="onCandidatesChosen()"
-      (agreementCreated)="onAgreementCreated()"
-      (investClicked)="onDetailPanelInvestClicked()"
-      (agreementStatusChanged)="onAgreementStatusChanged($event)"
-      (completed)="onCandidatesChosen()"
-    ></app-investment-package-type-plot-detail>
+    <div
+      *ngIf="!selectedAgreement && isRightPanelLoading; else detailOrEmpty"
+      class="flex flex-col items-center justify-center gap-3 py-12"
+    >
+      <div class="w-4 h-4 rounded-full bg-blue-500 animate-bounce"></div>
+      <span class="text-sm text-gray-500">Loading details…</span>
+    </div>
+    <ng-template #detailOrEmpty>
+      <app-investment-package-type-plot-detail
+        *ngIf="selectedAgreement; else rightEmptyText"
+        mode="lease"
+        [embedded]="true"
+        [agreement]="item"
+        [investmentPackageType]="investmentPackageType"
+        [refreshKey]="detailRefreshKey"
+        [tabs]="tabs"
+        [forcedTab]="pendingForcedTab"
+        [packageInvestments]="packageInvestments"
+        [packageInvestmentsLoading]="packageInvestmentsLoading"
+        [biddingLeaderboard]="biddingLeaderboard"
+        (tabChange)="onTabChange($event)"
+        (extensionWorkerAssigned)="onExtensionWorkerAssigned($event)"
+        (candidatesChosen)="onCandidatesChosen()"
+        (agreementCreated)="onAgreementCreated()"
+        (investClicked)="onDetailPanelInvestClicked()"
+        (agreementStatusChanged)="onAgreementStatusChanged($event)"
+        (completed)="onCandidatesChosen()"
+      ></app-investment-package-type-plot-detail>
+      <ng-template #rightEmptyText>
+        <div class="text-sm text-gray-500">Select a row to view details.</div>
+      </ng-template>
+    </ng-template>
   </ng-template>
 </app-page-split-layout>
 

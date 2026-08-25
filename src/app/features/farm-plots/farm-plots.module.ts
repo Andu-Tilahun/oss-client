@@ -16,6 +16,8 @@ import {
 } from "../../shared/components/action-icons/action-icon-button/action-icon-button.component";
 import {FarmPlotViewComponent} from './components/farm-plot-view/farm-plot-view.component';
 import {ImageGalleryModalComponent} from '../../shared/modals/image-gallery-modal/image-gallery-modal.component';
+import {FarmPlotMaintenanceModalComponent} from './modals/farm-plot-maintenance-modal/farm-plot-maintenance-modal.component';
+import {TabsComponent} from '../../shared/tabs/app-tabs/app-tabs.component';
 
 @NgModule({
   declarations: [FarmPlotListComponent],
@@ -29,6 +31,8 @@ import {ImageGalleryModalComponent} from '../../shared/modals/image-gallery-moda
     FarmPlotCreateModalComponent,
     FarmPlotEditModalComponent,
     ImageGalleryModalComponent,
+    FarmPlotMaintenanceModalComponent,
+    TabsComponent,
     PageSplitLayoutComponent,
     FarmPlotViewComponent,
   ],

@@ -25,11 +25,16 @@ export interface FarmPlot {
   imageUuid?: string;
   regionId?: string;
   gallery?: FarmGallery[];
+  maintenanceReason?: string | null;
 
   createdBy?: string;
   createdAt?: Date;
   updatedBy?: string;
   updatedAt?: Date;
+}
+
+export interface FarmPlotMaintenanceRequest {
+  reason: string;
 }
 
 export interface FarmPlotRequest {

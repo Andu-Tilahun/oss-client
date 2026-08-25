@@ -285,7 +285,7 @@ export const routes: Routes = [
       import('./features/farm-plots/pages/farm-plots-explore-page/farm-plots-explore-page.component')
         .then(m => m.FarmPlotsExplorePageComponent),
     canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['INVESTOR', 'EXTENSION_WORKER', 'ADMIN', 'OPERATOR'] },
+    data: { roles: ['INVESTOR', 'ADMIN', 'OPERATOR'] },
   },
   {
     path: 'farm-plots-extension',

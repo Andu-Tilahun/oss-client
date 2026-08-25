@@ -625,6 +625,18 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     return this.isAdmin || this.isExtensionWorkerUser;
   }
 
+  get isRightPanelLoading(): boolean {
+    if (this.isInvestorUser) {
+      if (this.investorActiveTab === 'my-leases') return this.myLeasesLoading;
+      if (this.investorActiveTab === 'explore') return this.availableLoading;
+      return this.historyLoading;
+    }
+    if (this.isAdmin) {
+      return this.adminActiveTab === 'published' ? this.publishedLoading : this.archivedLoading;
+    }
+    return this.extensionWorkerActiveTab === 'current' ? this.subscribedLoading : this.subscribedHistoryLoading;
+  }
+
   private resolveStatusFilter(): FundingStatus[] | undefined {
     return this.fundingStatus ? [this.fundingStatus] : undefined;
   }

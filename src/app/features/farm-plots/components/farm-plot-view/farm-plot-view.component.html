@@ -73,6 +73,7 @@
       <app-detail-field label="Soil Type" [value]="plot.soilType" />
       <app-detail-field label="Latitude" [value]="plot.latitude" />
       <app-detail-field label="Longitude" [value]="plot.longitude" />
+      <app-detail-field *ngIf="plot.status === 'UNDER_MAINTENANCE'" label="Maintenance Reason" [value]="plot.maintenanceReason || '-'" />
       <!-- <app-detail-field label="Description" [value]="plot.description || '-'" /> -->
     </app-detail-section>
 

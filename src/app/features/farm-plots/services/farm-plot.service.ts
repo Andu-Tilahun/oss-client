@@ -4,7 +4,14 @@ import {Observable} from 'rxjs';
 import {HttpService, RequestType} from '../../../core/services/http.service';
 import {ApiResponse, PageResponse} from '../../../shared/models/api-response.model';
 import {Endpoints} from '../../../core/endpoint/endpoint.model';
-import {FarmGallery, FarmGalleryCreateRequest, FarmPlot, FarmPlotFilterRequest, FarmPlotRequest} from '../models/farm-plot.model';
+import {
+  FarmGallery,
+  FarmGalleryCreateRequest,
+  FarmPlot,
+  FarmPlotFilterRequest,
+  FarmPlotMaintenanceRequest,
+  FarmPlotRequest,
+} from '../models/farm-plot.model';
 
 @Injectable({
   providedIn: 'root',
@@ -30,6 +37,21 @@ export class FarmPlotService {
 
   filterFarmPlots(request: FarmPlotFilterRequest): Observable<PageResponse<FarmPlot>> {
     return this.httpService.post<PageResponse<FarmPlot>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/filter`, request);
+  }
+
+  /** Operational tab: status bucket is enforced server-side. */
+  filterOperationalFarmPlots(request: FarmPlotFilterRequest): Observable<PageResponse<FarmPlot>> {
+    return this.httpService.post<PageResponse<FarmPlot>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/filter/operational`, request);
+  }
+
+  /** Repair/Damaged tab: status bucket is enforced server-side. */
+  filterRepairFarmPlots(request: FarmPlotFilterRequest): Observable<PageResponse<FarmPlot>> {
+    return this.httpService.post<PageResponse<FarmPlot>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/filter/repair`, request);
+  }
+
+  /** Archived tab: status bucket is enforced server-side. */
+  filterArchivedFarmPlots(request: FarmPlotFilterRequest): Observable<PageResponse<FarmPlot>> {
+    return this.httpService.post<PageResponse<FarmPlot>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/filter/archived`, request);
   }
 
   getFarmPlotById(id: string): Observable<FarmPlot> {
@@ -74,8 +96,16 @@ export class FarmPlotService {
     return this.httpService.put<FarmPlot>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}`, request);
   }
 
-  deleteFarmPlot(id: string): Observable<ApiResponse<void>> {
-    return this.httpService.delete<ApiResponse<void>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}`);
+  deactivateFarmPlot(id: string): Observable<ApiResponse<void>> {
+    return this.httpService.put<ApiResponse<void>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/deactivate`, null);
+  }
+
+  markUnderMaintenance(id: string, request: FarmPlotMaintenanceRequest): Observable<FarmPlot> {
+    return this.httpService.put<FarmPlot>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/mark-under-maintenance`, request);
+  }
+
+  markRepaired(id: string): Observable<FarmPlot> {
+    return this.httpService.put<FarmPlot>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/mark-repaired`, null);
   }
 }
 

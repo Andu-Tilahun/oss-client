@@ -9,42 +9,124 @@
   [showRightEditButton]="false"
 >
   <ng-template #leftContent>
-    <app-data-table
-      [columns]="columns"
-      [data]="plots"
-      [loading]="loading"
-      [total]="total"
-      [pageSize]="pageSize"
-      [pageIndex]="pageIndex"
-      [showIndex]="true"
-      [showAddButton]="true"
-      [showRefreshButton]="true"
-      [showExportButton]="true"
-      [showViewButton]="false"
-      [showEditButton]="false"
-      [showDeleteButton]="false"
-      [rowActions]="tableRowActions"
-      [rowClickable]="true"
-      (pageChange)="onPageChange($event)"
-      (addClick)="onAdd()"
-      (refreshClick)="onRefresh()"
-      (exportClick)="onDownload()"
-      (rowClick)="onView($event)"
-      (editClick)="onEdit($event)"
-      (deleteClick)="onDelete($event)"
+    <app-tabs
+      [tabs]="adminTabs"
+      [activeTab]="adminActiveTab"
+      [centered]="true"
+      (activeTabChange)="onAdminTabChange($event)"
     >
-      <div extraTableHeader class="w-full min-w-0">
-        <app-farm-plot-filter
-          [(searchText)]="searchText"
-          [(status)]="status"
-          [(soilType)]="soilType"
-          [(sizeType)]="sizeType"
-          (filterChange)="onFilterChange()"
-          (searchChange)="onFilterChange()"
-          (clearFilters)="clearFilters()"
-        ></app-farm-plot-filter>
+      <!-- Operational -->
+      <div *ngIf="adminActiveTab === 'operational'">
+        <app-data-table
+          [columns]="columns"
+          [data]="operationalPlots"
+          [loading]="operationalLoading"
+          [total]="operationalTotal"
+          [pageSize]="operationalPageSize"
+          [pageIndex]="operationalPageIndex"
+          [showIndex]="true"
+          [showAddButton]="true"
+          [showRefreshButton]="true"
+          [showExportButton]="true"
+          [showViewButton]="false"
+          [showEditButton]="false"
+          [showDeleteButton]="false"
+          [rowActions]="tableRowActions"
+          [rowClickable]="true"
+          (pageChange)="onOperationalPageChange($event)"
+          (addClick)="onAdd()"
+          (refreshClick)="onRefresh()"
+          (exportClick)="onDownload()"
+          (rowClick)="onView($event)"
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-farm-plot-filter
+              [(searchText)]="searchText"
+              [(status)]="status"
+              [(soilType)]="soilType"
+              [(sizeType)]="sizeType"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onFilterChange()"
+              (clearFilters)="clearFilters()"
+            ></app-farm-plot-filter>
+          </div>
+        </app-data-table>
       </div>
-    </app-data-table>
+
+      <!-- Repair / Damaged -->
+      <div *ngIf="adminActiveTab === 'repair'">
+        <app-data-table
+          [columns]="repairColumns"
+          [data]="repairPlots"
+          [loading]="repairLoading"
+          [total]="repairTotal"
+          [pageSize]="repairPageSize"
+          [pageIndex]="repairPageIndex"
+          [showIndex]="true"
+          [showAddButton]="false"
+          [showRefreshButton]="true"
+          [showExportButton]="false"
+          [showViewButton]="false"
+          [showEditButton]="false"
+          [showDeleteButton]="false"
+          [rowActions]="repairRowActions"
+          [rowClickable]="true"
+          [noDataMessage]="'No farm plots under maintenance.'"
+          (pageChange)="onRepairPageChange($event)"
+          (refreshClick)="onRefresh()"
+          (rowClick)="onView($event)"
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-farm-plot-filter
+              [(searchText)]="searchText"
+              [(status)]="status"
+              [(soilType)]="soilType"
+              [(sizeType)]="sizeType"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onFilterChange()"
+              (clearFilters)="clearFilters()"
+            ></app-farm-plot-filter>
+          </div>
+        </app-data-table>
+      </div>
+
+      <!-- Archived -->
+      <div *ngIf="adminActiveTab === 'archived'">
+        <app-data-table
+          [columns]="columns"
+          [data]="archivedPlots"
+          [loading]="archivedLoading"
+          [total]="archivedTotal"
+          [pageSize]="archivedPageSize"
+          [pageIndex]="archivedPageIndex"
+          [showIndex]="true"
+          [showAddButton]="false"
+          [showRefreshButton]="true"
+          [showExportButton]="false"
+          [showViewButton]="false"
+          [showEditButton]="false"
+          [showDeleteButton]="false"
+          [showActionColumn]="false"
+          [rowClickable]="true"
+          [noDataMessage]="'No archived farm plots.'"
+          (pageChange)="onArchivedPageChange($event)"
+          (refreshClick)="onRefresh()"
+          (rowClick)="onView($event)"
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-farm-plot-filter
+              [(searchText)]="searchText"
+              [(status)]="status"
+              [(soilType)]="soilType"
+              [(sizeType)]="sizeType"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onFilterChange()"
+              (clearFilters)="clearFilters()"
+            ></app-farm-plot-filter>
+          </div>
+        </app-data-table>
+      </div>
+    </app-tabs>
   </ng-template>
 
   <ng-template #rightContent let-plot>
@@ -65,13 +147,32 @@
   (farmPlotUpdated)="onFarmPlotUpdated()"
 ></app-farm-plot-edit-modal>
 
-<!-- Delete/Deactivate Confirmation Modal -->
+<!-- Deactivate Confirmation Modal -->
 <app-confirmation-modal
   [(visible)]="showDeleteModal"
   title="Deactivate Farm Plot"
   message="Are you sure you want to deactivate this farm plot?"
   confirmText="Deactivate"
-  (confirm)="confirmDelete()"
+  (confirm)="confirmDeactivate()"
+></app-confirmation-modal>
+
+<!-- Mark Under Maintenance Modal -->
+<app-farm-plot-maintenance-modal
+  [(visible)]="showMaintenanceModal"
+  [plotTitle]="selectedPlot?.title || ''"
+  [confirmLoading]="maintenanceSubmitting"
+  [(reason)]="maintenanceReason"
+  (confirm)="handleMaintenanceConfirm()"
+></app-farm-plot-maintenance-modal>
+
+<!-- Mark Repaired Confirmation Modal -->
+<app-confirmation-modal
+  [(visible)]="showRepairModal"
+  title="Mark Farm Plot as Repaired"
+  message="Are you sure this farm plot has been repaired and is ready to become operational again?"
+  confirmText="Mark Repaired"
+  [confirmLoading]="repairSubmitting"
+  (confirm)="confirmMarkRepaired()"
 ></app-confirmation-modal>
 
 <app-image-gallery-modal
