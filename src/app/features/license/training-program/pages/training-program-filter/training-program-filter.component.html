@@ -76,10 +76,15 @@
 
     <!-- Clear Filters Button -->
     <button
+      type="button"
       (click)="onClearFilters()"
-      class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm text-slate-700 font-medium"
+      aria-label="Clear Filters"
+      title="Clear Filters"
+      class="flex-shrink-0 h-[34px] w-[34px] rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors flex items-center justify-center"
     >
-      Clear Filters
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
     </button>
   </div>
 </div>

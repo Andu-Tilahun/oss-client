@@ -35,10 +35,15 @@
     Search
   </button>
   <button
-    class="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+    type="button"
     (click)="onClearFilters()"
+    aria-label="Clear"
+    title="Clear"
+    class="flex-shrink-0 h-[34px] w-[34px] rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors flex items-center justify-center"
   >
-    Clear
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
   </button>
 </div>
 

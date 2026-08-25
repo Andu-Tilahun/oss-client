@@ -310,6 +310,13 @@ export const routes: Routes = [
     data: { roles: ['EXTENSION_WORKER', 'ADMIN'] },
   },
   {
+    path: 'farm-restoration',
+    loadComponent: () =>
+      import('./features/farm-restoration/pages/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'OPERATOR', 'INVESTOR', 'EXTENSION_WORKER'] },
+  },
+  {
     path: 'investment-package-types',
     loadChildren: () => import('./features/investment-package-types/investment-package-types.module').then(m => m.InvestmentPackageTypesModule),
     canActivate: [AuthGuard, RoleGuard],

@@ -5,6 +5,7 @@ import {Endpoints} from '../../../core/endpoint/endpoint.model';
 import {
   FarmFollowUp,
   FarmFollowUpCreateRequest,
+  FarmFollowUpOutcomeRequest,
   FarmFollowUpReport,
   FarmFollowUpReportCreateRequest
 } from '../models/farm-followup.model';
@@ -21,6 +22,14 @@ export class FarmFollowUpService {
 
   getByExternalId(externalId: string): Observable<FarmFollowUp[]> {
     return this.httpService.get<FarmFollowUp[]>(`${Endpoints.FARM_FOLLOWUPS_ENDPOINT}/${externalId}`);
+  }
+
+  completeFollowUp(followUpId: string, request: FarmFollowUpOutcomeRequest): Observable<FarmFollowUp> {
+    return this.httpService.put<FarmFollowUp>(`${Endpoints.FARM_FOLLOWUPS_ENDPOINT}/${followUpId}/complete`, request);
+  }
+
+  excludeFollowUp(followUpId: string, request: FarmFollowUpOutcomeRequest): Observable<FarmFollowUp> {
+    return this.httpService.put<FarmFollowUp>(`${Endpoints.FARM_FOLLOWUPS_ENDPOINT}/${followUpId}/exclude`, request);
   }
 
   addReport(followUpId: string, request: FarmFollowUpReportCreateRequest): Observable<FarmFollowUpReport> {

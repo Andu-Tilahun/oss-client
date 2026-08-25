@@ -109,10 +109,11 @@ export class InvestmentPackageViewComponent implements OnChanges {
   packageStatusPillClass(status: string | null | undefined): string {
     const s = (status ?? '').toString().trim().toUpperCase();
     switch (s) {
-      case 'ACTIVE':   return 'bg-green-50 text-green-700 border-green-200';
-      case 'IN_USE':   return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'INACTIVE': return 'bg-slate-50 text-slate-700 border-slate-200';
-      default:         return 'bg-slate-50 text-slate-700 border-slate-200';
+      case 'ACTIVE':    return 'bg-green-50 text-green-700 border-green-200';
+      case 'IN_USE':    return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'INACTIVE':  return 'bg-slate-50 text-slate-700 border-slate-200';
+      case 'COMPLITED': return 'bg-purple-50 text-purple-700 border-purple-200';
+      default:          return 'bg-slate-50 text-slate-700 border-slate-200';
     }
   }
 

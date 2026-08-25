@@ -3,9 +3,12 @@
   <ng-container *ngIf="followUp">
 
     <app-detail-section title="Follow-up">
+      <app-detail-field label="Reference No." [value]="followUp.referenceNumber || '-'"/>
+      <app-detail-field label="Status" [value]="followUp.taskStatus || 'ACTIVE'"/>
       <app-detail-field label="Remark" [value]="followUp.remark || '-'"/>
       <app-detail-field label="Start Date" [value]="followUp.startDate || '-'"/>
       <app-detail-field label="End Date" [value]="followUp.endDate || '-'"/>
+      <app-detail-field *ngIf="followUp.taskStatus !== 'ACTIVE'" label="Outcome Reason" [value]="followUp.outcomeReason || '-'"/>
     </app-detail-section>
 
     <app-detail-section title="Attachment">

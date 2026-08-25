@@ -1,3 +1,5 @@
+export type FollowUpTaskStatus = 'ACTIVE' | 'DONE' | 'EXCLUDED';
+
 export interface FarmFollowUp {
   id: string;
   externalId: string;
@@ -10,6 +12,15 @@ export interface FarmFollowUp {
   updatedBy?: string | null;
   updatedAt?: string | null;
   extensionWorker?: any;
+  taskStatus: FollowUpTaskStatus;
+  outcomeReason?: string | null;
+  completedBy?: string | null;
+  completedAt?: string | null;
+  referenceNumber: string;
+}
+
+export interface FarmFollowUpOutcomeRequest {
+  reason: string;
 }
 
 export interface FarmFollowUpCreateRequest {

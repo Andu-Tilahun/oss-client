@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
+import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {AuthService} from '../../../auth/services/auth.service';
 import {
@@ -12,7 +13,7 @@ import {
   InvestmentPackageFilterRequest,
   InvestmentPackageType,
 } from '../../models/investment-package.model';
-import {FundingStatus, FUNDING_STATUSES} from '../../../../shared/models/funding-status.model';
+import {FundingStatus} from '../../../../shared/models/funding-status.model';
 import {TabItem} from '../../../../shared/tabs/models/tab-item.model';
 
 @Component({
@@ -22,13 +23,20 @@ import {TabItem} from '../../../../shared/tabs/models/tab-item.model';
   styleUrl: './investment-package-list.component.css',
 })
 export class InvestmentPackageListComponent implements OnInit {
-  investmentPackages: InvestmentPackage[] = [];
   publishedPackages: InvestmentPackage[] = [];
+  publishedLoading = false;
+  publishedTotal = 0;
+  publishedPageSize = 10;
+  publishedPageIndex = 1;
+
   archivedPackages: InvestmentPackage[] = [];
+  archivedLoading = false;
+  archivedTotal = 0;
+  archivedPageSize = 10;
+  archivedPageIndex = 1;
+
   selectedInvestmentPackage: InvestmentPackage | null = null;
   detailRefreshKey = 0;
-
-  loading = false;
 
   adminActiveTab = 'published';
   adminTabs: TabItem[] = [
@@ -110,59 +118,107 @@ export class InvestmentPackageListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadInvestmentPackages();
+    this.refreshCurrentTab();
   }
 
   onAdminTabChange(key: string): void {
     this.adminActiveTab = key;
-    const packages = key === 'archived' ? this.archivedPackages : this.publishedPackages;
-    this.selectedInvestmentPackage = packages.length > 0 ? {...packages[0]} : null;
-    if (this.selectedInvestmentPackage) this.detailRefreshKey++;
+    this.refreshCurrentTab();
   }
 
   onExtensionWorkerAssigned(pkg: InvestmentPackage): void {
     this.selectedInvestmentPackage = pkg;
     this.detailRefreshKey++;
+    this.refreshCurrentTab(this.selectedInvestmentPackage?.id);
   }
 
-  private buildFilterRequest(): InvestmentPackageFilterRequest {
+  /** Single entry point for every initial load and post-mutation refresh; dispatches to
+   *  whichever tab is currently active so the other tab reloads lazily on next visit. */
+  refreshCurrentTab(previousId?: string | null): void {
+    if (this.adminActiveTab === 'archived') {
+      this.loadArchived(previousId);
+    } else {
+      this.loadPublished(previousId);
+    }
+  }
+
+  private buildFilterRequest(page: number, size: number): InvestmentPackageFilterRequest {
     return {
-      searchText: this.searchText || undefined,
-      statuses: this.status ? [this.status] : FUNDING_STATUSES,
+      searchText: this.searchText.trim() || undefined,
+      statuses: this.status ? [this.status] : undefined,
       sortBy: 'fundingDeadline',
       sortDirection: 'DESC',
-      page: 0,
-      size: 500,
+      page,
+      size,
     };
   }
 
-  loadInvestmentPackages(): void {
-    this.loading = true;
-    const request = this.buildFilterRequest();
-    this.investmentPackageService.filterInvestmentPackages(request).subscribe({
+  loadPublished(previousId?: string | null): void {
+    this.publishedLoading = true;
+    const request = this.buildFilterRequest(this.publishedPageIndex - 1, this.publishedPageSize);
+    this.investmentPackageService.filterPublishedInvestmentPackages(request).subscribe({
       next: (response: PageResponse<InvestmentPackage>) => {
-        this.investmentPackages = response.content;
-        this.publishedPackages = this.investmentPackages.filter((c) => c.packageStatus !== 'INACTIVE');
-        this.archivedPackages = this.investmentPackages.filter((c) => c.packageStatus === 'INACTIVE');
-        this.loading = false;
-
-        const activeList = this.adminActiveTab === 'archived' ? this.archivedPackages : this.publishedPackages;
-        const previousSelectedId = this.selectedInvestmentPackage?.id;
-        if (previousSelectedId) {
-          const match = this.investmentPackages.find((c) => c.id === previousSelectedId);
-          if (match) {
-            this.selectedInvestmentPackage = {...match};
-            return;
-          }
-        }
-        this.selectedInvestmentPackage = activeList.length > 0 ? {...activeList[0]} : null;
-        if (this.selectedInvestmentPackage) this.detailRefreshKey++;
+        this.publishedPackages = response.content ?? [];
+        this.publishedTotal = response.totalElements ?? this.publishedPackages.length;
+        this.publishedLoading = false;
+        if (this.adminActiveTab !== 'published') return;
+        this.selectFromList(this.publishedPackages, previousId);
       },
       error: (error) => {
-        this.loading = false;
-        this.toastService.error(error.message || 'Failed to fetch investment packages', 'Fetch Investment Packages');
+        this.publishedLoading = false;
+        this.toastService.error(error.message || 'Failed to fetch published investment packages', 'Fetch Investment Packages');
       },
     });
+  }
+
+  loadArchived(previousId?: string | null): void {
+    this.archivedLoading = true;
+    const request = this.buildFilterRequest(this.archivedPageIndex - 1, this.archivedPageSize);
+    this.investmentPackageService.filterArchivedInvestmentPackages(request).subscribe({
+      next: (response: PageResponse<InvestmentPackage>) => {
+        this.archivedPackages = response.content ?? [];
+        this.archivedTotal = response.totalElements ?? this.archivedPackages.length;
+        this.archivedLoading = false;
+        if (this.adminActiveTab !== 'archived') return;
+        this.selectFromList(this.archivedPackages, previousId);
+      },
+      error: (error) => {
+        this.archivedLoading = false;
+        this.toastService.error(error.message || 'Failed to fetch archived investment packages', 'Fetch Investment Packages');
+      },
+    });
+  }
+
+  private selectFromList(list: InvestmentPackage[], previousId?: string | null): void {
+    if (previousId) {
+      const match = list.find((c) => c.id === previousId);
+      if (match) {
+        this.selectedInvestmentPackage = {...match};
+        return;
+      }
+    }
+    this.selectedInvestmentPackage = list.length > 0 ? {...list[0]} : null;
+    if (this.selectedInvestmentPackage) this.detailRefreshKey++;
+  }
+
+  onPublishedPageChange(params: TableQueryParams): void {
+    this.publishedPageIndex = params.pageIndex;
+    this.publishedPageSize = params.pageSize;
+    this.loadPublished();
+  }
+
+  onArchivedPageChange(params: TableQueryParams): void {
+    this.archivedPageIndex = params.pageIndex;
+    this.archivedPageSize = params.pageSize;
+    this.loadArchived();
+  }
+
+  private resetActiveTabPaging(): void {
+    if (this.adminActiveTab === 'archived') {
+      this.archivedPageIndex = 1;
+    } else {
+      this.publishedPageIndex = 1;
+    }
   }
 
   onAdd(): void {
@@ -170,21 +226,23 @@ export class InvestmentPackageListComponent implements OnInit {
   }
 
   onRefresh(): void {
-    this.loadInvestmentPackages();
+    this.refreshCurrentTab(this.selectedInvestmentPackage?.id);
   }
 
   onSearch(): void {
-    this.loadInvestmentPackages();
+    this.resetActiveTabPaging();
+    this.refreshCurrentTab();
   }
 
   onFilterChange(): void {
-    this.loadInvestmentPackages();
+    this.onSearch();
   }
 
   clearFilters(): void {
     this.searchText = '';
     this.status = '';
-    this.loadInvestmentPackages();
+    this.resetActiveTabPaging();
+    this.refreshCurrentTab();
   }
 
   onView(c: InvestmentPackage): void {
@@ -222,7 +280,7 @@ export class InvestmentPackageListComponent implements OnInit {
         this.packageToDeactivate = null;
         this.toastService.success('Investment package deactivated successfully');
         this.detailRefreshKey++;
-        this.loadInvestmentPackages();
+        this.refreshCurrentTab(this.selectedInvestmentPackage?.id);
       },
       error: (err) => {
         this.deactivating = false;
@@ -234,13 +292,18 @@ export class InvestmentPackageListComponent implements OnInit {
   onInvestmentPackageCreated(): void {
     this.showCreateInvestmentPackageModal = false;
     this.detailRefreshKey++;
-    this.loadInvestmentPackages();
+    this.refreshCurrentTab(this.selectedInvestmentPackage?.id);
   }
 
   onInvestmentPackageUpdated(): void {
     this.showEditInvestmentPackageModal = false;
     this.detailRefreshKey++;
-    this.loadInvestmentPackages();
+    this.refreshCurrentTab(this.selectedInvestmentPackage?.id);
+  }
+
+  onInvestmentPackageCompleted(): void {
+    this.detailRefreshKey++;
+    this.refreshCurrentTab(this.selectedInvestmentPackage?.id);
   }
 
   onInvestmentCreated(): void {

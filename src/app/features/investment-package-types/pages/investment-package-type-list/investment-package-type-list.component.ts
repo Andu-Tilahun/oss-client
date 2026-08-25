@@ -279,13 +279,18 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
   private buildColumns(): void {
     const base: DataTableColumn<InvestmentPackageTypeAgreement>[] = [
-      {header: 'Title', value: (l) => l.title, cellClass: 'block max-w-[200px] truncate'},
+      {header: 'Title', value: (l) => this.truncateText(l.title), cellClass: 'block max-w-[200px] truncate'},
       {header: 'Farm activity', value: (l) => l.farmActivity},
       {header: 'Water source', value: (l) => l.waterSource},
       {header: 'Target', value: (l) => this.formatAmount(l.targetAmount)},
     ];
     this.columns = [...base, {header: 'Funding Status', value: (l) => l.fundingStatus}];
     this.archivedColumns = [...base, {header: 'Package Status', value: (l) => l.packageStatus ?? 'ACTIVE'}];
+  }
+
+  private truncateText(value: string | undefined | null, max = 15): string {
+    const text = value ?? '';
+    return text.length > max ? `${text.slice(0, max)}...` : text;
   }
 
   private buildTableRowActions(): void {

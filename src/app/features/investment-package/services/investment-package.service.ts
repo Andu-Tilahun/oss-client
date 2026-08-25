@@ -43,6 +43,22 @@ export class InvestmentPackageService {
     );
   }
 
+  /** Published Investments tab: packageStatus bucket is enforced server-side. */
+  filterPublishedInvestmentPackages(request: InvestmentPackageFilterRequest): Observable<PageResponse<InvestmentPackage>> {
+    return this.httpService.put<PageResponse<InvestmentPackage>>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/filter/published`,
+      request,
+    );
+  }
+
+  /** Archived Investments tab: packageStatus bucket is enforced server-side. */
+  filterArchivedInvestmentPackages(request: InvestmentPackageFilterRequest): Observable<PageResponse<InvestmentPackage>> {
+    return this.httpService.put<PageResponse<InvestmentPackage>>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/filter/archived`,
+      request,
+    );
+  }
+
   create(request: InvestmentPackageCreateRequest): Observable<ApiResponse<InvestmentPackage>> {
     return this.httpService.post<ApiResponse<InvestmentPackage>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}`,

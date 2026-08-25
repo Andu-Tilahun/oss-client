@@ -12,6 +12,7 @@ import { InvestmentPackageTypeService } from '../../../investment-package-types/
 import { SharedModule } from '../../../../shared/shared.module';
 import { environment } from '../../../../../environments/environment';
 import { Router } from '@angular/router';
+import { DataTableColumn } from '../../../../shared/data-table/models/data-table-column.model';
 
 interface AssignedFarmPlot extends FarmPlot {
   agreement: InvestmentPackageTypeAgreement;
@@ -47,31 +48,67 @@ export class FarmPlotsExtensionPageComponent implements OnInit {
     { key: 'follow-up', label: 'Follow-ups' },
   ];
 
+  assignmentsActiveTab = 'current';
+  readonly assignmentsTabs: TabItem[] = [
+    { key: 'current', label: 'My Farm Plots' },
+    { key: 'history', label: 'History' },
+  ];
+
+  columns: DataTableColumn<InvestmentPackageTypeAgreement>[] = [];
+  archivedColumns: DataTableColumn<InvestmentPackageTypeAgreement>[] = [];
+
   constructor(
     private investmentPackageTypeService: InvestmentPackageTypeService,
     private router: Router,
-  ) {}
+  ) {
+    this.buildColumns();
+  }
 
   ngOnInit(): void {
     this.loadAssignedPlots();
   }
 
-  get leasingAgreements(): InvestmentPackageTypeAgreement[] {
-    return this.allAgreements.filter((a) => a.investmentPackageType === 'LEASING');
+  onAssignmentsTabChange(key: string): void {
+    this.assignmentsActiveTab = key;
   }
 
-  get biddingAgreements(): InvestmentPackageTypeAgreement[] {
-    return this.allAgreements.filter((a) => a.investmentPackageType === 'BIDDING');
+  get currentAgreements(): InvestmentPackageTypeAgreement[] {
+    return this.allAgreements.filter((a) => this.isActiveStatus(a));
   }
 
-  get crowdfundingAgreements(): InvestmentPackageTypeAgreement[] {
-    return this.allAgreements.filter((a) => a.investmentPackageType === 'CROWDFUNDING');
+  get historyAgreements(): InvestmentPackageTypeAgreement[] {
+    return this.allAgreements.filter((a) => !this.isActiveStatus(a));
   }
 
   isActiveStatus(agreement: InvestmentPackageTypeAgreement): boolean {
     const active = new Set(['ACTIVE', 'ACCEPTED', 'SENT', 'OPEN', 'FUNDED']);
     const status = agreement.status ?? agreement.fundingStatus ?? '';
     return active.has(status);
+  }
+
+  private buildColumns(): void {
+    const base: DataTableColumn<InvestmentPackageTypeAgreement>[] = [
+      { header: 'Title', value: (a) => this.truncateText(a.title), cellClass: 'block max-w-[200px] truncate' },
+      { header: 'Farm Plot', value: (a) => this.truncateText(a.farmPlot?.title || '-') },
+      { header: 'Type', value: (a) => a.investmentPackageType },
+      { header: 'Start', value: (a) => this.formatDate(a.startDate) },
+      { header: 'End', value: (a) => this.formatDate(a.endDate) },
+      { header: 'Status', value: (a) => a.status || a.fundingStatus },
+    ];
+    this.columns = base;
+    this.archivedColumns = base;
+  }
+
+  private formatDate(value?: string | null): string {
+    if (!value) return '-';
+    const d = new Date(value);
+    if (!Number.isFinite(d.getTime())) return '-';
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  private truncateText(value: string | undefined | null, max = 15): string {
+    const text = value ?? '';
+    return text.length > max ? `${text.slice(0, max)}...` : text;
   }
 
   selectAgreement(agreement: InvestmentPackageTypeAgreement | null): void {

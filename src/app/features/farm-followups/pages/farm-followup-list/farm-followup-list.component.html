@@ -4,25 +4,54 @@
   [loading]="loading"
 >
   <ng-template #mainContent>
-    <app-data-table
-      [columns]="columns"
-      [data]="followUps"
-      [loading]="loading"
-      [total]="followUps.length"
-      [showColumnPickerControl]="false"
-      [showPagination]="false"
-      [showAddButton]="showCreateButton"
-      [showRefreshButton]="false"
-      [showViewButton]="false"
-      [showEditButton]="showEditButton"
-      [showDeleteButton]="false"
-      [showActionColumn]="showActionColumn"
-      [rowClickable]="true"
-      (addClick)="onAdd()"
-      (refreshClick)="onRefresh()"
-      (rowClick)="onView($event)"
-      (editClick)="onEdit($event)"
-    ></app-data-table>
+    <app-tabs
+      [tabs]="followUpTabs"
+      [activeTab]="activeSubTab"
+      (activeTabChange)="activeSubTab = $event"
+    >
+      <div *ngIf="activeSubTab === 'active'">
+        <app-data-table
+          [columns]="columns"
+          [data]="activeFollowUps"
+          [loading]="loading"
+          [total]="activeFollowUps.length"
+          [showColumnPickerControl]="false"
+          [showPagination]="false"
+          [showAddButton]="showCreateButton"
+          [showRefreshButton]="false"
+          [showViewButton]="false"
+          [showEditButton]="showEditButton"
+          [showDeleteButton]="false"
+          [showActionColumn]="showActionColumn"
+          [rowActions]="followUpRowActions"
+          [rowClickable]="true"
+          (addClick)="onAdd()"
+          (refreshClick)="onRefresh()"
+          (rowClick)="onView($event)"
+          (editClick)="onEdit($event)"
+        ></app-data-table>
+      </div>
+
+      <div *ngIf="activeSubTab === 'completed'">
+        <app-data-table
+          [columns]="completedColumns"
+          [data]="completedFollowUps"
+          [loading]="loading"
+          [total]="completedFollowUps.length"
+          [showColumnPickerControl]="false"
+          [showPagination]="false"
+          [showAddButton]="false"
+          [showRefreshButton]="false"
+          [showViewButton]="false"
+          [showEditButton]="false"
+          [showDeleteButton]="false"
+          [showActionColumn]="false"
+          [rowClickable]="true"
+          [noDataMessage]="'No completed follow-up tasks yet.'"
+          (rowClick)="onView($event)"
+        ></app-data-table>
+      </div>
+    </app-tabs>
   </ng-template>
 </app-page-header>
 
@@ -36,4 +65,14 @@
   [(visible)]="showViewModal"
   [followUp]="selectedFollowUp"
 ></app-farm-followup-view-modal>
+
+<app-farm-followup-outcome-modal
+  [(visible)]="showOutcomeModal"
+  [action]="outcomeAction"
+  [followUpReference]="outcomeTarget?.referenceNumber || ''"
+  [confirmLoading]="outcomeSubmitting"
+  [isAdminActingOnBehalf]="isAdminActingOnBehalf"
+  [(reason)]="outcomeReason"
+  (confirm)="handleOutcomeConfirm()"
+></app-farm-followup-outcome-modal>
 

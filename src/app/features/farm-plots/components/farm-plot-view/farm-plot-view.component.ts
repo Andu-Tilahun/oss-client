@@ -13,6 +13,7 @@ import {ToastService} from '../../../../shared/toast/toast.service';
 import {environment} from '../../../../../environments/environment';
 import {InvestmentPackageService} from '../../../investment-package/services/investment-package.service';
 import {InvestmentPackage} from '../../../investment-package/models/investment-package.model';
+import {AuthService} from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-farm-plot-view',
@@ -41,8 +42,11 @@ export class FarmPlotViewComponent implements OnChanges {
   @Input() refreshKey = 0;
   @Input() showCreateLeaseButton = false;
   @Input() createLeaseButtonText = 'Create Lease Agreement';
-  @Input() allowGalleryUpload = true;
   @Output() createLease = new EventEmitter<void>();
+
+  get allowGalleryUpload(): boolean {
+    return this.authService.isAdmin();
+  }
 
   loading = false;
   error: string | null = null;
@@ -65,6 +69,7 @@ export class FarmPlotViewComponent implements OnChanges {
     private toastService: ToastService,
     private investmentPackageService: InvestmentPackageService,
     private router: Router,
+    private authService: AuthService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
