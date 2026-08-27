@@ -21,6 +21,7 @@ export class UserCreateModalComponent {
   @Input() visible = false;
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() userCreated = new EventEmitter<void>();
+  @Input() allowedRoleNames: string[] = ['ADMIN', 'OPERATOR', 'EXTENSION_WORKER'];
 
   @ViewChild('userForm') userForm!: UserFormComponent;
 

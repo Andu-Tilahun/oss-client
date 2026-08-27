@@ -28,6 +28,7 @@ export const Endpoints = {
   
 
   FARM_FOLLOWUPS_ENDPOINT: '/farm/followups',
+  RESTORATION_PLANS_ENDPOINT: '/farm/restoration-plans',
 
     // investment aggrement
   INVESTMENT_AGGREMENT_ENDPOINT: '/farm/investment-agreements', 

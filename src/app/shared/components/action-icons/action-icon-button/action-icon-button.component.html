@@ -4,7 +4,7 @@
   [ngClass]="[buttonSizeClass, buttonClass]"
   [disabled]="disabled"
   [attr.title]="computedTitle"
-  (click)="click.emit()"
+  (click)="buttonClick.emit()"
 >
   <svg
     [ngClass]="[svgSizeClass, svgClass]"

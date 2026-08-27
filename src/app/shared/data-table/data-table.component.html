@@ -8,7 +8,7 @@
         *ngIf="showAddButton"
         icon="plus"
         title="Add"
-        (click)="addClick.emit()"
+        (buttonClick)="addClick.emit()"
       ></app-action-icon-button>
 
       <!-- Refresh Button -->
@@ -16,7 +16,7 @@
         *ngIf="showRefreshButton"
         icon="refresh"
         title="Refresh"
-        (click)="refreshClick.emit()"
+        (buttonClick)="refreshClick.emit()"
       ></app-action-icon-button>
 
       <!-- Export Button -->
@@ -24,7 +24,7 @@
         *ngIf="showExportButton"
         icon="export"
         title="Export"
-        (click)="exportClick.emit()"
+        (buttonClick)="exportClick.emit()"
       ></app-action-icon-button>
     </div>
 
@@ -245,7 +245,7 @@
                   [buttonClass]="action.buttonClass || ''"
                   [svgClass]="action.svgClass || ''"
                   size="sm"
-                  (click)="onRowActionClick(action, item)"
+                  (buttonClick)="onRowActionClick(action, item)"
                 ></app-action-icon-button>
               </ng-container>
             </div>

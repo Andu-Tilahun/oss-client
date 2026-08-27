@@ -70,6 +70,7 @@ export interface InvestmentPackageCreateRequest {
 
 export interface InvestmentPackageFilterRequest {
   searchText?: string;
+  investmentPackageType?: InvestmentPackageType;
   statuses?: FundingStatus[];
   paymentStatuses?: InvestmentPaymentStatus[];
   soilTypes?: FarmPlotSoilType[];

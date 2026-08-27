@@ -56,7 +56,7 @@
       <!-- Repair / Damaged -->
       <div *ngIf="adminActiveTab === 'repair'">
         <app-data-table
-          [columns]="repairColumns"
+          [columns]="columns"
           [data]="repairPlots"
           [loading]="repairLoading"
           [total]="repairTotal"
@@ -69,7 +69,7 @@
           [showViewButton]="false"
           [showEditButton]="false"
           [showDeleteButton]="false"
-          [rowActions]="repairRowActions"
+          [showActionColumn]="false"
           [rowClickable]="true"
           [noDataMessage]="'No farm plots under maintenance.'"
           (pageChange)="onRepairPageChange($event)"
@@ -130,7 +130,11 @@
   </ng-template>
 
   <ng-template #rightContent let-plot>
-    <app-farm-plot-view [plot]="plot" [refreshKey]="detailRefreshKey"></app-farm-plot-view>
+    <app-farm-plot-view
+      [plot]="plot"
+      [refreshKey]="detailRefreshKey"
+      (statusChanged)="onPlotStatusChanged()"
+    ></app-farm-plot-view>
   </ng-template>
 </app-page-split-layout>
 
@@ -146,34 +150,6 @@
   [farmPlot]="selectedPlot"
   (farmPlotUpdated)="onFarmPlotUpdated()"
 ></app-farm-plot-edit-modal>
-
-<!-- Deactivate Confirmation Modal -->
-<app-confirmation-modal
-  [(visible)]="showDeleteModal"
-  title="Deactivate Farm Plot"
-  message="Are you sure you want to deactivate this farm plot?"
-  confirmText="Deactivate"
-  (confirm)="confirmDeactivate()"
-></app-confirmation-modal>
-
-<!-- Mark Under Maintenance Modal -->
-<app-farm-plot-maintenance-modal
-  [(visible)]="showMaintenanceModal"
-  [plotTitle]="selectedPlot?.title || ''"
-  [confirmLoading]="maintenanceSubmitting"
-  [(reason)]="maintenanceReason"
-  (confirm)="handleMaintenanceConfirm()"
-></app-farm-plot-maintenance-modal>
-
-<!-- Mark Repaired Confirmation Modal -->
-<app-confirmation-modal
-  [(visible)]="showRepairModal"
-  title="Mark Farm Plot as Repaired"
-  message="Are you sure this farm plot has been repaired and is ready to become operational again?"
-  confirmText="Mark Repaired"
-  [confirmLoading]="repairSubmitting"
-  (confirm)="confirmMarkRepaired()"
-></app-confirmation-modal>
 
 <app-image-gallery-modal
   [(visible)]="showGalleryModal"

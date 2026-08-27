@@ -7,6 +7,7 @@ import { PageResponse } from '../../../shared/models/api-response.model';
 import {
   NotificationLog,
   NotificationPriorityValue,
+  NotificationStats,
   NotificationStatus,
   NotificationStatusValue,
 } from '../models/notification.model';
@@ -58,6 +59,15 @@ export class NotificationLogService {
     requestOptions?: RequestOption,
   ): Observable<PageResponse<NotificationLog>> {
     return this.getNotifications(page, size, NotificationStatus.SENT, undefined, requestOptions);
+  }
+
+  getStats(requestOptions?: RequestOption): Observable<NotificationStats> {
+    return this.httpService.get<NotificationStats>(
+      `${Endpoints.NOTIFICATIONS_ENDPOINT}/stats`,
+      undefined,
+      undefined,
+      requestOptions,
+    );
   }
 
   getUnreadCount(requestOptions?: RequestOption): Observable<number> {

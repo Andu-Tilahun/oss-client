@@ -34,6 +34,8 @@ import {AuthService} from "../../../auth/services/auth.service";
 export class UserFormComponent implements OnInit, OnChanges, ControlValueAccessor {
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() user: User | null = null;
+  /** Restricts (and, when exactly one, auto-selects + locks) the role options offered in create mode. */
+  @Input() allowedRoleNames: string[] = ['ADMIN', 'OPERATOR', 'EXTENSION_WORKER'];
   @ViewChild(ProfilePictureUploadComponent) profilePictureUpload?: ProfilePictureUploadComponent;
   userForm: FormGroup;
   @Input() profileUpdate = false;
@@ -205,15 +207,28 @@ export class UserFormComponent implements OnInit, OnChanges, ControlValueAccesso
   }
 
   private loadRoles(): void {
-    const ALLOWED_ROLES = ['ADMIN', 'OPERATOR', 'EXTENSION_WORKER'];
     this.roleService.getRoles(0, 100, 'id', 'ASC').subscribe({
       next: (page) => {
-        this.roles = page.content.filter(r => ALLOWED_ROLES.includes(r.roleName));
+        this.roles = page.content.filter(r => this.allowedRoleNames.includes(r.roleName));
+        this.applyRoleLock();
       },
       error: (error) => {
         console.error('Failed to load roles', error);
       }
     });
+  }
+
+  /** When the caller only allows a single role, pre-select it and lock the field (mirrors the edit-mode roleId disable in patchFormValues). */
+  private applyRoleLock(): void {
+    if (this.allowedRoleNames.length !== 1) {
+      return;
+    }
+    const onlyRole = this.roles.find(r => r.roleName === this.allowedRoleNames[0]);
+    if (!onlyRole) {
+      return;
+    }
+    this.userForm.get('roleId')?.setValue(onlyRole.id);
+    this.userForm.get('roleId')?.disable();
   }
 
 

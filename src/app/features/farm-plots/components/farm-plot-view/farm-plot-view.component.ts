@@ -1,7 +1,8 @@
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {Router} from '@angular/router';
 import {CommonModule} from '@angular/common';
-import {FarmGallery, FarmPlot, FarmPlotStatus} from '../../models/farm-plot.model';
+import {FormsModule} from '@angular/forms';
+import {FarmGallery, FarmPlot, FarmPlotMaintenanceRequest, FarmPlotStatus} from '../../models/farm-plot.model';
 import {FarmPlotService} from '../../services/farm-plot.service';
 import {DetailCardComponent} from '../../../../shared/components/detail-field/detail-card/detail-card.component';
 import {DetailSectionComponent} from '../../../../shared/components/detail-field/detail-section/detail-section.component';
@@ -9,6 +10,8 @@ import {DetailFieldComponent} from '../../../../shared/components/detail-field/d
 import {OssMapComponent} from '../../../../shared/oss-map/oss-map.component';
 import {ImageGalleryModalComponent} from '../../../../shared/modals/image-gallery-modal/image-gallery-modal.component';
 import {ImageUploadModalComponent} from '../../../../shared/modals/image-upload-modal/image-upload-modal.component';
+import {ConfirmationModalComponent} from '../../../../shared/modals/confirmation-modal/confirmation-modal.component';
+import {FarmPlotMaintenanceModalComponent} from '../../modals/farm-plot-maintenance-modal/farm-plot-maintenance-modal.component';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {environment} from '../../../../../environments/environment';
 import {InvestmentPackageService} from '../../../investment-package/services/investment-package.service';
@@ -20,12 +23,15 @@ import {AuthService} from '../../../auth/services/auth.service';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     DetailCardComponent,
     DetailSectionComponent,
     DetailFieldComponent,
     OssMapComponent,
     ImageGalleryModalComponent,
     ImageUploadModalComponent,
+    ConfirmationModalComponent,
+    FarmPlotMaintenanceModalComponent,
   ],
   templateUrl: './farm-plot-view.component.html',
 })
@@ -43,6 +49,19 @@ export class FarmPlotViewComponent implements OnChanges {
   @Input() showCreateLeaseButton = false;
   @Input() createLeaseButtonText = 'Create Lease Agreement';
   @Output() createLease = new EventEmitter<void>();
+
+  /** Emitted after this plot's status is changed via the actions below, so the parent list can refresh. */
+  @Output() statusChanged = new EventEmitter<void>();
+
+  showMaintenanceModal = false;
+  maintenanceSubmitting = false;
+  maintenanceReason = '';
+
+  showRepairModal = false;
+  repairSubmitting = false;
+
+  showArchiveModal = false;
+  archiveSubmitting = false;
 
   get allowGalleryUpload(): boolean {
     return this.authService.isAdmin();
@@ -261,5 +280,74 @@ export class FarmPlotViewComponent implements OnChanges {
       'bg-slate-50 text-slate-700 border-slate-200': pkg.packageStatus === 'INACTIVE',
       'bg-blue-50 text-blue-700 border-blue-200': pkg.packageStatus === 'IN_USE',
     };
+  }
+
+  get canManageStatus(): boolean {
+    return this.authService.isAdmin();
+  }
+
+  onMarkUnderMaintenance(): void {
+    this.maintenanceReason = '';
+    this.showMaintenanceModal = true;
+  }
+
+  handleMaintenanceConfirm(): void {
+    if (!this.plot?.id || !this.maintenanceReason.trim()) return;
+    this.maintenanceSubmitting = true;
+    const request: FarmPlotMaintenanceRequest = {reason: this.maintenanceReason.trim()};
+    this.farmPlotService.markUnderMaintenance(this.plot.id, request).subscribe({
+      next: () => {
+        this.maintenanceSubmitting = false;
+        this.showMaintenanceModal = false;
+        this.toastService.success('Farm plot marked under maintenance');
+        this.statusChanged.emit();
+      },
+      error: (err) => {
+        this.maintenanceSubmitting = false;
+        this.toastService.error(err.message || 'Failed to update farm plot', 'Mark Under Maintenance');
+      },
+    });
+  }
+
+  onMarkRepaired(): void {
+    this.showRepairModal = true;
+  }
+
+  confirmMarkRepaired(): void {
+    if (!this.plot?.id) return;
+    this.repairSubmitting = true;
+    this.farmPlotService.markRepaired(this.plot.id).subscribe({
+      next: () => {
+        this.repairSubmitting = false;
+        this.showRepairModal = false;
+        this.toastService.success('Farm plot marked as repaired');
+        this.statusChanged.emit();
+      },
+      error: (err) => {
+        this.repairSubmitting = false;
+        this.toastService.error(err.message || 'Failed to update farm plot', 'Mark Repaired');
+      },
+    });
+  }
+
+  onArchive(): void {
+    this.showArchiveModal = true;
+  }
+
+  confirmArchive(): void {
+    if (!this.plot?.id) return;
+    this.archiveSubmitting = true;
+    this.farmPlotService.deactivateFarmPlot(this.plot.id).subscribe({
+      next: () => {
+        this.archiveSubmitting = false;
+        this.showArchiveModal = false;
+        this.toastService.success('Farm plot archived successfully');
+        this.statusChanged.emit();
+      },
+      error: (err) => {
+        this.archiveSubmitting = false;
+        this.toastService.error(err.message || 'Failed to archive farm plot', 'Archive');
+      },
+    });
   }
 }

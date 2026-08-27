@@ -1,48 +1,21 @@
 <app-page-split-layout
   [showLeftTitle]="true"
   [showRightTitle]="true"
-  leftTitle="Follow-ups"
-  rightTitle="Follow-up detail"
-  [rightItem]="selectedFollowUp"
-  [rightEmptyMessage]="'Select a row to view details.'"
+  leftTitle="Farm Plots Under Maintenance"
+  rightTitle="Restoration Follow-up"
+  [rightItem]="selectedPlot"
+  [rightEmptyMessage]="'Select a farm plot to view its restoration follow-up.'"
   [showRightEditButton]="false"
-  [showRightCloseButton]="true"
-  (rightClose)="onCloseDetail()"
 >
-  <ng-template #extraTableHeader>
-    <div class="w-full p-4 bg-white rounded-xl border border-gray-100 space-y-3">
-      <div class="flex flex-col md:flex-row gap-3 items-start md:items-end">
-        <div class="w-full md:w-96">
-          <label class="block text-sm font-medium text-gray-700 mb-1">External Id</label>
-          <input
-            type="text"
-            [(ngModel)]="externalId"
-            placeholder="UUID"
-            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div class="flex gap-2">
-          <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700" (click)="onSearch()">
-            Search
-          </button>
-          <button class="px-4 py-2 rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200" (click)="onRefresh()">
-            Refresh
-          </button>
-          <button class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700" (click)="onAdd()">
-            Create
-          </button>
-        </div>
-      </div>
-    </div>
-  </ng-template>
-
   <ng-template #leftContent>
     <app-data-table
       [columns]="columns"
-      [data]="followUps"
+      [data]="visiblePlots"
       [loading]="loading"
-      [total]="followUps.length"
-      [showPagination]="false"
+      [total]="visiblePlots.length"
+      [pageSize]="visiblePlots.length || 10"
+      [pageIndex]="1"
+      [showColumnPickerControl]="false"
       [showAddButton]="false"
       [showRefreshButton]="false"
       [showViewButton]="false"
@@ -50,23 +23,29 @@
       [showDeleteButton]="false"
       [showActionColumn]="false"
       [rowClickable]="true"
-      (rowClick)="onView($event)"
+      [noDataMessage]="'No farm plots are currently under maintenance.'"
+      (rowClick)="selectPlot($event)"
     ></app-data-table>
   </ng-template>
 
-  <ng-template #rightContent let-item>
-    <app-farm-followup-view [followUp]="item"></app-farm-followup-view>
+  <ng-template #rightContent>
+    <app-restoration-plan-view
+      [plot]="selectedPlot"
+      [plan]="selectedPlan"
+      [isAdmin]="isAdmin"
+      [isExtensionWorker]="isExtensionWorker"
+      [currentUserId]="currentUserId"
+      [currentUser]="currentUser"
+      [workers]="workers"
+      (assignRequested)="onAssignRequested()"
+      (updated)="onPlanChanged()"
+    ></app-restoration-plan-view>
   </ng-template>
 </app-page-split-layout>
 
-<app-farm-followup-create-modal
-  [(visible)]="showCreateModal"
-  [externalId]="externalId"
-  (followUpCreated)="onFollowUpCreated()"
-></app-farm-followup-create-modal>
-
-<app-farm-followup-view-modal
-  [(visible)]="showViewModal"
-  [followUp]="selectedFollowUp"
-></app-farm-followup-view-modal>
-
+<app-restoration-plan-assign-modal
+  [(visible)]="showAssignModal"
+  [farmPlotId]="selectedPlot?.id ?? null"
+  [existingPlanId]="selectedPlan?.id ?? null"
+  (assigned)="onPlanChanged()"
+></app-restoration-plan-assign-modal>

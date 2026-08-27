@@ -33,3 +33,26 @@ export interface NotificationLog {
   updatedAt: Date;
 }
 
+export interface NotificationStatusStats {
+  pending: number;
+  sent: number;
+  retry: number;
+  dlq: number;
+}
+
+export interface NotificationPriorityStats {
+  total: number;
+  dlq: number;
+}
+
+export interface NotificationTypeStats {
+  sent: number;
+  dlq: number;
+}
+
+export interface NotificationStats {
+  status: NotificationStatusStats;
+  priority: Record<string, NotificationPriorityStats>;
+  type: Record<string, NotificationTypeStats>;
+}
+

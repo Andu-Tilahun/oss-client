@@ -7,6 +7,7 @@ import {ApiResponse, PageResponse} from "../../../shared/models/api-response.mod
 import {Endpoints} from "../../../core/endpoint/endpoint.model";
 import {FilterRequest} from "../pages/user-filter/filter-request";
 import {Branch} from "../../branches/models/branch.model";
+import {ExportNotificationRequest} from "../../../shared/models/export-notification-request.model";
 
 @Injectable({
   providedIn: 'root'
@@ -96,5 +97,9 @@ export class UserService {
 
   unlockUser(id: string): Observable<ApiResponse<User>> {
     return this.httpService.put<ApiResponse<User>>(`${Endpoints.USERS_ENDPOINT}/${id}/unlock`, {});
+  }
+
+  notifyExport(request: ExportNotificationRequest): Observable<ApiResponse<void>> {
+    return this.httpService.post<ApiResponse<void>>(`${Endpoints.USERS_ENDPOINT}/exports/notify`, request);
   }
 }

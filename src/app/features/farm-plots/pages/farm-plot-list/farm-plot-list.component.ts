@@ -3,7 +3,6 @@ import {
   FarmGallery,
   FarmPlot,
   FarmPlotFilterRequest,
-  FarmPlotMaintenanceRequest,
   FarmPlotSizeType,
   FarmPlotSoilType,
   FarmPlotStatus
@@ -17,6 +16,7 @@ import {TabItem} from '../../../../shared/tabs/models/tab-item.model';
 import {environment} from '../../../../../environments/environment';
 import {RegionService} from '../../../regions/services/region.service';
 import {PageSplitRightAction} from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
+import {exportRowsToExcel} from '../../../../shared/utils/excel-export.util';
 
 @Component({
   selector: 'app-farm-plot-list',
@@ -62,12 +62,6 @@ export class FarmPlotListComponent {
 
   showCreateModal = false;
   showEditModal = false;
-  showDeleteModal = false;
-  showMaintenanceModal = false;
-  maintenanceSubmitting = false;
-  maintenanceReason = '';
-  showRepairModal = false;
-  repairSubmitting = false;
   showGalleryModal = false;
   galleryLoading = false;
   galleryImageUrls: string[] = [];
@@ -101,15 +95,6 @@ export class FarmPlotListComponent {
     },
   ];
 
-  repairColumns: DataTableColumn<FarmPlot>[] = [
-    ...this.columns,
-    {
-      header: 'Reason',
-      value: (plot) => plot.maintenanceReason ?? '-',
-      defaultVisible: true,
-    },
-  ];
-
   tableRowActions: PageSplitRightAction<FarmPlot>[] = [
     {
       id: 'edit',
@@ -117,30 +102,6 @@ export class FarmPlotListComponent {
       title: 'Edit',
       visible: (p) => p.status !== 'ASSIGNED_TO_LEASE' && p.status !== 'ASSIGNED_TO_INVESTMENT_PACKAGE',
       action: (p) => this.onEdit(p),
-    },
-    {
-      id: 'delete',
-      icon: 'delete',
-      title: 'Deactivate',
-      visible: (p) => p.status !== 'ASSIGNED_TO_LEASE' && p.status !== 'ASSIGNED_TO_INVESTMENT_PACKAGE',
-      action: (p) => this.onDeactivate(p),
-    },
-    {
-      id: 'mark-under-maintenance',
-      icon: 'ban',
-      title: 'Mark Under Maintenance',
-      visible: (p) => p.status === 'ACTIVE',
-      action: (p) => this.onMarkUnderMaintenance(p),
-    },
-  ];
-
-  repairRowActions: PageSplitRightAction<FarmPlot>[] = [
-    {
-      id: 'mark-repaired',
-      icon: 'check',
-      title: 'Mark Repaired',
-      visible: () => true,
-      action: (p) => this.onMarkRepaired(p),
     },
   ];
 
@@ -295,7 +256,20 @@ export class FarmPlotListComponent {
   }
 
   onDownload(): void {
-    this.toastService.info('Farm plot download is not implemented yet', 'Download Farm Plots');
+    const request = this.buildFilterRequest(0, Math.max(this.operationalTotal, 1));
+    this.farmPlotService.filterOperationalFarmPlots(request).subscribe({
+      next: (response: PageResponse<FarmPlot>) => {
+        const rows = response.content ?? [];
+        const {sizeBytes} = exportRowsToExcel(rows, this.columns, 'farm-plots-operational');
+        this.farmPlotService.notifyExport({
+          exportLabel: 'Farm Plots (Operational)',
+          recordCount: rows.length,
+          fileSizeBytes: sizeBytes,
+        }).subscribe({error: () => {}});
+        this.toastService.success(`Exported ${rows.length} farm plots`);
+      },
+      error: () => this.toastService.error('Export failed'),
+    });
   }
 
   onSearch(): void {
@@ -320,7 +294,6 @@ export class FarmPlotListComponent {
     this.farmPlotService.getFarmPlotGallery(plot.id).subscribe({
       next: (gallery) => {
         this.selectedPlot = {...plot, gallery};
-        this.showDeleteModal = false;
         this.showEditModal = true;
       },
       error: () => {},
@@ -332,78 +305,15 @@ export class FarmPlotListComponent {
     this.selectedPlot = {...plot};
     this.showCreateModal = false;
     this.showEditModal = false;
-    this.showDeleteModal = false;
   }
 
   onCloseDetail(): void {
     this.selectedPlot = null;
     this.showEditModal = false;
-    this.showDeleteModal = false;
   }
 
-  onDeactivate(plot: FarmPlot): void {
-    this.selectedPlot = plot;
-    this.showEditModal = false;
-    this.showDeleteModal = true;
-  }
-
-  confirmDeactivate(): void {
-    if (!this.selectedPlot) return;
-    this.farmPlotService.deactivateFarmPlot(this.selectedPlot.id).subscribe({
-      next: () => {
-        this.showDeleteModal = false;
-        this.selectedPlot = null;
-        this.refreshCurrentTab();
-        this.toastService.success('Farm plot deactivated successfully');
-      },
-      error: () => {},
-    });
-  }
-
-  onMarkUnderMaintenance(plot: FarmPlot): void {
-    this.selectedPlot = plot;
-    this.maintenanceReason = '';
-    this.showMaintenanceModal = true;
-  }
-
-  handleMaintenanceConfirm(): void {
-    if (!this.selectedPlot?.id || !this.maintenanceReason.trim()) return;
-    this.maintenanceSubmitting = true;
-    const request: FarmPlotMaintenanceRequest = {reason: this.maintenanceReason.trim()};
-    this.farmPlotService.markUnderMaintenance(this.selectedPlot.id, request).subscribe({
-      next: () => {
-        this.maintenanceSubmitting = false;
-        this.showMaintenanceModal = false;
-        this.toastService.success('Farm plot marked under maintenance');
-        this.refreshCurrentTab();
-      },
-      error: (err) => {
-        this.maintenanceSubmitting = false;
-        this.toastService.error(err.message || 'Failed to update farm plot', 'Mark Under Maintenance');
-      },
-    });
-  }
-
-  onMarkRepaired(plot: FarmPlot): void {
-    this.selectedPlot = plot;
-    this.showRepairModal = true;
-  }
-
-  confirmMarkRepaired(): void {
-    if (!this.selectedPlot?.id) return;
-    this.repairSubmitting = true;
-    this.farmPlotService.markRepaired(this.selectedPlot.id).subscribe({
-      next: () => {
-        this.repairSubmitting = false;
-        this.showRepairModal = false;
-        this.toastService.success('Farm plot marked as repaired');
-        this.refreshCurrentTab();
-      },
-      error: (err) => {
-        this.repairSubmitting = false;
-        this.toastService.error(err.message || 'Failed to update farm plot', 'Mark Repaired');
-      },
-    });
+  onPlotStatusChanged(): void {
+    this.refreshCurrentTab(this.selectedPlot?.id);
   }
 
   onFarmPlotCreated(): void {

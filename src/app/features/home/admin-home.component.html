@@ -1,0 +1,100 @@
+<div class="min-h-screen bg-slate-50 text-slate-900 w-full -mx-6 px-6 py-6 sm:py-8">
+  <header class="mb-8">
+    <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 text-center">{{ greeting }}, {{ currentUser?.firstName || 'Admin' }}</h1>
+    <p class="text-sm font-medium text-indigo-600 uppercase tracking-wide">Admin dashboard</p>
+  </header>
+
+  <div *ngIf="loading" class="rounded-xl border border-slate-200 bg-white p-10 text-center text-slate-500">
+    Loading dashboard…
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <!-- KPI tiles -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+      <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Farm plots</p>
+        <p class="text-3xl font-bold text-slate-900 mt-2">{{ totalFarmPlots }}</p>
+        <p class="text-sm text-slate-600 mt-1">Across all statuses</p>
+      </article>
+
+      <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Investment packages</p>
+        <p class="text-3xl font-bold text-slate-900 mt-2">{{ totalInvestmentPackages }}</p>
+        <p class="text-sm text-slate-600 mt-1">Leasing, bidding &amp; crowdfunding</p>
+      </article>
+
+      <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Users</p>
+        <p class="text-3xl font-bold text-slate-900 mt-2">{{ totalUsers }}</p>
+        <p class="text-sm text-slate-600 mt-1">Across all roles</p>
+      </article>
+
+      <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Follow-ups</p>
+        <p class="text-3xl font-bold text-slate-900 mt-2">{{ totalFollowUps }}</p>
+        <p class="text-sm text-slate-600 mt-1">Active, completed &amp; excluded</p>
+      </article>
+
+      <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Payments</p>
+        <p class="text-3xl font-bold text-slate-900 mt-2">{{ totalPayments }}</p>
+        <p class="text-sm text-slate-600 mt-1">All statuses</p>
+      </article>
+    </section>
+
+    <!-- Charts -->
+    <section class="mb-8 rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
+      <h2 class="text-lg font-semibold text-slate-900 mb-1">System overview</h2>
+      <p class="text-sm text-slate-500 mb-6">Breakdown of the platform's current state.</p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+          <h3 class="text-sm font-semibold text-slate-800 mb-3">Farm plots by status</h3>
+          <div *ngIf="totalFarmPlots === 0" class="text-sm text-slate-500 py-10 text-center">No farm plots yet.</div>
+          <div *ngIf="totalFarmPlots > 0" echarts [options]="farmPlotChartOption" class="h-56 w-full"></div>
+        </div>
+
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+          <h3 class="text-sm font-semibold text-slate-800 mb-3">Investment options per farm plot</h3>
+          <div *ngIf="farmPlotInvestmentBreakdown.length === 0" class="text-sm text-slate-500 py-10 text-center">No investment packages yet.</div>
+          <div *ngIf="farmPlotInvestmentBreakdown.length > 0" echarts [options]="farmPlotInvestmentChartOption" class="h-56 w-full"></div>
+        </div>
+
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+          <h3 class="text-sm font-semibold text-slate-800 mb-3">Users by role</h3>
+          <div *ngIf="totalUsers === 0" class="text-sm text-slate-500 py-10 text-center">No users yet.</div>
+          <div *ngIf="totalUsers > 0" echarts [options]="userRoleChartOption" class="h-56 w-full"></div>
+        </div>
+
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+          <h3 class="text-sm font-semibold text-slate-800 mb-3">Investment packages by type</h3>
+          <div *ngIf="totalInvestmentPackages === 0" class="text-sm text-slate-500 py-10 text-center">No investment packages yet.</div>
+          <div *ngIf="totalInvestmentPackages > 0" echarts [options]="investmentPackageChartOption" class="h-56 w-full"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Follow-up action patterns -->
+    <section class="mb-8 rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
+      <h2 class="text-lg font-semibold text-slate-900 mb-1">Follow-up action patterns</h2>
+      <p class="text-sm text-slate-500 mb-6">Monthly cohort of logged follow-ups, split by current outcome.</p>
+
+      <div *ngIf="totalFollowUps === 0" class="text-sm text-slate-500 py-10 text-center">No follow-ups logged yet.</div>
+      <div *ngIf="totalFollowUps > 0" echarts [options]="followUpTrendChartOption" class="h-72 w-full"></div>
+    </section>
+
+    <!-- Reference to the detailed analytics dashboard -->
+    <section class="rounded-xl border border-indigo-100 bg-indigo-50 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-base font-semibold text-indigo-900">Want a deeper breakdown?</h2>
+        <p class="text-sm text-indigo-700 mt-1">Detailed trends and analysis live in the dedicated analytics dashboard.</p>
+      </div>
+      <a
+        routerLink="/analytics"
+        class="shrink-0 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors"
+      >
+        View Detailed Analytics →
+      </a>
+    </section>
+  </ng-container>
+</div>

@@ -12,6 +12,7 @@ import {
   FarmPlotMaintenanceRequest,
   FarmPlotRequest,
 } from '../models/farm-plot.model';
+import {ExportNotificationRequest} from '../../../shared/models/export-notification-request.model';
 
 @Injectable({
   providedIn: 'root',
@@ -106,6 +107,10 @@ export class FarmPlotService {
 
   markRepaired(id: string): Observable<FarmPlot> {
     return this.httpService.put<FarmPlot>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/mark-repaired`, null);
+  }
+
+  notifyExport(request: ExportNotificationRequest): Observable<ApiResponse<void>> {
+    return this.httpService.post<ApiResponse<void>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/exports/notify`, request);
   }
 }
 

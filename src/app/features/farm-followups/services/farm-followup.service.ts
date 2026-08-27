@@ -24,6 +24,10 @@ export class FarmFollowUpService {
     return this.httpService.get<FarmFollowUp[]>(`${Endpoints.FARM_FOLLOWUPS_ENDPOINT}/${externalId}`);
   }
 
+  getAllForAdmin(): Observable<FarmFollowUp[]> {
+    return this.httpService.get<FarmFollowUp[]>(`${Endpoints.FARM_FOLLOWUPS_ENDPOINT}/admin`);
+  }
+
   completeFollowUp(followUpId: string, request: FarmFollowUpOutcomeRequest): Observable<FarmFollowUp> {
     return this.httpService.put<FarmFollowUp>(`${Endpoints.FARM_FOLLOWUPS_ENDPOINT}/${followUpId}/complete`, request);
   }

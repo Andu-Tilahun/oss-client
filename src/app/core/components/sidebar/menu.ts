@@ -130,11 +130,7 @@ export const MENU: MenuItem[] = [
     icon: 'M20 7l-8-4-8 4m16 0v10a2 2 0 01-2 2H6a2 2 0 01-2-2V7m14 0L12 10 2 7',
     label: 'Farm Restoration',
     route: '/farm-restoration',
-    roles: ['ADMIN', 'OPERATOR', 'INVESTOR','EXTENSION_WORKER'],
-    children: [
-      
-      { icon: '', label: 'Restoration & Follow-ups', route: '/farm-followups', roles: ['EXTENSION_WORKER', 'ADMIN'] },
-    ],
+    roles: ['ADMIN', 'EXTENSION_WORKER'],
     expanded: false
   },
   {

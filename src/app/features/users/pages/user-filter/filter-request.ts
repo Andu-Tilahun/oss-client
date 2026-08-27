@@ -1,6 +1,7 @@
 export interface FilterRequest {
   searchText?: string;
   roles?: string[];
+  excludeRoles?: string[];
   genders?: string[];
   branches?: string[];
   startDate?: string;

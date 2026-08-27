@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {FarmFollowUp, FarmFollowUpOutcomeRequest} from '../../models/farm-followup.model';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
 import {PageSplitRightAction} from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
@@ -13,10 +13,21 @@ import {AuthService} from "../../../auth/services/auth.service";
   templateUrl: './farm-followup-list.component.html',
   styleUrl: './farm-followup-list.component.css',
 })
-export class FarmFollowUpListComponent {
+export class FarmFollowUpListComponent implements OnChanges {
   @Input() followUps: FarmFollowUp[] = [];
   loading = false;
   @Input() externalId = '';
+
+  /**
+   * Rendering source of truth, decoupled from the `followUps` input. Angular reassigns
+   * `@Input()`-bound properties on every change-detection cycle, and the parent pages never
+   * re-fetch their agreement/plot after a follow-up outcome changes — so if the tabs read
+   * `followUps` directly, a locally-refreshed list gets stomped back to stale data on the very
+   * next tick. This field is only ever set by ngOnChanges (on a genuine externalId switch) or by
+   * this component's own refresh, so a local refresh always sticks.
+   */
+  displayedFollowUps: FarmFollowUp[] = [];
+  private lastExternalId: string | null = null;
 
   showCreateButton = false;
   showEditButton = false;
@@ -82,12 +93,19 @@ export class FarmFollowUpListComponent {
     this.showActionColumn = isWorker || this.authService.isAdmin();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (this.externalId && this.externalId !== this.lastExternalId) {
+      this.lastExternalId = this.externalId;
+      this.displayedFollowUps = this.followUps ?? [];
+    }
+  }
+
   get activeFollowUps(): FarmFollowUp[] {
-    return this.followUps.filter((f) => f.taskStatus === 'ACTIVE');
+    return this.displayedFollowUps.filter((f) => f.taskStatus === 'ACTIVE');
   }
 
   get completedFollowUps(): FarmFollowUp[] {
-    return this.followUps.filter((f) => f.taskStatus !== 'ACTIVE');
+    return this.displayedFollowUps.filter((f) => f.taskStatus !== 'ACTIVE');
   }
 
   private canActOn(f: FarmFollowUp): boolean {
@@ -138,7 +156,7 @@ export class FarmFollowUpListComponent {
   onRefresh(): void {
     const id = (this.externalId ?? '').trim();
     if (!id) {
-      this.followUps = [];
+      this.displayedFollowUps = [];
       return;
     }
     this.loadFollowUps(id);
@@ -166,7 +184,7 @@ export class FarmFollowUpListComponent {
     this.loading = true;
     this.farmFollowUpService.getByExternalId(externalId).subscribe({
       next: (data) => {
-        this.followUps = data ?? [];
+        this.displayedFollowUps = data ?? [];
         this.loading = false;
         // this.toastService.success('Follow-ups retrieved successfully');
       },

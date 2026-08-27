@@ -311,10 +311,16 @@ export const routes: Routes = [
   },
   {
     path: 'farm-restoration',
-    loadComponent: () =>
-      import('./features/farm-restoration/pages/coming-soon/coming-soon.component').then(m => m.ComingSoonComponent),
+    loadChildren: () => import('./features/farm-followups/farm-followups.module').then(m => m.FarmFollowupsModule),
     canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['ADMIN', 'OPERATOR', 'INVESTOR', 'EXTENSION_WORKER'] },
+    data: { roles: ['EXTENSION_WORKER', 'ADMIN'] },
+  },
+  {
+    path: 'analytics',
+    loadComponent: () =>
+      import('./features/analytics/analytics-page.component').then(m => m.AnalyticsPageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] },
   },
   {
     path: 'investment-package-types',

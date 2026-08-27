@@ -1,0 +1,48 @@
+<app-modal
+  [(visible)]="visible"
+  title="Assign Extension Worker"
+  size="sm"
+  confirmText="Assign"
+  cancelText="Cancel"
+  [confirmLoading]="submitting"
+  [confirmDisabled]="!canConfirm"
+  (confirm)="onConfirm()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <div class="space-y-4 text-sm">
+      <div>
+        <label class="text-sm font-medium text-gray-700">Extension Worker <span class="text-red-500">*</span></label>
+        <select
+          class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+          [(ngModel)]="selectedWorkerId"
+        >
+          <option value="" disabled>Select an extension worker</option>
+          <option *ngFor="let w of workers" [value]="w.id">{{ w.firstName }} {{ w.lastName }} ({{ w.email }})</option>
+        </select>
+        <p *ngIf="!workersLoading && workers.length === 0" class="text-xs text-amber-600 mt-1">
+          No extension workers found.
+        </p>
+      </div>
+
+      <div *ngIf="!existingPlanId" class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm font-medium text-gray-700">Start Date <span class="text-red-500">*</span></label>
+          <input
+            type="date"
+            class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+            [(ngModel)]="startDate"
+          />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700">End Date <span class="text-red-500">*</span></label>
+          <input
+            type="date"
+            class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+            [(ngModel)]="endDate"
+          />
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</app-modal>

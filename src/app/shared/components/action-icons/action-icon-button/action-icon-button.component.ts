@@ -48,7 +48,14 @@ export class ActionIconButtonComponent {
    */
   @Input() svgClass = '';
 
-  @Output() click = new EventEmitter<void>();
+  /**
+   * Named `buttonClick` (not `click`) deliberately: this component wraps a native
+   * <button>, and naming an @Output() after a native DOM event causes Angular to
+   * double-bind it on the host element — the wrapped button's native 'click' bubbles
+   * up and re-triggers the same handler alongside the proper output emission,
+   * firing every consumer's handler twice per physical click.
+   */
+  @Output() buttonClick = new EventEmitter<void>();
 
   get computedTitle(): string {
     return this.title || this.icon[0].toUpperCase() + this.icon.slice(1);
