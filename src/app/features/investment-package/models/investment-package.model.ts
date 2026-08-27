@@ -97,6 +97,8 @@ export interface InvestmentRecord {
   attachmentId?: string;
   signedAt?: string | null;
   rejectionReason?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface InvestmentCreateRequest {
@@ -121,6 +123,8 @@ export interface ChooseCandidatesRequest {
   remark: string;
 }
 
+export type AgreementStatus = 'ACTIVE' | 'PENDING' | 'TERMINATED' | 'SENT' | 'ACCEPTED' | 'REJECTED' | 'CANCELED';
+
 export interface InvestmentAgreement {
   id: string;
   farmPlotId: string;
@@ -139,6 +143,22 @@ export interface InvestmentAgreement {
   followUpDtoList?: FarmFollowUp[];
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface InvestmentAgreementFilterRequest {
+  investorId?: string;
+  extensionWorkerId?: string;
+  searchText?: string;
+  statuses?: AgreementStatus[];
+  sortBy?: string;
+  sortDirection?: 'ASC' | 'DESC';
+  page: number;
+  size: number;
+}
+
+export interface InvestmentPackageStatusSummary {
+  fundingStatusCounts: Record<string, number>;
+  packageStatusCounts: Record<string, number>;
 }
 
 export interface CreateInvestmentAgreementRequest {

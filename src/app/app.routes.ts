@@ -323,6 +323,13 @@ export const routes: Routes = [
     data: { roles: ['ADMIN'] },
   },
   {
+    path: 'investor-analytics',
+    loadComponent: () =>
+      import('./features/investor-analytics/investor-analytics-page.component').then(m => m.InvestorAnalyticsPageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['INVESTOR'] },
+  },
+  {
     path: 'investment-package-types',
     loadChildren: () => import('./features/investment-package-types/investment-package-types.module').then(m => m.InvestmentPackageTypesModule),
     canActivate: [AuthGuard, RoleGuard],

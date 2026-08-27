@@ -14,6 +14,8 @@ import {
   InvestmentRecordCreateRequest,
   ChooseCandidatesRequest,
   InvestmentAgreement,
+  InvestmentAgreementFilterRequest,
+  InvestmentPackageStatusSummary,
   CreateInvestmentAgreementRequest,
   InvestorAgreeResponseRequest,
 } from '../models/investment-package.model';
@@ -215,6 +217,20 @@ export class InvestmentPackageService {
     return this.httpService.put<InvestmentAgreement>(
       `${Endpoints.INVESTMENT_AGGREMENT_ENDPOINT}/${agreementId}/activate`,
       null,
+    );
+  }
+
+  filterAgreements(request: InvestmentAgreementFilterRequest): Observable<PageResponse<InvestmentAgreement>> {
+    return this.httpService.post<PageResponse<InvestmentAgreement>>(
+      `${Endpoints.INVESTMENT_AGGREMENT_ENDPOINT}/filter`,
+      request,
+    );
+  }
+
+  /** Platform-wide aggregate counts only — no row-level data, safe for investors. */
+  getStatusSummary(): Observable<InvestmentPackageStatusSummary> {
+    return this.httpService.get<InvestmentPackageStatusSummary>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/status-summary`,
     );
   }
 }

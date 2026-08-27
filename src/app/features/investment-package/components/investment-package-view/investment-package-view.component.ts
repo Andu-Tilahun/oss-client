@@ -20,6 +20,7 @@ export class InvestmentPackageViewComponent implements OnChanges {
   @Input() refreshKey = 0;
   @Input() packageInvestments: InvestmentRecord[] = [];
   @Input() isAdminRole = false;
+  @Input() isInvestorRole = false;
 
   investorShareChartOption: EChartsOption = {};
   fundingProgressChartOption: EChartsOption = {};

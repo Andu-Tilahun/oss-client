@@ -68,8 +68,8 @@
       <div echarts [options]="investorShareChartOption" class="h-64 w-full"></div>
     </div>
 
-    <!-- Funding progress chart (admin only) -->
-    <div *ngIf="isAdminRole && investmentPackage.investmentPackageType === 'CROWDFUNDING'"
+    <!-- Funding progress chart (admin & investor) -->
+    <div *ngIf="(isAdminRole || isInvestorRole) && investmentPackage.investmentPackageType === 'CROWDFUNDING'"
          class="mb-8">
       <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Funding Progress</p>
       <div class="flex items-center gap-6">
