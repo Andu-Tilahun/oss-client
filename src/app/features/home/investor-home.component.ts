@@ -112,10 +112,10 @@ export class InvestorHomeComponent implements OnInit {
         .filterInvestments({page: 0, size: 500})
         .pipe(catchError(() => of(this.emptyPage<InvestmentRecord>()))),
       campaigns: this.investmentPackageService
-        .filterInvestmentPackages({statuses: [FundingStatus.OPEN], sortBy: 'fundingDeadline', sortDirection: 'ASC', page: 0, size: 12})
+        .filterPublishedInvestmentPackages({statuses: [FundingStatus.OPEN], sortBy: 'fundingDeadline', sortDirection: 'ASC', page: 0, size: 12})
         .pipe(catchError(() => of(this.emptyPage<InvestmentPackage>()))),
       openCount: this.investmentPackageService
-        .filterInvestmentPackages({statuses: [FundingStatus.OPEN], page: 0, size: 1})
+        .filterPublishedInvestmentPackages({statuses: [FundingStatus.OPEN], page: 0, size: 1})
         .pipe(
           map((r) => r.totalElements ?? 0),
           catchError(() => of(0)),

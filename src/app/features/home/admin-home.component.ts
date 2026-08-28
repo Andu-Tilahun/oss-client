@@ -107,9 +107,9 @@ export class AdminHomeComponent implements OnInit {
     });
 
     const investmentPackages$ = forkJoin({
-      LEASING: this.countOf(this.investmentPackageService.filterInvestmentPackages({ investmentPackageType: 'LEASING', page: 0, size: 1 })),
-      BIDDING: this.countOf(this.investmentPackageService.filterInvestmentPackages({ investmentPackageType: 'BIDDING', page: 0, size: 1 })),
-      CROWDFUNDING: this.countOf(this.investmentPackageService.filterInvestmentPackages({ investmentPackageType: 'CROWDFUNDING', page: 0, size: 1 })),
+      LEASING: this.countOf(this.investmentPackageService.filterPublishedInvestmentPackages({ investmentPackageType: 'LEASING', page: 0, size: 1 })),
+      BIDDING: this.countOf(this.investmentPackageService.filterPublishedInvestmentPackages({ investmentPackageType: 'BIDDING', page: 0, size: 1 })),
+      CROWDFUNDING: this.countOf(this.investmentPackageService.filterPublishedInvestmentPackages({ investmentPackageType: 'CROWDFUNDING', page: 0, size: 1 })),
     });
 
     const userRoles$ = forkJoin({
@@ -137,7 +137,7 @@ export class AdminHomeComponent implements OnInit {
         if (plots.length === 0) return of([] as NamedCount[]);
         return forkJoin(
           plots.map((p) =>
-            this.countOf(this.investmentPackageService.filterInvestmentPackages({ farmPlotId: p.id, page: 0, size: 1 })).pipe(
+            this.countOf(this.investmentPackageService.filterPublishedInvestmentPackages({ farmPlotId: p.id, page: 0, size: 1 })).pipe(
               map((value) => ({ label: p.title, value })),
             ),
           ),

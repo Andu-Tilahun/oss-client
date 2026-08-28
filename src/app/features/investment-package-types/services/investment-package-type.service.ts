@@ -24,6 +24,14 @@ export class InvestmentPackageTypeService {
     );
   }
 
+  /** Published bucket (packageStatus in ACTIVE, IN_USE): packageStatus is enforced server-side. */
+  filterPublished(request: InvestmentPackageTypeFilterRequest): Observable<PageResponse<InvestmentPackageTypeAgreement>> {
+    return this.httpService.put<PageResponse<InvestmentPackageTypeAgreement>>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/filter/published`,
+      request,
+    );
+  }
+
   getById(id: string): Observable<ApiResponse<InvestmentPackageTypeAgreement>> {
     return this.httpService.get<ApiResponse<InvestmentPackageTypeAgreement>>(`${Endpoints.INVESTMENT_PACKAGE_TYPES_ENDPOINT}/${id}`);
   }

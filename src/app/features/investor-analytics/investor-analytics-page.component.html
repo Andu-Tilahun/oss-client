@@ -18,37 +18,37 @@
       <h2 class="text-lg font-semibold text-slate-900 mb-1">My Portfolio Detail</h2>
       <p class="text-sm text-slate-500 mb-6">Everything you've committed, broken down every way.</p>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+      <div class="flex flex-wrap gap-6">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 grow basis-[260px] min-w-[200px] sm:min-w-[220px]">
           <h3 class="text-sm font-semibold text-slate-800 mb-3">Capital allocation by farm activity</h3>
           <div *ngIf="farmActivityBreakdown.length === 0" class="text-sm text-slate-500 py-10 text-center">No deployed capital yet.</div>
           <div *ngIf="farmActivityBreakdown.length > 0" echarts [options]="farmActivityChartOption" class="h-56 w-full"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 grow basis-[520px] min-w-[260px] sm:min-w-[320px]">
           <h3 class="text-sm font-semibold text-slate-800 mb-3">Capital allocation by region</h3>
           <div *ngIf="regionBreakdown.length === 0" class="text-sm text-slate-500 py-10 text-center">No deployed capital yet.</div>
           <div *ngIf="regionBreakdown.length > 0" echarts [options]="regionChartOption" class="h-56 w-full"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 grow basis-[260px] min-w-[200px] sm:min-w-[220px]">
           <h3 class="text-sm font-semibold text-slate-800 mb-3">Payment method mix</h3>
           <div *ngIf="paymentMethodBreakdown.length === 0" class="text-sm text-slate-500 py-10 text-center">No deployed capital yet.</div>
           <div *ngIf="paymentMethodBreakdown.length > 0" echarts [options]="paymentMethodChartOption" class="h-56 w-full"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 grow basis-[520px] min-w-[260px] sm:min-w-[320px]">
           <h3 class="text-sm font-semibold text-slate-800 mb-3">Agreement status funnel</h3>
           <div echarts [options]="agreementFunnelChartOption" class="h-56 w-full"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 grow basis-[520px] min-w-[260px] sm:min-w-[320px]">
           <h3 class="text-sm font-semibold text-slate-800 mb-3">Upcoming agreement end dates</h3>
           <div *ngIf="upcomingAgreementEndDates.length === 0" class="text-sm text-slate-500 py-10 text-center">No active agreements ending soon.</div>
           <div *ngIf="upcomingAgreementEndDates.length > 0" echarts [options]="upcomingEndDatesChartOption" class="h-56 w-full"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 grow basis-[520px] min-w-[260px] sm:min-w-[320px]">
           <h3 class="text-sm font-semibold text-slate-800 mb-1">Reported ROI by package</h3>
           <p class="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-100 rounded px-2 py-1 mb-3 inline-block">
             Admin-reported estimate — not audited
@@ -64,49 +64,49 @@
       <h2 class="text-lg font-semibold text-slate-900 mb-1">Market Insights</h2>
       <p class="text-sm text-slate-500 mb-6">Platform-wide opportunity data (open campaigns are always visible to every investor; aggregate counts are platform-wide).</p>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+      <div class="flex flex-wrap gap-6 mb-6">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 grow basis-[520px] min-w-[260px] sm:min-w-[320px]">
           <h3 class="text-sm font-semibold text-slate-800 mb-3">Open packages by deadline urgency</h3>
           <div *ngIf="deadlineUrgency.length === 0" class="text-sm text-slate-500 py-10 text-center">No open campaigns.</div>
           <div *ngIf="deadlineUrgency.length > 0" echarts [options]="deadlineUrgencyChartOption" class="h-56 w-full"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 grow basis-[260px] min-w-[200px] sm:min-w-[220px]">
           <h3 class="text-sm font-semibold text-slate-800 mb-3">Open opportunities by package type</h3>
           <div *ngIf="openByPackageType.length === 0" class="text-sm text-slate-500 py-10 text-center">No open campaigns.</div>
           <div *ngIf="openByPackageType.length > 0" echarts [options]="openByPackageTypeChartOption" class="h-56 w-full"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 grow basis-[260px] min-w-[200px] sm:min-w-[220px]">
           <h3 class="text-sm font-semibold text-slate-800 mb-3">Open opportunities by farm activity</h3>
           <div *ngIf="openByFarmActivity.length === 0" class="text-sm text-slate-500 py-10 text-center">No open campaigns.</div>
           <div *ngIf="openByFarmActivity.length > 0" echarts [options]="openByFarmActivityChartOption" class="h-56 w-full"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 grow basis-[260px] min-w-[200px] sm:min-w-[220px]">
           <h3 class="text-sm font-semibold text-slate-800 mb-3">Open opportunities by minimum contribution</h3>
           <div echarts [options]="contributionTiersChartOption" class="h-56 w-full"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 grow basis-[520px] min-w-[260px] sm:min-w-[320px]">
           <h3 class="text-sm font-semibold text-slate-800 mb-3">Crowdfunding fill rate</h3>
           <div *ngIf="crowdfundingFillRate.length === 0" class="text-sm text-slate-500 py-10 text-center">No open crowdfunding campaigns.</div>
           <div *ngIf="crowdfundingFillRate.length > 0" echarts [options]="crowdfundingFillRateChartOption" class="h-56 w-full"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 grow basis-[260px] min-w-[200px] sm:min-w-[220px]">
           <h3 class="text-sm font-semibold text-slate-800 mb-3">Platform-wide funding outcomes</h3>
           <div *ngIf="platformFundingOutcomes.length === 0" class="text-sm text-slate-500 py-10 text-center">No data.</div>
           <div *ngIf="platformFundingOutcomes.length > 0" echarts [options]="platformFundingOutcomesChartOption" class="h-56 w-full"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 grow basis-[260px] min-w-[200px] sm:min-w-[220px]">
           <h3 class="text-sm font-semibold text-slate-800 mb-3">Platform-wide package lifecycle status</h3>
           <div *ngIf="platformLifecycleStatus.length === 0" class="text-sm text-slate-500 py-10 text-center">No data.</div>
           <div *ngIf="platformLifecycleStatus.length > 0" echarts [options]="platformLifecycleStatusChartOption" class="h-56 w-full"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 grow basis-[520px] min-w-[260px] sm:min-w-[320px]">
           <h3 class="text-sm font-semibold text-slate-800 mb-3">Soil type × water source (open packages)</h3>
           <div echarts [options]="soilWaterChartOption" class="h-56 w-full"></div>
         </div>

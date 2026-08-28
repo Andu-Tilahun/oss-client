@@ -150,7 +150,7 @@
       </div>
     </app-detail-section>
 
-    <app-detail-section title="Investment Options">
+    <app-detail-section title="Farm Plot Investment History">
       <div class="col-span-full">
         <div *ngIf="packagesLoading" class="text-sm text-gray-500">Loading...</div>
         <p *ngIf="!packagesLoading && plotInvestmentPackages.length === 0"
@@ -190,7 +190,7 @@
       </div>
     </app-detail-section>
 
-    <app-detail-section *ngIf="canManageStatus && (plot.status === 'ACTIVE' || plot.status === 'UNDER_MAINTENANCE')" title="Actions">
+    <app-detail-section *ngIf="showStatusActions && canManageStatus && (plot.status === 'ACTIVE' || plot.status === 'UNDER_MAINTENANCE')" title="Actions">
       <div class="col-span-full flex flex-wrap gap-3">
         <button
           *ngIf="plot.status === 'ACTIVE'"

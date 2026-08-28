@@ -133,6 +133,15 @@ export class InvestorAnalyticsPageComponent implements OnInit {
     return new Intl.NumberFormat(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}).format(n);
   }
 
+  /** Compact form for axis labels, where full comma-formatted numbers would collide on narrow charts. */
+  private formatMoneyCompact(n: number): string {
+    const abs = Math.abs(n);
+    if (abs >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
+    if (abs >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+    if (abs >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+    return this.formatMoney(n);
+  }
+
   onMapMarkerClicked(): void {
     // No per-package deep-link route exists today; land on the browse-packages page.
   }
@@ -147,7 +156,7 @@ export class InvestorAnalyticsPageComponent implements OnInit {
         .filterAgreements({statuses: ALL_AGREEMENT_STATUSES, page: 0, size: 300})
         .pipe(catchError(() => of(this.emptyPage<InvestmentAgreement>()))),
       openPackages: this.investmentPackageService
-        .filterInvestmentPackages({statuses: [FundingStatus.OPEN], page: 0, size: 500})
+        .filterPublishedInvestmentPackages({statuses: [FundingStatus.OPEN], page: 0, size: 500})
         .pipe(catchError(() => of(this.emptyPage<InvestmentPackage>()))),
       regions: this.regionService.filterRegions({page: 0, size: 200}).pipe(catchError(() => of(this.emptyPage<Region>()))),
       statusSummary: this.investmentPackageService
@@ -291,11 +300,13 @@ export class InvestorAnalyticsPageComponent implements OnInit {
     this.platformFundingOutcomesChartOption = this.donutOption(this.platformFundingOutcomes);
     this.platformLifecycleStatusChartOption = this.donutOption(this.platformLifecycleStatus);
 
+    const smallAxisLabel = {fontSize: 10};
+
     this.regionChartOption = {
       tooltip: {trigger: 'axis', valueFormatter: (v) => this.formatMoney(v as number)},
-      grid: {left: 110, right: 20, top: 20, bottom: 20, containLabel: true},
-      xAxis: {type: 'value'},
-      yAxis: {type: 'category', data: this.regionBreakdown.map((r) => r.label)},
+      grid: {left: 90, right: 16, top: 20, bottom: 30, containLabel: true},
+      xAxis: {type: 'value', splitNumber: 3, axisLabel: {...smallAxisLabel, formatter: (value: number) => this.formatMoneyCompact(value), rotate: 40}},
+      yAxis: {type: 'category', data: this.regionBreakdown.map((r) => r.label), axisLabel: {...smallAxisLabel, width: 70, overflow: 'truncate'}},
       series: [{type: 'bar', itemStyle: {color: '#4F46E5'}, data: this.regionBreakdown.map((r) => r.value)}],
     };
 
@@ -303,19 +314,19 @@ export class InvestorAnalyticsPageComponent implements OnInit {
       tooltip: {trigger: 'axis', formatter: (params) => {
         const p = Array.isArray(params) ? params[0] : params;
         const row = this.upcomingAgreementEndDates[p.dataIndex as number];
-        return row ? `${p.name}<br/>${row.daysRemaining} days remaining` : '';
+        return row ? `${row.label}<br/>${row.daysRemaining} days remaining` : '';
       }},
-      grid: {left: 110, right: 20, top: 20, bottom: 20, containLabel: true},
-      xAxis: {type: 'value', name: 'Days remaining'},
-      yAxis: {type: 'category', data: this.upcomingAgreementEndDates.map((a) => a.label)},
+      grid: {left: 90, right: 16, top: 20, bottom: 20, containLabel: true},
+      xAxis: {type: 'value', name: 'Days remaining', splitNumber: 2, axisLabel: smallAxisLabel},
+      yAxis: {type: 'category', data: this.upcomingAgreementEndDates.map((a) => a.label), axisLabel: {...smallAxisLabel, width: 70, overflow: 'truncate'}},
       series: [{type: 'bar', itemStyle: {color: '#F59E0B'}, data: this.upcomingAgreementEndDates.map((a) => a.daysRemaining)}],
     };
 
     this.roiByPackageChartOption = {
       tooltip: {trigger: 'axis', valueFormatter: (v) => `${v}%`},
-      grid: {left: 130, right: 20, top: 20, bottom: 20, containLabel: true},
-      xAxis: {type: 'value', name: 'ROI %'},
-      yAxis: {type: 'category', data: this.roiByPackage.map((r) => r.label)},
+      grid: {left: 100, right: 16, top: 20, bottom: 20, containLabel: true},
+      xAxis: {type: 'value', name: 'ROI %', splitNumber: 3, axisLabel: smallAxisLabel},
+      yAxis: {type: 'category', data: this.roiByPackage.map((r) => r.label), axisLabel: {...smallAxisLabel, width: 80, overflow: 'truncate'}},
       series: [{type: 'bar', itemStyle: {color: '#16A34A'}, data: this.roiByPackage.map((r) => r.value)}],
     };
 
@@ -323,18 +334,18 @@ export class InvestorAnalyticsPageComponent implements OnInit {
       tooltip: {trigger: 'axis', formatter: (params) => {
         const p = Array.isArray(params) ? params[0] : params;
         const row = this.deadlineUrgency[p.dataIndex as number];
-        return row ? `${p.name}<br/>${row.daysRemaining} days left · target ${this.formatMoney(row.value)}` : '';
+        return row ? `${row.label}<br/>${row.daysRemaining} days left · target ${this.formatMoney(row.value)}` : '';
       }},
-      grid: {left: 130, right: 20, top: 20, bottom: 20, containLabel: true},
-      xAxis: {type: 'value', name: 'Days left'},
-      yAxis: {type: 'category', data: this.deadlineUrgency.map((d) => d.label)},
+      grid: {left: 100, right: 16, top: 20, bottom: 20, containLabel: true},
+      xAxis: {type: 'value', name: 'Days left', splitNumber: 2, axisLabel: smallAxisLabel},
+      yAxis: {type: 'category', data: this.deadlineUrgency.map((d) => d.label), axisLabel: {...smallAxisLabel, width: 80, overflow: 'truncate'}},
       series: [{type: 'bar', itemStyle: {color: '#EF4444'}, data: this.deadlineUrgency.map((d) => d.daysRemaining)}],
     };
 
     this.contributionTiersChartOption = {
       tooltip: {trigger: 'axis'},
       grid: {left: 40, right: 20, top: 20, bottom: 30, containLabel: true},
-      xAxis: {type: 'category', data: this.contributionTiers.map((t) => t.label)},
+      xAxis: {type: 'category', data: this.contributionTiers.map((t) => t.label), axisLabel: smallAxisLabel},
       yAxis: {type: 'value', minInterval: 1},
       series: [{type: 'bar', itemStyle: {color: '#0EA5E9'}, data: this.contributionTiers.map((t) => t.value)}],
     };
@@ -343,11 +354,11 @@ export class InvestorAnalyticsPageComponent implements OnInit {
       tooltip: {trigger: 'axis', formatter: (params) => {
         const p = Array.isArray(params) ? params[0] : params;
         const row = this.crowdfundingFillRate[p.dataIndex as number];
-        return row ? `${p.name}<br/>${row.investorCount} of ${row.expected} investors (${row.value}%)` : '';
+        return row ? `${row.label}<br/>${row.investorCount} of ${row.expected} investors (${row.value}%)` : '';
       }},
-      grid: {left: 130, right: 20, top: 20, bottom: 20, containLabel: true},
-      xAxis: {type: 'value', name: 'Fill %', max: 100},
-      yAxis: {type: 'category', data: this.crowdfundingFillRate.map((r) => r.label)},
+      grid: {left: 100, right: 16, top: 20, bottom: 20, containLabel: true},
+      xAxis: {type: 'value', name: 'Fill %', max: 100, splitNumber: 3, axisLabel: smallAxisLabel},
+      yAxis: {type: 'category', data: this.crowdfundingFillRate.map((r) => r.label), axisLabel: {...smallAxisLabel, width: 80, overflow: 'truncate'}},
       series: [{type: 'bar', itemStyle: {color: '#4F46E5'}, data: this.crowdfundingFillRate.map((r) => r.value)}],
     };
 
@@ -386,8 +397,8 @@ export class InvestorAnalyticsPageComponent implements OnInit {
     return {
       tooltip: {trigger: 'axis'},
       grid: {left: 100, right: 20, top: 20, bottom: 20, containLabel: true},
-      xAxis: {type: 'value', minInterval: 1},
-      yAxis: {type: 'category', data: slices.map((s) => s.label)},
+      xAxis: {type: 'value', minInterval: 1, splitNumber: 3},
+      yAxis: {type: 'category', data: slices.map((s) => s.label), axisLabel: {width: 90, overflow: 'truncate'}},
       series: [{type: 'bar', data: slices.map((s) => ({value: s.value, itemStyle: {color: s.color}}))}],
     };
   }

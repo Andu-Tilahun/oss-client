@@ -47,6 +47,7 @@ function makeComponent() {
   const mockInvestmentPackageService = {
     filterInvestments: vi.fn(() => of(mockPage<InvestmentRecord>([]))),
     filterInvestmentPackages: vi.fn(() => of(mockPage<InvestmentPackage>([]))),
+    filterPublishedInvestmentPackages: vi.fn(() => of(mockPage<InvestmentPackage>([]))),
   };
   const component = new InvestorHomeComponent(mockInvestmentPackageService as any);
   return {component, mockInvestmentPackageService};
@@ -105,7 +106,7 @@ describe('InvestorHomeComponent', () => {
   });
 
   it('open opportunities count comes from the open-campaigns page total, not content length', () => {
-    mockInvestmentPackageService.filterInvestmentPackages.mockImplementation((req: any) => {
+    mockInvestmentPackageService.filterPublishedInvestmentPackages.mockImplementation((req: any) => {
       if (req.size === 1) return of(mockPage<InvestmentPackage>([], 42));
       return of(mockPage<InvestmentPackage>([]));
     });

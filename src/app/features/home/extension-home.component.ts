@@ -124,7 +124,8 @@ export class ExtensionHomeComponent implements OnInit {
   private isActiveAssignment(agreement: InvestmentPackageTypeAgreement): boolean {
     const active = new Set(['ACTIVE', 'ACCEPTED', 'SENT', 'OPEN', 'FUNDED']);
     const status = agreement.status ?? agreement.fundingStatus ?? '';
-    return active.has(status);
+    const packageActive = agreement.packageStatus !== 'INACTIVE' && agreement.packageStatus !== 'COMPLITED';
+    return active.has(status) && packageActive;
   }
 
   private isCompletedFollowUp(followUp: FarmFollowUp): boolean {

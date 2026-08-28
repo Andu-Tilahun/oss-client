@@ -46,6 +46,7 @@ export class FarmPlotViewComponent implements OnChanges {
   @Input() id?: string;
 
   @Input() refreshKey = 0;
+  @Input() showStatusActions = true;
   @Input() showCreateLeaseButton = false;
   @Input() createLeaseButtonText = 'Create Lease Agreement';
   @Output() createLease = new EventEmitter<void>();

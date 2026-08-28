@@ -83,7 +83,8 @@ export class FarmPlotsExtensionPageComponent implements OnInit {
   isActiveStatus(agreement: InvestmentPackageTypeAgreement): boolean {
     const active = new Set(['ACTIVE', 'ACCEPTED', 'SENT', 'OPEN', 'FUNDED']);
     const status = agreement.status ?? agreement.fundingStatus ?? '';
-    return active.has(status);
+    const packageActive = agreement.packageStatus !== 'INACTIVE' && agreement.packageStatus !== 'COMPLITED';
+    return active.has(status) && packageActive;
   }
 
   private buildColumns(): void {

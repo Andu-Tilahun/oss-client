@@ -66,7 +66,9 @@ export class FarmPlotsExplorePageComponent implements OnInit {
     this.loadingPackages = true;
     this.investmentPackageService.getPublicInvestmentPackages(0, this.initialLoadSize).subscribe({
       next: (response: PageResponse<InvestmentPackage>) => {
-        this.packages = (response.content ?? []).filter((pkg) => pkg.fundingStatus === 'OPEN');
+        this.packages = (response.content ?? []).filter(
+          (pkg) => pkg.fundingStatus === 'OPEN' && pkg.packageStatus !== 'INACTIVE' && pkg.packageStatus !== 'COMPLITED',
+        );
         this.applyClientFilters();
         this.loadingPackages = false;
       },

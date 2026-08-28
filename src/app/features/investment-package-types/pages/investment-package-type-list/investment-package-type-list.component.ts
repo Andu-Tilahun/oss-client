@@ -882,7 +882,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   private loadAvailablePackageTypes(): void {
     this.availableLoading = true;
     const currentUserId = this.authService.getCurrentUser()?.id;
-    this.investmentPackageTypeService.filter({
+    this.investmentPackageTypeService.filterPublished({
       searchText: this.availableSearchText.trim() || undefined,
       statuses: [FundingStatus.OPEN],
       investmentPackageType: this.investmentPackageType,
