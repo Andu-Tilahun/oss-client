@@ -58,4 +58,5 @@ export const Endpoints = {
   CONFIG_BRANCH_CENTERS_ENDPOINT: '/config/branch-centers',
   CONFIG_TEMPLATES_ENDPOINT: '/config/templates',
   CONFIG_BANK_ACCOUNTS_ENDPOINT: '/config/bank-accounts',
+  CONFIG_GALLERY_ENDPOINT: '/config/gallery',
 }

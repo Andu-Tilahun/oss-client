@@ -17,6 +17,8 @@ import {environment} from '../../../../../environments/environment';
 import {InvestmentPackageService} from '../../../investment-package/services/investment-package.service';
 import {InvestmentPackage} from '../../../investment-package/models/investment-package.model';
 import {AuthService} from '../../../auth/services/auth.service';
+import {TabsComponent} from '../../../../shared/tabs/app-tabs/app-tabs.component';
+import {TabItem} from '../../../../shared/tabs/models/tab-item.model';
 
 @Component({
   selector: 'app-farm-plot-view',
@@ -32,6 +34,7 @@ import {AuthService} from '../../../auth/services/auth.service';
     ImageUploadModalComponent,
     ConfirmationModalComponent,
     FarmPlotMaintenanceModalComponent,
+    TabsComponent,
   ],
   templateUrl: './farm-plot-view.component.html',
 })
@@ -82,6 +85,10 @@ export class FarmPlotViewComponent implements OnChanges {
   plotInvestmentPackages: InvestmentPackage[] = [];
   packagesLoading = false;
 
+  activeTab = 'description';
+  tabs: TabItem[] = [];
+  private previousPlotId?: string;
+
   private readonly storageApiUrl = `${environment.apiUrl}/files`;
 
   constructor(
@@ -97,6 +104,7 @@ export class FarmPlotViewComponent implements OnChanges {
       if (this.plot) {
         this.loading = false;
         this.error = null;
+        this.onPlotResolved(this.plot.id);
         this.loadGallery(this.plot.id);
         this.loadInvestmentPackages(this.plot.id);
       } else if (this.id) {
@@ -105,6 +113,8 @@ export class FarmPlotViewComponent implements OnChanges {
       } else {
         this.clearGallery();
         this.plotInvestmentPackages = [];
+        this.tabs = [];
+        this.previousPlotId = undefined;
       }
       return;
     }
@@ -130,11 +140,13 @@ export class FarmPlotViewComponent implements OnChanges {
         this.plot = plot ?? null;
         this.loading = false;
         if (this.plot?.id) {
+          this.onPlotResolved(this.plot.id);
           this.loadGallery(this.plot.id);
           this.loadInvestmentPackages(this.plot.id);
         } else {
           this.clearGallery();
           this.plotInvestmentPackages = [];
+          this.tabs = [];
         }
       },
       error: () => {
@@ -143,8 +155,40 @@ export class FarmPlotViewComponent implements OnChanges {
         this.loading = false;
         this.clearGallery();
         this.plotInvestmentPackages = [];
+        this.tabs = [];
       },
     });
+  }
+
+  /** Resets to the Description tab when a *different* plot is now shown, then recomputes the tab list. */
+  private onPlotResolved(plotId: string): void {
+    if (plotId !== this.previousPlotId) {
+      this.activeTab = 'description';
+    }
+    this.previousPlotId = plotId;
+    this.recomputeTabs();
+  }
+
+  private recomputeTabs(): void {
+    this.tabs = [
+      {key: 'description', label: 'Description'},
+      {
+        key: 'investment-history',
+        label: 'Investment History',
+        badge: this.plotInvestmentPackages.length || undefined,
+      },
+      ...(this.showStatusActions && this.canManageStatus
+        && (this.plot?.status === 'ACTIVE' || this.plot?.status === 'UNDER_MAINTENANCE')
+        ? [{key: 'actions', label: 'Actions'}]
+        : []),
+    ];
+    if (!this.tabs.some((t) => t.key === this.activeTab)) {
+      this.activeTab = 'description';
+    }
+  }
+
+  onTabChange(key: string): void {
+    this.activeTab = key;
   }
 
   private loadInvestmentPackages(plotId: string): void {
@@ -153,10 +197,12 @@ export class FarmPlotViewComponent implements OnChanges {
       next: (res) => {
         this.plotInvestmentPackages = res.content;
         this.packagesLoading = false;
+        this.recomputeTabs();
       },
       error: () => {
         this.plotInvestmentPackages = [];
         this.packagesLoading = false;
+        this.recomputeTabs();
       },
     });
   }

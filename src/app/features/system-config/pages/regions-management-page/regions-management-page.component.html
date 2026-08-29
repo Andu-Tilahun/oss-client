@@ -10,50 +10,36 @@
 >
   <ng-template #leftContent>
     <div class="p-4">
-      <div class="flex items-center justify-between mb-4">
-        <span class="text-sm text-gray-500">{{ regions.length }} region{{ regions.length !== 1 ? 's' : '' }}</span>
-        <button (click)="openCreate()"
-          class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors">
-          + Add Region
-        </button>
-      </div>
-
-      <div *ngIf="loading" class="text-sm text-gray-500 py-4">Loading...</div>
-
-      <div *ngIf="!loading">
-        <p *ngIf="regions.length === 0" class="text-sm text-gray-500">No regions yet. Add one above.</p>
-
-        <table *ngIf="regions.length > 0"
-          class="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
-          <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider">
-            <tr>
-              <th class="px-4 py-3 text-left">#</th>
-              <th class="px-4 py-3 text-left">Name</th>
-              <th class="px-4 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            <tr *ngFor="let region of regions; let i = index"
-                class="hover:bg-gray-50 cursor-pointer transition-colors"
-                [class.bg-blue-50]="selectedRegion?.id === region.id"
-                (click)="onView(region)">
-              <td class="px-4 py-3 text-gray-400">{{ i + 1 }}</td>
-              <td class="px-4 py-3 font-medium text-gray-800">{{ region.name }}</td>
-              <td class="px-4 py-3 text-right space-x-2">
-                <button (click)="openEdit(region); $event.stopPropagation()"
-                  class="text-xs px-3 py-1.5 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors">
-                  Edit
-                </button>
-                <button (click)="onDelete(region.id); $event.stopPropagation()"
-                  [disabled]="deleting === region.id"
-                  class="text-xs px-3 py-1.5 rounded-md border border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50">
-                  {{ deleting === region.id ? 'Deleting...' : 'Delete' }}
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-data-table
+        [columns]="columns"
+        [data]="regions"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showPagination]="true"
+        [showIndex]="true"
+        [rowClickable]="true"
+        [showAddButton]="true"
+        [showEditButton]="false"
+        [showDeleteButton]="false"
+        [rowActions]="rowActions"
+        [noDataMessage]="'No regions yet.'"
+        (pageChange)="onPageChange($event)"
+        (addClick)="openCreate()"
+        (rowClick)="onView($event)"
+      >
+        <div extraTableHeader class="w-full min-w-0">
+          <app-filter-bar
+            [(searchText)]="searchText"
+            searchPlaceholder="Search by name..."
+            applyLabel="Search"
+            clearLabel="Clear"
+            (searchChange)="onSearch()"
+            (clearFilters)="clearFilters()"
+          ></app-filter-bar>
+        </div>
+      </app-data-table>
     </div>
   </ng-template>
 

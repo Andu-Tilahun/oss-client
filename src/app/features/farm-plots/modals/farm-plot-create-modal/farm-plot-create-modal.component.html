@@ -1,16 +1,17 @@
-<app-modal
+<app-multi-step-form-modal
   [(visible)]="visible"
   title="Create Farm Plot"
-  size="lg"
-  [confirmText]="'Create Farm Plot'"
-  [confirmLoading]="isLoading"
-  [showCancelButton]="true"
-  (confirm)="onSubmit()"
-  (cancel)="onCancel()"
+  [steps]="steps"
+  [(currentStep)]="currentStep"
+  size="xxl"
+  [isSubmitting]="isLoading"
+  submitLabel="Create Farm Plot"
+  (next)="onNext()"
+  (submitForm)="onSubmit()"
+  (cancelled)="onCancelled()"
   (visibleChange)="visibleChange.emit($event)"
 >
-  <ng-template #modalBody>
-    <app-farm-plot-form #farmPlotForm mode="create"></app-farm-plot-form>
+  <ng-template #stepBody>
+    <app-farm-plot-create-wizard #wizard [currentStep]="currentStep"></app-farm-plot-create-wizard>
   </ng-template>
-</app-modal>
-
+</app-multi-step-form-modal>

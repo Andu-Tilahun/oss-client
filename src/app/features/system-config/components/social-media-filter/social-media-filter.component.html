@@ -1,0 +1,18 @@
+<app-filter-bar
+  [(searchText)]="searchText"
+  (searchTextChange)="onSearchTextInput($event)"
+  searchPlaceholder="Search by URL..."
+  applyLabel="Search"
+  clearLabel="Clear"
+  (searchChange)="onSearch()"
+  (clearFilters)="onClearFilters()"
+>
+  <select
+    [ngModel]="selectedPlatform"
+    (ngModelChange)="onPlatformChange($event)"
+    class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 w-40"
+  >
+    <option value="">Platform: All</option>
+    <option *ngFor="let p of platforms" [value]="p">{{ p }}</option>
+  </select>
+</app-filter-bar>

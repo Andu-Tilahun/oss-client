@@ -1,0 +1,8 @@
+.tractor-loader-canvas {
+  width: 100%;
+  max-width: 380px;
+  height: auto;
+  display: block;
+  border-radius: 14px;
+  background: #cfeaf7;
+}

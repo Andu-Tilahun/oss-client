@@ -2,14 +2,15 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpParams } from '@angular/common/http';
 import { HttpService } from '../../../core/services/http.service';
-import { ApiResponse } from '../../../shared/models/api-response.model';
+import { ApiResponse, PageResponse } from '../../../shared/models/api-response.model';
 import { Endpoints } from '../../../core/endpoint/endpoint.model';
 import { OrganizationAboutRequest, OrganizationBasicInfoRequest, OrganizationConfig, OrganizationConfigRequest, OrganizationContactRequest } from '../models/organization-config.model';
-import { NewsArticle, NewsArticleRequest, NewsPage } from '../models/news-article.model';
-import { SocialMediaLink, SocialMediaLinkRequest } from '../models/social-media.model';
+import { NewsArticle, NewsArticleFilterRequest, NewsArticleRequest } from '../models/news-article.model';
+import { SocialMediaLink, SocialMediaLinkFilterRequest, SocialMediaLinkRequest } from '../models/social-media.model';
 import { BranchCenter, BranchCenterRequest } from '../models/branch-center.model';
 import { MessageTemplate, MessageTemplateRequest, TemplateType } from '../models/message-template.model';
 import { BankAccount, BankAccountRequest } from '../models/bank-account.model';
+import { GalleryItem, GalleryItemFilterRequest, GalleryItemRequest } from '../models/gallery-item.model';
 
 @Injectable({ providedIn: 'root' })
 export class SystemConfigService {
@@ -37,15 +38,14 @@ export class SystemConfigService {
   }
 
   // News – public
-  getPublishedNews(page = 0, size = 20): Observable<NewsPage> {
+  getPublishedNews(page = 0, size = 20): Observable<PageResponse<NewsArticle>> {
     const params = new HttpParams().set('page', page).set('size', size);
-    return this.http.get<NewsPage>(Endpoints.CONFIG_NEWS_ENDPOINT, undefined, params);
+    return this.http.get<PageResponse<NewsArticle>>(Endpoints.CONFIG_NEWS_ENDPOINT, undefined, params);
   }
 
   // News – admin
-  getAllNews(page = 0, size = 20): Observable<NewsPage> {
-    const params = new HttpParams().set('page', page).set('size', size);
-    return this.http.get<NewsPage>(`${Endpoints.CONFIG_NEWS_ENDPOINT}/admin`, undefined, params);
+  filterNews(request: NewsArticleFilterRequest): Observable<PageResponse<NewsArticle>> {
+    return this.http.post<PageResponse<NewsArticle>>(`${Endpoints.CONFIG_NEWS_ENDPOINT}/admin/filter`, request);
   }
 
   getNewsById(id: string): Observable<NewsArticle> {
@@ -70,8 +70,8 @@ export class SystemConfigService {
   }
 
   // Social media – admin
-  getAllSocialMedia(): Observable<SocialMediaLink[]> {
-    return this.http.get<SocialMediaLink[]>(`${Endpoints.CONFIG_SOCIAL_MEDIA_ENDPOINT}/all`);
+  filterSocialMedia(request: SocialMediaLinkFilterRequest): Observable<PageResponse<SocialMediaLink>> {
+    return this.http.post<PageResponse<SocialMediaLink>>(`${Endpoints.CONFIG_SOCIAL_MEDIA_ENDPOINT}/admin/filter`, request);
   }
 
   createSocialMedia(request: SocialMediaLinkRequest): Observable<ApiResponse<SocialMediaLink>> {
@@ -146,5 +146,27 @@ export class SystemConfigService {
 
   deleteTemplate(id: string): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${Endpoints.CONFIG_TEMPLATES_ENDPOINT}/${id}`);
+  }
+
+  // Gallery – public
+  getVisibleGalleryItems(): Observable<GalleryItem[]> {
+    return this.http.get<GalleryItem[]>(Endpoints.CONFIG_GALLERY_ENDPOINT);
+  }
+
+  // Gallery – admin
+  filterGalleryItems(request: GalleryItemFilterRequest): Observable<PageResponse<GalleryItem>> {
+    return this.http.post<PageResponse<GalleryItem>>(`${Endpoints.CONFIG_GALLERY_ENDPOINT}/admin/filter`, request);
+  }
+
+  createGalleryItem(request: GalleryItemRequest): Observable<ApiResponse<GalleryItem>> {
+    return this.http.post<ApiResponse<GalleryItem>>(Endpoints.CONFIG_GALLERY_ENDPOINT, request);
+  }
+
+  updateGalleryItem(id: string, request: GalleryItemRequest): Observable<ApiResponse<GalleryItem>> {
+    return this.http.put<ApiResponse<GalleryItem>>(`${Endpoints.CONFIG_GALLERY_ENDPOINT}/${id}`, request);
+  }
+
+  deleteGalleryItem(id: string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${Endpoints.CONFIG_GALLERY_ENDPOINT}/${id}`);
   }
 }

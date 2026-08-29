@@ -157,12 +157,21 @@
 
               <!-- Image Type -->
               <ng-container *ngSwitchCase="columnType.IMAGE">
-                <img
-                  *ngIf="column.value?.(item); else noImage"
-                  [src]="column.value!(item)"
-                  [alt]="column.imageAlt?.(item) ?? ''"
-                  class="h-10 w-10 rounded-md object-cover border border-slate-200"
-                />
+                <ng-container *ngIf="column.value?.(item); else noImage">
+                  <video
+                    *ngIf="column.mediaKind?.(item) === 'video'; else imageThumb"
+                    [src]="column.value!(item)"
+                    muted
+                    class="h-10 w-10 rounded-md object-cover border border-slate-200"
+                  ></video>
+                  <ng-template #imageThumb>
+                    <img
+                      [src]="column.value!(item)"
+                      [alt]="column.imageAlt?.(item) ?? ''"
+                      class="h-10 w-10 rounded-md object-cover border border-slate-200"
+                    />
+                  </ng-template>
+                </ng-container>
                 <ng-template #noImage>
                   <span class="text-xs text-slate-400">—</span>
                 </ng-template>
@@ -172,8 +181,8 @@
               <ng-container *ngSwitchCase="columnType.CHECK_BOX">
                 <input
                   type="checkbox"
-                  [checked]="column?.defaultValue || false"
-                  [disabled]="column?.disabled"
+                  [checked]="resolveCheckboxChecked(column, item)"
+                  [disabled]="resolveCheckboxDisabled(column, item)"
                   (change)="column.columnAction?.(item)"
                   class="w-4 h-4 text-blue-500 border-slate-300 rounded focus:ring-blue-500"
                 />
@@ -181,8 +190,9 @@
 
               <!-- Default Text -->
               <ng-container *ngSwitchDefault>
-                <span [class]="column.cellClass ?? ''"
-                      [title]="column.cellClass ? (column.value ? column.value(item) : '') : ''">
+                <span [class]="'dt-cell-truncate ' + resolveCellClass(column, item)"
+                      [style.max-width.px]="column.maxCellWidth || 320"
+                      [title]="column.value ? column.value(item) : ''">
                   {{ column.value ? column.value(item) : '' }}
                 </span>
               </ng-container>
@@ -255,12 +265,17 @@
         <!-- Empty State -->
         <tr *ngIf="data.length === 0 && !loading">
           <td [attr.colspan]="visibleColumns.length + (showIndex ? 1 : 0) + (showActionColumn ? 1 : 0)" class="px-6 py-16">
-            <div class="flex flex-col items-center justify-center text-slate-500">
-              <svg class="w-14 h-14 mb-3 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
-              </svg>
-              <p class="text-sm font-medium">{{ noDataMessage }}</p>
-            </div>
+            <ng-container *ngIf="emptyStateTemplate; else defaultEmptyState">
+              <ng-container *ngTemplateOutlet="emptyStateTemplate"></ng-container>
+            </ng-container>
+            <ng-template #defaultEmptyState>
+              <div class="flex flex-col items-center justify-center text-slate-500">
+                <svg class="w-14 h-14 mb-3 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                </svg>
+                <p class="text-sm font-medium">{{ noDataMessage }}</p>
+              </div>
+            </ng-template>
           </td>
         </tr>
         </tbody>

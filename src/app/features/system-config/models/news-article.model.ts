@@ -23,10 +23,11 @@ export interface NewsArticleRequest {
   status: NewsStatus;
 }
 
-export interface NewsPage {
-  content: NewsArticle[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
+export interface NewsArticleFilterRequest {
+  searchText?: string;
+  status?: NewsStatus;
+  sortBy?: string;
+  sortDirection?: 'ASC' | 'DESC';
+  page: number;
   size: number;
 }

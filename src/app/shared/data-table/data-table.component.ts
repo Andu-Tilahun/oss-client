@@ -2,11 +2,13 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ContentChild,
   ElementRef,
   EventEmitter,
   HostListener,
   Input,
-  Output
+  Output,
+  TemplateRef
 } from '@angular/core';
 import {DataTableColumn} from './models/data-table-column.model';
 import {ColumnType} from './models/column-types.model';
@@ -42,6 +44,9 @@ export class DataTableComponent<T> {
   @Input() showIndex = false;
   @Input() showActionColumn = true;
   @Input() noDataMessage = 'No data available';
+
+  /** Optional override for the empty-state body; falls back to the default icon + noDataMessage when not provided. */
+  @ContentChild('emptyState') emptyStateTemplate: TemplateRef<any> | null = null;
 
   /** If true, clicking a row emits `rowClick` */
   @Input() rowClickable = false;
@@ -205,6 +210,21 @@ export class DataTableComponent<T> {
       return;
     }
     this.rowClick.emit(item);
+  }
+
+  resolveCellClass(column: DataTableColumn<T>, item: T): string {
+    const cls = column.cellClass;
+    return typeof cls === 'function' ? (cls(item) ?? '') : (cls ?? '');
+  }
+
+  resolveCheckboxChecked(column: DataTableColumn<T>, item: T): boolean {
+    const val = column.defaultValue;
+    return typeof val === 'function' ? !!val(item) : !!val;
+  }
+
+  resolveCheckboxDisabled(column: DataTableColumn<T>, item: T): boolean {
+    const val = column.disabled;
+    return typeof val === 'function' ? !!val(item) : !!val;
   }
 
   isRowActionVisible(action: PageSplitRightAction<T>, item: T): boolean {

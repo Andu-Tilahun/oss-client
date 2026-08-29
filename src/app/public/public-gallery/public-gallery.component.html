@@ -5,7 +5,11 @@
       <p>Explore scenes from our partner farms, fields, and sustainable agricultural operations.</p>
     </div>
 
-    <div class="gallery-grid">
+    <div *ngIf="loading" class="gallery-loading">Loading gallery...</div>
+    <div *ngIf="!loading && error" class="gallery-empty">Unable to load the gallery at this time.</div>
+    <div *ngIf="!loading && !error && galleryItems.length === 0" class="gallery-empty">No gallery images yet.</div>
+
+    <div *ngIf="!loading && !error && galleryItems.length > 0" class="gallery-grid">
       <figure
         *ngFor="let item of galleryItems; index as i"
         class="gallery-tile"

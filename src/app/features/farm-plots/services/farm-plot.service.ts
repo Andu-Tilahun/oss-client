@@ -9,6 +9,7 @@ import {
   FarmGalleryCreateRequest,
   FarmPlot,
   FarmPlotFilterRequest,
+  FarmPlotImageDto,
   FarmPlotMaintenanceRequest,
   FarmPlotRequest,
 } from '../models/farm-plot.model';
@@ -61,6 +62,11 @@ export class FarmPlotService {
 
   getFarmPlotGallery(id: string): Observable<FarmGallery[]> {
     return this.httpService.get<FarmGallery[]>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/gallery`);
+  }
+
+  /** Admin-only: every farm plot's main image + gallery images, across all plots. */
+  getAllFarmPlotImages(): Observable<FarmPlotImageDto[]> {
+    return this.httpService.get<FarmPlotImageDto[]>(`${Endpoints.FARM_PLOTS_ENDPOINT}/gallery-images`);
   }
 
   getPublicFarmPlotGallery(id: string): Observable<FarmGallery[]> {

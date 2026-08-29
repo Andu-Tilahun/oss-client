@@ -239,6 +239,12 @@ export const routes: Routes = [
             .then(m => m.SocialMediaPageComponent),
       },
       {
+        path: 'gallery',
+        loadComponent: () =>
+          import('./features/system-config/pages/gallery-management-page/gallery-management-page.component')
+            .then(m => m.GalleryManagementPageComponent),
+      },
+      {
         path: 'regions',
         loadComponent: () =>
           import('./features/system-config/pages/regions-management-page/regions-management-page.component')

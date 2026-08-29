@@ -54,6 +54,10 @@ export class FileUploadService {
     return this.http.get<FileMetadata>(`${this.STORAGE_API_URL}/${fileId}/metadata`);
   }
 
+  getFilesByIds(ids: string[]): Observable<FileMetadata[]> {
+    return this.http.post<FileMetadata[]>(`${this.STORAGE_API_URL}/batch`, { ids });
+  }
+
   getPresignedUrl(fileId: string): Observable<string> {
     return this.getFileMetadata(fileId).pipe(
       map(metadata => metadata.presignedUrl)

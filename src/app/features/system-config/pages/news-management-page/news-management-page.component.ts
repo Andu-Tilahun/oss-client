@@ -2,15 +2,20 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SystemConfigService } from '../../services/system-config.service';
-import { NewsArticle, NewsStatus } from '../../models/news-article.model';
+import { NewsArticle, NewsArticleFilterRequest, NewsStatus } from '../../models/news-article.model';
 import { ToastService } from '../../../../shared/toast/toast.service';
 import { PageSplitLayoutComponent } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
 import { NewsArticleViewComponent } from '../../components/news-article-view/news-article-view.component';
+import { NewsFilterComponent } from '../../components/news-filter/news-filter.component';
+import { SharedModule } from '../../../../shared/shared.module';
+import { DataTableColumn } from '../../../../shared/data-table/models/data-table-column.model';
+import { TableQueryParams } from '../../../../shared/data-table/models/table-query-params.model';
+import { PageSplitRightAction } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
 
 @Component({
   selector: 'app-news-management-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageSplitLayoutComponent, NewsArticleViewComponent],
+  imports: [CommonModule, ReactiveFormsModule, SharedModule, PageSplitLayoutComponent, NewsArticleViewComponent, NewsFilterComponent],
   templateUrl: './news-management-page.component.html',
 })
 export class NewsManagementPageComponent implements OnInit {
@@ -24,9 +29,32 @@ export class NewsManagementPageComponent implements OnInit {
   deleting: string | null = null;
   editingId: string | null = null;
 
+  total = 0;
+  pageSize = 10;
+  pageIndex = 1;
+  searchText = '';
+  selectedStatus: NewsStatus | '' = '';
+
   form!: FormGroup;
 
   readonly statusOptions: NewsStatus[] = ['DRAFT', 'PUBLISHED'];
+
+  columns: DataTableColumn<NewsArticle>[] = [
+    { header: 'Title', value: a => a.title, cellClass: 'font-medium text-gray-800' },
+    { header: 'Category', value: a => a.category || '—', hiddenBelowPx: 640 },
+    {
+      header: 'Status', value: a => a.status,
+      cellClass: a => a.status === 'PUBLISHED'
+        ? 'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700'
+        : 'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600',
+    },
+    { header: 'Published', value: a => this.formatDate(a.publishedAt) },
+  ];
+
+  rowActions: PageSplitRightAction<NewsArticle>[] = [
+    { id: 'edit', icon: 'edit', title: 'Edit', action: a => this.openEdit(a) },
+    { id: 'delete', icon: 'delete', title: 'Delete', disabled: a => this.deleting === a.id, action: a => this.onDelete(a.id) },
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -53,9 +81,16 @@ export class NewsManagementPageComponent implements OnInit {
   loadArticles(): void {
     this.loading = true;
     const previousId = this.selectedArticle?.id;
-    this.systemConfigService.getAllNews(0, 50).subscribe({
+    const request: NewsArticleFilterRequest = {
+      searchText: this.searchText || undefined,
+      status: this.selectedStatus || undefined,
+      page: this.pageIndex - 1,
+      size: this.pageSize,
+    };
+    this.systemConfigService.filterNews(request).subscribe({
       next: (page) => {
         this.articles = page.content;
+        this.total = page.totalElements;
         this.loading = false;
         if (this.articles.length === 0) { this.selectedArticle = null; return; }
         if (previousId) {
@@ -67,6 +102,27 @@ export class NewsManagementPageComponent implements OnInit {
       },
       error: () => { this.loading = false; },
     });
+  }
+
+  onPageChange(params: TableQueryParams): void {
+    this.pageIndex = params.pageIndex;
+    this.pageSize = params.pageSize;
+    this.loadArticles();
+  }
+
+  onSearch(): void {
+    this.pageIndex = 1;
+    this.loadArticles();
+  }
+
+  onFilterChange(): void {
+    this.pageIndex = 1;
+    this.loadArticles();
+  }
+
+  clearFilters(): void {
+    this.pageIndex = 1;
+    this.loadArticles();
   }
 
   onView(article: NewsArticle): void {

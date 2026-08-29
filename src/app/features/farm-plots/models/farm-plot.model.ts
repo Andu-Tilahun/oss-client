@@ -12,6 +12,12 @@ export interface FarmGalleryCreateRequest {
   imageUuid: string;
 }
 
+export interface FarmPlotImageDto {
+  imageUuid: string;
+  farmPlotId: string;
+  farmPlotTitle: string;
+}
+
 export interface FarmPlot {
   id: string;
   title: string;

@@ -10,46 +10,35 @@
 >
   <ng-template #leftContent>
     <div class="p-4">
-      <div class="flex items-center justify-between mb-4">
-        <span class="text-sm text-gray-500">{{ links.length }} link{{ links.length !== 1 ? 's' : '' }}</span>
-        <button (click)="openCreate()"
-          class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors">
-          + Add Link
-        </button>
-      </div>
-
-      <div *ngIf="loading" class="text-sm text-gray-500 py-4">Loading...</div>
-
-      <div *ngIf="!loading" class="space-y-2">
-        <div *ngFor="let link of links"
-             class="flex items-center gap-4 p-3 border rounded-lg bg-white cursor-pointer hover:bg-gray-50 transition-colors"
-             [class.border-blue-400]="selectedLink?.id === link.id"
-             [class.border-gray-200]="selectedLink?.id !== link.id"
-             [class.ring-1]="selectedLink?.id === link.id"
-             [class.ring-blue-300]="selectedLink?.id === link.id"
-             (click)="onView(link)">
-          <span class="w-24 text-xs font-semibold text-gray-600 uppercase flex-shrink-0">{{ link.platform }}</span>
-          <span class="flex-1 text-sm text-blue-600 truncate">{{ link.url }}</span>
-          <span class="text-xs text-gray-400 flex-shrink-0">order: {{ link.displayOrder }}</span>
-
-          <button
-            (click)="toggleVisible(link); $event.stopPropagation()"
-            [disabled]="togglingId === link.id"
-            class="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0"
-            [ngClass]="link.visible ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'">
-            {{ link.visible ? 'Visible' : 'Hidden' }}
-          </button>
-
-          <button (click)="openEdit(link); $event.stopPropagation()"
-            class="text-blue-600 hover:underline text-xs flex-shrink-0">Edit</button>
-          <button (click)="onDelete(link.id); $event.stopPropagation()"
-            [disabled]="deletingId === link.id"
-            class="text-red-500 hover:underline text-xs disabled:opacity-50 flex-shrink-0">
-            {{ deletingId === link.id ? '...' : 'Delete' }}
-          </button>
+      <app-data-table
+        [columns]="columns"
+        [data]="links"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showPagination]="true"
+        [showIndex]="true"
+        [rowClickable]="true"
+        [showAddButton]="true"
+        [showEditButton]="false"
+        [showDeleteButton]="false"
+        [rowActions]="rowActions"
+        [noDataMessage]="'No social media links yet.'"
+        (pageChange)="onPageChange($event)"
+        (addClick)="openCreate()"
+        (rowClick)="onView($event)"
+      >
+        <div extraTableHeader class="w-full min-w-0">
+          <app-social-media-filter
+            [(searchText)]="searchText"
+            [(selectedPlatform)]="selectedPlatform"
+            (filterChange)="onFilterChange()"
+            (searchChange)="onSearch()"
+            (clearFilters)="clearFilters()"
+          ></app-social-media-filter>
         </div>
-        <p *ngIf="links.length === 0" class="text-sm text-gray-400 text-center py-6">No social media links yet.</p>
-      </div>
+      </app-data-table>
     </div>
   </ng-template>
 

@@ -2,15 +2,21 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SystemConfigService } from '../../services/system-config.service';
-import { SocialMediaLink, SocialMediaPlatform } from '../../models/social-media.model';
+import { SocialMediaLink, SocialMediaLinkFilterRequest, SocialMediaPlatform } from '../../models/social-media.model';
 import { ToastService } from '../../../../shared/toast/toast.service';
 import { PageSplitLayoutComponent } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
 import { SocialMediaViewComponent } from '../../components/social-media-view/social-media-view.component';
+import { SocialMediaFilterComponent } from '../../components/social-media-filter/social-media-filter.component';
+import { SharedModule } from '../../../../shared/shared.module';
+import { DataTableColumn } from '../../../../shared/data-table/models/data-table-column.model';
+import { ColumnType } from '../../../../shared/data-table/models/column-types.model';
+import { TableQueryParams } from '../../../../shared/data-table/models/table-query-params.model';
+import { PageSplitRightAction } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
 
 @Component({
   selector: 'app-social-media-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageSplitLayoutComponent, SocialMediaViewComponent],
+  imports: [CommonModule, ReactiveFormsModule, SharedModule, PageSplitLayoutComponent, SocialMediaViewComponent, SocialMediaFilterComponent],
   templateUrl: './social-media-page.component.html',
 })
 export class SocialMediaPageComponent implements OnInit {
@@ -25,10 +31,32 @@ export class SocialMediaPageComponent implements OnInit {
   deletingId: string | null = null;
   editingId: string | null = null;
 
+  total = 0;
+  pageSize = 10;
+  pageIndex = 1;
+  searchText = '';
+  selectedPlatform: SocialMediaPlatform | '' = '';
+
   form!: FormGroup;
 
   readonly platforms: SocialMediaPlatform[] = [
     'FACEBOOK', 'INSTAGRAM', 'TIKTOK', 'YOUTUBE', 'LINKEDIN', 'X', 'TWITTER', 'TELEGRAM', 'WHATSAPP',
+  ];
+
+  columns: DataTableColumn<SocialMediaLink>[] = [
+    { header: 'Platform', value: l => l.platform, cellClass: 'text-xs font-semibold text-gray-600 uppercase' },
+    { header: 'URL', value: l => l.url, cellClass: 'text-blue-600' },
+    { header: 'Order', value: l => l.displayOrder, hiddenBelowPx: 640 },
+    {
+      header: 'Visible', columnType: ColumnType.CHECK_BOX,
+      defaultValue: l => l.visible, disabled: l => this.togglingId === l.id,
+      columnAction: l => this.toggleVisible(l),
+    },
+  ];
+
+  rowActions: PageSplitRightAction<SocialMediaLink>[] = [
+    { id: 'edit', icon: 'edit', title: 'Edit', action: l => this.openEdit(l) },
+    { id: 'delete', icon: 'delete', title: 'Delete', disabled: l => this.deletingId === l.id, action: l => this.onDelete(l.id) },
   ];
 
   constructor(
@@ -50,9 +78,16 @@ export class SocialMediaPageComponent implements OnInit {
   loadLinks(): void {
     this.loading = true;
     const previousId = this.selectedLink?.id;
-    this.systemConfigService.getAllSocialMedia().subscribe({
-      next: (links) => {
-        this.links = links;
+    const request: SocialMediaLinkFilterRequest = {
+      searchText: this.searchText || undefined,
+      platform: this.selectedPlatform || undefined,
+      page: this.pageIndex - 1,
+      size: this.pageSize,
+    };
+    this.systemConfigService.filterSocialMedia(request).subscribe({
+      next: (page) => {
+        this.links = page.content;
+        this.total = page.totalElements;
         this.loading = false;
         if (this.links.length === 0) { this.selectedLink = null; return; }
         if (previousId) {
@@ -64,6 +99,27 @@ export class SocialMediaPageComponent implements OnInit {
       },
       error: () => { this.loading = false; },
     });
+  }
+
+  onPageChange(params: TableQueryParams): void {
+    this.pageIndex = params.pageIndex;
+    this.pageSize = params.pageSize;
+    this.loadLinks();
+  }
+
+  onSearch(): void {
+    this.pageIndex = 1;
+    this.loadLinks();
+  }
+
+  onFilterChange(): void {
+    this.pageIndex = 1;
+    this.loadLinks();
+  }
+
+  clearFilters(): void {
+    this.pageIndex = 1;
+    this.loadLinks();
   }
 
   onView(link: SocialMediaLink): void {

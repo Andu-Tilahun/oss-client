@@ -22,6 +22,7 @@ import {FarmPlotViewComponent} from "../farm-plots/components/farm-plot-view/far
 import {FarmFollowupsModule} from "../farm-followups/farm-followups.module";
 import {UserViewComponent} from "../users/components/user-view/user-view.component";
 import {InvestmentPackageTypeCloseModalComponent} from "../investment-package-types/modals/investment-package-type-close-modal/investment-package-type-close-modal.component";
+import {TractorLoaderComponent} from "../../shared/components/tractor-loader/tractor-loader.component";
 
 @NgModule({
   declarations: [
@@ -51,6 +52,7 @@ import {InvestmentPackageTypeCloseModalComponent} from "../investment-package-ty
         FarmFollowupsModule,
         UserViewComponent,
         InvestmentPackageTypeCloseModalComponent,
+        TractorLoaderComponent,
     ],
 })
 export class InvestmentPackageModule {}

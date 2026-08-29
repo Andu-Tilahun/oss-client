@@ -1,20 +1,17 @@
-<app-modal
+<app-multi-step-form-modal
   [(visible)]="visible"
   title="Create Investment Package"
-  size="lg"
-  [confirmText]="'Create Investment Package'"
-  [confirmLoading]="isLoading"
-  (confirm)="onSubmit()"
-  (cancel)="onCancel()"
+  [steps]="steps"
+  [(currentStep)]="currentStep"
+  size="xxl"
+  [isSubmitting]="isLoading"
+  submitLabel="Create Investment Package"
+  (next)="onNext()"
+  (submitForm)="onSubmit()"
+  (cancelled)="onCancelled()"
   (visibleChange)="visibleChange.emit($event)"
 >
-  <ng-template #modalBody>
-    <app-investment-package-form
-      [farmPlots]="farmPlots"
-      #investmentPackageForm mode="create">
-    </app-investment-package-form>
+  <ng-template #stepBody>
+    <app-investment-package-create-wizard #wizard [currentStep]="currentStep"></app-investment-package-create-wizard>
   </ng-template>
-</app-modal>
-
-
-
+</app-multi-step-form-modal>

@@ -47,6 +47,9 @@
               (clearFilters)="clearFilters()"
             ></app-investment-package-filter>
           </div>
+          <ng-template #emptyState>
+            <app-tractor-loader mode="indeterminate" label="No investment packages published yet"></app-tractor-loader>
+          </ng-template>
         </app-data-table>
       </div>
 

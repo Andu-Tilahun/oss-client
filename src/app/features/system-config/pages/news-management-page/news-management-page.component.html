@@ -10,57 +10,35 @@
 >
   <ng-template #leftContent>
     <div class="p-4">
-      <div class="flex items-center justify-between mb-4">
-        <span class="text-sm text-gray-500">{{ articles.length }} article{{ articles.length !== 1 ? 's' : '' }}</span>
-        <button (click)="openCreate()"
-          class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors">
-          + New Article
-        </button>
-      </div>
-
-      <div *ngIf="loading" class="text-sm text-gray-500 py-4">Loading...</div>
-
-      <div *ngIf="!loading" class="overflow-x-auto rounded-lg border border-gray-200">
-        <table class="w-full text-sm text-left">
-          <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
-            <tr>
-              <th class="px-4 py-3">Title</th>
-              <th class="px-4 py-3">Category</th>
-              <th class="px-4 py-3">Status</th>
-              <th class="px-4 py-3">Published</th>
-              <th class="px-4 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            <tr *ngFor="let article of articles"
-                class="hover:bg-gray-50 cursor-pointer transition-colors"
-                [class.bg-blue-50]="selectedArticle?.id === article.id"
-                (click)="onView(article)">
-              <td class="px-4 py-3 font-medium text-gray-800 max-w-xs truncate">{{ article.title }}</td>
-              <td class="px-4 py-3 text-gray-500">{{ article.category || '—' }}</td>
-              <td class="px-4 py-3">
-                <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium"
-                      [ngClass]="article.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
-                  {{ article.status }}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-gray-500">{{ formatDate(article.publishedAt) }}</td>
-              <td class="px-4 py-3 text-right">
-                <button (click)="openEdit(article); $event.stopPropagation()"
-                  class="text-blue-600 hover:underline text-xs mr-3">Edit</button>
-                <button (click)="onDelete(article.id); $event.stopPropagation()"
-                  [disabled]="deleting === article.id"
-                  class="text-red-500 hover:underline text-xs disabled:opacity-50">
-                  {{ deleting === article.id ? '...' : 'Delete' }}
-                </button>
-              </td>
-            </tr>
-            <tr *ngIf="articles.length === 0">
-              <td colspan="5" class="px-4 py-6 text-center text-sm text-gray-400">No articles yet.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-data-table
+        [columns]="columns"
+        [data]="articles"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showPagination]="true"
+        [showIndex]="true"
+        [rowClickable]="true"
+        [showAddButton]="true"
+        [showEditButton]="false"
+        [showDeleteButton]="false"
+        [rowActions]="rowActions"
+        [noDataMessage]="'No articles yet.'"
+        (pageChange)="onPageChange($event)"
+        (addClick)="openCreate()"
+        (rowClick)="onView($event)"
+      >
+        <div extraTableHeader class="w-full min-w-0">
+          <app-news-filter
+            [(searchText)]="searchText"
+            [(selectedStatus)]="selectedStatus"
+            (filterChange)="onFilterChange()"
+            (searchChange)="onSearch()"
+            (clearFilters)="clearFilters()"
+          ></app-news-filter>
+        </div>
+      </app-data-table>
     </div>
   </ng-template>
 

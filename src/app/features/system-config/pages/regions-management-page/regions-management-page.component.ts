@@ -6,11 +6,16 @@ import { Region } from '../../../regions/models/region.model';
 import { ToastService } from '../../../../shared/toast/toast.service';
 import { PageSplitLayoutComponent } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
 import { RegionViewComponent } from '../../../regions/components/region-view/region-view.component';
+import { FilterBarComponent } from '../../../../shared/components/filter-bar/filter-bar.component';
+import { SharedModule } from '../../../../shared/shared.module';
+import { DataTableColumn } from '../../../../shared/data-table/models/data-table-column.model';
+import { TableQueryParams } from '../../../../shared/data-table/models/table-query-params.model';
+import { PageSplitRightAction } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
 
 @Component({
   selector: 'app-regions-management-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageSplitLayoutComponent, RegionViewComponent],
+  imports: [CommonModule, ReactiveFormsModule, SharedModule, PageSplitLayoutComponent, RegionViewComponent, FilterBarComponent],
   templateUrl: './regions-management-page.component.html',
 })
 export class RegionsManagementPageComponent implements OnInit {
@@ -24,7 +29,21 @@ export class RegionsManagementPageComponent implements OnInit {
   deleting: string | null = null;
   editingId: string | null = null;
 
+  total = 0;
+  pageSize = 10;
+  pageIndex = 1;
+  searchText = '';
+
   form!: FormGroup;
+
+  columns: DataTableColumn<Region>[] = [
+    { header: 'Name', value: r => r.name },
+  ];
+
+  rowActions: PageSplitRightAction<Region>[] = [
+    { id: 'edit', icon: 'edit', title: 'Edit', action: r => this.openEdit(r) },
+    { id: 'delete', icon: 'delete', title: 'Delete', disabled: r => this.deleting === r.id, action: r => this.onDelete(r.id) },
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -42,9 +61,14 @@ export class RegionsManagementPageComponent implements OnInit {
   loadRegions(): void {
     this.loading = true;
     const previousId = this.selectedRegion?.id;
-    this.regionService.filterRegions({ page: 0, size: 200 }).subscribe({
+    this.regionService.filterRegions({
+      searchText: this.searchText || undefined,
+      page: this.pageIndex - 1,
+      size: this.pageSize,
+    }).subscribe({
       next: (page) => {
         this.regions = page.content;
+        this.total = page.totalElements;
         this.loading = false;
         if (this.regions.length === 0) { this.selectedRegion = null; return; }
         if (previousId) {
@@ -56,6 +80,23 @@ export class RegionsManagementPageComponent implements OnInit {
       },
       error: () => { this.loading = false; },
     });
+  }
+
+  onPageChange(params: TableQueryParams): void {
+    this.pageIndex = params.pageIndex;
+    this.pageSize = params.pageSize;
+    this.loadRegions();
+  }
+
+  onSearch(): void {
+    this.pageIndex = 1;
+    this.loadRegions();
+  }
+
+  clearFilters(): void {
+    this.searchText = '';
+    this.pageIndex = 1;
+    this.loadRegions();
   }
 
   onView(region: Region): void {

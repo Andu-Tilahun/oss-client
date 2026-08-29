@@ -1,0 +1,30 @@
+<div *ngIf="!item" class="p-6 text-sm text-gray-400 text-center">Select an image to view details.</div>
+
+<div *ngIf="item">
+  <app-detail-card>
+    <div class="flex items-center justify-between mb-8">
+      <h3 class="text-xl font-bold text-gray-900">{{ item.title }}</h3>
+      <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
+            [ngClass]="item.visible ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-500 border-gray-200'">
+        {{ item.visible ? 'Visible' : 'Hidden' }}
+      </span>
+    </div>
+
+    <div class="rounded-lg overflow-hidden mb-8 bg-gray-50 max-h-80">
+      <img *ngIf="item.kind !== 'VIDEO'" [src]="mediaUrl" [alt]="item.title" class="w-full max-h-80 object-contain" />
+      <video *ngIf="item.kind === 'VIDEO'" [src]="mediaUrl" controls class="w-full max-h-80"></video>
+    </div>
+
+    <hr class="border-gray-200 mb-8" />
+
+    <app-detail-section title="Details">
+      <app-detail-field label="Kind" [value]="item.kind"></app-detail-field>
+      <app-detail-field label="Display Order" [value]="item.displayOrder"></app-detail-field>
+      <app-detail-field label="Visibility" [value]="item.visible ? 'Public' : 'Hidden'"></app-detail-field>
+      <div class="col-span-full">
+        <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Description</p>
+        <p class="text-sm font-medium text-gray-900">{{ item.description }}</p>
+      </div>
+    </app-detail-section>
+  </app-detail-card>
+</div>

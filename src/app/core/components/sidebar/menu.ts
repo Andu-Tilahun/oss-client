@@ -142,6 +142,7 @@ export const MENU: MenuItem[] = [
       { icon: '', label: 'Organization',  route: '/system-config/organization', roles: ['ADMIN'] },
       { icon: '', label: 'News & Events', route: '/system-config/news',         roles: ['ADMIN'] },
       { icon: '', label: 'Social Media',  route: '/system-config/social-media', roles: ['ADMIN'] },
+      { icon: '', label: 'Gallery',       route: '/system-config/gallery',      roles: ['ADMIN'] },
       { icon: '', label: 'Regions',       route: '/system-config/regions',      roles: ['ADMIN'] },
     ],
     expanded: false

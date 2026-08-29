@@ -16,3 +16,12 @@ export interface SocialMediaLinkRequest {
   visible: boolean;
   displayOrder: number;
 }
+
+export interface SocialMediaLinkFilterRequest {
+  searchText?: string;
+  platform?: SocialMediaPlatform;
+  sortBy?: string;
+  sortDirection?: 'ASC' | 'DESC';
+  page: number;
+  size: number;
+}

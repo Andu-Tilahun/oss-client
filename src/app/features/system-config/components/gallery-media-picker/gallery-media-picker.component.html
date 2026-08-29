@@ -1,0 +1,44 @@
+<div class="space-y-3">
+  <div *ngIf="currentPreviewUrl" class="rounded-lg border border-gray-200 overflow-hidden w-40 h-28 bg-gray-50">
+    <img *ngIf="currentPreviewKind !== 'VIDEO'" [src]="currentPreviewUrl" alt="Selected media" class="w-full h-full object-cover" />
+    <video *ngIf="currentPreviewKind === 'VIDEO'" [src]="currentPreviewUrl" muted class="w-full h-full object-cover"></video>
+  </div>
+
+  <div class="flex gap-2">
+    <button type="button" (click)="switchToUpload()"
+      class="px-3 py-1.5 rounded-lg text-xs font-medium border"
+      [ngClass]="mode === 'upload' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'">
+      Upload new
+    </button>
+    <button type="button" (click)="switchToExisting()"
+      class="px-3 py-1.5 rounded-lg text-xs font-medium border"
+      [ngClass]="mode === 'existing' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'">
+      Choose existing
+    </button>
+  </div>
+
+  <div *ngIf="mode === 'upload'">
+    <label
+      class="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg h-24 cursor-pointer text-sm text-gray-500 hover:border-blue-400 hover:text-blue-500 transition-colors"
+      [class.opacity-50]="uploading">
+      <input type="file" accept="image/*,video/*" class="hidden" [disabled]="uploading" (change)="onFileSelected($event)" />
+      {{ uploading ? 'Uploading...' : 'Click to upload an image or video' }}
+    </label>
+  </div>
+
+  <div *ngIf="mode === 'existing'">
+    <div *ngIf="loadingExisting" class="text-sm text-gray-500 py-3">Loading previously uploaded files...</div>
+
+    <div *ngIf="!loadingExisting" class="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto">
+      <button *ngFor="let file of existingFiles" type="button" (click)="selectExisting(file)"
+        class="relative rounded-lg border border-gray-200 overflow-hidden h-20 hover:ring-2 hover:ring-blue-400 transition-all"
+        [title]="file.originalFilename">
+        <img *ngIf="file.contentType?.startsWith('image/')" [src]="file.presignedUrl" [alt]="file.originalFilename" class="w-full h-full object-cover" />
+        <video *ngIf="file.contentType?.startsWith('video/')" [src]="file.presignedUrl" muted class="w-full h-full object-cover"></video>
+      </button>
+      <p *ngIf="existingFiles.length === 0" class="col-span-4 text-sm text-gray-400 text-center py-6">
+        No farm plot images found.
+      </p>
+    </div>
+  </div>
+</div>

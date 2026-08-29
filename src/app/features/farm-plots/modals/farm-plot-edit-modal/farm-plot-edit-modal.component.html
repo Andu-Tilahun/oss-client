@@ -1,20 +1,22 @@
-<app-modal
+<app-multi-step-form-modal
   [(visible)]="visible"
   title="Edit Farm Plot"
-  size="lg"
-  [confirmText]="'Save Changes'"
-  [confirmLoading]="isLoading"
-  [showCancelButton]="true"
-  (confirm)="onSubmit()"
-  (cancel)="onCancel()"
+  [steps]="steps"
+  [(currentStep)]="currentStep"
+  size="xxl"
+  [isSubmitting]="isLoading"
+  submitLabel="Save Changes"
+  (next)="onNext()"
+  (submitForm)="onSubmit()"
+  (cancelled)="onCancelled()"
   (visibleChange)="visibleChange.emit($event)"
 >
-  <ng-template #modalBody>
-    <app-farm-plot-form
-      #farmPlotForm
-      mode="edit"
+  <ng-template #stepBody>
+    <app-farm-plot-edit-wizard
+      #wizard
+      *ngIf="farmPlot"
       [farmPlot]="farmPlot"
-    ></app-farm-plot-form>
+      [currentStep]="currentStep"
+    ></app-farm-plot-edit-wizard>
   </ng-template>
-</app-modal>
-
+</app-multi-step-form-modal>

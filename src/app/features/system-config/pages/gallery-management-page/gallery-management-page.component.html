@@ -1,0 +1,95 @@
+<app-page-split-layout
+  [showLeftTitle]="true"
+  leftTitle="Gallery"
+  [showRightTitle]="true"
+  rightTitle="Image Detail"
+  [rightItem]="selectedItem"
+  [rightEmptyMessage]="'Select an image to view details.'"
+  [showRightEditButton]="true"
+  (rightEdit)="openEdit($event)"
+>
+  <ng-template #leftContent>
+    <div class="p-4">
+      <app-data-table
+        [columns]="columns"
+        [data]="items"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showPagination]="true"
+        [showIndex]="true"
+        [rowClickable]="true"
+        [showAddButton]="true"
+        [showEditButton]="false"
+        [showDeleteButton]="false"
+        [rowActions]="rowActions"
+        [noDataMessage]="'No gallery images yet.'"
+        (pageChange)="onPageChange($event)"
+        (addClick)="openCreate()"
+        (rowClick)="onView($event)"
+      >
+        <div extraTableHeader class="w-full min-w-0">
+          <app-gallery-filter
+            [(searchText)]="searchText"
+            [(selectedKind)]="selectedKind"
+            (filterChange)="onFilterChange()"
+            (searchChange)="onSearch()"
+            (clearFilters)="clearFilters()"
+          ></app-gallery-filter>
+        </div>
+      </app-data-table>
+    </div>
+  </ng-template>
+
+  <ng-template #rightContent let-item>
+    <app-gallery-item-view [item]="item"></app-gallery-item-view>
+  </ng-template>
+</app-page-split-layout>
+
+<!-- Create / Edit Modal -->
+<div *ngIf="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6 max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-gray-800">{{ editingId ? 'Edit Image' : 'Add Gallery Image' }}</h3>
+      <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSave()" class="space-y-3">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Media *</label>
+        <app-gallery-media-picker
+          [currentMediaUuid]="form.value.mediaUuid"
+          [currentKind]="form.value.kind"
+          (mediaSelected)="onMediaSelected($event)">
+        </app-gallery-media-picker>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+        <input formControlName="title" type="text"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+        <textarea formControlName="description" rows="3"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+      </div>
+      <div>
+        <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+          <input formControlName="visible" type="checkbox" class="rounded" />
+          Visible on site
+        </label>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" (click)="closeModal()"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Cancel</button>
+        <button type="submit" [disabled]="saving"
+          class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
