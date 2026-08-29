@@ -68,7 +68,7 @@ function makeComponent() {
   const mockInvestmentPackageService = {
     filterInvestments: vi.fn(() => of(mockPage<InvestmentRecord>([]))),
     filterAgreements: vi.fn(() => of(mockPage<InvestmentAgreement>([]))),
-    filterInvestmentPackages: vi.fn(() => of(mockPage<InvestmentPackage>([]))),
+    filterPublishedInvestmentPackages: vi.fn(() => of(mockPage<InvestmentPackage>([]))),
     getStatusSummary: vi.fn(() => of({fundingStatusCounts: {}, packageStatusCounts: {}})),
   };
   const mockRegionService = {
@@ -157,7 +157,7 @@ describe('InvestorAnalyticsPageComponent', () => {
       mockPackage({id: 'p1', investmentPackageType: 'CROWDFUNDING', expectedInvestorNumber: 10, investorIdList: ['a', 'b', 'c', 'd', 'e']}),
       mockPackage({id: 'p2', investmentPackageType: 'LEASING'}),
     ];
-    mockInvestmentPackageService.filterInvestmentPackages.mockReturnValue(of(mockPage(openPackages)));
+    mockInvestmentPackageService.filterPublishedInvestmentPackages.mockReturnValue(of(mockPage(openPackages)));
 
     component.ngOnInit();
 
@@ -172,7 +172,7 @@ describe('InvestorAnalyticsPageComponent', () => {
       mockPackage({id: 'p2', minimumContribution: 3000}),
       mockPackage({id: 'p3', minimumContribution: 150000}),
     ];
-    mockInvestmentPackageService.filterInvestmentPackages.mockReturnValue(of(mockPage(openPackages)));
+    mockInvestmentPackageService.filterPublishedInvestmentPackages.mockReturnValue(of(mockPage(openPackages)));
 
     component.ngOnInit();
 
@@ -202,7 +202,7 @@ describe('InvestorAnalyticsPageComponent', () => {
       mockPackage({id: 'p1', title: 'With coords', farmPlot: {id: 'plot-1', title: 'Plot', latitude: 9.1, longitude: 40.5} as any}),
       mockPackage({id: 'p2', title: 'No coords', farmPlot: {id: 'plot-2', title: 'Plot 2'} as any}),
     ];
-    mockInvestmentPackageService.filterInvestmentPackages.mockReturnValue(of(mockPage(openPackages)));
+    mockInvestmentPackageService.filterPublishedInvestmentPackages.mockReturnValue(of(mockPage(openPackages)));
 
     component.ngOnInit();
 
