@@ -1,20 +1,21 @@
-<app-modal
+<app-multi-step-form-modal
   [(visible)]="visible"
-  title="Edit Crowd Funding"
-  size="lg"
-  [confirmText]="'Update Investment Package'"
-  [confirmLoading]="isLoading"
-  (confirm)="onSubmit()"
-  (cancel)="onCancel()"
+  [title]="title"
+  [steps]="steps"
+  [(currentStep)]="currentStep"
+  size="xxl"
+  [isSubmitting]="isLoading"
+  submitLabel="Update Investment Package"
+  (next)="onNext()"
+  (submitForm)="onSubmit()"
+  (cancelled)="onCancelled()"
   (visibleChange)="visibleChange.emit($event)"
 >
-  <ng-template #modalBody>
-    <app-investment-package-form
-      #investmentPackageForm
-      mode="edit"
+  <ng-template #stepBody>
+    <app-investment-package-edit-wizard
+      #wizard
+      [currentStep]="currentStep"
       [investmentPackage]="investmentPackage"
-      [farmPlots]="farmPlots"
-    ></app-investment-package-form>
+    ></app-investment-package-edit-wizard>
   </ng-template>
-</app-modal>
-
+</app-multi-step-form-modal>

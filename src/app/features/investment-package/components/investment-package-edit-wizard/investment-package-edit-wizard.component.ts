@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   AbstractControl,
@@ -10,13 +10,13 @@ import {
 } from '@angular/forms';
 import {
   FarmActivity,
+  InvestmentPackage,
   InvestmentPackageCreateRequest,
   InvestmentPackageType,
   InvestmentPaymentMethod,
   WaterSource,
 } from '../../models/investment-package.model';
-import { FarmPlot } from '../../../farm-plots/models/farm-plot.model';
-import { InvestmentPackageService } from '../../services/investment-package.service';
+import { FundingStatus, FUNDING_STATUSES } from '../../../../shared/models/funding-status.model';
 import { SystemConfigService } from '../../../system-config/services/system-config.service';
 import { BankAccount } from '../../../system-config/models/bank-account.model';
 import {
@@ -40,30 +40,28 @@ function endDateAfterDeadlineValidator(control: AbstractControl): ValidationErro
 }
 
 @Component({
-  selector: 'app-investment-package-create-wizard',
+  selector: 'app-investment-package-edit-wizard',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, InvestmentPackagePreviewComponent],
-  templateUrl: './investment-package-create-wizard.component.html',
+  templateUrl: './investment-package-edit-wizard.component.html',
 })
-export class InvestmentPackageCreateWizardComponent implements OnInit {
+export class InvestmentPackageEditWizardComponent implements OnInit, OnChanges {
   @Input() currentStep = 1;
+  @Input() investmentPackage: InvestmentPackage | null = null;
 
   detailsForm: FormGroup;
   datesForm: FormGroup;
   paymentForm: FormGroup;
 
-  farmPlots: FarmPlot[] = [];
-  farmPlotsLoading = false;
   bankAccounts: BankAccount[] = [];
 
-  readonly packageTypes: InvestmentPackageType[] = ['CROWDFUNDING', 'BIDDING', 'LEASING'];
   readonly activities: FarmActivity[] = ['CROPS', 'LIVE_STOCKS', 'AGRO_FORESTRY'];
   readonly waterSources: WaterSource[] = ['IRRIGATION', 'RIVER_ACCESS', 'RAIN_FED'];
   readonly allPaymentMethods: InvestmentPaymentMethod[] = ['CREDIT', 'BANK_TRANSFER', 'CRYPTO'];
+  readonly statuses: FundingStatus[] = FUNDING_STATUSES;
 
   constructor(
     private fb: FormBuilder,
-    private investmentPackageService: InvestmentPackageService,
     private systemConfigService: SystemConfigService,
   ) {
     this.detailsForm = this.createDetailsForm();
@@ -72,26 +70,47 @@ export class InvestmentPackageCreateWizardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadFarmPlots();
     this.systemConfigService.getActiveBankAccounts().subscribe({
       next: (accounts) => { this.bankAccounts = accounts; },
       error: () => {},
     });
+    this.applyTypeValidators(this.investmentPackage?.investmentPackageType ?? 'CROWDFUNDING');
+  }
 
-    this.detailsForm.get('investmentPackageType')?.valueChanges.subscribe((type) => {
-      this.applyTypeValidators(type as InvestmentPackageType);
-    });
-    this.applyTypeValidators(this.detailsForm.get('investmentPackageType')?.value as InvestmentPackageType);
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['investmentPackage'] && this.investmentPackage) {
+      const pkg = this.investmentPackage;
+      this.detailsForm.patchValue({
+        title: pkg.title,
+        farmActivity: pkg.farmActivity,
+        waterSource: pkg.waterSource,
+        description: pkg.description ?? '',
+        remark: pkg.remark ?? '',
+      });
+      this.datesForm.patchValue({
+        startDate: this.toDateInput(pkg.startDate),
+        endDate: this.toDateInput(pkg.endDate),
+        fundingDeadline: this.toDateTimeLocal(pkg.fundingDeadline),
+      });
+      this.paymentForm.patchValue({
+        targetAmount: pkg.targetAmount,
+        minimumContribution: pkg.minimumContribution,
+        expectedInvestorNumber: pkg.expectedInvestorNumber ?? null,
+        fundingStatus: pkg.fundingStatus,
+        allowedPaymentMethods: pkg.allowedPaymentMethods?.length ? pkg.allowedPaymentMethods : ['CRYPTO'],
+        allowedBankAccountIds: pkg.allowedBankAccountIds ?? [],
+      });
+      this.applyTypeValidators(pkg.investmentPackageType ?? 'CROWDFUNDING');
+    }
   }
 
   private createDetailsForm(): FormGroup {
     return this.fb.group({
-      farmPlotId: ['', Validators.required],
       title: ['', [Validators.required, Validators.maxLength(100)]],
-      investmentPackageType: ['CROWDFUNDING' as InvestmentPackageType, Validators.required],
       farmActivity: ['CROPS' as FarmActivity, Validators.required],
       waterSource: ['RAIN_FED' as WaterSource, Validators.required],
       description: [''],
+      remark: [''],
     });
   }
 
@@ -112,6 +131,7 @@ export class InvestmentPackageCreateWizardComponent implements OnInit {
         targetAmount: [null, [Validators.required, Validators.min(0.01)]],
         minimumContribution: [null, [Validators.required, Validators.min(0.01)]],
         expectedInvestorNumber: [null, [Validators.required, Validators.min(1)]],
+        fundingStatus: [FundingStatus.OPEN, Validators.required],
         allowedPaymentMethods: [['CRYPTO'] as InvestmentPaymentMethod[]],
         allowedBankAccountIds: [[] as string[]],
       },
@@ -120,7 +140,7 @@ export class InvestmentPackageCreateWizardComponent implements OnInit {
   }
 
   private targetMustExceedMinimumValidator(group: AbstractControl): ValidationErrors | null {
-    const type = this.detailsForm?.get('investmentPackageType')?.value as InvestmentPackageType;
+    const type = this.investmentPackage?.investmentPackageType;
     const targetAmount = Number(group.get('targetAmount')?.value);
     const minimumContribution = Number(group.get('minimumContribution')?.value);
 
@@ -148,21 +168,8 @@ export class InvestmentPackageCreateWizardComponent implements OnInit {
     this.paymentForm.updateValueAndValidity({ emitEvent: false });
   }
 
-  private loadFarmPlots(): void {
-    this.farmPlotsLoading = true;
-    this.investmentPackageService.getEligibleFarmPlots().subscribe({
-      next: (plots) => {
-        this.farmPlots = plots;
-        this.farmPlotsLoading = false;
-      },
-      error: () => {
-        this.farmPlotsLoading = false;
-      },
-    });
-  }
-
   get isCrowdfunding(): boolean {
-    return this.detailsForm.get('investmentPackageType')?.value === 'CROWDFUNDING';
+    return (this.investmentPackage?.investmentPackageType ?? 'CROWDFUNDING') === 'CROWDFUNDING';
   }
 
   get showBankAccountPicker(): boolean {
@@ -177,8 +184,8 @@ export class InvestmentPackageCreateWizardComponent implements OnInit {
 
     return {
       title: details.title,
-      investmentPackageType: details.investmentPackageType,
-      farmPlotTitle: this.farmPlots.find((p) => p.id === details.farmPlotId)?.title,
+      investmentPackageType: this.investmentPackage?.investmentPackageType,
+      farmPlotTitle: this.investmentPackage?.farmPlot?.title,
       farmActivity: details.farmActivity,
       waterSource: details.waterSource,
       description: details.description,
@@ -188,6 +195,7 @@ export class InvestmentPackageCreateWizardComponent implements OnInit {
       targetAmount: payment.targetAmount,
       minimumContribution: payment.minimumContribution,
       expectedInvestorNumber: payment.expectedInvestorNumber,
+      fundingStatus: payment.fundingStatus,
       allowedPaymentMethods: payment.allowedPaymentMethods,
       allowedBankAccountNames: allowedBankAccountIds
         .map((id) => this.bankAccounts.find((b) => b.id === id)?.bankName)
@@ -264,11 +272,12 @@ export class InvestmentPackageCreateWizardComponent implements OnInit {
     const details = this.detailsForm.getRawValue();
     const dates = this.datesForm.getRawValue();
     const payment = this.paymentForm.getRawValue();
-    const isCrowdfunding = details.investmentPackageType === 'CROWDFUNDING';
+    const type = this.investmentPackage?.investmentPackageType ?? 'CROWDFUNDING';
+    const isCrowdfunding = type === 'CROWDFUNDING';
     const targetAmount = Number(payment.targetAmount);
 
     return {
-      farmPlotId: details.farmPlotId,
+      farmPlotId: this.investmentPackage?.farmPlotId ?? '',
       title: details.title,
       startDate: dates.startDate,
       endDate: dates.endDate,
@@ -276,10 +285,12 @@ export class InvestmentPackageCreateWizardComponent implements OnInit {
       minimumContribution: isCrowdfunding ? Number(payment.minimumContribution) : targetAmount,
       expectedInvestorNumber: isCrowdfunding ? Number(payment.expectedInvestorNumber) : 1,
       fundingDeadline: new Date(dates.fundingDeadline).toISOString(),
-      investmentPackageType: details.investmentPackageType,
+      investmentPackageType: type,
       farmActivity: details.farmActivity,
       waterSource: details.waterSource,
       description: details.description || undefined,
+      remark: details.remark || undefined,
+      fundingStatus: payment.fundingStatus,
       allowedPaymentMethods: payment.allowedPaymentMethods?.length ? payment.allowedPaymentMethods : ['CRYPTO'],
       allowedBankAccountIds: payment.allowedBankAccountIds ?? [],
     };
@@ -287,21 +298,37 @@ export class InvestmentPackageCreateWizardComponent implements OnInit {
 
   reset(): void {
     this.detailsForm.reset({
-      farmPlotId: '',
       title: '',
-      investmentPackageType: 'CROWDFUNDING',
       farmActivity: 'CROPS',
       waterSource: 'RAIN_FED',
       description: '',
+      remark: '',
     });
     this.datesForm.reset({ startDate: '', endDate: '', fundingDeadline: '' });
     this.paymentForm.reset({
       targetAmount: null,
       minimumContribution: null,
       expectedInvestorNumber: null,
+      fundingStatus: FundingStatus.OPEN,
       allowedPaymentMethods: ['CRYPTO'],
       allowedBankAccountIds: [],
     });
     this.applyTypeValidators('CROWDFUNDING');
+  }
+
+  private toDateInput(value: string | null | undefined): string {
+    if (!value) return '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return '';
+    return d.toISOString().slice(0, 10);
+  }
+
+  private toDateTimeLocal(value: string | null | undefined): string {
+    if (!value) return '';
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value)) return value.slice(0, 16);
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return '';
+    return d.toISOString().slice(0, 16);
   }
 }

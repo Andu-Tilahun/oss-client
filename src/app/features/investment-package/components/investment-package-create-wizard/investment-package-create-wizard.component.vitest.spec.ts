@@ -4,8 +4,8 @@ import { FormBuilder } from '@angular/forms';
 import { InvestmentPackageCreateWizardComponent } from './investment-package-create-wizard.component';
 
 function makeComponent() {
-  const mockFarmPlotService = {
-    filterFarmPlots: vi.fn(() => of({ content: [{ id: 'plot-1', title: 'North Field' }] } as any)),
+  const mockInvestmentPackageService = {
+    getEligibleFarmPlots: vi.fn(() => of([{ id: 'plot-1', title: 'North Field' }] as any)),
   };
   const mockSystemConfigService = {
     getActiveBankAccounts: vi.fn(() => of([])),
@@ -13,11 +13,11 @@ function makeComponent() {
 
   const component = new InvestmentPackageCreateWizardComponent(
     new FormBuilder(),
-    mockFarmPlotService as any,
+    mockInvestmentPackageService as any,
     mockSystemConfigService as any,
   );
 
-  return { component, mockFarmPlotService, mockSystemConfigService };
+  return { component, mockInvestmentPackageService, mockSystemConfigService };
 }
 
 function fillDetails(component: InvestmentPackageCreateWizardComponent, overrides: Record<string, any> = {}) {

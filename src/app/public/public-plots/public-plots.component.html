@@ -11,6 +11,7 @@
       [total]="total"
       [pageSize]="pageSize"
       [pageIndex]="pageIndex"
+      [showPagination]="showPagination"
       [showRefreshButton]="false"
       [titleAccessor]="getPackageCardTitle"
       [subtitleAccessor]="getPublicCardSubtitle"
@@ -27,7 +28,7 @@
       (primaryActionClick)="primaryActionClick.emit($event)"
       (secondaryActionClick)="secondaryActionClick.emit($event)"
     >
-      <div class="w-full" extraHeader>
+      <div class="w-full" extraHeader *ngIf="showSearch">
         <app-investment-package-filter
           [showStatus]="false"
           [searchText]="searchText"
@@ -40,5 +41,11 @@
         ></app-investment-package-filter>
       </div>
     </app-public-card-layout>
+
+    <div *ngIf="showMoreButton" class="plots-more-wrap">
+      <button type="button" class="plots-more-btn" (click)="moreClick.emit()">
+        View More
+      </button>
+    </div>
   </div>
 </section>

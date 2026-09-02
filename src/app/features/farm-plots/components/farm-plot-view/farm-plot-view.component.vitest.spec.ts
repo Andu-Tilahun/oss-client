@@ -9,7 +9,7 @@ function mockPlot(overrides: Partial<FarmPlot>): FarmPlot {
 }
 
 function mockPackage(overrides: Partial<InvestmentPackage>): InvestmentPackage {
-  return { id: 'pkg-1', title: 'Package', farmPlotId: 'plot-1' } as InvestmentPackage;
+  return { id: 'pkg-1', title: 'Package', farmPlotId: 'plot-1', ...overrides } as InvestmentPackage;
 }
 
 function makeComponent(opts: { isAdmin?: boolean; packages?: InvestmentPackage[] } = {}) {
@@ -31,7 +31,7 @@ function makeComponent(opts: { isAdmin?: boolean; packages?: InvestmentPackage[]
     mockAuthService as any,
   );
 
-  return { component, mockFarmPlotService, mockInvestmentPackageService, mockAuthService };
+  return { component, mockFarmPlotService, mockInvestmentPackageService, mockAuthService, mockRouter };
 }
 
 describe('FarmPlotViewComponent tabs', () => {
@@ -116,6 +116,37 @@ describe('FarmPlotViewComponent tabs', () => {
     component.ngOnChanges({ plot: {} as any });
 
     expect(component.activeTab).toBe('description');
+  });
+
+  describe('plotInvestmentPackages sort order (timeline)', () => {
+    it('orders packages by funding deadline, soonest/most-recent first', () => {
+      ({ component } = makeComponent({
+        packages: [
+          mockPackage({ id: 'pkg-old', fundingDeadline: '2025-01-01T00:00:00Z' }),
+          mockPackage({ id: 'pkg-new', fundingDeadline: '2027-06-01T00:00:00Z' }),
+          mockPackage({ id: 'pkg-mid', fundingDeadline: '2026-03-01T00:00:00Z' }),
+        ],
+      }));
+      component.plot = mockPlot({});
+
+      component.ngOnChanges({ plot: {} as any });
+
+      expect(component.plotInvestmentPackages.map((p) => p.id)).toEqual(['pkg-new', 'pkg-mid', 'pkg-old']);
+    });
+
+    it('sorts entries with no funding deadline to the end', () => {
+      ({ component } = makeComponent({
+        packages: [
+          mockPackage({ id: 'pkg-none', fundingDeadline: undefined }),
+          mockPackage({ id: 'pkg-dated', fundingDeadline: '2026-03-01T00:00:00Z' }),
+        ],
+      }));
+      component.plot = mockPlot({});
+
+      component.ngOnChanges({ plot: {} as any });
+
+      expect(component.plotInvestmentPackages.map((p) => p.id)).toEqual(['pkg-dated', 'pkg-none']);
+    });
   });
 
   describe('onTabChange', () => {

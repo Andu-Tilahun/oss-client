@@ -1,90 +1,94 @@
-import {CommonModule} from '@angular/common';
-import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
-import {ModalComponent} from '../../../../shared/modals/modal/modal.component';
-import {ToastService} from '../../../../shared/toast/toast.service';
-import {FarmPlotService} from '../../../farm-plots/services/farm-plot.service';
-import {FarmPlot, FarmPlotFilterRequest} from '../../../farm-plots/models/farm-plot.model';
-import {InvestmentPackageService} from '../../services/investment-package.service';
-import {InvestmentPackage, InvestmentPackageCreateRequest} from '../../models/investment-package.model';
-import {InvestmentPackageFormComponent} from '../../components/investment-package-form/investment-package-form.component';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MultiStepFormModalComponent } from '../../../../shared/modals/multi-step-form-modal/multi-step-form-modal.component';
+import { StepConfig } from '../../../../shared/components/stepper/stepper.component';
+import { InvestmentPackageEditWizardComponent } from '../../components/investment-package-edit-wizard/investment-package-edit-wizard.component';
+import { InvestmentPackage, InvestmentPackageCreateRequest } from '../../models/investment-package.model';
+import { InvestmentPackageService } from '../../services/investment-package.service';
+import { ToastService } from '../../../../shared/toast/toast.service';
 
 @Component({
   selector: 'app-investment-package-edit-modal',
   standalone: true,
-  imports: [CommonModule, ModalComponent, InvestmentPackageFormComponent],
+  imports: [CommonModule, MultiStepFormModalComponent, InvestmentPackageEditWizardComponent],
   templateUrl: './investment-package-edit-modal.component.html',
 })
-export class InvestmentPackageEditModalComponent implements OnInit {
+export class InvestmentPackageEditModalComponent {
   @Input() visible = false;
   @Output() visibleChange = new EventEmitter<boolean>();
 
   @Input() investmentPackage: InvestmentPackage | null = null;
   @Output() investmentPackageUpdated = new EventEmitter<void>();
 
-  @ViewChild('investmentPackageForm') investmentPackageForm!: InvestmentPackageFormComponent;
+  @ViewChild('wizard') wizard!: InvestmentPackageEditWizardComponent;
 
-  farmPlots: FarmPlot[] = [];
+  currentStep = 1;
   isLoading = false;
 
+  readonly steps: StepConfig[] = [
+    { label: 'Details', description: 'Title, activity & farm details', clickable: true },
+    { label: 'Dates', description: 'Start, end & funding deadline', clickable: true },
+    { label: 'Payment', description: 'Target, contribution & payment methods', clickable: true },
+  ];
+
   constructor(
-    private farmPlotService: FarmPlotService,
     private investmentPackageService: InvestmentPackageService,
     private toastService: ToastService,
   ) {}
 
-  ngOnInit(): void {
-    this.loadFarmPlots();
+  get title(): string {
+    switch (this.investmentPackage?.investmentPackageType) {
+      case 'LEASING':
+        return 'Edit Leasing Investment Package';
+      case 'BIDDING':
+        return 'Edit Bidding Investment Package';
+      case 'CROWDFUNDING':
+        return 'Edit Crowdfunding Investment Package';
+      default:
+        return 'Edit Investment Package';
+    }
+  }
+
+  onNext(): void {
+    if (this.wizard.isStepValid(this.currentStep)) {
+      this.currentStep++;
+    } else {
+      this.wizard.markStepTouched(this.currentStep);
+    }
   }
 
   onSubmit(): void {
     if (!this.investmentPackage) return;
-    if (!this.investmentPackageForm.isValid()) {
-      this.investmentPackageForm.markAllAsTouched();
-      return;
+
+    for (const step of [1, 2, 3]) {
+      if (!this.wizard.isStepValid(step)) {
+        this.currentStep = step;
+        this.wizard.markStepTouched(step);
+        return;
+      }
     }
 
     this.isLoading = true;
-    const request: InvestmentPackageCreateRequest = this.investmentPackageForm.getValue();
+    const request: InvestmentPackageCreateRequest = this.wizard.getValue();
 
     this.investmentPackageService.updateInvestmentPackage(this.investmentPackage.id, request).subscribe({
       next: () => {
         this.isLoading = false;
         this.visible = false;
         this.visibleChange.emit(false);
+        this.currentStep = 1;
         this.toastService.success('Investment Package updated successfully');
         this.investmentPackageUpdated.emit();
       },
       error: (err) => {
         this.isLoading = false;
-        this.toastService.error(err.message || 'Failed to update crowd funding', 'Update Investment Package');
+        this.toastService.error(err.message || 'Failed to update investment package', 'Update Investment Package');
       },
     });
   }
 
-  onCancel(): void {
-    this.investmentPackageForm.reset();
-  }
-
-  private loadFarmPlots(): void {
-    const filterRequest: FarmPlotFilterRequest = {
-      searchText: undefined,
-      statuses: ['ACTIVE'],
-      soilTypes: undefined,
-      sizeTypes: undefined,
-      sortBy: 'title',
-      sortDirection: 'ASC',
-      page: 0,
-      size: 1000,
-    };
-
-    this.farmPlotService.filterFarmPlots(filterRequest).subscribe({
-      next: (response) => {
-        this.farmPlots = response.content;
-      },
-      error: (error) => {
-        this.toastService.error(error.message || 'Failed to fetch farm plots', 'Load Farm Plots');
-      },
-    });
+  onCancelled(): void {
+    this.currentStep = 1;
+    this.wizard.reset();
   }
 }
-

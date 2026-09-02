@@ -199,7 +199,7 @@
   position: relative;
   display: grid;
   grid-template-columns: 56px 1fr;
-  grid-template-rows: auto auto;
+  align-items: start;
   gap: 0.15rem 0.65rem;
   width: 100%;
   padding: 0.65rem;
@@ -221,7 +221,6 @@
 }
 
 .news-sidebar-thumb {
-  grid-row: 1 / span 2;
   width: 56px;
   height: 56px;
   border-radius: 0.4rem;
@@ -262,19 +261,20 @@
   color: #94a3b8;
 }
 
+.news-sidebar-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.2rem;
+}
+
 .news-sidebar-year {
-  position: absolute;
-  top: 0.55rem;
-  right: 0.55rem;
   font-size: 0.68rem;
   font-weight: 600;
   color: #64748b;
 }
 
 .news-sidebar-tag {
-  position: absolute;
-  bottom: 0.55rem;
-  right: 0.55rem;
   font-size: 0.62rem;
   font-weight: 600;
   color: #64748b;

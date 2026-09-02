@@ -6,6 +6,7 @@ import {
   InvestmentPaymentMethod,
   WaterSource,
 } from '../../models/investment-package.model';
+import { FundingStatus } from '../../../../shared/models/funding-status.model';
 
 export interface InvestmentPackagePreviewData {
   title?: string;
@@ -20,6 +21,7 @@ export interface InvestmentPackagePreviewData {
   targetAmount?: number;
   minimumContribution?: number;
   expectedInvestorNumber?: number;
+  fundingStatus?: FundingStatus;
   allowedPaymentMethods?: InvestmentPaymentMethod[];
   allowedBankAccountNames?: string[];
 }

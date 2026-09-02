@@ -22,6 +22,13 @@ export class PublicPlotsComponent {
   @Input() searchText = '';
   @Input() status: FundingStatus | '' = '';
 
+  /** Set false for a static teaser grid with no search bar (e.g. the public homepage preview). */
+  @Input() showSearch = true;
+  /** Set false to hide the pager footer entirely (e.g. when the caller caps/shows a fixed preview count instead). */
+  @Input() showPagination = true;
+  /** Shows a "View More" CTA below the grid; wire `moreClick` to whatever action more-browsing should trigger (e.g. redirect to login). */
+  @Input() showMoreButton = false;
+
   @Input() getPackageCardTitle: (pkg: InvestmentPackage) => string = (pkg) => pkg.title;
   @Input() getPublicCardSubtitle: (pkg: InvestmentPackage) => string = () => '';
   @Input() getPublicCardDescription: (pkg: InvestmentPackage) => string = () => '';
@@ -38,4 +45,5 @@ export class PublicPlotsComponent {
   @Output() filterChange = new EventEmitter<void>();
   @Output() searchChange = new EventEmitter<void>();
   @Output() clearFilters = new EventEmitter<void>();
+  @Output() moreClick = new EventEmitter<void>();
 }

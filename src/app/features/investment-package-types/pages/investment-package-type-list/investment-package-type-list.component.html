@@ -151,6 +151,12 @@
                   (clearFilters)="clearFilters()"
                 ></app-investment-package-type-filter>
               </div>
+              <ng-template #emptyState>
+                <app-tractor-loader
+                  mode="indeterminate"
+                  [label]="'No ' + (investmentPackageType | lowercase) + ' investment packages published yet'"
+                ></app-tractor-loader>
+              </ng-template>
             </app-data-table>
           </div>
 
@@ -328,7 +334,7 @@
 
 <app-investment-package-edit-modal
   [(visible)]="showEditInvestmentPackageModal"
-  [investmentPackage]="asInvestmentPackage(selectedAgreement)"
+  [investmentPackage]="selectedInvestmentPackageForEdit"
   (investmentPackageUpdated)="onInvestmentPackageUpdated()"
 ></app-investment-package-edit-modal>
 

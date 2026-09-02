@@ -4,26 +4,23 @@
   <app-public-hero (exploreOpportunities)="scrollTo('plots')"></app-public-hero>
 
   <app-public-plots
-    [pagedPackages]="pagedPackages"
+    [pagedPackages]="previewPackages"
     [loadingPackages]="loadingPackages"
-    [total]="total"
-    [pageSize]="pageSize"
-    [pageIndex]="pageIndex"
-    [searchText]="searchText"
+    [total]="previewPackages.length"
+    [pageSize]="maxPreviewPackages"
+    [pageIndex]="1"
+    [showSearch]="false"
+    [showPagination]="false"
+    [showMoreButton]="hasMorePackages"
     [getPackageCardTitle]="getPackageCardTitle"
     [getPublicCardSubtitle]="getPublicCardSubtitle"
     [getPublicCardDescription]="getPublicCardDescription"
     [getPackageThumbnailUrl]="getPackageThumbnailUrl"
     [getPackageThumbnailAlt]="getPackageThumbnailAlt"
     [getPublicCardBadges]="getPublicCardBadges"
-    (pageChange)="onPageChange($event)"
-    (refreshClick)="loadPackages()"
     (primaryActionClick)="openPackageDetail($event)"
     (secondaryActionClick)="openPublicGallery($event)"
-    (searchTextChange)="searchText = $event"
-    (filterChange)="onFilterChange()"
-    (searchChange)="onFilterChange()"
-    (clearFilters)="clearFilters()"
+    (moreClick)="goToLogin()"
   ></app-public-plots>
 
   <app-public-news></app-public-news>

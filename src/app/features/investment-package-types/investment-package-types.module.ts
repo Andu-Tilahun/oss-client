@@ -34,6 +34,7 @@ import {
 import {
   InvestmentPackageDeactivateModalComponent
 } from './modals/investment-package-deactivate-modal/investment-package-deactivate-modal.component';
+import {TractorLoaderComponent} from '../../shared/components/tractor-loader/tractor-loader.component';
 
 @NgModule({
   declarations: [
@@ -64,6 +65,7 @@ import {
     InvestmentPackageTypeCloseModalComponent,
     InvestmentPackageTypeCompleteModalComponent,
     InvestmentPackageDeactivateModalComponent,
+    TractorLoaderComponent,
   ],
 })
 export class InvestmentPackageTypesModule {}

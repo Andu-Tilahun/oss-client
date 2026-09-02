@@ -46,15 +46,13 @@
   <div *ngIf="!plot && !loading" class="text-sm text-gray-500">No farm plot selected.</div>
 
   <ng-container *ngIf="plot && !loading">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
-      <div>
-        <h3 class="text-2xl font-bold text-gray-900">{{ plot.title }}</h3>
-        <p *ngIf="plot.description" class="mt-1 text-sm text-gray-500">{{ plot.description }}</p>
-      </div>
+    <div class="mb-8">
+      <h3 class="text-2xl font-bold text-gray-900">{{ plot.title }}</h3>
+      <p *ngIf="plot.description" class="mt-1 text-sm text-gray-500">{{ plot.description }}</p>
 
       <span
         *ngIf="plot.status"
-        class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
+        class="mt-3 inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
         [ngClass]="statusPillClass(plot.status)"
       >
         {{ plot.status }}
@@ -160,38 +158,50 @@
             <div *ngIf="packagesLoading" class="text-sm text-gray-500">Loading...</div>
             <p *ngIf="!packagesLoading && plotInvestmentPackages.length === 0"
                class="text-sm text-gray-500">No investment options for this plot.</p>
-            <ul *ngIf="!packagesLoading && plotInvestmentPackages.length > 0" class="space-y-2">
-              <li *ngFor="let pkg of plotInvestmentPackages"
-                  class="flex flex-col gap-1.5 rounded-lg border border-gray-100 bg-white px-4 py-3 text-sm cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors"
-                  (click)="navigateToPackage(pkg)">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2 min-w-0">
-                    <span class="shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold bg-indigo-100 text-indigo-700 border border-indigo-200">
-                      {{ pkg.investmentPackageType ?? 'LEASING' }}
-                    </span>
-                    <span class="font-medium text-gray-800 truncate">{{ pkg.title }}</span>
-                  </div>
-                  <div class="flex items-center gap-2 shrink-0 ml-3">
-                    <span class="flex items-center gap-1 text-xs">
-                      <span class="text-gray-400 font-normal">Investment:</span>
-                      <span class="rounded-full px-2 py-0.5 font-medium border" [ngClass]="pkgStatusClass(pkg)">
-                        {{ formatStatus(pkg.packageStatus) }}
-                      </span>
-                    </span>
-                    <span class="flex items-center gap-1 text-xs">
-                      <span class="text-gray-400 font-normal">Funding:</span>
-                      <span class="rounded-full px-2 py-0.5 font-medium border border-blue-200 bg-blue-50 text-blue-700">
-                        {{ formatStatus(pkg.fundingStatus) }}
-                      </span>
-                    </span>
-                  </div>
+            <ol *ngIf="!packagesLoading && plotInvestmentPackages.length > 0">
+              <li *ngFor="let pkg of plotInvestmentPackages; let last = last" class="grid grid-cols-[5rem_1.5rem_1fr] gap-x-3">
+                <div class="text-right text-xs font-medium text-gray-500 pt-3">
+                  {{ pkg.fundingDeadline ? (pkg.fundingDeadline | date:'MMM d, y') : 'No deadline set' }}
                 </div>
-                <div *ngIf="pkg.packageStatus === 'INACTIVE' && pkg.closureReason"
-                     class="rounded-md bg-slate-50 border border-slate-200 px-3 py-2 text-xs text-slate-600">
-                  <span class="font-semibold text-slate-700">Closed:</span> {{ pkg.closureReason }}
+
+                <div class="relative flex justify-center">
+                  <span *ngIf="!last" class="absolute top-0 bottom-0 w-0.5 bg-indigo-100"></span>
+                  <span class="relative z-10 mt-1.5 w-4 h-4 rounded-full border-2 border-white bg-indigo-500 shadow"></span>
+                </div>
+
+                <div
+                  class="min-w-0 mb-4 flex flex-col gap-1.5 rounded-lg border border-gray-100 bg-white px-4 py-3 text-sm cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors"
+                  (click)="navigateToPackage(pkg)"
+                >
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <span class="shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold bg-indigo-100 text-indigo-700 border border-indigo-200">
+                        {{ pkg.investmentPackageType ?? 'LEASING' }}
+                      </span>
+                      <span class="font-medium text-gray-800 truncate">{{ pkg.title }}</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="flex items-center gap-1 text-xs">
+                        <span class="text-gray-400 font-normal">Investment:</span>
+                        <span class="text-xs" [class]="pkgStatusClass(pkg)">
+                          {{ formatStatus(pkg.packageStatus) }}
+                        </span>
+                      </span>
+                      <span class="flex items-center gap-1 text-xs">
+                        <span class="text-gray-400 font-normal">Funding:</span>
+                        <span class="rounded-full px-2 py-0.5 font-medium border border-blue-200 bg-blue-50 text-blue-700">
+                          {{ formatStatus(pkg.fundingStatus) }}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                  <div *ngIf="pkg.packageStatus === 'INACTIVE' && pkg.closureReason"
+                       class="rounded-md bg-slate-50 border border-slate-200 px-3 py-2 text-xs text-slate-600">
+                    <span class="font-semibold text-slate-700">Closed:</span> {{ pkg.closureReason }}
+                  </div>
                 </div>
               </li>
-            </ul>
+            </ol>
           </div>
         </app-detail-section>
       </div>

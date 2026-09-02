@@ -16,6 +16,7 @@ import {ToastService} from '../../../../shared/toast/toast.service';
 import {environment} from '../../../../../environments/environment';
 import {InvestmentPackageService} from '../../../investment-package/services/investment-package.service';
 import {InvestmentPackage} from '../../../investment-package/models/investment-package.model';
+import {packageStatusBadgeClass} from '../../../investment-package/utils/investment-package-status.util';
 import {AuthService} from '../../../auth/services/auth.service';
 import {TabsComponent} from '../../../../shared/tabs/app-tabs/app-tabs.component';
 import {TabItem} from '../../../../shared/tabs/models/tab-item.model';
@@ -195,7 +196,7 @@ export class FarmPlotViewComponent implements OnChanges {
     this.packagesLoading = true;
     this.investmentPackageService.filterInvestmentPackages({ farmPlotId: plotId, page: 0, size: 50 }).subscribe({
       next: (res) => {
-        this.plotInvestmentPackages = res.content;
+        this.plotInvestmentPackages = this.sortByFundingDeadline(res.content);
         this.packagesLoading = false;
         this.recomputeTabs();
       },
@@ -204,6 +205,16 @@ export class FarmPlotViewComponent implements OnChanges {
         this.packagesLoading = false;
         this.recomputeTabs();
       },
+    });
+  }
+
+  /** Soonest/most-recent funding deadline first; entries with no deadline sort to the end. */
+  private sortByFundingDeadline(packages: InvestmentPackage[]): InvestmentPackage[] {
+    return packages.slice().sort((a, b) => {
+      if (!a.fundingDeadline && !b.fundingDeadline) return 0;
+      if (!a.fundingDeadline) return 1;
+      if (!b.fundingDeadline) return -1;
+      return new Date(b.fundingDeadline).getTime() - new Date(a.fundingDeadline).getTime();
     });
   }
 
@@ -311,7 +322,10 @@ export class FarmPlotViewComponent implements OnChanges {
 
   navigateToPackage(pkg: InvestmentPackage): void {
     const typeSegment = (pkg.investmentPackageType ?? 'LEASING').toLowerCase();
-    this.router.navigate(['/investment-package-types', typeSegment]);
+    const tab = pkg.packageStatus === 'INACTIVE' || pkg.packageStatus === 'COMPLITED' ? 'archived' : 'published';
+    this.router.navigate(['/investment-package-types', typeSegment], {
+      queryParams: {packageId: pkg.id, tab},
+    });
   }
 
   formatStatus(status: string | undefined): string {
@@ -321,12 +335,8 @@ export class FarmPlotViewComponent implements OnChanges {
       .replace(/\b\w/g, c => c.toUpperCase());
   }
 
-  pkgStatusClass(pkg: InvestmentPackage): Record<string, boolean> {
-    return {
-      'bg-green-50 text-green-700 border-green-200': pkg.packageStatus === 'ACTIVE' || !pkg.packageStatus,
-      'bg-slate-50 text-slate-700 border-slate-200': pkg.packageStatus === 'INACTIVE',
-      'bg-blue-50 text-blue-700 border-blue-200': pkg.packageStatus === 'IN_USE',
-    };
+  pkgStatusClass(pkg: InvestmentPackage): string {
+    return packageStatusBadgeClass(pkg.packageStatus);
   }
 
   get canManageStatus(): boolean {

@@ -56,7 +56,7 @@
       <!-- Archived Investments -->
       <div *ngIf="adminActiveTab === 'archived'">
         <app-data-table
-          [columns]="columns"
+          [columns]="archivedColumns"
           [data]="archivedPackages"
           [loading]="archivedLoading"
           [total]="archivedTotal"

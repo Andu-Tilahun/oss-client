@@ -15,6 +15,7 @@ import {
 } from '../../models/investment-package.model';
 import {FundingStatus} from '../../../../shared/models/funding-status.model';
 import {TabItem} from '../../../../shared/tabs/models/tab-item.model';
+import {packageStatusBadgeClass} from '../../utils/investment-package-status.util';
 
 @Component({
   selector: 'app-investment-package-list',
@@ -57,7 +58,7 @@ export class InvestmentPackageListComponent implements OnInit {
 
   columns: DataTableColumn<InvestmentPackage>[] = [
     {header: 'Title', value: (c) => c.title, cellClass: 'block max-w-[200px] truncate'},
-    {header: 'Package Status', value: (c) => c.packageStatus ?? 'ACTIVE'},
+    {header: 'Package Status', value: (c) => c.packageStatus ?? 'ACTIVE', cellClass: (c) => packageStatusBadgeClass(c.packageStatus)},
     {header: 'Funding Status', value: (c) => c.fundingStatus, defaultVisible: false},
     {header: 'Type', value: (c) => this.formatPackageType(c.investmentPackageType)},
     {header: 'Deadline', value: (c) => this.formatDeadline(c.fundingDeadline), defaultVisible: false},
@@ -65,11 +66,18 @@ export class InvestmentPackageListComponent implements OnInit {
     {header: 'Minimum', value: (c) => this.formatAmount(c.minimumContribution)},
   ];
 
+  archivedColumns: DataTableColumn<InvestmentPackage>[] = [
+    {header: 'Title', value: (c) => c.title, cellClass: 'block max-w-[200px] truncate'},
+    {header: 'Package Status', value: (c) => c.packageStatus ?? 'ACTIVE', cellClass: (c) => packageStatusBadgeClass(c.packageStatus)},
+    {header: 'Type', value: (c) => this.formatPackageType(c.investmentPackageType)},
+    {header: 'Funding Status', value: (c) => c.fundingStatus, defaultVisible: false},
+    {header: 'Deadline', value: (c) => this.formatDeadline(c.fundingDeadline), defaultVisible: false},
+  ];
+
   tabs: TabItem[] = [
     {key: 'detail', label: 'Detail'},
     {key: 'farm-plot', label: 'FarmPlot'},
-    {key: 'extension-worker', label: 'Extension Worker'},
-    {key: 'follow-up', label: 'FollowUp'},
+    {key: 'investor', label: 'Investor'},
   ];
 
   rightActions: PageSplitRightAction<InvestmentPackage>[];
@@ -132,6 +140,43 @@ export class InvestmentPackageListComponent implements OnInit {
     this.refreshCurrentTab(this.selectedInvestmentPackage?.id);
   }
 
+  /** Monotonic stage progression: Detail/FarmPlot/Investor always show, then Contract once
+   *  funding has closed (or a contract already exists), then Extension Worker once the
+   *  contract is signed, then FollowUp once a worker is assigned. Structural evidence
+   *  (agreementId/extensionWorker existing) always wins over the current fundingStatus/status
+   *  label, since a deal can later be force-closed to a terminal status well after it actually
+   *  reached a later stage — otherwise archived packages would lose tabs they'd already earned. */
+  private computeTabs(): TabItem[] {
+    const pkg = this.selectedInvestmentPackage;
+    const hasExtensionWorker = !!pkg?.extensionWorker;
+    const hasAgreement = !!pkg?.agreementId;
+    const contractSigned = hasAgreement && (pkg?.status === 'ACTIVE' || hasExtensionWorker);
+    const fundingClosedOrLater =
+      pkg?.fundingStatus === 'CLOSED' || pkg?.fundingStatus === 'FUNDED' || hasAgreement;
+
+    const result: TabItem[] = [
+      {key: 'detail', label: 'Detail'},
+      {key: 'farm-plot', label: 'FarmPlot'},
+      {key: 'investor', label: 'Investor'},
+    ];
+
+    if (fundingClosedOrLater) {
+      result.push({key: 'contract', label: 'Contract'});
+    }
+    if (contractSigned) {
+      result.push({key: 'extension-worker', label: 'Extension Worker', badge: hasExtensionWorker ? undefined : 1});
+    }
+    if (hasExtensionWorker) {
+      const followUpCount = pkg?.followUpDtoList?.length ?? 0;
+      result.push({key: 'follow-up', label: 'FollowUp', badge: followUpCount === 0 ? 1 : undefined});
+    }
+    return result;
+  }
+
+  private recomputeTabs(): void {
+    this.tabs = this.computeTabs();
+  }
+
   /** Single entry point for every initial load and post-mutation refresh; dispatches to
    *  whichever tab is currently active so the other tab reloads lazily on next visit. */
   refreshCurrentTab(previousId?: string | null): void {
@@ -163,6 +208,7 @@ export class InvestmentPackageListComponent implements OnInit {
         this.publishedLoading = false;
         if (this.adminActiveTab !== 'published') return;
         this.selectFromList(this.publishedPackages, previousId);
+        this.recomputeTabs();
       },
       error: (error) => {
         this.publishedLoading = false;
@@ -181,6 +227,7 @@ export class InvestmentPackageListComponent implements OnInit {
         this.archivedLoading = false;
         if (this.adminActiveTab !== 'archived') return;
         this.selectFromList(this.archivedPackages, previousId);
+        this.recomputeTabs();
       },
       error: (error) => {
         this.archivedLoading = false;
@@ -248,6 +295,7 @@ export class InvestmentPackageListComponent implements OnInit {
   onView(c: InvestmentPackage): void {
     this.selectedInvestmentPackage = {...c};
     this.showCreateInvestmentModal = false;
+    this.recomputeTabs();
   }
 
   onEdit(c: InvestmentPackage): void {

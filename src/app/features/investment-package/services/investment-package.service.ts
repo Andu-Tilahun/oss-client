@@ -20,6 +20,7 @@ import {
   InvestorAgreeResponseRequest,
 } from '../models/investment-package.model';
 import {AssignExtensionWorkerRequest, ChangeExtensionWorkerRequest} from "../../assign-extension-worker-request";
+import {FarmPlot} from '../../farm-plots/models/farm-plot.model';
 
 @Injectable({providedIn: 'root'})
 export class InvestmentPackageService {
@@ -59,6 +60,11 @@ export class InvestmentPackageService {
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/filter/archived`,
       request,
     );
+  }
+
+  /** Farm plots the admin can pick when creating a new investment package. */
+  getEligibleFarmPlots(): Observable<FarmPlot[]> {
+    return this.httpService.get<FarmPlot[]>(`${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/eligible-farm-plots`);
   }
 
   create(request: InvestmentPackageCreateRequest): Observable<ApiResponse<InvestmentPackage>> {

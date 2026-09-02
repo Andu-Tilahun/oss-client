@@ -23,6 +23,7 @@ import {
 import {AuthService} from '../../../auth/services/auth.service';
 import {TabItem} from "../../../../shared/tabs/models/tab-item.model";
 import {environment} from '../../../../../environments/environment';
+import {packageStatusBadgeClass} from '../../../investment-package/utils/investment-package-status.util';
 
 @Component({
   selector: 'app-investment-package-type-list',
@@ -79,6 +80,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   showCreateModal = false;
   showEditModal = false;
   showEditInvestmentPackageModal = false;
+  selectedInvestmentPackageForEdit: InvestmentPackage | null = null;
   showCloseModal = false;
   closing = false;
   closeReason = '';
@@ -180,9 +182,23 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   }
 
   private computeTabs(): TabItem[] {
-    const contractSigned = this.selectedAgreementStatus === 'ACTIVE';
-    const isWinnerAnnounced = this.selectedAgreement?.fundingStatus === 'CLOSED' && contractSigned;
+    // Synchronous, monotonic stage signals — once true these stay true as the deal progresses
+    // (fundingStatus moving CLOSED -> FUNDED must not make earlier-stage tabs disappear).
+    // `status` (not the async-fetched agreement status) mirrors the same field the
+    // "Assign Extension Worker" row action already trusts for "contract signed". Once a worker
+    // is actually assigned that's on its own proof the contract was signed, even once `status`
+    // has moved on past 'ACTIVE' (e.g. it's absent entirely on a COMPLITED archived package).
+    // A deal can later be force-closed to a terminal fundingStatus (e.g. FAILED/deactivated)
+    // well after it actually had a contract, worker, and follow-ups — so "has a contract stage
+    // been reached" must OR in the structural evidence (agreementId existing) rather than trust
+    // fundingStatus alone, or the Contract tab would vanish on exactly those archived packages.
     const hasExtensionWorker = !!this.selectedAgreement?.extensionWorker;
+    const hasAgreement = !!this.selectedAgreement?.agreementId;
+    const contractSigned = hasAgreement && (this.selectedAgreement?.status === 'ACTIVE' || hasExtensionWorker);
+    const fundingClosedOrLater =
+      this.selectedAgreement?.fundingStatus === 'CLOSED' ||
+      this.selectedAgreement?.fundingStatus === 'FUNDED' ||
+      hasAgreement;
     const isLosingBidder = this.isLosingBidder;
 
     const result: TabItem[] = [
@@ -205,7 +221,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
       result.splice(investorIdx + 1, 0, {key: 'payment', label: 'Payment'});
     }
 
-    if (this.isAdmin && this.selectedAgreement?.fundingStatus === 'CLOSED') {
+    if (this.isAdmin && fundingClosedOrLater) {
       result.push({key: 'contract', label: 'Contract'});
     } else if (
       this.isInvestorUser && !isLosingBidder &&
@@ -215,7 +231,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
       result.push({key: 'contract', label: 'Contract'});
     }
 
-    if (isWinnerAnnounced && !isLosingBidder) {
+    if (contractSigned && !isLosingBidder) {
       result.push({
         key: 'extension-worker',
         label: 'Extension Worker',
@@ -285,7 +301,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
       {header: 'Target', value: (l) => this.formatAmount(l.targetAmount)},
     ];
     this.columns = [...base, {header: 'Funding Status', value: (l) => l.fundingStatus}];
-    this.archivedColumns = [...base, {header: 'Package Status', value: (l) => l.packageStatus ?? 'ACTIVE'}];
+    this.archivedColumns = [...base, {header: 'Package Status', value: (l) => l.packageStatus ?? 'ACTIVE', cellClass: (l) => packageStatusBadgeClass(l.packageStatus)}];
   }
 
   private truncateText(value: string | undefined | null, max = 15): string {
@@ -588,7 +604,22 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
     this.buildTableRowActions();
     this.recomputeTabs();
-    this.refreshCurrentTab();
+
+    const queryParams = this.route.snapshot.queryParamMap;
+    const deepLinkPackageId = queryParams.get('packageId');
+    const deepLinkTab = queryParams.get('tab');
+    if (deepLinkPackageId) {
+      if (deepLinkTab === 'archived' || deepLinkTab === 'published') {
+        this.adminActiveTab = deepLinkTab;
+      }
+      if (deepLinkTab === 'archived') {
+        this.investorActiveTab = 'history';
+        this.extensionWorkerActiveTab = 'history';
+      }
+      this.refreshCurrentTab(deepLinkPackageId);
+    } else {
+      this.refreshCurrentTab();
+    }
   }
 
   private resetListStateForPackageTypeChange(): void {
@@ -1039,6 +1070,11 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
   onEditPackage(lease: InvestmentPackageTypeAgreement): void {
     this.selectedAgreement = {...lease};
+    // Computed once here (not inline in the template) so the edit modal gets a stable
+    // object reference — an inline `asInvestmentPackage(selectedAgreement)` binding would
+    // create a new object on every change-detection cycle, re-triggering the wizard's
+    // ngOnChanges pre-population and silently discarding whatever the admin just typed.
+    this.selectedInvestmentPackageForEdit = this.asInvestmentPackage(lease);
     this.showCloseModal = false;
     this.showEditInvestmentPackageModal = true;
   }

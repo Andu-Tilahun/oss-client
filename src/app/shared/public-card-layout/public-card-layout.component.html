@@ -30,7 +30,7 @@
     {{ noDataMessage }}
   </div>
 
-  <div *ngIf="data.length > 0" class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+  <div *ngIf="data.length > 0" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
     <article
       class="public-card"
       *ngFor="let item of data; trackBy: trackByIndex"
@@ -80,7 +80,7 @@
   </div>
 
   <div *ngIf="showPagination && data.length > 0" class="mt-4 rounded-2xl border border-slate-100 bg-white/80 px-5 py-3">
-    <div class="flex flex-col items-center justify-center gap-3 text-center">
+    <div class="flex flex-row flex-wrap items-center justify-center gap-x-6 gap-y-2 text-center">
       <div class="flex items-center justify-center space-x-2">
         <label class="text-sm text-slate-600">Show</label>
         <select

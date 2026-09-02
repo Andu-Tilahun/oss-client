@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CompanyProfile } from '../../features/farm-company/models/company-profile.model';
 import { CompanyProfileService } from '../../features/farm-company/services/company-profile.service';
-import { TableQueryParams } from '../../shared/data-table/models/table-query-params.model';
 import { PageResponse } from '../../shared/models/api-response.model';
 import { environment } from '../../../environments/environment';
 import { RequestType } from '../../core/services/http.service';
@@ -33,9 +32,10 @@ export class PublicWebsiteComponent implements OnInit, OnDestroy {
   private readonly initialLoadSize = 500;
   private fragmentSubscription?: { unsubscribe: () => void };
 
+  readonly maxPreviewPackages = 8;
+
   packages: InvestmentPackage[] = [];
-  filteredPackages: InvestmentPackage[] = [];
-  pagedPackages: InvestmentPackage[] = [];
+  previewPackages: InvestmentPackage[] = [];
   company: CompanyProfile | null = null;
   selectedPackage: InvestmentPackage | null = null;
 
@@ -46,11 +46,9 @@ export class PublicWebsiteComponent implements OnInit, OnDestroy {
   galleryImageUrls: string[] = [];
   galleryTitle = 'Farm Plot Gallery';
 
-  total = 0;
-  pageIndex = 1;
-  pageSize = 10;
-
-  searchText = '';
+  get hasMorePackages(): boolean {
+    return this.packages.length > this.maxPreviewPackages;
+  }
 
   readonly getPackageCardTitle = (pkg: InvestmentPackage): string => pkg.title;
   readonly getPackageThumbnailAlt = (pkg: InvestmentPackage): string => `${pkg.title} thumbnail`;
@@ -95,14 +93,12 @@ export class PublicWebsiteComponent implements OnInit, OnDestroy {
         this.packages = (response.content ?? []).filter(
           (pkg) => pkg.fundingStatus === 'OPEN' && pkg.packageStatus !== 'INACTIVE' && pkg.packageStatus !== 'COMPLITED',
         );
-        this.applyClientFilters();
+        this.previewPackages = this.packages.slice(0, this.maxPreviewPackages);
         this.loadingPackages = false;
       },
       error: () => {
         this.packages = [];
-        this.filteredPackages = [];
-        this.pagedPackages = [];
-        this.total = 0;
+        this.previewPackages = [];
         this.loadingPackages = false;
       },
     });
@@ -125,23 +121,6 @@ export class PublicWebsiteComponent implements OnInit, OnDestroy {
     });
   }
 
-  onFilterChange(): void {
-    this.pageIndex = 1;
-    this.applyClientFilters();
-  }
-
-  clearFilters(): void {
-    this.searchText = '';
-    this.pageIndex = 1;
-    this.applyClientFilters();
-  }
-
-  onPageChange(params: TableQueryParams): void {
-    this.pageIndex = params.pageIndex;
-    this.pageSize = params.pageSize;
-    this.applyPagination();
-  }
-
   openPackageDetail(pkg: InvestmentPackage): void {
     this.selectedPackage = pkg;
   }
@@ -157,7 +136,7 @@ export class PublicWebsiteComponent implements OnInit, OnDestroy {
     this.galleryLoading = true;
     this.galleryImageUrls = [];
 
-    this.farmPlotService.getPublicFarmPlotGalleryByPlotId(plotId).subscribe({
+    this.farmPlotService.getPublicFarmPlotGallery(plotId).subscribe({
       next: (gallery) => {
         this.galleryImageUrls = gallery
           .map((item) => (item.imageUuid ? `${this.storageApiUrl}/${item.imageUuid}` : null))
@@ -193,27 +172,6 @@ export class PublicWebsiteComponent implements OnInit, OnDestroy {
     if ((sectionId === 'contact' || sectionId === 'about') && !this.company && !this.loadingCompany) {
       this.loadCompany();
     }
-  }
-
-  private applyClientFilters(): void {
-    const search = this.searchText.trim().toLowerCase();
-    this.filteredPackages = this.packages.filter((pkg) => {
-      const matchesSearch =
-        !search ||
-        pkg.title.toLowerCase().includes(search) ||
-        (pkg.farmPlot?.title ?? '').toLowerCase().includes(search) ||
-        (pkg.farmPlot?.description ?? '').toLowerCase().includes(search) ||
-        (pkg.remark ?? '').toLowerCase().includes(search);
-      return matchesSearch;
-    });
-    this.total = this.filteredPackages.length;
-    this.applyPagination();
-  }
-
-  private applyPagination(): void {
-    const startIndex = (this.pageIndex - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.pagedPackages = this.filteredPackages.slice(startIndex, endIndex);
   }
 
   private formatAmount(value: number | undefined): string {

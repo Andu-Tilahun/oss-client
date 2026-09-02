@@ -48,10 +48,11 @@
               <div class="news-sidebar-text">
                 <h5>{{ item.title }}</h5>
                 <p class="news-sidebar-excerpt">{{ item.excerpt }}</p>
+                <div class="news-sidebar-meta-row">
+                  <span class="news-sidebar-year">{{ item.year }}</span>
+                  <span class="news-sidebar-tag">{{ item.category }}</span>
+                </div>
               </div>
-
-              <span class="news-sidebar-year">{{ item.year }}</span>
-              <span class="news-sidebar-tag">{{ item.category }}</span>
             </button>
           </li>
         </ul>

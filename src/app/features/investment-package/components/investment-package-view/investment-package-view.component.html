@@ -20,8 +20,8 @@
         <div class="flex flex-col items-center gap-1">
           <span class="text-xs text-gray-400 font-medium">Package</span>
           <span
-            class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
-            [ngClass]="packageStatusPillClass(investmentPackage.packageStatus)"
+            class="text-xs font-medium"
+            [class]="packageStatusPillClass(investmentPackage.packageStatus)"
           >
             {{ investmentPackage.packageStatus || '-' }}
           </span>
