@@ -6,6 +6,7 @@ import {
   InvestmentPackageStatus,
   InvestmentPackageType,
   InvestmentPaymentStatus,
+  InvestmentStatus,
   WaterSource,
 } from "../../investment-package/models/investment-package.model";
 import {FundingStatus} from "../../../shared/models/funding-status.model";
@@ -86,6 +87,8 @@ export interface InvestmentPackageTypeFilterRequest {
   searchText?: string;
   statuses?: FundingStatus[];
   packageStatuses?: InvestmentPackageStatus[];
+  excludeMyInvestmentStatuses?: InvestmentStatus[];
+  includeMyInvestmentStatuses?: InvestmentStatus[];
   paymentStatuses?: InvestmentPaymentStatus[];
   soilTypes?: FarmPlotSoilType[];
   investmentPackageType?: InvestmentPackageType;

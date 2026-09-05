@@ -12,7 +12,7 @@ function mockPackage(overrides: Partial<InvestmentPackage>): InvestmentPackage {
   return { id: 'pkg-1', title: 'Package', farmPlotId: 'plot-1', ...overrides } as InvestmentPackage;
 }
 
-function makeComponent(opts: { isAdmin?: boolean; packages?: InvestmentPackage[] } = {}) {
+function makeComponent(opts: { isAdmin?: boolean; isInvestor?: boolean; packages?: InvestmentPackage[] } = {}) {
   const mockFarmPlotService = {
     getFarmPlotGallery: vi.fn(() => of([])),
   };
@@ -21,7 +21,10 @@ function makeComponent(opts: { isAdmin?: boolean; packages?: InvestmentPackage[]
     filterInvestmentPackages: vi.fn(() => of({ content: opts.packages ?? [] } as any)),
   };
   const mockRouter = { navigate: vi.fn() };
-  const mockAuthService = { isAdmin: vi.fn(() => opts.isAdmin ?? true) };
+  const mockAuthService = {
+    isAdmin: vi.fn(() => opts.isAdmin ?? true),
+    isInvestor: vi.fn(() => opts.isInvestor ?? false),
+  };
 
   const component = new FarmPlotViewComponent(
     mockFarmPlotService as any,
@@ -68,6 +71,25 @@ describe('FarmPlotViewComponent tabs', () => {
     component.ngOnChanges({ plot: {} as any });
 
     expect(component.tabs.map((t) => t.key)).toEqual(['description', 'investment-history']);
+  });
+
+  it('shows only the description tab for an investor, regardless of plot status', () => {
+    ({ component } = makeComponent({ isAdmin: false, isInvestor: true }));
+    component.plot = mockPlot({ status: 'ACTIVE' });
+
+    component.ngOnChanges({ plot: {} as any });
+
+    expect(component.tabs.map((t) => t.key)).toEqual(['description']);
+  });
+
+  it('never fetches investment packages for an investor', () => {
+    const { component: c, mockInvestmentPackageService } = makeComponent({ isInvestor: true });
+    c.plot = mockPlot({});
+
+    c.ngOnChanges({ plot: {} as any });
+
+    expect(mockInvestmentPackageService.filterInvestmentPackages).not.toHaveBeenCalled();
+    expect(c.plotInvestmentPackages).toEqual([]);
   });
 
   it('shows a badge on the investment-history tab once packages load, and no badge when there are none', () => {

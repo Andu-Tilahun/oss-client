@@ -24,7 +24,7 @@
 
     <app-investment-package-detail-panel
       *ngIf="effectiveAgreement && !loading"
-      [investmentPackage]="asInvestmentPackage(effectiveAgreement)"
+      [investmentPackage]="effectiveInvestmentPackage"
       [investmentPackageType]="investmentPackageType"
       [refreshKey]="effectiveRefreshKey"
       [tabs]="effectiveTabs"

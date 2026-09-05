@@ -6,23 +6,53 @@ import { BankAccount } from '../../models/bank-account.model';
 import { ToastService } from '../../../../shared/toast/toast.service';
 import { PageSplitLayoutComponent } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
 import { BankAccountViewComponent } from '../../components/bank-account-view/bank-account-view.component';
+import { SharedModule } from '../../../../shared/shared.module';
+import { DataTableColumn } from '../../../../shared/data-table/models/data-table-column.model';
+import { ColumnType } from '../../../../shared/data-table/models/column-types.model';
+import { TableQueryParams } from '../../../../shared/data-table/models/table-query-params.model';
+import { PageSplitRightAction } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
+import { BankAccountFilterComponent } from '../../components/bank-account-filter/bank-account-filter.component';
 
 @Component({
   selector: 'app-bank-accounts-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageSplitLayoutComponent, BankAccountViewComponent],
+  imports: [CommonModule, ReactiveFormsModule, SharedModule, PageSplitLayoutComponent, BankAccountViewComponent, BankAccountFilterComponent],
   templateUrl: './bank-accounts-page.component.html',
 })
 export class BankAccountsPageComponent implements OnInit {
   accounts: BankAccount[] = [];
+  allFiltered: BankAccount[] = [];
+  displayedAccounts: BankAccount[] = [];
   loading = true;
   showModal = false;
   saving = false;
+  togglingId: string | null = null;
   deletingId: string | null = null;
   editingId: string | null = null;
   selectedAccount: BankAccount | null = null;
 
+  searchText = '';
+  total = 0;
+  pageSize = 10;
+  pageIndex = 1;
+
   form!: FormGroup;
+
+  columns: DataTableColumn<BankAccount>[] = [
+    { header: 'Bank Name', value: a => a.bankName, cellClass: 'font-medium text-gray-900' },
+    { header: 'Account Number', value: a => a.accountNumber, cellClass: 'font-mono text-xs' },
+    { header: 'Account Holder', value: a => a.accountHolderName },
+    {
+      header: 'Status', columnType: ColumnType.CHECK_BOX,
+      defaultValue: a => a.active, disabled: a => this.togglingId === a.id,
+      columnAction: a => this.onToggleActive(a),
+    },
+  ];
+
+  rowActions: PageSplitRightAction<BankAccount>[] = [
+    { id: 'edit', icon: 'edit', title: 'Edit', action: a => this.openEdit(a) },
+    { id: 'delete', icon: 'delete', title: 'Delete', disabled: a => this.deletingId === a.id, action: a => this.onDelete(a.id) },
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -51,6 +81,7 @@ export class BankAccountsPageComponent implements OnInit {
       next: (accounts) => {
         this.accounts = accounts;
         this.loading = false;
+        this.applyFilter();
         if (accounts.length === 0) { this.selectedAccount = null; return; }
         const match = accounts.find(a => a.id === previousId);
         this.selectedAccount = match ? { ...match } : { ...accounts[0] };
@@ -60,6 +91,40 @@ export class BankAccountsPageComponent implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  private applyFilter(): void {
+    const q = (this.searchText || '').toLowerCase().trim();
+    this.allFiltered = q
+      ? this.accounts.filter(a =>
+          a.bankName.toLowerCase().includes(q) ||
+          a.accountNumber.toLowerCase().includes(q) ||
+          a.accountHolderName.toLowerCase().includes(q))
+      : [...this.accounts];
+    this.total = this.allFiltered.length;
+    this.updateDisplayedPage();
+  }
+
+  private updateDisplayedPage(): void {
+    const start = (this.pageIndex - 1) * this.pageSize;
+    this.displayedAccounts = this.allFiltered.slice(start, start + this.pageSize);
+  }
+
+  onPageChange(params: TableQueryParams): void {
+    this.pageIndex = params.pageIndex;
+    this.pageSize = params.pageSize;
+    this.updateDisplayedPage();
+  }
+
+  onSearch(): void {
+    this.pageIndex = 1;
+    this.applyFilter();
+  }
+
+  clearFilters(): void {
+    this.searchText = '';
+    this.pageIndex = 1;
+    this.applyFilter();
   }
 
   onView(account: BankAccount): void {
@@ -148,6 +213,7 @@ export class BankAccountsPageComponent implements OnInit {
   }
 
   onToggleActive(account: BankAccount): void {
+    this.togglingId = account.id;
     const request = {
       bankName:          account.bankName,
       accountNumber:     account.accountNumber,
@@ -159,8 +225,14 @@ export class BankAccountsPageComponent implements OnInit {
       displayOrder:      account.displayOrder,
     };
     this.systemConfigService.updateBankAccount(account.id, request).subscribe({
-      next: () => this.loadAccounts(),
-      error: (err) => this.toastService.error(err.message || 'Failed to update status'),
+      next: () => {
+        this.togglingId = null;
+        this.loadAccounts();
+      },
+      error: (err) => {
+        this.togglingId = null;
+        this.toastService.error(err.message || 'Failed to update status');
+      },
     });
   }
 }

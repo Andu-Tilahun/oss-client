@@ -29,6 +29,9 @@ describe('HeaderComponent', () => {
           provide: NotificationLogService,
           useValue: {
             getNotifications: () => of(emptyPage),
+            unreadCount$: of(0),
+            refreshUnreadCount: () => of(0),
+            clearUnreadCount: () => {},
           },
         },
         {

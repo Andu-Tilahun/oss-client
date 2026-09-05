@@ -135,3 +135,29 @@ describe('InvestmentPackageListComponent stage-gated tabs', () => {
     expect(tabKeys(component)).toEqual(['detail', 'farm-plot', 'investor', 'contract', 'extension-worker', 'follow-up']);
   });
 });
+
+describe('InvestmentPackageListComponent mutation refresh handlers', () => {
+  it('onAgreementCreated refreshes the current tab and bumps detailRefreshKey', () => {
+    const { component, mockInvestmentPackageService } = makeComponent();
+    component.onView(mockPackage({}));
+    mockInvestmentPackageService.filterPublishedInvestmentPackages.mockClear();
+    const keyBefore = component.detailRefreshKey;
+
+    component.onAgreementCreated();
+
+    expect(component.detailRefreshKey).toBe(keyBefore + 1);
+    expect(mockInvestmentPackageService.filterPublishedInvestmentPackages).toHaveBeenCalled();
+  });
+
+  it('onCandidatesChosen refreshes the current tab and bumps detailRefreshKey', () => {
+    const { component, mockInvestmentPackageService } = makeComponent();
+    component.onView(mockPackage({}));
+    mockInvestmentPackageService.filterPublishedInvestmentPackages.mockClear();
+    const keyBefore = component.detailRefreshKey;
+
+    component.onCandidatesChosen();
+
+    expect(component.detailRefreshKey).toBe(keyBefore + 1);
+    expect(mockInvestmentPackageService.filterPublishedInvestmentPackages).toHaveBeenCalled();
+  });
+});

@@ -74,133 +74,6 @@
     <!-- Investor viewing their own lease: show only their own profile, matched by id. -->
     <ng-container *ngIf="isInvestorRole">
 
-      <!-- BIDDING: chosen investor payment receipt section -->
-      <ng-container *ngIf="isBiddingType && isChosenBidder">
-
-        <!-- PENDING (or REJECTED and not yet re-submitted): upload form -->
-        <div *ngIf="(ownInvestmentRecord?.status === 'PENDING' || ownInvestmentRecord?.status === 'REJECTED') && !paymentSubmitted"
-             class="rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-4">
-          <!-- Rejection header when re-uploading -->
-          <div *ngIf="ownInvestmentRecord?.status === 'REJECTED'"
-               class="rounded-lg border border-red-200 bg-red-50 p-3 space-y-2">
-            <div class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <div>
-                <p class="text-sm font-semibold text-red-800">Receipt rejected.</p>
-                <p class="text-sm text-red-700">The admin reviewed your receipt and requested a re-upload.</p>
-              </div>
-            </div>
-            <div *ngIf="ownInvestmentRecord?.rejectionReason"
-                 class="border-t border-red-200 pt-2 text-sm text-red-700 italic">
-              Admin note: "{{ ownInvestmentRecord!.rejectionReason }}"
-            </div>
-          </div>
-          <!-- View previously submitted receipt when re-uploading -->
-          <button
-            *ngIf="ownInvestmentRecord?.status === 'REJECTED' && ownInvestmentRecord?.attachmentId"
-            type="button"
-            class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-red-300 text-red-700 text-sm hover:bg-red-100 transition-colors"
-            (click)="openSingleAttachmentPreview(ownInvestmentRecord!.attachmentId!)"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-            </svg>
-            View Previously Submitted Receipt
-          </button>
-          <!-- Normal header when first submitting -->
-          <div *ngIf="ownInvestmentRecord?.status === 'PENDING'">
-            <p class="text-sm font-semibold text-amber-800">Congratulations! You have been selected.</p>
-            <p class="text-sm text-amber-700 mt-1">Please upload your payment receipt to complete the process.</p>
-          </div>
-          <!-- Payment method confirmation (read-only) -->
-          <div *ngIf="ownInvestmentRecord as rec" class="rounded-lg border border-amber-300 bg-white p-3 space-y-1 text-sm">
-            <p class="font-medium text-gray-700">Payment Method on Record</p>
-            <p class="text-gray-900">{{ formatPaymentMethod(rec.paymentMethod) }}</p>
-            <ng-container *ngIf="rec.paymentMethod === 'BANK_TRANSFER'">
-              <ng-container *ngIf="getBankAccountById(rec.bankAccountId) as bank">
-                <p class="text-gray-500 text-xs">{{ bank.bankName }} · {{ bank.accountNumber }}</p>
-                <p class="text-gray-500 text-xs">{{ bank.accountHolderName }}</p>
-              </ng-container>
-              <p *ngIf="rec.paymentReference" class="text-gray-500 text-xs font-mono">Ref: {{ rec.paymentReference }}</p>
-            </ng-container>
-          </div>
-          <app-document-upload
-            label="Payment receipt"
-            [required]="true"
-            [currentFileId]="paymentReceiptAttachmentId || undefined"
-            accept="image/*,.pdf"
-            (fileUploaded)="paymentReceiptAttachmentId = $event"
-            (fileRemoved)="paymentReceiptAttachmentId = null"
-          ></app-document-upload>
-          <button
-            type="button"
-            class="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            [disabled]="!paymentReceiptAttachmentId || submittingPayment"
-            (click)="submitBidPayment()"
-          >
-            {{ submittingPayment ? 'Submitting...' : 'Submit Payment Receipt' }}
-          </button>
-        </div>
-
-        <!-- PAID or just submitted: waiting for approval -->
-        <div *ngIf="ownInvestmentRecord?.status === 'PAID' || paymentSubmitted"
-             class="rounded-lg border border-green-200 bg-green-50 p-4 space-y-3">
-          <div class="flex items-center gap-3">
-            <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <div>
-              <p class="text-sm font-semibold text-green-800">Payment receipt submitted.</p>
-              <p class="text-sm text-green-700">The admin will review your receipt and approve it.</p>
-            </div>
-          </div>
-          <!-- Receipt view button — shown when attachment ID is available -->
-          <button
-            *ngIf="effectiveBiddingAttachmentId"
-            type="button"
-            class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-green-300 text-green-700 text-sm hover:bg-green-100 transition-colors"
-            (click)="openSingleAttachmentPreview(effectiveBiddingAttachmentId!)"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-            </svg>
-            View My Receipt
-          </button>
-        </div>
-
-        <!-- ACCEPTED: payment approved -->
-        <div *ngIf="ownInvestmentRecord?.status === 'ACCEPTED'"
-             class="rounded-lg border border-blue-200 bg-blue-50 p-4 space-y-3">
-          <div class="flex items-center gap-3">
-            <svg class="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <div>
-              <p class="text-sm font-semibold text-blue-800">Payment approved.</p>
-              <p class="text-sm text-blue-700">Your payment has been reviewed and approved by the admin.</p>
-            </div>
-          </div>
-          <!-- Receipt view button — shown when attachment ID is available -->
-          <button
-            *ngIf="ownInvestmentRecord?.attachmentId"
-            type="button"
-            class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-blue-300 text-blue-700 text-sm hover:bg-blue-100 transition-colors"
-            (click)="openSingleAttachmentPreview(ownInvestmentRecord!.attachmentId!)"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-            </svg>
-            View My Receipt
-          </button>
-        </div>
-
-      </ng-container>
-
       <!-- BIDDING: not selected as the winner -->
       <div *ngIf="isLosingBidder" class="rounded-lg border border-gray-200 bg-gray-50 p-4">
         <p class="text-sm font-semibold text-gray-800">You were not selected as the winning bidder.</p>
@@ -559,7 +432,10 @@
           [ngClass]="isCandidateSelected(record.investorId)
             ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
             : 'border-gray-200 bg-white hover:border-blue-200'"
-          (click)="toggleCandidate(record.investorId)"
+          [class.opacity-50]="isCandidateLocked(record)"
+          [class.grayscale]="isCandidateLocked(record)"
+          [class.pointer-events-none]="isCandidateLocked(record)"
+          (click)="isCandidateLocked(record) ? null : toggleCandidate(record.investorId)"
         >
           <!-- Selected checkmark -->
           <div
@@ -578,6 +454,7 @@
               name="winning-investor"
               [checked]="isCandidateSelected(record.investorId)"
               (click)="$event.stopPropagation(); toggleCandidate(record.investorId)"
+              [disabled]="isCandidateLocked(record)"
               class="mt-0.5 flex-shrink-0 h-4 w-4"
             />
             <input
@@ -585,7 +462,7 @@
               type="checkbox"
               [checked]="isCandidateSelected(record.investorId)"
               (click)="$event.stopPropagation(); toggleCandidate(record.investorId)"
-              [disabled]="!isCrowdfundingType && !canConfirmCandidates"
+              [disabled]="isCandidateLocked(record) || (!isCrowdfundingType && !canConfirmCandidates)"
               class="mt-0.5 flex-shrink-0 h-4 w-4"
             />
             <img
@@ -637,7 +514,7 @@
           *ngIf="biddingCandidates.length > 0"
           type="button"
           class="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          [disabled]="selectedCandidateIds.length === 0 || choosingCandidates || !canConfirmCandidates || (isCrowdfundingType && isWinnerChange)"
+          [disabled]="selectedCandidateIds.length === 0 || choosingCandidates || !canConfirmCandidates || (isCrowdfundingType && isWinnerChange) || hasPaidOrAcceptedCandidate"
           (click)="openChooseWinnerModal()"
         >
           {{ isBiddingType ? 'Confirm Winner' : 'Confirm Winners' }}
@@ -1203,6 +1080,133 @@
   </div>
 
   <div *ngIf="activeTab === 'payment' && hasTab('payment')" class="space-y-4">
+
+    <!-- BIDDING: chosen investor payment receipt section -->
+    <ng-container *ngIf="isBiddingType && isChosenBidder">
+
+      <!-- PENDING (or REJECTED and not yet re-submitted): upload form -->
+      <div *ngIf="(ownInvestmentRecord?.status === 'PENDING' || ownInvestmentRecord?.status === 'REJECTED') && !paymentSubmitted"
+           class="rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-4">
+        <!-- Rejection header when re-uploading -->
+        <div *ngIf="ownInvestmentRecord?.status === 'REJECTED'"
+             class="rounded-lg border border-red-200 bg-red-50 p-3 space-y-2">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+              <p class="text-sm font-semibold text-red-800">Receipt rejected.</p>
+              <p class="text-sm text-red-700">The admin reviewed your receipt and requested a re-upload.</p>
+            </div>
+          </div>
+          <div *ngIf="ownInvestmentRecord?.rejectionReason"
+               class="border-t border-red-200 pt-2 text-sm text-red-700 italic">
+            Admin note: "{{ ownInvestmentRecord!.rejectionReason }}"
+          </div>
+        </div>
+        <!-- View previously submitted receipt when re-uploading -->
+        <button
+          *ngIf="ownInvestmentRecord?.status === 'REJECTED' && ownInvestmentRecord?.attachmentId"
+          type="button"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-red-300 text-red-700 text-sm hover:bg-red-100 transition-colors"
+          (click)="openSingleAttachmentPreview(ownInvestmentRecord!.attachmentId!)"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+          </svg>
+          View Previously Submitted Receipt
+        </button>
+        <!-- Normal header when first submitting -->
+        <div *ngIf="ownInvestmentRecord?.status === 'PENDING'">
+          <p class="text-sm font-semibold text-amber-800">Congratulations! You have been selected.</p>
+          <p class="text-sm text-amber-700 mt-1">Please upload your payment receipt to complete the process.</p>
+        </div>
+        <!-- Payment method confirmation (read-only) -->
+        <div *ngIf="ownInvestmentRecord as rec" class="rounded-lg border border-amber-300 bg-white p-3 space-y-1 text-sm">
+          <p class="font-medium text-gray-700">Payment Method on Record</p>
+          <p class="text-gray-900">{{ formatPaymentMethod(rec.paymentMethod) }}</p>
+          <ng-container *ngIf="rec.paymentMethod === 'BANK_TRANSFER'">
+            <ng-container *ngIf="getBankAccountById(rec.bankAccountId) as bank">
+              <p class="text-gray-500 text-xs">{{ bank.bankName }} · {{ bank.accountNumber }}</p>
+              <p class="text-gray-500 text-xs">{{ bank.accountHolderName }}</p>
+            </ng-container>
+            <p *ngIf="rec.paymentReference" class="text-gray-500 text-xs font-mono">Ref: {{ rec.paymentReference }}</p>
+          </ng-container>
+        </div>
+        <app-document-upload
+          label="Payment receipt"
+          [required]="true"
+          [currentFileId]="paymentReceiptAttachmentId || undefined"
+          accept="image/*,.pdf"
+          (fileUploaded)="paymentReceiptAttachmentId = $event"
+          (fileRemoved)="paymentReceiptAttachmentId = null"
+        ></app-document-upload>
+        <button
+          type="button"
+          class="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="!paymentReceiptAttachmentId || submittingPayment"
+          (click)="submitBidPayment()"
+        >
+          {{ submittingPayment ? 'Submitting...' : 'Submit Payment Receipt' }}
+        </button>
+      </div>
+
+      <!-- PAID or just submitted: waiting for approval -->
+      <div *ngIf="ownInvestmentRecord?.status === 'PAID' || paymentSubmitted"
+           class="rounded-lg border border-green-200 bg-green-50 p-4 space-y-3">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div>
+            <p class="text-sm font-semibold text-green-800">Payment receipt submitted.</p>
+            <p class="text-sm text-green-700">The admin will review your receipt and approve it.</p>
+          </div>
+        </div>
+        <!-- Receipt view button — shown when attachment ID is available -->
+        <button
+          *ngIf="effectiveBiddingAttachmentId"
+          type="button"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-green-300 text-green-700 text-sm hover:bg-green-100 transition-colors"
+          (click)="openSingleAttachmentPreview(effectiveBiddingAttachmentId!)"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+          View My Receipt
+        </button>
+      </div>
+
+      <!-- ACCEPTED: payment approved -->
+      <div *ngIf="ownInvestmentRecord?.status === 'ACCEPTED'"
+           class="rounded-lg border border-blue-200 bg-blue-50 p-4 space-y-3">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div>
+            <p class="text-sm font-semibold text-blue-800">Payment approved.</p>
+            <p class="text-sm text-blue-700">Your payment has been reviewed and approved by the admin.</p>
+          </div>
+        </div>
+        <!-- Receipt view button — shown when attachment ID is available -->
+        <button
+          *ngIf="ownInvestmentRecord?.attachmentId"
+          type="button"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-blue-300 text-blue-700 text-sm hover:bg-blue-100 transition-colors"
+          (click)="openSingleAttachmentPreview(ownInvestmentRecord!.attachmentId!)"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+          View My Receipt
+        </button>
+      </div>
+
+    </ng-container>
 
     <!-- Always-visible submitted receipt card — shown regardless of approval/rejection status -->
     <div *ngIf="isChosenCrowdfundingInvestor && effectiveCrowdfundingAttachmentId"

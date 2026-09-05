@@ -104,6 +104,7 @@ export class InvestmentPackageListComponent implements OnInit {
         title: 'Edit',
         visible: (c) => this.isAdmin
           && c.fundingStatus !== 'CLOSED'
+          && c.packageStatus !== 'APPLIED'
           && c.packageStatus !== 'IN_USE'
           && c.packageStatus !== 'INACTIVE'
           && !(c.investorIdList && c.investorIdList.length > 0),
@@ -350,6 +351,16 @@ export class InvestmentPackageListComponent implements OnInit {
   }
 
   onInvestmentPackageCompleted(): void {
+    this.detailRefreshKey++;
+    this.refreshCurrentTab(this.selectedInvestmentPackage?.id);
+  }
+
+  onCandidatesChosen(): void {
+    this.detailRefreshKey++;
+    this.refreshCurrentTab(this.selectedInvestmentPackage?.id);
+  }
+
+  onAgreementCreated(): void {
     this.detailRefreshKey++;
     this.refreshCurrentTab(this.selectedInvestmentPackage?.id);
   }

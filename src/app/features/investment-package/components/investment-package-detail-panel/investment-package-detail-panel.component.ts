@@ -176,9 +176,7 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
         this.submittingCrowdfundingPayment = false;
         this.crowdfundingPaymentSubmitted = false;
       }
-      if (this.isChosenBidder && this.ownBidRecordPackageId !== this.investmentPackage?.id) {
-        this.loadOwnBidRecord();
-      }
+      this.maybeLoadOwnBidRecord();
       if (!this.isInvestorRole && this.activeTab === 'investor') {
         this.maybeLoadClosedLeaseInvestors();
       }
@@ -188,6 +186,10 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     }
     if (changes['packageInvestments']) {
       this.maybeLoadInvestorRecordAttachmentMetadata();
+      // isChosenBidder depends on packageInvestments, which loads separately from (and often
+      // after) investmentPackage — re-check here too, or a chosen bidder whose investor record
+      // arrives late would never get their ownBidRecordId populated.
+      this.maybeLoadOwnBidRecord();
     }
     if (changes['refreshKey'] && this.forcedTab && this.hasTab(this.forcedTab)) {
       this.onTabChange(this.forcedTab);
@@ -230,7 +232,11 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   }
 
   get canChangeExtensionWorker(): boolean {
-    return this.authService.isAdmin() && !!this.investmentPackage?.extensionWorker;
+    return this.authService.isAdmin()
+      && !!this.investmentPackage?.extensionWorker
+      && this.investmentPackage?.packageStatus !== 'COMPLITED'
+      && !(this.investmentPackage?.fundingStatus === FundingStatus.FAILED
+        && this.investmentPackage?.packageStatus === 'INACTIVE');
   }
 
   get canInvestorAgreeOnContract(): boolean {
@@ -480,6 +486,19 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     return !!this.investmentPackage?.attachmentIdList?.length && this.investmentPackage?.paymentStatus === 'PENDING';
   }
 
+  /** True for every candidate except the already-committed winner, once any candidate has reached
+   *  PAID/ACCEPTED/ACTIVE — used to grey out and disable the rest of the selection grid. */
+  isCandidateLocked(record: InvestmentRecord): boolean {
+    return this.hasPaidOrAcceptedCandidate
+      && record.status !== 'PAID' && record.status !== 'ACCEPTED' && record.status !== 'ACTIVE';
+  }
+
+  /** Once any candidate has submitted (or had approved) a payment receipt — or gone on to sign
+   *  the contract (ACTIVE), even further committed — the winner can no longer be changed. */
+  get hasPaidOrAcceptedCandidate(): boolean {
+    return this.packageInvestments.some(r => r.status === 'PAID' || r.status === 'ACCEPTED' || r.status === 'ACTIVE');
+  }
+
   get canCreateAgreement(): boolean {
     if (this.isCrowdfundingType) {
       const ids = this.investmentPackage?.investorIdList ?? [];
@@ -536,7 +555,12 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     const investmentPackageId = this.investmentPackage?.id;
     const farmPlotId = this.investmentPackage?.farmPlotId || this.investmentPackage?.farmPlot?.id;
     const agreementId = this.investmentPackage?.agreementId;
-    if (!investmentPackageId || !farmPlotId || !agreementId || !this.selectedExtensionWorkerId) {
+    if (!investmentPackageId || !farmPlotId || !agreementId) {
+      this.toastService.error('Package data is incomplete — please refresh and try again.');
+      return;
+    }
+    if (!this.selectedExtensionWorkerId) {
+      this.toastService.error('Please select an extension worker first.');
       return;
     }
 
@@ -985,6 +1009,12 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
         this.toastService.error(err.message || 'Failed to sign contract');
       },
     });
+  }
+
+  private maybeLoadOwnBidRecord(): void {
+    if (this.isChosenBidder && this.ownBidRecordPackageId !== this.investmentPackage?.id) {
+      this.loadOwnBidRecord();
+    }
   }
 
   private loadOwnBidRecord(): void {

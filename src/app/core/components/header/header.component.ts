@@ -12,6 +12,7 @@ import {
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {CommonModule} from '@angular/common';
 import {Router, RouterModule} from '@angular/router';
+import {Subscription, interval} from 'rxjs';
 import {switchMap, take} from 'rxjs/operators';
 import {NotificationLogService} from '../../../features/notifications/services/notification.service';
 import {NotificationLog} from '../../../features/notifications/models/notification.model';
@@ -41,6 +42,8 @@ export class HeaderComponent implements OnInit {
     requestType: RequestType.NON_BLOCKING,
     skipAuthRedirect: true,
   };
+  private static readonly UNREAD_POLL_INTERVAL_MS = 30000;
+  private pollSubscription?: Subscription;
 
   /** When true, the mobile navigation drawer is open (for aria-expanded). */
   @Input() mobileNavOpen = false;
@@ -55,9 +58,15 @@ export class HeaderComponent implements OnInit {
   previewLoading = false;
   previewError: string | null = null;
   /** Total count from a lightweight request (for badge). */
-  badgeTotal: number | null = null;
+  badgeTotal = 0;
 
   ngOnInit(): void {
+    this.notificationService.unreadCount$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((count) => {
+        this.badgeTotal = count;
+      });
+
     this.authService.currentUser$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((user) => {
@@ -65,10 +74,24 @@ export class HeaderComponent implements OnInit {
         if (user) {
           this.refreshBadgeCount();
           this.loadOrgBranding();
+          this.startUnreadPolling();
         } else {
           this.clearNotificationState();
+          this.stopUnreadPolling();
         }
       });
+  }
+
+  private startUnreadPolling(): void {
+    this.stopUnreadPolling();
+    this.pollSubscription = interval(HeaderComponent.UNREAD_POLL_INTERVAL_MS)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.refreshBadgeCount());
+  }
+
+  private stopUnreadPolling(): void {
+    this.pollSubscription?.unsubscribe();
+    this.pollSubscription = undefined;
   }
 
   private loadOrgBranding(): void {
@@ -98,7 +121,7 @@ export class HeaderComponent implements OnInit {
   }
 
   private clearNotificationState(): void {
-    this.badgeTotal = null;
+    this.notificationService.clearUnreadCount();
     this.previewItems = [];
     this.previewTotal = 0;
     this.previewError = null;
@@ -125,25 +148,15 @@ export class HeaderComponent implements OnInit {
 
   private refreshBadgeCount(): void {
     this.authService.ensureValidSession().pipe(
-      switchMap(() => this.notificationService.getUnreadCount(this.notificationPreviewOptions)),
+      switchMap(() => this.notificationService.refreshUnreadCount(this.notificationPreviewOptions)),
       take(1),
-    ).subscribe({
-      next: (count) => {
-        this.badgeTotal = count ?? 0;
-      },
-      error: () => {
-        this.badgeTotal = null;
-      },
-    });
+    ).subscribe({ error: () => {} });
   }
 
   onNotificationClick(notification: NotificationLog): void {
     this.notificationService.markAsRead(notification.id, this.notificationPreviewOptions).subscribe({
       next: () => {
         notification.isRead = true;
-        if (this.badgeTotal !== null && this.badgeTotal > 0) {
-          this.badgeTotal--;
-        }
       },
     });
     this.showNotificationPanel = false;

@@ -180,7 +180,7 @@ export class InvestmentPackageService {
   }
 
   changeExtensionWorker(request: ChangeExtensionWorkerRequest): Observable<InvestmentPackage> {
-    return this.httpService.post<InvestmentPackage>(
+    return this.httpService.put<InvestmentPackage>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/assign-extension-worker/change`,
       request,
     );

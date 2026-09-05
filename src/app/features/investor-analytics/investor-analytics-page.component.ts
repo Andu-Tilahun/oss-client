@@ -63,6 +63,7 @@ const FUNDING_STATUS_COLORS: Record<string, string> = {
 const PACKAGE_STATUS_COLORS: Record<string, string> = {
   ACTIVE: '#22C55E',
   INACTIVE: '#94A3B8',
+  APPLIED: '#F59E0B',
   IN_USE: '#0EA5E9',
   COMPLITED: '#4F46E5',
 };

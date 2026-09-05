@@ -102,6 +102,8 @@
       [refreshKey]="detailRefreshKey"
       [tabs]="tabs"
       (extensionWorkerAssigned)="onExtensionWorkerAssigned($event)"
+      (candidatesChosen)="onCandidatesChosen()"
+      (agreementCreated)="onAgreementCreated()"
       (completed)="onInvestmentPackageCompleted()"
     ></app-investment-package-detail-panel>
     </ng-template>

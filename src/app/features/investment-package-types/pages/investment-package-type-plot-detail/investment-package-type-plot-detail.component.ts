@@ -60,6 +60,13 @@ export class InvestmentPackageTypePlotDetailComponent implements OnInit, OnChang
   internalPackageInvestments: InvestmentRecord[] = [];
   internalPackageInvestmentsLoading = false;
 
+  // Computed only when the `agreement` input actually changes (see syncEffectiveInvestmentPackage()),
+  // instead of calling asInvestmentPackage() directly in the template — that would rebuild a new object
+  // reference on every change-detection cycle regardless of whether agreement changed, which breaks the
+  // child panel's own change-tracking (it keys off investmentPackage.id to avoid wiping in-progress form
+  // state like a selected extension worker).
+  effectiveInvestmentPackage: InvestmentPackage | null = null;
+
   private readonly defaultTabs: TabItem[] = [
     {key: 'detail', label: 'Detail'},
     {key: 'farm-plot', label: 'FarmPlot'},
@@ -140,6 +147,13 @@ export class InvestmentPackageTypePlotDetailComponent implements OnInit, OnChang
     if (changes['mode'] && !changes['mode'].firstChange) {
       this.initializeForMode();
     }
+    if (changes['agreement']) {
+      this.syncEffectiveInvestmentPackage();
+    }
+  }
+
+  private syncEffectiveInvestmentPackage(): void {
+    this.effectiveInvestmentPackage = this.asInvestmentPackage(this.effectiveAgreement);
   }
 
   @HostListener('window:resize')
@@ -179,6 +193,7 @@ export class InvestmentPackageTypePlotDetailComponent implements OnInit, OnChang
     this.investmentPackageTypeService.getById(this.routeId).subscribe({
       next: (res) => {
         this.agreement = (res as unknown as InvestmentPackageTypeAgreement) ?? null;
+        this.syncEffectiveInvestmentPackage();
         this.loading = false;
       },
       error: () => {
@@ -260,6 +275,7 @@ export class InvestmentPackageTypePlotDetailComponent implements OnInit, OnChang
     }
 
     this.internalRefreshKey++;
+    this.reloadAgreement();
   }
 
   onAgreementCreated(): void {
@@ -269,6 +285,17 @@ export class InvestmentPackageTypePlotDetailComponent implements OnInit, OnChang
     }
 
     this.internalRefreshKey++;
+    this.reloadAgreement();
+  }
+
+  private reloadAgreement(): void {
+    if (!this.routeId) return;
+    this.investmentPackageTypeService.getById(this.routeId).subscribe({
+      next: (res) => {
+        this.agreement = (res as unknown as InvestmentPackageTypeAgreement) ?? null;
+        this.syncEffectiveInvestmentPackage();
+      },
+    });
   }
 
   onInvestClicked(): void {

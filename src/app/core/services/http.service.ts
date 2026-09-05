@@ -1,4 +1,4 @@
-import {Observable, of, switchMap, throwError} from 'rxjs';
+import {Observable, of, switchMap, throwError, TimeoutError} from 'rxjs';
 import {
   HttpClient,
   HttpContext,
@@ -8,7 +8,7 @@ import {
   HttpParams,
 } from '@angular/common/http';
 import {environment} from '../../../environments/environment';
-import {catchError, map, take} from 'rxjs/operators';
+import {catchError, map, take, timeout} from 'rxjs/operators';
 import {ApiResponse} from '../../shared/models/api-response.model';
 import {ToastService} from "../../shared/toast/toast.service";
 import {Injectable, Injector} from "@angular/core";
@@ -29,6 +29,10 @@ const defaultRequestOption: RequestOption = {
   requestType: RequestType.BLOCKING,
   skipAuthRedirect: false,
 };
+
+// A request that hangs (e.g. the backend restarting mid-request) would otherwise sit pending
+// forever with no error and no feedback — this forces it to fail visibly instead.
+const DEFAULT_TIMEOUT_MS = 30000;
 
 export const REQUEST_TYPE = new HttpContextToken(() => RequestType.BLOCKING);
 export const SKIP_AUTH_REDIRECT = new HttpContextToken(() => false);
@@ -77,6 +81,7 @@ export class HttpService {
             context: httpContext,
           })
           .pipe(
+            timeout(DEFAULT_TIMEOUT_MS),
             map(response => this.extractData(response)),
             catchError(error => this.handleErrorResponse(error, httpContext)),
           ),
@@ -100,6 +105,7 @@ export class HttpService {
             context: httpContext,
           })
           .pipe(
+            timeout(DEFAULT_TIMEOUT_MS),
             map(response => this.extractData(response)),
             catchError(error => this.handleErrorResponse(error, httpContext)),
           ),
@@ -123,6 +129,7 @@ export class HttpService {
             context: httpContext,
           })
           .pipe(
+            timeout(DEFAULT_TIMEOUT_MS),
             map(response => this.extractData(response)),
             catchError(error => this.handleErrorResponse(error, httpContext)),
           ),
@@ -146,6 +153,7 @@ export class HttpService {
             context: httpContext,
           })
           .pipe(
+            timeout(DEFAULT_TIMEOUT_MS),
             map(response => this.extractData(response)),
             catchError(error => this.handleErrorResponse(error, httpContext)),
           ),
@@ -168,6 +176,7 @@ export class HttpService {
             context: httpContext,
           })
           .pipe(
+            timeout(DEFAULT_TIMEOUT_MS),
             map(response => this.extractData(response)),
             catchError(error => this.handleErrorResponse(error, httpContext)),
           ),
@@ -204,6 +213,14 @@ export class HttpService {
     httpContext: HttpContext,
   ): Observable<never> {
     let errorMessage = 'An error occurred';
+    if (error instanceof TimeoutError) {
+      errorMessage = 'Request timed out — please try again.';
+      const requestType = httpContext.get(REQUEST_TYPE);
+      if (requestType !== RequestType.NON_BLOCKING) {
+        this.toastService.error(errorMessage);
+      }
+      return throwError(() => new Error(errorMessage));
+    }
     if (error instanceof HttpErrorResponse) {
       if (error.error?.error?.message) {
         errorMessage = error.error.error.message;

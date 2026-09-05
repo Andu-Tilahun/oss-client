@@ -207,16 +207,19 @@ export class InvestmentPackageTypeListComponent implements OnInit {
       {key: 'investor', label: 'Investor'},
     ];
 
-    // CROWDFUNDING: show Payment tab for chosen investor (PENDING = needs to pay; PAID = submitted; REJECTED = must re-upload)
-    const isChosenCrowdfundingInvestor =
+    // CROWDFUNDING/BIDDING: show Payment tab for a chosen investor who owes (or has submitted)
+    // proof of payment (PENDING = needs to pay; PAID = submitted; REJECTED = must re-upload;
+    // ACCEPTED = approved) — the detail panel's own Payment-tab content picks between the
+    // CROWDFUNDING and BIDDING blocks itself.
+    const isChosenInvestorAwaitingPayment =
       this.isInvestorUser &&
-      this.investmentPackageType === 'CROWDFUNDING' &&
+      (this.investmentPackageType === 'CROWDFUNDING' || this.investmentPackageType === 'BIDDING') &&
       (this.investorBidRecord?.status === 'PENDING' ||
        this.investorBidRecord?.status === 'PAID' ||
        this.investorBidRecord?.status === 'REJECTED' ||
        this.investorBidRecord?.status === 'ACCEPTED');
 
-    if (isChosenCrowdfundingInvestor) {
+    if (isChosenInvestorAwaitingPayment) {
       const investorIdx = result.findIndex(t => t.key === 'investor');
       result.splice(investorIdx + 1, 0, {key: 'payment', label: 'Payment'});
     }
@@ -316,7 +319,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
           id: 'edit',
           icon: 'edit',
           title: 'Edit',
-          visible: (l) => l.fundingStatus !== FundingStatus.CLOSED && l.packageStatus !== 'IN_USE' && l.packageStatus !== 'INACTIVE' && !this.isSignedAndAssigned(l),
+          visible: (l) => l.fundingStatus !== FundingStatus.CLOSED && l.packageStatus !== 'APPLIED' && l.packageStatus !== 'IN_USE' && l.packageStatus !== 'INACTIVE' && !this.isSignedAndAssigned(l),
           action: (l) => this.onEditPackage(l),
         },
         {
@@ -331,6 +334,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
           icon: 'check',
           title: this.investmentPackageType === 'BIDDING' ? 'Winning Investor' : 'Winning Investors',
           visible: (l) => this.canAdminReview(l) && !this.isSignedAndAssigned(l),
+          disabled: (l) => l.packageStatus === 'INACTIVE' || l.packageStatus === 'IN_USE' || l.packageStatus === 'COMPLITED',
           action: (l) => this.onChooseCandidateAction(l),
         },
         {
@@ -369,7 +373,9 @@ export class InvestmentPackageTypeListComponent implements OnInit {
           title: 'Change Extension Worker',
           visible: (l) =>
             l.fundingStatus === FundingStatus.FUNDED &&
-            !!l.extensionWorker,
+            !!l.extensionWorker &&
+            l.packageStatus !== 'INACTIVE' &&
+            l.packageStatus !== 'COMPLITED',
           action: (l) => this.onAssignExtensionWorkerAction(l),
         },
         {
@@ -778,10 +784,14 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     }
   }
 
-  private fetchPackageTypes(packageStatuses?: InvestmentPackageStatus[]) {
+  private fetchPackageTypes(
+    packageStatuses?: InvestmentPackageStatus[],
+    extra?: Partial<InvestmentPackageTypeFilterRequest>,
+  ) {
     return this.investmentPackageTypeService.filter({
       ...this.buildFilterRequest(),
       packageStatuses,
+      ...extra,
     });
   }
 
@@ -808,7 +818,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   /** Extension worker: "My Farm Plots" tab — active (non-terminal) assignments. */
   private loadSubscribedPackageTypes(previousId?: string | null): void {
     this.subscribedLoading = true;
-    this.fetchPackageTypes(['ACTIVE', 'IN_USE']).subscribe({
+    this.fetchPackageTypes(['ACTIVE', 'APPLIED', 'IN_USE']).subscribe({
       next: (response: PageResponse<InvestmentPackageTypeAgreement>) => {
         this.subscribedPackageTypes = this.filterVisiblePackageTypes(response.content ?? []);
         this.subscribedLoading = false;
@@ -841,7 +851,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
   loadMyLeases(previousId?: string | null): void {
     this.myLeasesLoading = true;
-    this.fetchPackageTypes(['ACTIVE', 'IN_USE']).subscribe({
+    this.fetchPackageTypes(['ACTIVE', 'APPLIED', 'IN_USE'], { excludeMyInvestmentStatuses: ['BACKUP'] }).subscribe({
       next: (response: PageResponse<InvestmentPackageTypeAgreement>) => {
         const filtered = this.filterVisiblePackageTypes(response.content ?? []);
         this.myLeasesPackageTypes = this.filterOwnedByCurrentInvestor(filtered);
@@ -863,7 +873,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
   loadHistory(previousId?: string | null): void {
     this.historyLoading = true;
-    this.fetchPackageTypes(['INACTIVE', 'COMPLITED']).subscribe({
+    this.fetchPackageTypes(['INACTIVE', 'COMPLITED'], { includeMyInvestmentStatuses: ['BACKUP'] }).subscribe({
       next: (response: PageResponse<InvestmentPackageTypeAgreement>) => {
         const filtered = this.filterVisiblePackageTypes(response.content ?? []);
         this.historyPackageTypes = this.filterOwnedByCurrentInvestor(filtered);
@@ -880,7 +890,7 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
   loadPublished(previousId?: string | null): void {
     this.publishedLoading = true;
-    this.fetchPackageTypes(['ACTIVE', 'IN_USE']).subscribe({
+    this.fetchPackageTypes(['ACTIVE', 'APPLIED', 'IN_USE']).subscribe({
       next: (response: PageResponse<InvestmentPackageTypeAgreement>) => {
         this.publishedPackages = this.filterVisiblePackageTypes(response.content ?? []);
         this.publishedLoading = false;

@@ -61,95 +61,100 @@
 
     <hr class="border-gray-200 mb-8" />
 
+    <ng-template #descriptionContent>
+      <app-detail-section title="Farm Plot Information">
+        <app-detail-field
+          label="Size"
+          [value]="plot.size + ' ' + (plot.sizeType === 'HECTARES' ? 'H' : (plot.sizeType === 'ACRES' ? 'A' : plot.sizeType))"
+        />
+        <app-detail-field label="Soil Type" [value]="plot.soilType" />
+        <app-detail-field label="Latitude" [value]="plot.latitude" />
+        <app-detail-field label="Longitude" [value]="plot.longitude" />
+        <div *ngIf="plot.status === 'UNDER_MAINTENANCE' && plot.maintenanceReason" class="col-span-full bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <p class="text-sm text-gray-700"><span class="font-semibold">Maintenance Reason:</span> {{ plot.maintenanceReason }}</p>
+        </div>
+      </app-detail-section>
+
+      <app-detail-section>
+        <div class="col-span-full space-y-4">
+          <div *ngIf="getMainImageUrl(); else noMainImage">
+            <p class="text-sm font-medium text-gray-700 mb-2">Plot Image</p>
+            <img
+              [src]="getMainImageUrl()!"
+              [alt]="plot.title"
+              class="max-h-48 rounded-lg border border-gray-200 object-cover cursor-pointer"
+              (click)="openImagePreview(getMainImageUrl()!)"
+            />
+          </div>
+          <ng-template #noMainImage>
+            <p class="text-sm text-gray-500">No plot image available.</p>
+          </ng-template>
+
+          <div *ngIf="galleryLoading" class="text-sm text-gray-500">Loading gallery...</div>
+          <div *ngIf="!galleryLoading">
+            <p class="text-sm font-medium text-gray-700 mb-2">Gallery</p>
+            <div class="grid grid-cols-4 gap-3">
+              <ng-container *ngFor="let _ of [0, 1, 2]; let i = index">
+                <img
+                  *ngIf="previewGalleryUrls[i] as url"
+                  [src]="url"
+                  [alt]="'Gallery image ' + (i + 1)"
+                  class="w-full h-24 object-cover rounded-lg border border-gray-200 cursor-pointer"
+                  (click)="openGallery(i)"
+                />
+                <div
+                  *ngIf="!previewGalleryUrls[i]"
+                  class="w-full h-24 rounded-lg border border-gray-100 bg-gray-50"
+                  aria-hidden="true"
+                ></div>
+              </ng-container>
+              <button
+                *ngIf="allowGalleryUpload"
+                type="button"
+                class="w-full h-24 flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-gray-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                [disabled]="galleryUploading"
+                (click)="openGalleryUpload()"
+                aria-label="Add gallery image"
+              >
+                <span class="text-2xl leading-none">+</span>
+              </button>
+            </div>
+          </div>
+
+          <button
+            *ngIf="showCreateLeaseButton"
+            type="button"
+            (click)="onCreateLease()"
+            class="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors"
+          >
+            {{ createLeaseButtonText }}
+          </button>
+        </div>
+      </app-detail-section>
+
+      <app-detail-section *ngIf="plot.latitude != null && plot.longitude != null" title="Location Map">
+        <div class="col-span-full">
+          <app-oss-map
+            [interactive]="false"
+            [height]="'300px'"
+            [zoom]="9"
+            [latitude]="plot.latitude"
+            [longitude]="plot.longitude"
+            [locations]="[{ lat: plot.latitude, lng: plot.longitude, name: plot.title }]"
+            [fitBounds]="false"
+          ></app-oss-map>
+        </div>
+      </app-detail-section>
+    </ng-template>
+
     <app-tabs
+      *ngIf="tabs.length > 1; else plainDescription"
       [tabs]="tabs"
       [activeTab]="activeTab"
       (activeTabChange)="onTabChange($event)"
     >
       <div *ngIf="activeTab === 'description'">
-        <app-detail-section title="Farm Plot Information">
-          <app-detail-field
-            label="Size"
-            [value]="plot.size + ' ' + (plot.sizeType === 'HECTARES' ? 'H' : (plot.sizeType === 'ACRES' ? 'A' : plot.sizeType))"
-          />
-          <app-detail-field label="Soil Type" [value]="plot.soilType" />
-          <app-detail-field label="Latitude" [value]="plot.latitude" />
-          <app-detail-field label="Longitude" [value]="plot.longitude" />
-          <div *ngIf="plot.status === 'UNDER_MAINTENANCE' && plot.maintenanceReason" class="col-span-full bg-blue-50 border border-blue-200 rounded-xl p-4">
-            <p class="text-sm text-gray-700"><span class="font-semibold">Maintenance Reason:</span> {{ plot.maintenanceReason }}</p>
-          </div>
-        </app-detail-section>
-
-        <app-detail-section>
-          <div class="col-span-full space-y-4">
-            <div *ngIf="getMainImageUrl(); else noMainImage">
-              <p class="text-sm font-medium text-gray-700 mb-2">Plot Image</p>
-              <img
-                [src]="getMainImageUrl()!"
-                [alt]="plot.title"
-                class="max-h-48 rounded-lg border border-gray-200 object-cover cursor-pointer"
-                (click)="openImagePreview(getMainImageUrl()!)"
-              />
-            </div>
-            <ng-template #noMainImage>
-              <p class="text-sm text-gray-500">No plot image available.</p>
-            </ng-template>
-
-            <div *ngIf="galleryLoading" class="text-sm text-gray-500">Loading gallery...</div>
-            <div *ngIf="!galleryLoading">
-              <p class="text-sm font-medium text-gray-700 mb-2">Gallery</p>
-              <div class="grid grid-cols-4 gap-3">
-                <ng-container *ngFor="let _ of [0, 1, 2]; let i = index">
-                  <img
-                    *ngIf="previewGalleryUrls[i] as url"
-                    [src]="url"
-                    [alt]="'Gallery image ' + (i + 1)"
-                    class="w-full h-24 object-cover rounded-lg border border-gray-200 cursor-pointer"
-                    (click)="openGallery(i)"
-                  />
-                  <div
-                    *ngIf="!previewGalleryUrls[i]"
-                    class="w-full h-24 rounded-lg border border-gray-100 bg-gray-50"
-                    aria-hidden="true"
-                  ></div>
-                </ng-container>
-                <button
-                  *ngIf="allowGalleryUpload"
-                  type="button"
-                  class="w-full h-24 flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-gray-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  [disabled]="galleryUploading"
-                  (click)="openGalleryUpload()"
-                  aria-label="Add gallery image"
-                >
-                  <span class="text-2xl leading-none">+</span>
-                </button>
-              </div>
-            </div>
-
-            <button
-              *ngIf="showCreateLeaseButton"
-              type="button"
-              (click)="onCreateLease()"
-              class="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors"
-            >
-              {{ createLeaseButtonText }}
-            </button>
-          </div>
-        </app-detail-section>
-
-        <app-detail-section *ngIf="plot.latitude != null && plot.longitude != null" title="Location Map">
-          <div class="col-span-full">
-            <app-oss-map
-              [interactive]="false"
-              [height]="'300px'"
-              [zoom]="9"
-              [latitude]="plot.latitude"
-              [longitude]="plot.longitude"
-              [locations]="[{ lat: plot.latitude, lng: plot.longitude, name: plot.title }]"
-              [fitBounds]="false"
-            ></app-oss-map>
-          </div>
-        </app-detail-section>
+        <ng-container *ngTemplateOutlet="descriptionContent"></ng-container>
       </div>
 
       <div *ngIf="activeTab === 'investment-history'">
@@ -243,6 +248,10 @@
         </app-detail-section>
       </div>
     </app-tabs>
+
+    <ng-template #plainDescription>
+      <ng-container *ngTemplateOutlet="descriptionContent"></ng-container>
+    </ng-template>
 
   </ng-container>
 

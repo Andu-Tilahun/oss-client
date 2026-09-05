@@ -24,7 +24,7 @@ export class InvestmentPackageTypeService {
     );
   }
 
-  /** Published bucket (packageStatus in ACTIVE, IN_USE): packageStatus is enforced server-side. */
+  /** Published bucket (packageStatus in ACTIVE, APPLIED, IN_USE): packageStatus is enforced server-side. */
   filterPublished(request: InvestmentPackageTypeFilterRequest): Observable<PageResponse<InvestmentPackageTypeAgreement>> {
     return this.httpService.put<PageResponse<InvestmentPackageTypeAgreement>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/filter/published`,

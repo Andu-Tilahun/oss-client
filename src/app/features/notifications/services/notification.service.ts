@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { HttpService, RequestOption, RequestType } from '../../../core/services/http.service';
 import { Endpoints } from '../../../core/endpoint/endpoint.model';
 import { PageResponse } from '../../../shared/models/api-response.model';
@@ -17,7 +18,24 @@ import {
 })
 export class NotificationLogService {
 
+  private readonly unreadCountSubject = new BehaviorSubject<number>(0);
+  /** Shared unread count — every component reads from this so they all stay in sync
+   *  the moment any one of them marks a notification read or refreshes the count. */
+  readonly unreadCount$ = this.unreadCountSubject.asObservable();
+
   constructor(private httpService: HttpService) {
+  }
+
+  /** Re-fetches the unread count from the backend and pushes it into the shared stream. */
+  refreshUnreadCount(requestOptions?: RequestOption): Observable<number> {
+    return this.getUnreadCount(requestOptions).pipe(
+      tap((count) => this.unreadCountSubject.next(count ?? 0)),
+    );
+  }
+
+  /** Resets the shared unread count locally (e.g. on logout) without a network call. */
+  clearUnreadCount(): void {
+    this.unreadCountSubject.next(0);
   }
 
   getNotificationById(id: number): Observable<NotificationLog> {
@@ -85,6 +103,8 @@ export class NotificationLogService {
       null,
       undefined,
       requestOptions ?? { requestType: RequestType.NON_BLOCKING, skipAuthRedirect: true },
+    ).pipe(
+      tap(() => this.refreshUnreadCount(requestOptions).subscribe()),
     );
   }
 }

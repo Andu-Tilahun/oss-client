@@ -256,6 +256,8 @@ export class ExtensionHomeComponent implements OnInit {
     switch (label) {
       case 'ACTIVE':
         return '#22C55E';
+      case 'APPLIED':
+        return '#F59E0B';
       case 'IN_USE':
         return '#3B82F6';
       case 'INACTIVE':

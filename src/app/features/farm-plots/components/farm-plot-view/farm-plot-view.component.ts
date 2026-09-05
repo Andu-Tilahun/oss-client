@@ -173,11 +173,11 @@ export class FarmPlotViewComponent implements OnChanges {
   private recomputeTabs(): void {
     this.tabs = [
       {key: 'description', label: 'Description'},
-      {
+      ...(this.authService.isInvestor() ? [] : [{
         key: 'investment-history',
         label: 'Investment History',
         badge: this.plotInvestmentPackages.length || undefined,
-      },
+      }]),
       ...(this.showStatusActions && this.canManageStatus
         && (this.plot?.status === 'ACTIVE' || this.plot?.status === 'UNDER_MAINTENANCE')
         ? [{key: 'actions', label: 'Actions'}]
@@ -193,6 +193,11 @@ export class FarmPlotViewComponent implements OnChanges {
   }
 
   private loadInvestmentPackages(plotId: string): void {
+    if (this.authService.isInvestor()) {
+      this.plotInvestmentPackages = [];
+      this.recomputeTabs();
+      return;
+    }
     this.packagesLoading = true;
     this.investmentPackageService.filterInvestmentPackages({ farmPlotId: plotId, page: 0, size: 50 }).subscribe({
       next: (res) => {
