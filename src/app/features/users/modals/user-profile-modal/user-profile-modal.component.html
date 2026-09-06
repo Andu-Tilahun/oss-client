@@ -14,6 +14,7 @@
       mode="edit"
       [user]="user"
       [profileUpdate]="true"
+      (profileImageUploaded)="onProfileImageUploaded($event)"
     ></app-user-form>
   </ng-template>
 </app-modal>

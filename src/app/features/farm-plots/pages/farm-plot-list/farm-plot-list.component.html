@@ -20,6 +20,7 @@
         <app-data-table
           [columns]="columns"
           [data]="operationalPlots"
+          [selectedRowId]="selectedPlot?.id ?? null"
           [loading]="operationalLoading"
           [total]="operationalTotal"
           [pageSize]="operationalPageSize"
@@ -58,6 +59,7 @@
         <app-data-table
           [columns]="columns"
           [data]="repairPlots"
+          [selectedRowId]="selectedPlot?.id ?? null"
           [loading]="repairLoading"
           [total]="repairTotal"
           [pageSize]="repairPageSize"
@@ -95,6 +97,7 @@
         <app-data-table
           [columns]="columns"
           [data]="archivedPlots"
+          [selectedRowId]="selectedPlot?.id ?? null"
           [loading]="archivedLoading"
           [total]="archivedTotal"
           [pageSize]="archivedPageSize"

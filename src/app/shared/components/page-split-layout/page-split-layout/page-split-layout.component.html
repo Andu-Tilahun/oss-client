@@ -18,7 +18,7 @@
 
        <!-- Main columns -->
     <div class="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
-      <section class="w-full lg:w-7/12 h-full min-h-0 overflow-y-auto">
+      <section class="w-full lg:w-7/12 h-full min-h-0 min-w-0 overflow-y-auto">
         <!-- Global top header (spans above both columns) -->
         <div *ngIf="hasExtraTableHeader()" class="mb-4">
           <ng-container *ngTemplateOutlet="extraTableHeader ?? null"></ng-container>
@@ -32,7 +32,7 @@
         </ng-container>
       </section>
 
-      <section class="w-full lg:w-5/12 lg:border-l lg:border-gray-200 lg:pl-6 h-full min-h-0 overflow-y-auto">
+      <section class="w-full lg:w-5/12 lg:border-l lg:border-gray-200 lg:pl-6 h-full min-h-0 min-w-0 overflow-y-auto">
         <div *ngIf="hasRightExtraHeader()" class="mb-4">
           <ng-container *ngTemplateOutlet="rightExtraTableHeader ?? null"></ng-container>
         </div>

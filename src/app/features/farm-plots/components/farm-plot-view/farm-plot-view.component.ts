@@ -53,6 +53,7 @@ export class FarmPlotViewComponent implements OnChanges {
   @Input() showStatusActions = true;
   @Input() showCreateLeaseButton = false;
   @Input() createLeaseButtonText = 'Create Lease Agreement';
+  @Input() hideInvestmentHistoryForExtensionWorker = false;
   @Output() createLease = new EventEmitter<void>();
 
   /** Emitted after this plot's status is changed via the actions below, so the parent list can refresh. */
@@ -170,10 +171,15 @@ export class FarmPlotViewComponent implements OnChanges {
     this.recomputeTabs();
   }
 
+  private get hideInvestmentHistory(): boolean {
+    return this.authService.isInvestor()
+      || (this.hideInvestmentHistoryForExtensionWorker && this.authService.isExtensionWorker());
+  }
+
   private recomputeTabs(): void {
     this.tabs = [
       {key: 'description', label: 'Description'},
-      ...(this.authService.isInvestor() ? [] : [{
+      ...(this.hideInvestmentHistory ? [] : [{
         key: 'investment-history',
         label: 'Investment History',
         badge: this.plotInvestmentPackages.length || undefined,
@@ -193,7 +199,7 @@ export class FarmPlotViewComponent implements OnChanges {
   }
 
   private loadInvestmentPackages(plotId: string): void {
-    if (this.authService.isInvestor()) {
+    if (this.hideInvestmentHistory) {
       this.plotInvestmentPackages = [];
       this.recomputeTabs();
       return;

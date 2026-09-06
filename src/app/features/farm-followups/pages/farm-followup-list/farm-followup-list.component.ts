@@ -17,6 +17,7 @@ export class FarmFollowUpListComponent implements OnChanges {
   @Input() followUps: FarmFollowUp[] = [];
   loading = false;
   @Input() externalId = '';
+  @Input() readOnly = false;
 
   /**
    * Rendering source of truth, decoupled from the `followUps` input. Angular reassigns
@@ -87,10 +88,6 @@ export class FarmFollowUpListComponent implements OnChanges {
     private authService: AuthService,
     private toastService: ToastService,
   ) {
-    const isWorker = this.authService.isExtensionWorker();
-    this.showCreateButton = isWorker;
-    this.showEditButton = isWorker;
-    this.showActionColumn = isWorker || this.authService.isAdmin();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -98,6 +95,14 @@ export class FarmFollowUpListComponent implements OnChanges {
       this.lastExternalId = this.externalId;
       this.displayedFollowUps = this.followUps ?? [];
     }
+    this.updateActionVisibility();
+  }
+
+  private updateActionVisibility(): void {
+    const isWorker = this.authService.isExtensionWorker();
+    this.showCreateButton = isWorker && !this.readOnly;
+    this.showEditButton = isWorker && !this.readOnly;
+    this.showActionColumn = (isWorker || this.authService.isAdmin()) && !this.readOnly;
   }
 
   get activeFollowUps(): FarmFollowUp[] {

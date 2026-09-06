@@ -4,12 +4,22 @@
       <h1 class="text-2xl font-bold text-gray-900">Notifications</h1>
       <p class="text-sm text-gray-500 mt-1">All notification log entries for your account.</p>
     </div>
-    <a
-      routerLink="/home"
-      class="text-sm font-medium text-indigo-600 hover:text-indigo-800 shrink-0"
-    >
-      ← Back to home
-    </a>
+    <div class="flex items-center gap-4 shrink-0">
+      <button
+        *ngIf="hasUnread()"
+        type="button"
+        (click)="markAllAsRead()"
+        class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+      >
+        Mark all read
+      </button>
+      <a
+        routerLink="/home"
+        class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+      >
+        ← Back to home
+      </a>
+    </div>
   </div>
 
   <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -41,12 +51,12 @@
             <span class="text-xs font-medium uppercase tracking-wide text-gray-400">{{ n.status }}</span>
             <span *ngIf="!n.isRead" class="text-xs font-medium text-blue-600">New</span>
           </div>
-          <p class="text-xs text-gray-500">
-            {{ n.notificationType }}
-            <span *ngIf="n.recipient"> · {{ n.recipient }}</span>
-          </p>
+          <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span *ngIf="n.eventType" class="text-xs text-gray-500">{{ formatEventType(n.eventType) }}</span>
+            <span *ngIf="n.notificationType === 'EMAIL'" class="text-[10px] font-medium text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">Email</span>
+            <span class="text-xs text-gray-400">{{ formatCreated(n) }}</span>
+          </div>
           <p *ngIf="n.message" class="text-sm text-gray-600 line-clamp-2 mt-1">{{ n.message }}</p>
-          <p class="text-xs text-gray-400 mt-1">{{ formatCreated(n) }}</p>
         </div>
       </li>
     </ul>

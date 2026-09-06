@@ -16,6 +16,10 @@ import {Subscription, interval} from 'rxjs';
 import {switchMap, take} from 'rxjs/operators';
 import {NotificationLogService} from '../../../features/notifications/services/notification.service';
 import {NotificationLog} from '../../../features/notifications/models/notification.model';
+import {
+  resolveNotificationRoute,
+  formatEventType as formatNotificationEventType,
+} from '../../../features/notifications/utils/notification-route.util';
 import {AuthService} from '../../../features/auth/services/auth.service';
 import {RequestType} from '../../services/http.service';
 import {User} from '../../../features/users/models/user.model';
@@ -131,8 +135,8 @@ export class HeaderComponent implements OnInit {
 
   userAvatar(): string {
     const user = this.currentUser;
-    if (user?.profileImageUuid) {
-      return this.fileUploadService.getFileUrl(user.profileImageUuid);
+    if (user?.profileUrl) {
+      return user.profileUrl;
     }
     const name = user ? `${user.firstName}+${user.lastName}` : 'User';
     return `https://ui-avatars.com/api/?name=${name}&background=6366f1&color=fff`;
@@ -160,20 +164,22 @@ export class HeaderComponent implements OnInit {
       },
     });
     this.showNotificationPanel = false;
-    const eventData = this.parseEventData(notification.eventData);
-    const type = (eventData['investmentPackageType'] as string)?.toLowerCase();
-    if (type) {
-      void this.router.navigate([`/investment-package-types/${type}`]);
+    const route = resolveNotificationRoute(notification);
+    if (route) {
+      void this.router.navigate(route.commands, route.queryParams ? { queryParams: route.queryParams } : undefined);
     }
   }
 
-  private parseEventData(raw: string | undefined): Record<string, unknown> {
-    if (!raw) return {};
-    try {
-      return JSON.parse(raw) as Record<string, unknown>;
-    } catch {
-      return {};
-    }
+  markAllAsRead(): void {
+    this.notificationService.markAllAsRead(this.notificationPreviewOptions).subscribe({
+      next: () => {
+        this.previewItems.forEach((n) => (n.isRead = true));
+      },
+    });
+  }
+
+  formatEventType(eventType?: string): string {
+    return formatNotificationEventType(eventType);
   }
 
   private loadPreview(): void {

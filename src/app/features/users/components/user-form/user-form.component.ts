@@ -1,4 +1,4 @@
-import {Component, forwardRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild} from '@angular/core';
+import {Component, EventEmitter, forwardRef, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {
   ControlValueAccessor,
@@ -40,6 +40,9 @@ export class UserFormComponent implements OnInit, OnChanges, ControlValueAccesso
   userForm: FormGroup;
   @Input() profileUpdate = false;
   @Input() profileImageInline = true;
+  /** Fires right after a photo finishes uploading — lets the parent persist it immediately
+   *  instead of relying on a later, separate form submit that the user might never trigger. */
+  @Output() profileImageUploaded = new EventEmitter<string>();
   roles: Role[] = [];
   employees: Employee[] = [];
 
@@ -185,6 +188,7 @@ export class UserFormComponent implements OnInit, OnChanges, ControlValueAccesso
     if (this.user) {
       this.user.profileImageUuid = fileId;
     }
+    this.profileImageUploaded.emit(fileId);
   }
 
   onProfilePictureRemoved() {

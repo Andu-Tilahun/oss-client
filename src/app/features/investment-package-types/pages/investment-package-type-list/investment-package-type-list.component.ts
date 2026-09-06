@@ -1,7 +1,7 @@
 import {Component, DestroyRef, OnInit} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {jsPDF} from 'jspdf';
-import {InvestmentPackageTypeAgreement, InvestmentPackageTypeFilterRequest} from '../../models/investment-package-type.model';
+import {InvestmentPackageTypeAgreement, InvestmentPackageTypeFilterRequest, InvestmentPackageTypeStatus} from '../../models/investment-package-type.model';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
   InvestmentPackage,
@@ -107,6 +107,8 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
   columns: DataTableColumn<InvestmentPackageTypeAgreement>[] = [];
   archivedColumns: DataTableColumn<InvestmentPackageTypeAgreement>[] = [];
+  extensionWorkerColumns: DataTableColumn<InvestmentPackageTypeAgreement>[] = [];
+  extensionWorkerHistoryColumns: DataTableColumn<InvestmentPackageTypeAgreement>[] = [];
 
   activeTab = 'detail';
 
@@ -260,6 +262,13 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
   onAgreementStatusChanged(status: string | null): void {
     this.selectedAgreementStatus = status;
+    // computeTabs() reads selectedAgreement.status (a snapshot from whenever the row was last
+    // loaded), not selectedAgreementStatus — without updating it here too, recomputeTabs() below
+    // would just recompute from the same stale value and never add the Extension Worker tab once
+    // the investor signs in a separate session.
+    if (this.selectedAgreement && status) {
+      this.selectedAgreement = {...this.selectedAgreement, status: status as InvestmentPackageTypeStatus};
+    }
     this.recomputeTabs();
   }
 
@@ -296,6 +305,14 @@ export class InvestmentPackageTypeListComponent implements OnInit {
     return this.investmentPackageType.toLowerCase();
   }
 
+  private formatArchivedDate(value?: string): string {
+    if (!value) return '-';
+    const d = new Date(value);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = d.toLocaleString('en-US', {month: 'short'});
+    return `${day}-${month}-${d.getFullYear()}`;
+  }
+
   private buildColumns(): void {
     const base: DataTableColumn<InvestmentPackageTypeAgreement>[] = [
       {header: 'Title', value: (l) => this.truncateText(l.title), cellClass: 'block max-w-[200px] truncate'},
@@ -304,7 +321,21 @@ export class InvestmentPackageTypeListComponent implements OnInit {
       {header: 'Target', value: (l) => this.formatAmount(l.targetAmount)},
     ];
     this.columns = [...base, {header: 'Funding Status', value: (l) => l.fundingStatus}];
-    this.archivedColumns = [...base, {header: 'Package Status', value: (l) => l.packageStatus ?? 'ACTIVE', cellClass: (l) => packageStatusBadgeClass(l.packageStatus)}];
+    this.archivedColumns = [
+      ...base,
+      {header: 'Package Status', value: (l) => l.packageStatus ?? 'ACTIVE', cellClass: (l) => packageStatusBadgeClass(l.packageStatus)},
+      {header: 'Archived Date', value: (l) => this.formatArchivedDate(l.updatedAt)},
+    ];
+    this.extensionWorkerColumns = [
+      ...base,
+      {header: 'Funding Status', value: (l) => l.fundingStatus},
+      {header: 'Assigned On', value: (l) => this.formatArchivedDate(l.updatedAt)},
+    ];
+    this.extensionWorkerHistoryColumns = [
+      ...base,
+      {header: 'Package Status', value: (l) => l.packageStatus ?? 'ACTIVE', cellClass: (l) => packageStatusBadgeClass(l.packageStatus)},
+      {header: 'Assigned On', value: (l) => this.formatArchivedDate(l.updatedAt)},
+    ];
   }
 
   private truncateText(value: string | undefined | null, max = 15): string {
@@ -1049,6 +1080,8 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   private refreshPackageInvestmentsIfNeeded(): void {
     if (this.selectedAgreement?.id &&
         (this.activeTab === 'investor' ||
+         this.activeTab === 'payment' ||
+         this.activeTab === 'contract' ||
          (this.isAdmin && this.investmentPackageType === 'CROWDFUNDING') ||
          (this.isInvestorUser && this.investmentPackageType === 'CROWDFUNDING'))) {
       this.loadPackageInvestments(this.selectedAgreement.id);

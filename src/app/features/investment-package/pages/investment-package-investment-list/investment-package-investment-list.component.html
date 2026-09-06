@@ -12,6 +12,7 @@
     <app-data-table
       [columns]="columns"
       [data]="investments"
+      [selectedRowId]="selectedInvestment?.id ?? null"
       [loading]="loading"
       [total]="total"
       [pageSize]="pageSize"

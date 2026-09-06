@@ -19,6 +19,7 @@ import {ToastService} from '../../../../shared/toast/toast.service';
 })
 export class FarmFollowUpViewComponent implements OnChanges {
   @Input() followUp: FarmFollowUp | null = null;
+  @Input() readOnly = false;
 
   private readonly farmFollowUpService = inject(FarmFollowUpService);
   private readonly authService = inject(AuthService);

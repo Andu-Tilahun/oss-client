@@ -5,6 +5,10 @@ import {switchMap} from 'rxjs/operators';
 import {NotificationLogService} from '../../services/notification.service';
 import {NotificationLog} from '../../models/notification.model';
 import {AuthService} from '../../../auth/services/auth.service';
+import {
+  resolveNotificationRoute,
+  formatEventType as formatNotificationEventType,
+} from '../../utils/notification-route.util';
 
 @Component({
   selector: 'app-notifications-inbox-page',
@@ -74,19 +78,25 @@ export class NotificationsInboxPageComponent implements OnInit {
         next: () => { notification.isRead = true; },
       });
     }
-    const eventData = this.parseEventData(notification.eventData);
-    const type = (eventData['investmentPackageType'] as string)?.toLowerCase();
-    if (type) {
-      void this.router.navigate([`/investment-package-types/${type}`]);
+    const route = resolveNotificationRoute(notification);
+    if (route) {
+      void this.router.navigate(route.commands, route.queryParams ? { queryParams: route.queryParams } : undefined);
     }
   }
 
-  private parseEventData(raw: string | undefined): Record<string, unknown> {
-    if (!raw) return {};
-    try {
-      return JSON.parse(raw) as Record<string, unknown>;
-    } catch {
-      return {};
-    }
+  markAllAsRead(): void {
+    this.notificationService.markAllAsRead().subscribe({
+      next: () => {
+        this.notifications.forEach((n) => (n.isRead = true));
+      },
+    });
+  }
+
+  hasUnread(): boolean {
+    return this.notifications.some((n) => !n.isRead);
+  }
+
+  formatEventType(eventType?: string): string {
+    return formatNotificationEventType(eventType);
   }
 }

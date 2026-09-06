@@ -9,7 +9,6 @@ import {
   NotificationLog,
   NotificationPriorityValue,
   NotificationStats,
-  NotificationStatus,
   NotificationStatusValue,
 } from '../models/notification.model';
 
@@ -71,12 +70,23 @@ export class NotificationLogService {
     );
   }
 
+  /** Own inbox, scoped to the caller's identity regardless of role — unlike getNotifications(),
+   *  ADMIN/OPERATOR do not see other users' notifications here. */
   getInboxNotifications(
     page: number = 0,
     size: number = 10,
     requestOptions?: RequestOption,
   ): Observable<PageResponse<NotificationLog>> {
-    return this.getNotifications(page, size, NotificationStatus.SENT, undefined, requestOptions);
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.httpService.get<PageResponse<NotificationLog>>(
+      `${Endpoints.NOTIFICATIONS_ENDPOINT}/my-inbox`,
+      undefined,
+      params,
+      requestOptions,
+    );
   }
 
   getStats(requestOptions?: RequestOption): Observable<NotificationStats> {
@@ -105,6 +115,17 @@ export class NotificationLogService {
       requestOptions ?? { requestType: RequestType.NON_BLOCKING, skipAuthRedirect: true },
     ).pipe(
       tap(() => this.refreshUnreadCount(requestOptions).subscribe()),
+    );
+  }
+
+  markAllAsRead(requestOptions?: RequestOption): Observable<void> {
+    return this.httpService.put<void>(
+      `${Endpoints.NOTIFICATIONS_ENDPOINT}/read-all`,
+      null,
+      undefined,
+      requestOptions ?? { requestType: RequestType.NON_BLOCKING, skipAuthRedirect: true },
+    ).pipe(
+      tap(() => this.unreadCountSubject.next(0)),
     );
   }
 }

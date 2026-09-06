@@ -13,6 +13,7 @@
       <app-data-table
         [columns]="columns"
         [data]="displayedAccounts"
+        [selectedRowId]="selectedAccount?.id ?? null"
         [loading]="loading"
         [total]="total"
         [pageSize]="pageSize"

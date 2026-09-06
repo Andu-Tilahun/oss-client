@@ -49,10 +49,30 @@ export class ProfilePageComponent implements OnInit {
 
   onProfileImageUploaded(fileId: string): void {
     this.userForm?.setProfileImageUuid(fileId);
-    if (this.currentUser) {
-      this.currentUser = {...this.currentUser, profileImageUuid: fileId};
+    if (!this.currentUser) {
+      return;
     }
-    this.toastService.success('Profile photo uploaded. Click Save Changes to update your profile.');
+
+    const request: UpdateUserRequest = {
+      email: this.currentUser.email,
+      firstName: this.currentUser.firstName,
+      lastName: this.currentUser.lastName,
+      middleName: this.currentUser.middleName,
+      gender: this.currentUser.gender,
+      profileImageUuid: fileId,
+      branchId: this.currentUser.branchId,
+    };
+
+    this.userService.profileUser(request).subscribe({
+      next: (updatedUser: User) => {
+        this.currentUser = updatedUser;
+        this.authService.updateCurrentUser(updatedUser);
+        this.toastService.success('Profile photo updated');
+      },
+      error: (error) => {
+        this.toastService.error(error.message || 'Failed to save profile photo', 'Profile Photo');
+      },
+    });
   }
 
   onProfileImageUploadError(message: string): void {

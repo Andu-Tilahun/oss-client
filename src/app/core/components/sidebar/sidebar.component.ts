@@ -7,7 +7,6 @@ import {MENU} from './menu';
 import {AuthService} from '../../../features/auth/services/auth.service';
 import {User} from '../../../features/users/models/user.model';
 import {MenuItem} from './menu.model';
-import {FileUploadService} from '../../../shared/file-upload/file-upload.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -33,7 +32,6 @@ export class SidebarComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private fileUploadService: FileUploadService
   ) {
     this.router.events
       .pipe(
@@ -52,8 +50,8 @@ export class SidebarComponent implements OnInit {
   }
 
   userAvatar(user: User | null): string {
-    if (user?.profileImageUuid) {
-      return this.fileUploadService.getFileUrl(user.profileImageUuid);
+    if (user?.profileUrl) {
+      return user.profileUrl;
     }
     const name = user ? `${user.firstName}+${user.lastName}` : 'User';
     return `https://ui-avatars.com/api/?name=${name}&background=6366f1&color=fff`;

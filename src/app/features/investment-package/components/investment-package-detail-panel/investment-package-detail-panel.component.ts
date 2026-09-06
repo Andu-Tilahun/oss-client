@@ -23,6 +23,7 @@ import {FarmFollowupsModule} from '../../../farm-followups/farm-followups.module
 import {UserViewComponent} from '../../../users/components/user-view/user-view.component';
 import {ImageGalleryModalComponent} from '../../../../shared/modals/image-gallery-modal/image-gallery-modal.component';
 import {FilePreviewModalComponent} from '../../../../shared/modals/file-preview-modal/file-preview-modal.component';
+import {ModalComponent} from '../../../../shared/modals/modal/modal.component';
 import {DocumentUploadComponent} from '../../../../shared/file-upload/document-upload/document-upload.component';
 import {
   InvestmentPackageChooseWinnerModalComponent
@@ -58,6 +59,7 @@ import {BankAccount} from '../../../system-config/models/bank-account.model';
     UserViewComponent,
     ImageGalleryModalComponent,
     FilePreviewModalComponent,
+    ModalComponent,
     DocumentUploadComponent,
     InvestmentPackageChooseWinnerModalComponent,
     InvestmentPackageTypeCompleteModalComponent,
@@ -89,6 +91,7 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   selectedExtensionWorkerId: string | null = null;
   loadingExtensionWorkers = false;
   assigningExtensionWorker = false;
+  showAssignExtensionWorkerModal = false;
   showChangeExtensionWorkerForm = false;
   changeExtensionWorkerId: string | null = null;
   changeExtensionWorkerDescription = '';
@@ -291,6 +294,11 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     return this.authService.isExtensionWorker();
   }
 
+  get isFollowUpReadOnly(): boolean {
+    return this.isExtensionWorkerRole &&
+      (this.investmentPackage?.packageStatus === 'INACTIVE' || this.investmentPackage?.packageStatus === 'COMPLITED');
+  }
+
   get isBiddingType(): boolean {
     return this.investmentPackageType === 'BIDDING';
   }
@@ -465,7 +473,7 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   onTabChange(tab: string): void {
     this.activeTab = tab;
     this.tabChange.emit(tab);
-    if (tab === 'extension-worker' && this.extensionWorkers.length === 0 && !this.loadingExtensionWorkers) {
+    if (tab === 'extension-worker' && this.authService.isAdmin() && this.extensionWorkers.length === 0 && !this.loadingExtensionWorkers) {
       this.loadExtensionWorkers();
     }
     if (!this.isInvestorRole && tab === 'investor') {
@@ -473,6 +481,15 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     }
     if (tab === 'contract') {
       this.maybeLoadAgreement();
+    }
+  }
+
+  /** Opens the Verify & Assign modal directly from the contract banner, instead of silently
+   *  switching to the Extension Worker tab and leaving the admin to notice the form on their own. */
+  openAssignExtensionWorkerModal(): void {
+    this.showAssignExtensionWorkerModal = true;
+    if (this.extensionWorkers.length === 0 && !this.loadingExtensionWorkers) {
+      this.loadExtensionWorkers();
     }
   }
 
@@ -511,8 +528,8 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     return !!this.investmentPackage?.attachmentIdList?.length;
   }
 
-  getInvestorAvatarUrl(profileImageUuid: string | null | undefined): string | null {
-    return this.getFileUrl(profileImageUuid);
+  getInvestorAvatarUrl(profileUrl: string | null | undefined): string | null {
+    return profileUrl || null;
   }
 
   getFileUrl(fileId: string | null | undefined): string | null {
@@ -576,6 +593,7 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
       next: (updated) => {
         this.assigningExtensionWorker = false;
         this.selectedExtensionWorkerId = null;
+        this.showAssignExtensionWorkerModal = false;
         if (updated) {
           this.extensionWorkerAssigned.emit(updated);
         }
@@ -684,7 +702,7 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
 
   private getClosedLeaseInvestorIds(): string[] {
     const pkg = this.investmentPackage as (InvestmentPackage & {investorIdList?: string[]}) | null;
-    if (!pkg || pkg.fundingStatus !== FundingStatus.CLOSED) {
+    if (!pkg || (pkg.fundingStatus !== FundingStatus.CLOSED && pkg.fundingStatus !== FundingStatus.FUNDED)) {
       return [];
     }
     return pkg.investorIdList ?? [];
@@ -709,10 +727,15 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
       return;
     }
 
+    if (!this.investmentPackage?.id) {
+      this.closedLeaseInvestors = [];
+      return;
+    }
+
     this.closedLeaseInvestorsLoading = true;
-    forkJoin(investorIds.map((id) => this.userService.getUserById(id))).subscribe({
+    this.investmentPackageService.getClosedLeaseInvestors(this.investmentPackage.id).subscribe({
       next: (users) => {
-        this.closedLeaseInvestors = users;
+        this.closedLeaseInvestors = users ?? [];
         this.closedLeaseInvestorsLoading = false;
       },
       error: () => {

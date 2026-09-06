@@ -113,8 +113,9 @@
           *ngFor="let item of paginatedData; let i = index; trackBy: trackByIndex"
           class="transition-colors duration-150 hover:bg-slate-100/70"
           [ngClass]="{
-            'bg-slate-50/80': i % 2 === 0,
-            'bg-white': i % 2 !== 0,
+            'bg-indigo-50 hover:bg-indigo-100/70': isRowSelected(item),
+            'bg-slate-50/80': !isRowSelected(item) && i % 2 === 0,
+            'bg-white': !isRowSelected(item) && i % 2 !== 0,
             'cursor-pointer': rowClickable
           }"
           (click)="handleRowClick(item, $event)"

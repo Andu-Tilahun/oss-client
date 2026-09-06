@@ -20,6 +20,7 @@
         <app-data-table
           [columns]="columns"
           [data]="currentAgreements"
+          [selectedRowId]="selectedAgreement?.id ?? null"
           [loading]="loading"
           [total]="currentAgreements.length"
           [pageSize]="currentAgreements.length || 10"
@@ -34,13 +35,25 @@
           [rowClickable]="true"
           [noDataMessage]="'No current assigned investments found.'"
           (rowClick)="selectAgreement($event)"
-        ></app-data-table>
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-investment-package-type-filter
+              [(searchText)]="searchText"
+              [(status)]="fundingStatus"
+              [(paymentStatus)]="paymentStatus"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onFilterChange()"
+              (clearFilters)="clearFilters()"
+            ></app-investment-package-type-filter>
+          </div>
+        </app-data-table>
       </div>
 
       <div *ngIf="assignmentsActiveTab === 'history'">
         <app-data-table
           [columns]="archivedColumns"
           [data]="historyAgreements"
+          [selectedRowId]="selectedAgreement?.id ?? null"
           [loading]="loading"
           [total]="historyAgreements.length"
           [pageSize]="historyAgreements.length || 10"
@@ -55,7 +68,18 @@
           [rowClickable]="true"
           [noDataMessage]="'No completed or deactivated assignments yet.'"
           (rowClick)="selectAgreement($event)"
-        ></app-data-table>
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-investment-package-type-filter
+              [(searchText)]="searchText"
+              [(status)]="fundingStatus"
+              [(paymentStatus)]="paymentStatus"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onFilterChange()"
+              (clearFilters)="clearFilters()"
+            ></app-investment-package-type-filter>
+          </div>
+        </app-data-table>
       </div>
     </app-tabs>
   </ng-template>
@@ -64,7 +88,7 @@
     <div *ngIf="selectedPlot && selectedAgreement; else noSelection">
       <app-tabs [tabs]="tabs" [activeTab]="activeTab" (activeTabChange)="activeTab = $event">
         <div *ngIf="activeTab === 'farm-plot'">
-          <app-farm-plot-view [plot]="selectedPlot"></app-farm-plot-view>
+          <app-farm-plot-view [plot]="selectedPlot" [hideInvestmentHistoryForExtensionWorker]="true"></app-farm-plot-view>
         </div>
         <div *ngIf="activeTab === 'lease'">
           <app-investment-package-type-view [agreement]="selectedAgreement"></app-investment-package-type-view>
@@ -73,6 +97,7 @@
           <app-farm-followup-list
             [followUps]="selectedAgreement.followUpDtoList ?? []"
             [externalId]="selectedAgreement.id"
+            [readOnly]="isFollowUpReadOnly"
           ></app-farm-followup-list>
         </div>
       </app-tabs>

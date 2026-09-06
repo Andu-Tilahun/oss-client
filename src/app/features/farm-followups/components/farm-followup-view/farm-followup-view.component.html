@@ -134,7 +134,7 @@
       </div>
 
       <!-- Add Report (extension worker only) -->
-      <div *ngIf="isExtensionWorker" class="col-span-full">
+      <div *ngIf="isExtensionWorker && !readOnly" class="col-span-full">
         <button
           *ngIf="!showAddReportForm"
           type="button"

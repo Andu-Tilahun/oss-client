@@ -11,8 +11,9 @@
           target="_blank"
           rel="noopener noreferrer"
           class="footer-social-link"
+          [style.background]="brandColor(link.platform)"
           [attr.aria-label]="link.platform"
-        >{{ getSocialIcon(link.platform) }}</a>
+        ><app-social-icon [platform]="link.platform" class="footer-social-icon-svg"></app-social-icon></a>
       </div>
     </div>
     <div>

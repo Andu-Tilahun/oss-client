@@ -45,6 +45,13 @@ export class DataTableComponent<T> {
   @Input() showActionColumn = true;
   @Input() noDataMessage = 'No data available';
 
+  /** Id of the row currently shown in a right-hand detail panel — that row gets a highlighted
+   *  background so it's clear which record's detail is on screen. */
+  @Input() selectedRowId: string | number | null = null;
+
+  /** How to read an id off a row item, for matching against `selectedRowId`. Defaults to `.id`. */
+  @Input() rowIdField: (item: T) => string | number | null | undefined = (item: any) => item?.id;
+
   /** Optional override for the empty-state body; falls back to the default icon + noDataMessage when not provided. */
   @ContentChild('emptyState') emptyStateTemplate: TemplateRef<any> | null = null;
 
@@ -198,6 +205,10 @@ export class DataTableComponent<T> {
 
   trackByIndex(index: number): number {
     return index;
+  }
+
+  isRowSelected(item: T): boolean {
+    return this.selectedRowId != null && this.rowIdField(item) === this.selectedRowId;
   }
 
   handleRowClick(item: T, event: MouseEvent): void {

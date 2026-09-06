@@ -11,6 +11,7 @@ import { InvestmentPackageTypeViewComponent } from '../../../investment-package-
 import { TabsComponent } from '../../../../shared/tabs/app-tabs/app-tabs.component';
 import { TabItem } from '../../../../shared/tabs/models/tab-item.model';
 import { FarmFollowupsModule } from '../../../farm-followups/farm-followups.module';
+import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-farm-plots-extension-detail-page',
@@ -36,8 +37,14 @@ export class FarmPlotsExtensionDetailPageComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private investmentPackageTypeService: InvestmentPackageTypeService
+    private investmentPackageTypeService: InvestmentPackageTypeService,
+    private authService: AuthService,
   ) {}
+
+  get isFollowUpReadOnly(): boolean {
+    return this.authService.isExtensionWorker() &&
+      (this.agreement?.packageStatus === 'INACTIVE' || this.agreement?.packageStatus === 'COMPLITED');
+  }
 
   ngOnInit(): void {
     const fromNavState = history.state?.agreement as InvestmentPackageTypeAgreement | undefined;

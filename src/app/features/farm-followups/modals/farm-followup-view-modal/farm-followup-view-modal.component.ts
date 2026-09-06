@@ -15,5 +15,6 @@ export class FarmFollowUpViewModalComponent {
   @Output() visibleChange = new EventEmitter<boolean>();
 
   @Input() followUp: FarmFollowUp | null = null;
+  @Input() readOnly = false;
 }
 

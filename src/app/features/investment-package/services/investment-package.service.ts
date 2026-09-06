@@ -21,6 +21,7 @@ import {
 } from '../models/investment-package.model';
 import {AssignExtensionWorkerRequest, ChangeExtensionWorkerRequest} from "../../assign-extension-worker-request";
 import {FarmPlot} from '../../farm-plots/models/farm-plot.model';
+import {User} from '../../users/models/user.model';
 
 @Injectable({providedIn: 'root'})
 export class InvestmentPackageService {
@@ -112,6 +113,12 @@ export class InvestmentPackageService {
   getInvestmentPackageById(crowdFundingId: string): Observable<ApiResponse<InvestmentPackage>> {
     return this.httpService.get<ApiResponse<InvestmentPackage>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${crowdFundingId}`,
+    );
+  }
+
+  getClosedLeaseInvestors(packageId: string): Observable<User[]> {
+    return this.httpService.get<User[]>(
+      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${packageId}/closed-lease-investors`,
     );
   }
 

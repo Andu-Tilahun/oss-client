@@ -76,25 +76,28 @@
   margin-top: 0.75rem;
 }
 
-.footer-social-link {
+.footer-social .footer-social-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
-  background: rgba(255,255,255,0.15);
-  color: #e2e8f0 !important;
+  color: #ffffff !important;
   font-size: 0.85rem;
   font-weight: 700;
   text-decoration: none !important;
-  transition: background 0.2s;
+  transition: opacity 0.2s, transform 0.2s;
   margin-bottom: 0 !important;
 }
 
 .footer-social-link:hover {
-  background: rgba(255,255,255,0.28);
-  color: #fff !important;
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.footer-social-icon-svg {
+  font-size: 0.95rem;
 }
 
 @media (max-width: 720px) {

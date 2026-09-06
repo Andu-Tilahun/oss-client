@@ -28,6 +28,8 @@ export interface NotificationLog {
   readAt?: Date;
   isRead?: boolean;
   entityId?: string;
+  entityType?: string;
+  investmentPackageType?: string;
   eventData?: string;
   createdAt: Date;
   updatedAt: Date;

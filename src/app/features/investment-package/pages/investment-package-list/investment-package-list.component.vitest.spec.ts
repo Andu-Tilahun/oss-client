@@ -30,14 +30,18 @@ function makeComponent(opts: { isAdmin?: boolean; isInvestor?: boolean } = {}) {
     isAdmin: vi.fn(() => opts.isAdmin ?? true),
     isInvestor: vi.fn(() => opts.isInvestor ?? false),
   };
+  const mockActivatedRoute = {
+    snapshot: { queryParamMap: { get: vi.fn(() => null) } },
+  };
 
   const component = new InvestmentPackageListComponent(
     mockInvestmentPackageService as any,
     mockToastService as any,
     mockAuthService as any,
+    mockActivatedRoute as any,
   );
 
-  return { component, mockInvestmentPackageService, mockToastService, mockAuthService };
+  return { component, mockInvestmentPackageService, mockToastService, mockAuthService, mockActivatedRoute };
 }
 
 describe('InvestmentPackageListComponent stage-gated tabs', () => {
@@ -133,6 +137,39 @@ describe('InvestmentPackageListComponent stage-gated tabs', () => {
     }));
 
     expect(tabKeys(component)).toEqual(['detail', 'farm-plot', 'investor', 'contract', 'extension-worker', 'follow-up']);
+  });
+});
+
+describe('InvestmentPackageListComponent deep-link on init', () => {
+  it('selects the row matching ?id= from a notification deep link', () => {
+    const { component, mockInvestmentPackageService, mockActivatedRoute } = makeComponent();
+    mockActivatedRoute.snapshot.queryParamMap.get = vi.fn((key: string) => (key === 'id' ? 'pkg-1' : null));
+    mockInvestmentPackageService.filterPublishedInvestmentPackages.mockReturnValue(
+      of({ content: [mockPackage({ id: 'pkg-1' })], totalElements: 1 } as any),
+    );
+
+    component.ngOnInit();
+
+    expect(component.selectedInvestmentPackage?.id).toBe('pkg-1');
+  });
+
+  it('lands on the archived tab when ?tab=archived accompanies the deep-linked id', () => {
+    const { component, mockActivatedRoute } = makeComponent();
+    mockActivatedRoute.snapshot.queryParamMap.get = vi.fn((key: string) =>
+      key === 'id' ? 'pkg-1' : key === 'tab' ? 'archived' : null);
+
+    component.ngOnInit();
+
+    expect(component.adminActiveTab).toBe('archived');
+  });
+
+  it('loads the published tab as usual with no deep-link query params', () => {
+    const { component, mockInvestmentPackageService } = makeComponent();
+
+    component.ngOnInit();
+
+    expect(component.adminActiveTab).toBe('published');
+    expect(mockInvestmentPackageService.filterPublishedInvestmentPackages).toHaveBeenCalled();
   });
 });
 

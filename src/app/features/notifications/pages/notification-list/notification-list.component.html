@@ -12,6 +12,7 @@
     <app-data-table
       [columns]="columns"
       [data]="notifications"
+      [selectedRowId]="selectedNotification?.id ?? null"
       [loading]="loading"
       [total]="total"
       [pageSize]="pageSize"

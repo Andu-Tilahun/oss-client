@@ -13,7 +13,9 @@
         <ul class="contact-social-list">
           <li *ngFor="let link of socialLinks">
             <a class="contact-social-link" [href]="link.url" target="_blank" rel="noopener noreferrer">
-              <span class="contact-social-icon" [ngClass]="getSocialClass(link.platform)" aria-hidden="true">{{ getSocialIcon(link.platform) }}</span>
+              <span class="contact-social-icon" [style.background]="brandColor(link.platform)" aria-hidden="true">
+                <app-social-icon [platform]="link.platform" class="contact-social-icon-svg"></app-social-icon>
+              </span>
               <span>{{ link.platform | titlecase }}</span>
             </a>
           </li>

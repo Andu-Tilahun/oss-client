@@ -4,11 +4,12 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { CompanyProfile } from '../../features/farm-company/models/company-profile.model';
 import { SystemConfigService } from '../../features/system-config/services/system-config.service';
 import { SocialMediaLink, SocialMediaPlatform } from '../../features/system-config/models/social-media.model';
+import { SocialIconComponent, SOCIAL_BRAND_COLORS } from '../../shared/components/social-icon/social-icon.component';
 
 @Component({
   selector: 'app-public-contact',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TitleCasePipe],
+  imports: [CommonModule, ReactiveFormsModule, TitleCasePipe, SocialIconComponent],
   templateUrl: './public-contact.component.html',
   styleUrl: './public-contact.component.css',
 })
@@ -64,23 +65,8 @@ export class PublicContactComponent implements OnInit {
     return `mailto:${this.displayEmail}`;
   }
 
-  getSocialIcon(platform: SocialMediaPlatform): string {
-    const icons: Record<SocialMediaPlatform, string> = {
-      FACEBOOK: 'f',
-      INSTAGRAM: '◉',
-      TIKTOK: '♪',
-      YOUTUBE: '▶',
-      LINKEDIN: 'in',
-      X: 'X',
-      TWITTER: '🐦',
-      TELEGRAM: '✈',
-      WHATSAPP: '💬',
-    };
-    return icons[platform] ?? platform[0];
-  }
-
-  getSocialClass(platform: SocialMediaPlatform): string {
-    return `contact-social-icon--${platform.toLowerCase()}`;
+  brandColor(platform: SocialMediaPlatform): string {
+    return SOCIAL_BRAND_COLORS[platform];
   }
 
   refreshCaptcha(): void {

@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FarmPlot } from '../../models/farm-plot.model';
 import { InvestmentPackageTypeAgreement, InvestmentPackageTypeFilterRequest } from '../../../investment-package-types/models/investment-package-type.model';
+import { InvestmentPackageTypeFilterComponent } from '../../../investment-package-types/pages/investment-package-type-filter/investment-package-type-filter.component';
+import { FundingStatus } from '../../../../shared/models/funding-status.model';
+import { InvestmentPaymentStatus } from '../../../investment-package/models/investment-package.model';
 import { TabItem } from '../../../../shared/tabs/models/tab-item.model';
 import { PageSplitLayoutComponent } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
 import { FarmPlotViewComponent } from '../../components/farm-plot-view/farm-plot-view.component';
@@ -13,6 +16,7 @@ import { SharedModule } from '../../../../shared/shared.module';
 import { environment } from '../../../../../environments/environment';
 import { Router } from '@angular/router';
 import { DataTableColumn } from '../../../../shared/data-table/models/data-table-column.model';
+import { AuthService } from '../../../auth/services/auth.service';
 
 interface AssignedFarmPlot extends FarmPlot {
   agreement: InvestmentPackageTypeAgreement;
@@ -29,6 +33,7 @@ interface AssignedFarmPlot extends FarmPlot {
     TabsComponent,
     FarmFollowupsModule,
     SharedModule,
+    InvestmentPackageTypeFilterComponent,
   ],
   templateUrl: './farm-plots-extension-page.component.html',
 })
@@ -57,9 +62,14 @@ export class FarmPlotsExtensionPageComponent implements OnInit {
   columns: DataTableColumn<InvestmentPackageTypeAgreement>[] = [];
   archivedColumns: DataTableColumn<InvestmentPackageTypeAgreement>[] = [];
 
+  searchText = '';
+  fundingStatus: FundingStatus | '' = '';
+  paymentStatus: InvestmentPaymentStatus | '' = '';
+
   constructor(
     private investmentPackageTypeService: InvestmentPackageTypeService,
     private router: Router,
+    private authService: AuthService,
   ) {
     this.buildColumns();
   }
@@ -68,16 +78,39 @@ export class FarmPlotsExtensionPageComponent implements OnInit {
     this.loadAssignedPlots();
   }
 
+  get isFollowUpReadOnly(): boolean {
+    return this.authService.isExtensionWorker() &&
+      (this.selectedAgreement?.packageStatus === 'INACTIVE' || this.selectedAgreement?.packageStatus === 'COMPLITED');
+  }
+
   onAssignmentsTabChange(key: string): void {
     this.assignmentsActiveTab = key;
   }
 
   get currentAgreements(): InvestmentPackageTypeAgreement[] {
-    return this.allAgreements.filter((a) => this.isActiveStatus(a));
+    return this.applyFilters(this.allAgreements.filter((a) => this.isActiveStatus(a)));
   }
 
   get historyAgreements(): InvestmentPackageTypeAgreement[] {
-    return this.allAgreements.filter((a) => !this.isActiveStatus(a));
+    return this.applyFilters(this.allAgreements.filter((a) => !this.isActiveStatus(a)));
+  }
+
+  private applyFilters(list: InvestmentPackageTypeAgreement[]): InvestmentPackageTypeAgreement[] {
+    const term = this.searchText.trim().toLowerCase();
+    return list.filter((a) =>
+      (!term || (a.title ?? '').toLowerCase().includes(term)) &&
+      (!this.fundingStatus || a.fundingStatus === this.fundingStatus) &&
+      (!this.paymentStatus || a.paymentStatus === this.paymentStatus)
+    );
+  }
+
+  onFilterChange(): void {
+  }
+
+  clearFilters(): void {
+    this.searchText = '';
+    this.fundingStatus = '';
+    this.paymentStatus = '';
   }
 
   isActiveStatus(agreement: InvestmentPackageTypeAgreement): boolean {

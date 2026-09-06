@@ -65,3 +65,25 @@ describe('DataTableComponent resolvers', () => {
     expect(component.resolveCheckboxDisabled(column, INACTIVE_ROW)).toBe(false);
   });
 });
+
+describe('DataTableComponent isRowSelected', () => {
+  it('is false when selectedRowId is not set', () => {
+    const component = makeComponent();
+    expect(component.isRowSelected(ROW)).toBe(false);
+  });
+
+  it('is true when the default rowIdField (.id) matches selectedRowId', () => {
+    const component = makeComponent();
+    component.selectedRowId = 'row-1';
+    expect(component.isRowSelected(ROW)).toBe(true);
+    expect(component.isRowSelected(INACTIVE_ROW)).toBe(false);
+  });
+
+  it('uses a custom rowIdField when provided', () => {
+    const component = makeComponent();
+    component.selectedRowId = 'row-2';
+    component.rowIdField = (item) => item.id;
+    expect(component.isRowSelected(ROW)).toBe(false);
+    expect(component.isRowSelected(INACTIVE_ROW)).toBe(true);
+  });
+});

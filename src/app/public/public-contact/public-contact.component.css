@@ -95,12 +95,8 @@
   font-weight: 800;
 }
 
-.contact-social-icon--facebook {
-  background: #1877f2;
-}
-
-.contact-social-icon--tiktok {
-  background: #010101;
+.contact-social-icon-svg {
+  font-size: 1.05rem;
 }
 
 .contact-social-icon--email {

@@ -67,6 +67,7 @@
       *ngIf="investmentPackage"
       [plot]="investmentPackage.farmPlot"
       [showStatusActions]="false"
+      [hideInvestmentHistoryForExtensionWorker]="true"
     ></app-farm-plot-view>
   </div>
 
@@ -115,13 +116,13 @@
           >
             <div class="flex items-center gap-3">
               <img
-                *ngIf="getInvestorAvatarUrl(record.investorUser?.profileImageUuid) as avatarUrl"
+                *ngIf="getInvestorAvatarUrl(record.investorUser?.profileUrl) as avatarUrl"
                 [src]="avatarUrl"
                 class="w-9 h-9 rounded-full object-cover flex-shrink-0"
                 alt=""
               />
               <div
-                *ngIf="!getInvestorAvatarUrl(record.investorUser?.profileImageUuid)"
+                *ngIf="!getInvestorAvatarUrl(record.investorUser?.profileUrl)"
                 class="w-9 h-9 rounded-full bg-indigo-500 text-white flex items-center justify-center text-sm font-semibold flex-shrink-0"
               >
                 {{ (record.investorUser?.firstName || record.investorUser?.username || '?').charAt(0).toUpperCase() }}
@@ -218,12 +219,12 @@
       <div *ngIf="ownInvestorProfile && !isCrowdfundingType" class="rounded-lg border border-gray-200 bg-white p-4">
         <div class="flex items-center gap-4">
           <img
-            *ngIf="getInvestorAvatarUrl(ownInvestorProfile.profileImageUuid) as avatarUrl"
+            *ngIf="getInvestorAvatarUrl(ownInvestorProfile.profileUrl) as avatarUrl"
             [src]="avatarUrl"
             class="w-14 h-14 rounded-full object-cover flex-shrink-0"
             alt=""
           />
-          <div *ngIf="!getInvestorAvatarUrl(ownInvestorProfile.profileImageUuid)" class="w-14 h-14 rounded-full bg-indigo-500 text-white flex items-center justify-center text-lg font-semibold flex-shrink-0">
+          <div *ngIf="!getInvestorAvatarUrl(ownInvestorProfile.profileUrl)" class="w-14 h-14 rounded-full bg-indigo-500 text-white flex items-center justify-center text-lg font-semibold flex-shrink-0">
             {{ (ownInvestorProfile.firstName || ownInvestorProfile.username || '?').charAt(0).toUpperCase() }}
           </div>
           <div>
@@ -255,7 +256,7 @@
       <p *ngIf="packageInvestmentsLoading || closedLeaseInvestorsLoading" class="text-sm text-gray-500">Loading investors...</p>
 
       <p
-        *ngIf="!packageInvestmentsLoading && !closedLeaseInvestorsLoading && packageInvestments.length === 0 && closedLeaseInvestors.length === 0"
+        *ngIf="!packageInvestmentsLoading && !closedLeaseInvestorsLoading && packageInvestments.length === 0 && closedLeaseInvestors.length === 0 && !((isBiddingType || isCrowdfundingType) && isExtensionWorkerRole)"
         class="text-sm text-gray-500"
       >
         No investors have applied for this package yet.
@@ -272,12 +273,12 @@
       >
         <div class="flex items-center gap-4">
           <img
-            *ngIf="getInvestorAvatarUrl(investorUser.profileImageUuid) as avatarUrl"
+            *ngIf="getInvestorAvatarUrl(investorUser.profileUrl) as avatarUrl"
             [src]="avatarUrl"
             class="w-14 h-14 rounded-full object-cover flex-shrink-0"
             alt=""
           />
-          <div *ngIf="!getInvestorAvatarUrl(investorUser.profileImageUuid)" class="w-14 h-14 rounded-full bg-indigo-500 text-white flex items-center justify-center text-lg font-semibold flex-shrink-0">
+          <div *ngIf="!getInvestorAvatarUrl(investorUser.profileUrl)" class="w-14 h-14 rounded-full bg-indigo-500 text-white flex items-center justify-center text-lg font-semibold flex-shrink-0">
             {{ (investorUser.firstName || investorUser.username || '?').charAt(0).toUpperCase() }}
           </div>
           <div>
@@ -320,8 +321,70 @@
       </div>
       </div>
 
-      <!-- BIDDING / CROWDFUNDING: click an investor, then Confirm Winner(s) -->
-      <div *ngIf="isBiddingType || isCrowdfundingType" class="space-y-4">
+      <!-- BIDDING / CROWDFUNDING, extension worker: read-only view of the chosen investor(s) only -->
+      <div *ngIf="(isBiddingType || isCrowdfundingType) && isExtensionWorkerRole" class="space-y-4">
+        <!-- CROWDFUNDING investor progress bar -->
+        <div *ngIf="isCrowdfundingType && investmentPackage" class="rounded-lg border border-gray-200 bg-white p-4 space-y-2">
+          <div class="flex items-center justify-between text-sm">
+            <span class="font-semibold text-gray-700">Investor Progress</span>
+            <span class="text-gray-600 font-semibold">
+              {{ confirmedInvestorCount }} / {{ investmentPackage.expectedInvestorNumber || 0 }}
+            </span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+            <div class="bg-indigo-500 h-3 rounded-full transition-all duration-500"
+                 [style.width]="investorProgressPercent + '%'">
+            </div>
+          </div>
+          <p class="text-xs text-gray-500">
+            {{ confirmedInvestorCount }} of {{ investmentPackage.expectedInvestorNumber || 0 }} investors ({{ investorProgressPercent }}%)
+          </p>
+        </div>
+
+        <p *ngIf="chosenInvestorRecords.length === 0" class="text-sm text-gray-500">
+          No investor has been confirmed for this package yet.
+        </p>
+
+        <div
+          *ngFor="let record of chosenInvestorRecords"
+          class="rounded-lg border border-gray-200 bg-white p-4"
+        >
+          <div class="flex items-center gap-4">
+            <img
+              *ngIf="getInvestorAvatarUrl(record.investorUser?.profileUrl) as avatarUrl"
+              [src]="avatarUrl"
+              class="w-14 h-14 rounded-full object-cover flex-shrink-0"
+              alt=""
+            />
+            <div *ngIf="!getInvestorAvatarUrl(record.investorUser?.profileUrl)" class="w-14 h-14 rounded-full bg-indigo-500 text-white flex items-center justify-center text-lg font-semibold flex-shrink-0">
+              {{ (record.investorUser?.firstName || record.investorUser?.username || '?').charAt(0).toUpperCase() }}
+            </div>
+            <div>
+              <p class="text-base font-semibold text-gray-900">{{ formatWorkerName(record.investorUser) }}</p>
+              <p class="text-sm text-gray-500">{{ record.investorUser?.email }}</p>
+              <p class="text-xs text-gray-400">{{ record.investorUser?.username }}</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm mt-4 pt-4 border-t border-gray-100">
+            <div>
+              <p class="text-gray-500">Middle Name</p>
+              <p class="text-gray-900 font-medium">{{ record.investorUser?.middleName || '-' }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Gender</p>
+              <p class="text-gray-900 font-medium">{{ record.investorUser?.gender || '-' }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">Status</p>
+              <p class="text-gray-900 font-medium">{{ record.investorUser?.accountNonLocked ? 'Active' : 'Locked' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BIDDING / CROWDFUNDING, admin: click an investor, then Confirm Winner(s) -->
+      <div *ngIf="(isBiddingType || isCrowdfundingType) && isAdminRole" class="space-y-4">
 
         <!-- Non-BIDDING, non-CROWDFUNDING: show payment status and attachment proof panel (LEASING only) -->
         <div *ngIf="!isBiddingType && !isCrowdfundingType" class="rounded-lg border border-gray-200 bg-white p-4 space-y-3">
@@ -466,12 +529,12 @@
               class="mt-0.5 flex-shrink-0 h-4 w-4"
             />
             <img
-              *ngIf="getInvestorAvatarUrl(record.investorUser?.profileImageUuid) as avatarUrl"
+              *ngIf="getInvestorAvatarUrl(record.investorUser?.profileUrl) as avatarUrl"
               [src]="avatarUrl"
               class="w-10 h-10 rounded-full object-cover flex-shrink-0"
               alt=""
             />
-            <div *ngIf="!getInvestorAvatarUrl(record.investorUser?.profileImageUuid)" class="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center text-sm font-semibold flex-shrink-0">
+            <div *ngIf="!getInvestorAvatarUrl(record.investorUser?.profileUrl)" class="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center text-sm font-semibold flex-shrink-0">
               {{ (record.investorUser?.firstName || record.investorUser?.username || '?').charAt(0).toUpperCase() }}
             </div>
             <div class="flex-1 min-w-0">
@@ -738,12 +801,12 @@
 
         <div *ngIf="agreement.investorUser" class="flex items-center gap-3 pt-3 border-t border-gray-100">
           <img
-            *ngIf="getInvestorAvatarUrl(agreement.investorUser.profileImageUuid) as avatarUrl"
+            *ngIf="getInvestorAvatarUrl(agreement.investorUser.profileUrl) as avatarUrl"
             [src]="avatarUrl"
             class="w-10 h-10 rounded-full object-cover flex-shrink-0"
             alt=""
           />
-          <div *ngIf="!getInvestorAvatarUrl(agreement.investorUser.profileImageUuid)" class="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center text-sm font-semibold flex-shrink-0">
+          <div *ngIf="!getInvestorAvatarUrl(agreement.investorUser.profileUrl)" class="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center text-sm font-semibold flex-shrink-0">
             {{ (agreement.investorUser.firstName || agreement.investorUser.username || '?').charAt(0).toUpperCase() }}
           </div>
           <div>
@@ -797,7 +860,7 @@
           <button
             type="button"
             class="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors"
-            (click)="onTabChange('extension-worker')"
+            (click)="openAssignExtensionWorkerModal()"
           >
             Assign Extension Worker →
           </button>
@@ -848,7 +911,7 @@
         <button
           type="button"
           class="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors"
-          (click)="onTabChange('extension-worker')"
+          (click)="openAssignExtensionWorkerModal()"
         >
           Verify Signature &amp; Assign Extension Worker →
         </button>
@@ -925,12 +988,12 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <img
-            *ngIf="getInvestorAvatarUrl(investmentPackage?.extensionWorker?.profileImageUuid) as avatarUrl"
+            *ngIf="getInvestorAvatarUrl(investmentPackage?.extensionWorker?.profileUrl) as avatarUrl"
             [src]="avatarUrl"
             class="w-12 h-12 rounded-full object-cover flex-shrink-0"
             alt=""
           />
-          <div *ngIf="!getInvestorAvatarUrl(investmentPackage?.extensionWorker?.profileImageUuid)" class="w-12 h-12 rounded-full bg-indigo-500 text-white flex items-center justify-center text-base font-semibold flex-shrink-0">
+          <div *ngIf="!getInvestorAvatarUrl(investmentPackage?.extensionWorker?.profileUrl)" class="w-12 h-12 rounded-full bg-indigo-500 text-white flex items-center justify-center text-base font-semibold flex-shrink-0">
             {{ (investmentPackage?.extensionWorker?.firstName || investmentPackage?.extensionWorker?.username || '?').charAt(0).toUpperCase() }}
           </div>
           <div>
@@ -969,12 +1032,12 @@
 
       <div *ngIf="selectedChangeExtensionWorkerDetail" class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
         <img
-          *ngIf="getInvestorAvatarUrl(selectedChangeExtensionWorkerDetail.profileImageUuid) as avatarUrl"
+          *ngIf="getInvestorAvatarUrl(selectedChangeExtensionWorkerDetail.profileUrl) as avatarUrl"
           [src]="avatarUrl"
           class="w-12 h-12 rounded-full object-cover flex-shrink-0"
           alt=""
         />
-        <div *ngIf="!getInvestorAvatarUrl(selectedChangeExtensionWorkerDetail.profileImageUuid)" class="w-12 h-12 rounded-full bg-indigo-500 text-white flex items-center justify-center text-base font-semibold flex-shrink-0">
+        <div *ngIf="!getInvestorAvatarUrl(selectedChangeExtensionWorkerDetail.profileUrl)" class="w-12 h-12 rounded-full bg-indigo-500 text-white flex items-center justify-center text-base font-semibold flex-shrink-0">
           {{ (selectedChangeExtensionWorkerDetail.firstName || selectedChangeExtensionWorkerDetail.username || '?').charAt(0).toUpperCase() }}
         </div>
         <div>
@@ -1023,12 +1086,12 @@
 
       <div *ngIf="selectedExtensionWorkerDetail" class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
         <img
-          *ngIf="getInvestorAvatarUrl(selectedExtensionWorkerDetail.profileImageUuid) as avatarUrl"
+          *ngIf="getInvestorAvatarUrl(selectedExtensionWorkerDetail.profileUrl) as avatarUrl"
           [src]="avatarUrl"
           class="w-12 h-12 rounded-full object-cover flex-shrink-0"
           alt=""
         />
-        <div *ngIf="!getInvestorAvatarUrl(selectedExtensionWorkerDetail.profileImageUuid)" class="w-12 h-12 rounded-full bg-indigo-500 text-white flex items-center justify-center text-base font-semibold flex-shrink-0">
+        <div *ngIf="!getInvestorAvatarUrl(selectedExtensionWorkerDetail.profileUrl)" class="w-12 h-12 rounded-full bg-indigo-500 text-white flex items-center justify-center text-base font-semibold flex-shrink-0">
           {{ (selectedExtensionWorkerDetail.firstName || selectedExtensionWorkerDetail.username || '?').charAt(0).toUpperCase() }}
         </div>
         <div>
@@ -1076,6 +1139,7 @@
     <app-farm-followup-list
       [followUps]="investmentPackage?.followUpDtoList ?? []"
       [externalId]="investmentPackage?.id ?? ''"
+      [readOnly]="isFollowUpReadOnly"
     ></app-farm-followup-list>
   </div>
 
@@ -1403,6 +1467,54 @@
   [(remark)]="chooseWinnerRemark"
   (confirm)="confirmCandidates()"
 ></app-investment-package-choose-winner-modal>
+
+<app-modal
+  [(visible)]="showAssignExtensionWorkerModal"
+  title="Verify & Assign Extension Worker"
+  size="sm"
+  confirmText="Verify & Assign"
+  [confirmLoading]="assigningExtensionWorker"
+  [confirmDisabled]="!selectedExtensionWorkerId"
+  (confirm)="assignExtensionWorker()"
+>
+  <ng-template #modalBody>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Extension worker <span class="text-red-500">*</span>
+        </label>
+        <select
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+          [(ngModel)]="selectedExtensionWorkerId"
+          [disabled]="loadingExtensionWorkers || assigningExtensionWorker"
+        >
+          <option [ngValue]="null">Select extension worker...</option>
+          <option *ngFor="let worker of extensionWorkers" [ngValue]="worker.id">
+            {{ getExtensionWorkerDisplayName(worker) }}
+          </option>
+        </select>
+        <p *ngIf="loadingExtensionWorkers" class="text-xs text-gray-500 mt-2">Loading extension workers...</p>
+      </div>
+
+      <div *ngIf="selectedExtensionWorkerDetail" class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
+        <img
+          *ngIf="getInvestorAvatarUrl(selectedExtensionWorkerDetail.profileUrl) as avatarUrl"
+          [src]="avatarUrl"
+          class="w-12 h-12 rounded-full object-cover flex-shrink-0"
+          alt=""
+        />
+        <div *ngIf="!getInvestorAvatarUrl(selectedExtensionWorkerDetail.profileUrl)" class="w-12 h-12 rounded-full bg-indigo-500 text-white flex items-center justify-center text-base font-semibold flex-shrink-0">
+          {{ (selectedExtensionWorkerDetail.firstName || selectedExtensionWorkerDetail.username || '?').charAt(0).toUpperCase() }}
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-900">{{ formatWorkerName(selectedExtensionWorkerDetail) }}</p>
+          <p class="text-xs text-gray-500">{{ selectedExtensionWorkerDetail.email }}</p>
+          <p class="text-xs text-gray-400">{{ selectedExtensionWorkerDetail.gender }}</p>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</app-modal>
 
 <app-investment-package-type-complete-modal
   [(visible)]="showCompleteModal"

@@ -12,6 +12,7 @@
     <app-data-table
       [columns]="columns"
       [data]="templates"
+      [selectedRowId]="selectedTemplate?.id ?? null"
       [loading]="loading"
       [total]="templates.length"
       [pageSize]="templates.length || 10"

@@ -72,6 +72,7 @@ export interface InvestmentPackageFilterRequest {
   searchText?: string;
   investmentPackageType?: InvestmentPackageType;
   statuses?: FundingStatus[];
+  packageStatuses?: InvestmentPackageStatus[];
   paymentStatuses?: InvestmentPaymentStatus[];
   soilTypes?: FarmPlotSoilType[];
   farmPlotId?: string;

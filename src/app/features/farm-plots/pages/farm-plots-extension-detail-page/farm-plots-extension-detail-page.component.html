@@ -14,7 +14,7 @@
   <div *ngIf="agreement">
     <app-tabs [tabs]="tabs" [activeTab]="activeTab" (activeTabChange)="activeTab = $event">
       <div *ngIf="activeTab === 'farm-plot'">
-        <app-farm-plot-view [plot]="agreement.farmPlot"></app-farm-plot-view>
+        <app-farm-plot-view [plot]="agreement.farmPlot" [hideInvestmentHistoryForExtensionWorker]="true"></app-farm-plot-view>
       </div>
       <div *ngIf="activeTab === 'lease'">
         <app-investment-package-type-view [agreement]="agreement"></app-investment-package-type-view>
@@ -23,6 +23,7 @@
         <app-farm-followup-list
           [followUps]="agreement.followUpDtoList ?? []"
           [externalId]="agreement.id"
+          [readOnly]="isFollowUpReadOnly"
         ></app-farm-followup-list>
       </div>
     </app-tabs>

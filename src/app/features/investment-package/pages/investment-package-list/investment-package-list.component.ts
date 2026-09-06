@@ -1,4 +1,5 @@
 import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
 import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
@@ -72,6 +73,7 @@ export class InvestmentPackageListComponent implements OnInit {
     {header: 'Type', value: (c) => this.formatPackageType(c.investmentPackageType)},
     {header: 'Funding Status', value: (c) => c.fundingStatus, defaultVisible: false},
     {header: 'Deadline', value: (c) => this.formatDeadline(c.fundingDeadline), defaultVisible: false},
+    {header: 'Archived Date', value: (c) => this.formatArchivedDate(c.updatedAt)},
   ];
 
   tabs: TabItem[] = [
@@ -87,6 +89,7 @@ export class InvestmentPackageListComponent implements OnInit {
     private investmentPackageService: InvestmentPackageService,
     private toastService: ToastService,
     private authService: AuthService,
+    private route: ActivatedRoute,
   ) {
     this.rightActions = [
       {
@@ -126,8 +129,21 @@ export class InvestmentPackageListComponent implements OnInit {
     return this.authService.isAdmin();
   }
 
+  private formatArchivedDate(value?: string): string {
+    if (!value) return '-';
+    const d = new Date(value);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = d.toLocaleString('en-US', {month: 'short'});
+    return `${day}-${month}-${d.getFullYear()}`;
+  }
+
   ngOnInit(): void {
-    this.refreshCurrentTab();
+    const queryParams = this.route.snapshot.queryParamMap;
+    const deepLinkId = queryParams.get('id');
+    if (deepLinkId && queryParams.get('tab') === 'archived') {
+      this.adminActiveTab = 'archived';
+    }
+    this.refreshCurrentTab(deepLinkId);
   }
 
   onAdminTabChange(key: string): void {

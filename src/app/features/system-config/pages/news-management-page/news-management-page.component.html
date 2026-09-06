@@ -13,6 +13,7 @@
       <app-data-table
         [columns]="columns"
         [data]="articles"
+        [selectedRowId]="selectedArticle?.id ?? null"
         [loading]="loading"
         [total]="total"
         [pageSize]="pageSize"

@@ -23,6 +23,7 @@
           <app-data-table
             [columns]="columns"
             [data]="myLeasesPackageTypes"
+            [selectedRowId]="rightPanelItem?.id ?? null"
             [loading]="myLeasesLoading"
             [total]="myLeasesPackageTypes.length"
             [pageSize]="myLeasesPackageTypes.length || 10"
@@ -56,6 +57,7 @@
           <app-data-table
             [columns]="columns"
             [data]="availablePackageTypes"
+            [selectedRowId]="rightPanelItem?.id ?? null"
             [loading]="availableLoading"
             [total]="availableTotal"
             [pageSize]="availablePageSize"
@@ -89,6 +91,7 @@
           <app-data-table
             [columns]="archivedColumns"
             [data]="historyPackageTypes"
+            [selectedRowId]="rightPanelItem?.id ?? null"
             [loading]="historyLoading"
             [total]="historyPackageTypes.length"
             [pageSize]="historyPackageTypes.length || 10"
@@ -124,6 +127,7 @@
             <app-data-table
               [columns]="columns"
               [data]="publishedPackages"
+              [selectedRowId]="rightPanelItem?.id ?? null"
               [loading]="publishedLoading"
               [total]="publishedPackages.length"
               [pageSize]="publishedPackages.length || 10"
@@ -165,6 +169,7 @@
             <app-data-table
               [columns]="archivedColumns"
               [data]="archivedPackages"
+              [selectedRowId]="rightPanelItem?.id ?? null"
               [loading]="archivedLoading"
               [total]="archivedPackages.length"
               [pageSize]="archivedPackages.length || 10"
@@ -175,8 +180,7 @@
               [showViewButton]="false"
               [showEditButton]="false"
               [showDeleteButton]="false"
-              [showActionColumn]="true"
-              [rowActions]="tableRowActions"
+              [showActionColumn]="false"
               [rowClickable]="true"
               [noDataMessage]="'No archived investment packages found.'"
               (rowClick)="onView($event)"
@@ -207,8 +211,9 @@
           <!-- Tab 1: My Farm Plots -->
           <div *ngIf="extensionWorkerActiveTab === 'current'">
             <app-data-table
-              [columns]="columns"
+              [columns]="extensionWorkerColumns"
               [data]="subscribedPackageTypes"
+              [selectedRowId]="rightPanelItem?.id ?? null"
               [loading]="subscribedLoading"
               [total]="subscribedPackageTypes.length"
               [pageSize]="subscribedPackageTypes.length || 10"
@@ -219,8 +224,7 @@
               [showViewButton]="false"
               [showEditButton]="false"
               [showDeleteButton]="false"
-              [showActionColumn]="true"
-              [rowActions]="tableRowActions"
+              [showActionColumn]="false"
               [rowClickable]="true"
               (refreshClick)="onRefresh()"
               (rowClick)="onView($event)"
@@ -241,8 +245,9 @@
           <!-- Tab 2: History -->
           <div *ngIf="extensionWorkerActiveTab === 'history'">
             <app-data-table
-              [columns]="archivedColumns"
+              [columns]="extensionWorkerHistoryColumns"
               [data]="subscribedHistoryPackageTypes"
+              [selectedRowId]="rightPanelItem?.id ?? null"
               [loading]="subscribedHistoryLoading"
               [total]="subscribedHistoryPackageTypes.length"
               [pageSize]="subscribedHistoryPackageTypes.length || 10"
@@ -253,8 +258,7 @@
               [showViewButton]="false"
               [showEditButton]="false"
               [showDeleteButton]="false"
-              [showActionColumn]="true"
-              [rowActions]="tableRowActions"
+              [showActionColumn]="false"
               [rowClickable]="true"
               [noDataMessage]="'No completed or deactivated assignments yet.'"
               (rowClick)="onView($event)"

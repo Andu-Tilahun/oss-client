@@ -122,7 +122,6 @@ export const MENU: MenuItem[] = [
       { icon: '', label: 'Leases', route: '/investment-package-types/leasing', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
       { icon: '', label: 'Bidding', route: '/investment-package-types/bidding', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
       { icon: '', label: 'Crowdfunding', route: '/investment-package-types/crowdfunding', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
-      { icon: '', label: 'Farm Plots', route: '/farm-plots-extension', roles: ['EXTENSION_WORKER'] },
     ],
     expanded: false
   },

@@ -20,6 +20,7 @@
         <app-data-table
           [columns]="columns"
           [data]="publishedPackages"
+          [selectedRowId]="selectedInvestmentPackage?.id ?? null"
           [loading]="publishedLoading"
           [total]="publishedTotal"
           [pageSize]="publishedPageSize"
@@ -58,6 +59,7 @@
         <app-data-table
           [columns]="archivedColumns"
           [data]="archivedPackages"
+          [selectedRowId]="selectedInvestmentPackage?.id ?? null"
           [loading]="archivedLoading"
           [total]="archivedTotal"
           [pageSize]="archivedPageSize"
@@ -67,8 +69,7 @@
           [showViewButton]="false"
           [showEditButton]="false"
           [showDeleteButton]="false"
-          [showActionColumn]="isAdmin"
-          [rowActions]="tableRowActions"
+          [showActionColumn]="false"
           [rowClickable]="true"
           [noDataMessage]="'No archived investment packages found.'"
           (rowClick)="onView($event)"

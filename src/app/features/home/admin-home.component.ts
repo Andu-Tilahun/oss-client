@@ -14,6 +14,7 @@ import { PaymentService } from '../payments/services/payment.service';
 import { FarmFollowUpService } from '../farm-followups/services/farm-followup.service';
 import { FarmFollowUp } from '../farm-followups/models/farm-followup.model';
 import { PageResponse } from '../../shared/models/api-response.model';
+import { InvestmentPackage } from '../investment-package/models/investment-package.model';
 
 interface CountSlice {
   label: string;
@@ -49,6 +50,13 @@ export class AdminHomeComponent implements OnInit {
   totalUsers = 0;
   totalFollowUps = 0;
   totalPayments = 0;
+  appliedInvestmentOptionsCount = 0;
+  activeInvestmentOptionsCount = 0;
+  farmPlotActiveCount = 0;
+  farmPlotArchivedCount = 0;
+  followUpActiveCount = 0;
+  followUpDueSoonCount = 0;
+  followUpTotalActiveCount = 0;
 
   farmPlotBreakdown: CountSlice[] = [];
   investmentPackageBreakdown: CountSlice[] = [];
@@ -131,6 +139,21 @@ export class AdminHomeComponent implements OnInit {
       catchError(() => of([] as FarmFollowUp[])),
     );
 
+    const activeOptionsCounts$ = this.investmentPackageService.getStatusSummary().pipe(
+      map((summary) => ({
+        applied: summary.packageStatusCounts['APPLIED'] ?? 0,
+        active: summary.packageStatusCounts['ACTIVE'] ?? 0,
+      })),
+      catchError(() => of({ applied: 0, active: 0 })),
+    );
+
+    // Needed to resolve which investment package (if any) each follow-up belongs to, so
+    // follow-ups tied to a closed/inactive package can be excluded from the "Total Active" count.
+    const allPackagesForFollowUps$ = this.investmentPackageService.filterInvestmentPackages({ page: 0, size: 500 }).pipe(
+      map((r) => r?.content ?? []),
+      catchError(() => of([] as InvestmentPackage[])),
+    );
+
     const farmPlotInvestmentCounts$ = this.farmPlotService.filterFarmPlots({ page: 0, size: 200 }).pipe(
       map((r) => r?.content ?? []),
       switchMap((plots) => {
@@ -153,6 +176,8 @@ export class AdminHomeComponent implements OnInit {
       payments: payments$,
       followUps: followUps$,
       farmPlotInvestmentCounts: farmPlotInvestmentCounts$,
+      activeOptionsCounts: activeOptionsCounts$,
+      allPackagesForFollowUps: allPackagesForFollowUps$,
     }).subscribe((result) => {
       this.computeDashboard(result);
       this.buildChartOptions();
@@ -167,10 +192,16 @@ export class AdminHomeComponent implements OnInit {
     payments: Record<string, number>;
     followUps: FarmFollowUp[];
     farmPlotInvestmentCounts: NamedCount[];
+    activeOptionsCounts: { applied: number; active: number };
+    allPackagesForFollowUps: InvestmentPackage[];
   }): void {
-    const { farmPlots, investmentPackages, userRoles, payments, followUps, farmPlotInvestmentCounts } = result;
+    const { farmPlots, investmentPackages, userRoles, payments, followUps, farmPlotInvestmentCounts, activeOptionsCounts, allPackagesForFollowUps } = result;
+    this.appliedInvestmentOptionsCount = activeOptionsCounts.applied;
+    this.activeInvestmentOptionsCount = activeOptionsCounts.active;
 
     this.totalFarmPlots = farmPlots.operational + farmPlots.repair + farmPlots.archived;
+    this.farmPlotActiveCount = farmPlots.operational;
+    this.farmPlotArchivedCount = farmPlots.archived;
     this.farmPlotBreakdown = [
       { label: 'Operational', value: farmPlots.operational, color: '#22C55E' },
       { label: 'Repair / Damaged', value: farmPlots.repair, color: '#F59E0B' },
@@ -195,6 +226,7 @@ export class AdminHomeComponent implements OnInit {
 
     this.totalFollowUps = followUps.length;
     this.followUpTrend = this.buildFollowUpTrend(followUps);
+    this.computeFollowUpActiveCounts(followUps, allPackagesForFollowUps);
 
     this.farmPlotInvestmentBreakdown = [...farmPlotInvestmentCounts]
       .sort((a, b) => b.value - a.value)
@@ -269,6 +301,53 @@ export class AdminHomeComponent implements OnInit {
       pending: pending[m.key],
       overdue: overdue[m.key],
     }));
+  }
+
+  /**
+   * A follow-up's `externalId` is polymorphic — it's either the investment package's own id, or
+   * the id of the agreement it was raised against (whose `agreementId` then points back to the
+   * package). Either way, resolving it tells us which package (if any) the follow-up belongs to.
+   * "Total Active" only counts ACTIVE follow-ups whose package is still ACTIVE/APPLIED/IN_USE —
+   * a follow-up left over from a package that's since gone INACTIVE/COMPLITED isn't counted.
+   */
+  private computeFollowUpActiveCounts(followUps: FarmFollowUp[], allPackages: InvestmentPackage[]): void {
+    const statusById = new Map(allPackages.map((p) => [p.id, p.packageStatus]));
+    const statusByAgreementId = new Map(
+      allPackages.filter((p) => p.agreementId).map((p) => [p.agreementId as string, p.packageStatus]),
+    );
+    const isLinkedToActivePackage = (externalId: string): boolean => {
+      const status = statusById.get(externalId) ?? statusByAgreementId.get(externalId);
+      return !!status && status !== 'INACTIVE' && status !== 'COMPLITED';
+    };
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dueSoonCutoff = new Date(today);
+    dueSoonCutoff.setDate(dueSoonCutoff.getDate() + 7);
+
+    let active = 0;
+    let dueSoon = 0;
+    let totalActive = 0;
+
+    for (const f of followUps) {
+      if (f.taskStatus !== 'ACTIVE') continue;
+      active++;
+
+      if (f.endDate) {
+        const end = new Date(f.endDate);
+        if (Number.isFinite(end.getTime()) && end >= today && end <= dueSoonCutoff) {
+          dueSoon++;
+        }
+      }
+
+      if (isLinkedToActivePackage(f.externalId)) {
+        totalActive++;
+      }
+    }
+
+    this.followUpActiveCount = active;
+    this.followUpDueSoonCount = dueSoon;
+    this.followUpTotalActiveCount = totalActive;
   }
 
   private buildChartOptions(): void {

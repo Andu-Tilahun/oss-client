@@ -20,6 +20,7 @@
         <app-data-table
           [columns]="columns"
           [data]="investorUsers"
+          [selectedRowId]="selectedUser?.id ?? null"
           [loading]="investorLoading"
           [total]="investorTotal"
           [pageSize]="investorPageSize"
@@ -58,6 +59,7 @@
         <app-data-table
           [columns]="columns"
           [data]="staffUsers"
+          [selectedRowId]="selectedUser?.id ?? null"
           [loading]="staffLoading"
           [total]="staffTotal"
           [pageSize]="staffPageSize"
@@ -97,6 +99,7 @@
         <app-data-table
           [columns]="columns"
           [data]="adminUsers"
+          [selectedRowId]="selectedUser?.id ?? null"
           [loading]="adminLoading"
           [total]="adminTotal"
           [pageSize]="adminPageSize"

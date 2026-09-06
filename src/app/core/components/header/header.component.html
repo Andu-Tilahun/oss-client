@@ -53,7 +53,17 @@
         >
           <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between shrink-0">
             <span class="text-sm font-semibold text-gray-900">Notifications</span>
-            <span *ngIf="!previewLoading && previewTotal > 0" class="text-xs text-gray-500">{{ previewTotal }} total</span>
+            <div class="flex items-center gap-3">
+              <button
+                *ngIf="badgeTotal > 0"
+                type="button"
+                (click)="markAllAsRead()"
+                class="text-xs font-medium text-indigo-600 hover:text-indigo-800"
+              >
+                Mark all read
+              </button>
+              <span *ngIf="!previewLoading && previewTotal > 0" class="text-xs text-gray-500">{{ previewTotal }} total</span>
+            </div>
           </div>
 
           <div class="overflow-y-auto flex-1 min-h-0">
@@ -78,7 +88,10 @@
                 <span *ngIf="n.isRead" class="mt-1.5 shrink-0 w-2 h-2"></span>
                 <div class="min-w-0">
                   <p class="text-sm font-medium text-gray-900 line-clamp-1" [class.font-semibold]="!n.isRead">{{ n.subject || n.notificationType }}</p>
-                  <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">{{ n.notificationType }}</p>
+                  <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                    <span *ngIf="n.eventType" class="text-xs text-gray-500">{{ formatEventType(n.eventType) }}</span>
+                    <span *ngIf="n.notificationType === 'EMAIL'" class="text-[10px] font-medium text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">Email</span>
+                  </div>
                   <p class="text-xs text-gray-400 mt-1">{{ formatPreviewWhen(n) }}</p>
                 </div>
               </li>
