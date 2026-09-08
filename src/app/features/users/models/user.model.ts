@@ -25,7 +25,7 @@ export interface SignupRequest {
   lastName: string;
   middleName?: string;
   gender: string;
-  profileImageUuid: string;
+  profileImageUuid?: string;
 }
 
 export interface VerifyEmailRequest {

@@ -361,6 +361,7 @@ small {
   .brand-panel {
     min-height: 280px;
     order: -1;
+    border-bottom-right-radius: 64px;
   }
 
   .field-row {

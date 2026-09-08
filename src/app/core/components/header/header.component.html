@@ -2,16 +2,16 @@
   <div class="flex items-center justify-between px-4 sm:px-6 py-4 gap-4">
 
     <!-- Left: platform logo + name -->
-    <a routerLink="/home" class="flex items-center gap-3 min-w-0 shrink-0 text-inherit no-underline hover:opacity-90 transition-opacity">
+    <a routerLink="/home" class="flex items-center gap-3 min-w-0 max-w-[min(45vw,20rem)] text-inherit no-underline hover:opacity-90 transition-opacity">
       <img *ngIf="orgLogoUrl" [src]="orgLogoUrl" alt="Logo"
-        class="w-10 h-10 rounded-lg object-cover shadow-sm" />
+        class="w-10 h-10 rounded-lg object-cover shadow-sm shrink-0" />
       <div *ngIf="!orgLogoUrl"
-        class="w-10 h-10 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-lg flex items-center justify-center shadow-sm">
+        class="w-10 h-10 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-lg flex items-center justify-center shadow-sm shrink-0">
         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
         </svg>
       </div>
-      <span class="text-xl font-bold text-emerald-800 tracking-tight">{{ orgName }}</span>
+      <span class="text-xl font-bold text-emerald-800 tracking-tight truncate">{{ orgName }}</span>
     </a>
 
     <!-- Right: Notifications, mobile nav -->
@@ -133,7 +133,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
         </svg>
-        Logout
+        <span class="hidden sm:inline">Logout</span>
       </button>
 
       <!-- Mobile menu -->

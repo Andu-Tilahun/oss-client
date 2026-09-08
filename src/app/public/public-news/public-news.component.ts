@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SystemConfigService } from '../../features/system-config/services/system-config.service';
 import { NewsArticle } from '../../features/system-config/models/news-article.model';
+import { GalleryMediaKind } from '../../features/system-config/models/gallery-item.model';
 import { environment } from '../../../environments/environment';
 import { Endpoints } from '../../core/endpoint/endpoint.model';
 
@@ -14,7 +15,8 @@ interface PublicNewsItem {
   excerpt: string;
   body: string;
   category: string;
-  imageUrl: string;
+  mediaUrl: string;
+  mediaKind: GalleryMediaKind;
 }
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=900&q=80';
@@ -55,6 +57,10 @@ export class PublicNewsComponent implements OnInit {
 
   private toPublicItem(article: NewsArticle): PublicNewsItem {
     const publishedAt = article.publishedAt ? new Date(article.publishedAt) : new Date(article.createdAt ?? '');
+    const kind: GalleryMediaKind = article.kind ?? 'IMAGE';
+    const mediaUrl = article.mediaUuid
+      ? `${environment.apiUrl}${Endpoints.STORAGE_ENDPOINT}/${article.mediaUuid}${kind === 'VIDEO' ? '/stream' : ''}`
+      : DEFAULT_IMAGE;
     return {
       id: article.id,
       year: publishedAt.getFullYear().toString(),
@@ -64,9 +70,8 @@ export class PublicNewsComponent implements OnInit {
       excerpt: article.summary ?? '',
       body: article.content ?? '',
       category: article.category ?? 'News',
-      imageUrl: article.imageUuid
-        ? `${environment.apiUrl}${Endpoints.STORAGE_ENDPOINT}/${article.imageUuid}`
-        : DEFAULT_IMAGE,
+      mediaUrl,
+      mediaKind: article.mediaUuid ? kind : 'IMAGE',
     };
   }
 

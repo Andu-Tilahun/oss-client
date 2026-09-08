@@ -2,11 +2,8 @@ import {Component, ElementRef, QueryList, ViewChildren} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router, RouterModule} from '@angular/router';
-import {switchMap} from 'rxjs/operators';
 import {ToastService} from '../../../shared/toast/toast.service';
 import {AuthService} from '../services/auth.service';
-import {FileUploadService} from '../../../shared/file-upload/file-upload.service';
-import {uploadDefaultAvatar} from '../../../shared/file-upload/default-avatar.util';
 
 const OTP_LENGTH = 6;
 
@@ -32,7 +29,6 @@ export class SignupComponent {
     private router: Router,
     private toastService: ToastService,
     private authService: AuthService,
-    private fileUploadService: FileUploadService,
   ) {
     this.signupForm = this.fb.group({
       firstName: ['', [Validators.required]],
@@ -157,20 +153,17 @@ export class SignupComponent {
       return;
     }
     this.isLoading = true;
-    const gender = this.f['gender'].value;
 
-    uploadDefaultAvatar(this.fileUploadService, gender).pipe(
-      switchMap((profileImageUuid) =>
-        this.authService.signup({
-          email: this.f['email'].value,
-          firstName: this.f['firstName'].value,
-          lastName: this.f['lastName'].value,
-          middleName: this.f['middleName'].value || undefined,
-          gender,
-          profileImageUuid,
-        }),
-      ),
-    ).subscribe({
+    // Public signup runs without a token, so no file upload can happen here
+    // (the storage endpoint requires authentication). Investors are created
+    // without a profile image and can upload one from their profile after login.
+    this.authService.signup({
+      email: this.f['email'].value,
+      firstName: this.f['firstName'].value,
+      lastName: this.f['lastName'].value,
+      middleName: this.f['middleName'].value || undefined,
+      gender: this.f['gender'].value,
+    }).subscribe({
       next: () => {
         this.isLoading = false;
         this.signupEmail = this.f['email'].value;
@@ -183,12 +176,7 @@ export class SignupComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        const message =
-          err?.error?.message ||
-          err?.message ||
-          (err?.status === 401 || err?.status === 403
-            ? 'Failed to set profile image. Please try again.'
-            : 'Signup failed. Please try again.');
+        const message = err?.error?.message || 'Signup failed. Please try again.';
         this.toastService.error(message);
       },
     });

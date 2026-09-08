@@ -1,3 +1,5 @@
+import { GalleryMediaKind } from './gallery-item.model';
+
 export type NewsStatus = 'DRAFT' | 'PUBLISHED';
 
 export interface NewsArticle {
@@ -6,7 +8,8 @@ export interface NewsArticle {
   summary?: string;
   content?: string;
   category?: string;
-  imageUuid?: string;
+  mediaUuid?: string;
+  kind?: GalleryMediaKind;
   publishedAt?: string;
   status: NewsStatus;
   createdAt?: string;
@@ -18,7 +21,8 @@ export interface NewsArticleRequest {
   summary?: string;
   content?: string;
   category?: string;
-  imageUuid?: string;
+  mediaUuid?: string;
+  kind?: GalleryMediaKind;
   publishedAt?: string;
   status: NewsStatus;
 }

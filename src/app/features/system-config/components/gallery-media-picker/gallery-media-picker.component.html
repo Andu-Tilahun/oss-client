@@ -37,7 +37,7 @@
         <video *ngIf="file.contentType?.startsWith('video/')" [src]="file.presignedUrl" muted class="w-full h-full object-cover"></video>
       </button>
       <p *ngIf="existingFiles.length === 0" class="col-span-4 text-sm text-gray-400 text-center py-6">
-        No farm plot images found.
+        No uploaded files found.
       </p>
     </div>
   </div>

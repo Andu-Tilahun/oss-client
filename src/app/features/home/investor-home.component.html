@@ -44,8 +44,8 @@
       <h2 class="text-lg font-semibold text-slate-900 mb-1">Portfolio overview</h2>
       <p class="text-sm text-slate-500 mb-6">Your capital, status, and activity across all investments.</p>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 sm:col-span-2">
           <h3 class="text-sm font-semibold text-slate-800 mb-3">Portfolio value over time</h3>
           <div *ngIf="portfolioTrend.length === 0" class="text-sm text-slate-500 py-10 text-center">No deployed capital yet.</div>
           <div *ngIf="portfolioTrend.length > 0" echarts [options]="portfolioValueChartOption" class="h-56 w-full"></div>

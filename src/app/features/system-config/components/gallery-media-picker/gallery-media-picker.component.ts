@@ -1,10 +1,9 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { filter, switchMap, take } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import { FileMetadata, FileUploadService } from '../../../../shared/file-upload/file-upload.service';
 import { ToastService } from '../../../../shared/toast/toast.service';
 import { GalleryMediaKind } from '../../models/gallery-item.model';
-import { FarmPlotService } from '../../../farm-plots/services/farm-plot.service';
 
 export interface GalleryMediaSelection {
   id: string;
@@ -37,7 +36,6 @@ export class GalleryMediaPickerComponent implements OnChanges {
 
   constructor(
     private fileUploadService: FileUploadService,
-    private farmPlotService: FarmPlotService,
     private toastService: ToastService,
   ) {}
 
@@ -64,9 +62,7 @@ export class GalleryMediaPickerComponent implements OnChanges {
 
   loadExisting(): void {
     this.loadingExisting = true;
-    this.farmPlotService.getAllFarmPlotImages().pipe(
-      switchMap((refs) => this.fileUploadService.getFilesByIds([...new Set(refs.map((r) => r.imageUuid))])),
-    ).subscribe({
+    this.fileUploadService.listFiles().subscribe({
       next: (files) => {
         this.existingFiles = files.filter(
           (f) => f.contentType?.startsWith('image/') || f.contentType?.startsWith('video/'),
@@ -75,7 +71,7 @@ export class GalleryMediaPickerComponent implements OnChanges {
       },
       error: () => {
         this.loadingExisting = false;
-        this.toastService.error('Failed to load farm plot images', 'Gallery');
+        this.toastService.error('Failed to load uploaded files', 'Media');
       },
     });
   }

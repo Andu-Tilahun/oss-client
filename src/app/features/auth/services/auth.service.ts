@@ -62,7 +62,11 @@ export class AuthService {
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.httpService
-      .post<AuthResponse>(`${Endpoints.AUTH_ENDPOINT}/login`, credentials)
+      .post<AuthResponse>(`${Endpoints.AUTH_ENDPOINT}/login`, credentials, undefined, {
+        // LoginComponent shows its own "Login Failed" toast; skip HttpService's generic one
+        requestType: RequestType.LOCAL,
+        skipAuthRedirect: true,
+      })
       .pipe(
         tap((authResponse: AuthResponse) => {
           const session = this.normalizeAuthResponse(authResponse);

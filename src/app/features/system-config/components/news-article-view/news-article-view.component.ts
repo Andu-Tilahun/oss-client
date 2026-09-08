@@ -4,6 +4,8 @@ import { NewsArticle } from '../../models/news-article.model';
 import { DetailCardComponent } from '../../../../shared/components/detail-field/detail-card/detail-card.component';
 import { DetailSectionComponent } from '../../../../shared/components/detail-field/detail-section/detail-section.component';
 import { DetailFieldComponent } from '../../../../shared/components/detail-field/detail-field/detail-field.component';
+import { environment } from '../../../../../environments/environment';
+import { Endpoints } from '../../../../core/endpoint/endpoint.model';
 
 @Component({
   selector: 'app-news-article-view',
@@ -13,6 +15,10 @@ import { DetailFieldComponent } from '../../../../shared/components/detail-field
 })
 export class NewsArticleViewComponent {
   @Input() article: NewsArticle | null = null;
+
+  get mediaUrl(): string {
+    return this.article?.mediaUuid ? `${environment.apiUrl}${Endpoints.STORAGE_ENDPOINT}/${this.article.mediaUuid}` : '';
+  }
 
   statusPillClass(status: string): string {
     return status === 'PUBLISHED'

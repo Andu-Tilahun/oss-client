@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, ElementRef, Input, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterModule} from '@angular/router';
 import {environment} from '../../../environments/environment';
@@ -14,6 +14,26 @@ type PublicNavPage = 'home' | 'about' | 'contact';
 })
 export class PublicHeaderComponent {
   @Input() activePage: PublicNavPage = 'home';
+
+  @ViewChild('menuToggle') private menuToggle?: ElementRef<HTMLInputElement>;
+
+  /**
+   * Close the mobile drawer when a link inside it is tapped. Fragment navigation
+   * (/public#news etc.) reuses this component, so the checkbox would otherwise stay
+   * checked, leaving the drawer open and page scroll locked.
+   */
+  onMenuClick(event: Event): void {
+    if ((event.target as HTMLElement | null)?.closest('a')) {
+      this.closeMenu();
+    }
+  }
+
+  private closeMenu(): void {
+    const toggle = this.menuToggle?.nativeElement;
+    if (toggle) {
+      toggle.checked = false;
+    }
+  }
 
   async downloadAndroidApp(event: Event): Promise<void> {
     event.preventDefault();

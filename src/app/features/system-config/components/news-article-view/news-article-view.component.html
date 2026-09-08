@@ -9,6 +9,11 @@
         {{ article.status }}
       </span>
     </div>
+    <div *ngIf="article.mediaUuid" class="rounded-lg overflow-hidden mb-8 bg-gray-50 max-h-80">
+      <img *ngIf="article.kind !== 'VIDEO'" [src]="mediaUrl" [alt]="article.title" class="w-full max-h-80 object-contain" />
+      <video *ngIf="article.kind === 'VIDEO'" [src]="mediaUrl" controls class="w-full max-h-80"></video>
+    </div>
+
     <hr class="border-gray-200 mb-8" />
 
     <app-detail-section title="Details">

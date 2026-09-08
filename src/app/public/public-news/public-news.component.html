@@ -11,7 +11,8 @@
     <div *ngIf="!loading && !error && allNewsItems.length > 0 && activeItem" class="news-layout">
       <article class="news-feature">
         <div class="news-feature-image-wrap">
-          <img class="news-feature-image" [src]="activeItem.imageUrl" [alt]="activeItem.title" loading="lazy" />
+          <img *ngIf="activeItem.mediaKind !== 'VIDEO'" class="news-feature-image" [src]="activeItem.mediaUrl" [alt]="activeItem.title" loading="lazy" />
+          <video *ngIf="activeItem.mediaKind === 'VIDEO'" class="news-feature-image" [src]="activeItem.mediaUrl" controls></video>
           <span class="news-feature-badge">{{ activeItem.category }}</span>
         </div>
 
@@ -43,7 +44,8 @@
               [class.news-sidebar-item--active]="item.id === activeItem.id"
               (click)="selectItem(item)"
             >
-              <img class="news-sidebar-thumb" [src]="item.imageUrl" [alt]="item.title" loading="lazy" />
+              <img *ngIf="item.mediaKind !== 'VIDEO'" class="news-sidebar-thumb" [src]="item.mediaUrl" [alt]="item.title" loading="lazy" />
+              <video *ngIf="item.mediaKind === 'VIDEO'" class="news-sidebar-thumb" [src]="item.mediaUrl" muted></video>
 
               <div class="news-sidebar-text">
                 <h5>{{ item.title }}</h5>

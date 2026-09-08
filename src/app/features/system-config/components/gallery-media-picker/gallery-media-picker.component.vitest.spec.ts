@@ -33,25 +33,17 @@ const DOC_FILE_META: FileMetadata = {
   presignedUrl: 'http://storage/file-3',
 };
 
-const FARM_PLOT_IMAGE_REFS = [
-  { imageUuid: 'file-1', farmPlotId: 'plot-1', farmPlotTitle: 'North Field' },
-  { imageUuid: 'file-2', farmPlotId: 'plot-2', farmPlotTitle: 'South Field' },
-];
-
 function makeComponent() {
   const mockFileUploadService = {
     uploadFile: vi.fn(() => of({ progress: 100, file: IMAGE_FILE_META })),
-    getFilesByIds: vi.fn(() => of([IMAGE_FILE_META, VIDEO_FILE_META, DOC_FILE_META])),
+    listFiles: vi.fn(() => of([IMAGE_FILE_META, VIDEO_FILE_META, DOC_FILE_META])),
     getFileMetadata: vi.fn(() => of(IMAGE_FILE_META)),
-  };
-  const mockFarmPlotService = {
-    getAllFarmPlotImages: vi.fn(() => of(FARM_PLOT_IMAGE_REFS)),
   };
   const mockToastService = { error: vi.fn(), success: vi.fn() };
   const component = new GalleryMediaPickerComponent(
-    mockFileUploadService as any, mockFarmPlotService as any, mockToastService as any,
+    mockFileUploadService as any, mockToastService as any,
   );
-  return { component, mockFileUploadService, mockFarmPlotService, mockToastService };
+  return { component, mockFileUploadService, mockToastService };
 }
 
 function fileSelectEvent(file: File): Event {
@@ -61,11 +53,10 @@ function fileSelectEvent(file: File): Event {
 describe('GalleryMediaPickerComponent', () => {
   let component: GalleryMediaPickerComponent;
   let mockFileUploadService: ReturnType<typeof makeComponent>['mockFileUploadService'];
-  let mockFarmPlotService: ReturnType<typeof makeComponent>['mockFarmPlotService'];
   let mockToastService: ReturnType<typeof makeComponent>['mockToastService'];
 
   beforeEach(() => {
-    ({ component, mockFileUploadService, mockFarmPlotService, mockToastService } = makeComponent());
+    ({ component, mockFileUploadService, mockToastService } = makeComponent());
   });
 
   it('should create', () => expect(component).toBeTruthy());
@@ -98,22 +89,10 @@ describe('GalleryMediaPickerComponent', () => {
     expect(mockToastService.error).toHaveBeenCalled();
   });
 
-  it('loadExisting fetches farm plot image refs then resolves them via batch lookup', () => {
+  it('loadExisting fetches every previously uploaded file', () => {
     component.loadExisting();
 
-    expect(mockFarmPlotService.getAllFarmPlotImages).toHaveBeenCalled();
-    expect(mockFileUploadService.getFilesByIds).toHaveBeenCalledWith(['file-1', 'file-2']);
-  });
-
-  it('loadExisting de-duplicates repeated farm plot image UUIDs', () => {
-    mockFarmPlotService.getAllFarmPlotImages.mockReturnValue(of([
-      { imageUuid: 'file-1', farmPlotId: 'plot-1', farmPlotTitle: 'North Field' },
-      { imageUuid: 'file-1', farmPlotId: 'plot-1', farmPlotTitle: 'North Field' },
-    ]));
-
-    component.loadExisting();
-
-    expect(mockFileUploadService.getFilesByIds).toHaveBeenCalledWith(['file-1']);
+    expect(mockFileUploadService.listFiles).toHaveBeenCalled();
   });
 
   it('loadExisting filters results to image/video content types only', () => {
@@ -134,7 +113,7 @@ describe('GalleryMediaPickerComponent', () => {
 
   it('switchToExisting triggers loadExisting on first open', () => {
     component.switchToExisting();
-    expect(mockFarmPlotService.getAllFarmPlotImages).toHaveBeenCalled();
+    expect(mockFileUploadService.listFiles).toHaveBeenCalled();
     expect(component.mode).toBe('existing');
   });
 

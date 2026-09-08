@@ -7,6 +7,8 @@ import { ToastService } from '../../../../shared/toast/toast.service';
 import { PageSplitLayoutComponent } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
 import { NewsArticleViewComponent } from '../../components/news-article-view/news-article-view.component';
 import { NewsFilterComponent } from '../../components/news-filter/news-filter.component';
+import { GalleryMediaPickerComponent, GalleryMediaSelection } from '../../components/gallery-media-picker/gallery-media-picker.component';
+import { GalleryMediaKind } from '../../models/gallery-item.model';
 import { SharedModule } from '../../../../shared/shared.module';
 import { DataTableColumn } from '../../../../shared/data-table/models/data-table-column.model';
 import { TableQueryParams } from '../../../../shared/data-table/models/table-query-params.model';
@@ -15,7 +17,7 @@ import { PageSplitRightAction } from '../../../../shared/components/page-split-l
 @Component({
   selector: 'app-news-management-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SharedModule, PageSplitLayoutComponent, NewsArticleViewComponent, NewsFilterComponent],
+  imports: [CommonModule, ReactiveFormsModule, SharedModule, PageSplitLayoutComponent, NewsArticleViewComponent, NewsFilterComponent, GalleryMediaPickerComponent],
   templateUrl: './news-management-page.component.html',
 })
 export class NewsManagementPageComponent implements OnInit {
@@ -73,6 +75,8 @@ export class NewsManagementPageComponent implements OnInit {
       summary:     ['', Validators.maxLength(600)],
       content:     [''],
       category:    [''],
+      mediaUuid:   [''],
+      kind:        [null as GalleryMediaKind | null],
       publishedAt: [''],
       status:      ['DRAFT', Validators.required],
     });
@@ -131,7 +135,7 @@ export class NewsManagementPageComponent implements OnInit {
 
   openCreate(): void {
     this.editingId = null;
-    this.form.reset({ status: 'DRAFT' });
+    this.form.reset({ status: 'DRAFT', mediaUuid: '', kind: null });
     this.showModal = true;
   }
 
@@ -142,6 +146,8 @@ export class NewsManagementPageComponent implements OnInit {
       summary:     article.summary ?? '',
       content:     article.content ?? '',
       category:    article.category ?? '',
+      mediaUuid:   article.mediaUuid ?? '',
+      kind:        article.kind ?? null,
       publishedAt: article.publishedAt ? article.publishedAt.slice(0, 16) : '',
       status:      article.status,
     });
@@ -150,6 +156,10 @@ export class NewsManagementPageComponent implements OnInit {
 
   closeModal(): void {
     this.showModal = false;
+  }
+
+  onMediaSelected(selection: GalleryMediaSelection): void {
+    this.form.patchValue({ mediaUuid: selection.id, kind: selection.kind });
   }
 
   onSave(): void {
@@ -162,6 +172,8 @@ export class NewsManagementPageComponent implements OnInit {
       summary:     value.summary || undefined,
       content:     value.content || undefined,
       category:    value.category || undefined,
+      mediaUuid:   value.mediaUuid || undefined,
+      kind:        value.kind || undefined,
       publishedAt: value.publishedAt || undefined,
       status:      value.status as NewsStatus,
     };

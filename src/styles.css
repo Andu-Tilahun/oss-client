@@ -77,3 +77,8 @@ body:has(#public-header-menu-toggle:checked) {
   overflow: hidden;
   touch-action: none;
 }
+
+/* Login: paint the canvas so overscroll / keyboard-driven scroll never shows white under the card */
+body:has(app-login) {
+  background-color: #0e4129;
+}
