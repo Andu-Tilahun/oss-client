@@ -120,6 +120,9 @@ export class RegionsManagementPageComponent implements OnInit {
   }
 
   onSave(): void {
+    if (this.saving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving = true;
     const request = this.form.value;
@@ -140,6 +143,9 @@ export class RegionsManagementPageComponent implements OnInit {
   }
 
   onDelete(id: string): void {
+    if (this.deleting) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!confirm('Delete this region?')) return;
     this.deleting = id;
     this.regionService.deleteRegion(id).subscribe({

@@ -59,7 +59,7 @@ export class InvestmentPackageService {
   filterArchivedInvestmentPackages(request: InvestmentPackageFilterRequest): Observable<PageResponse<InvestmentPackage>> {
     return this.httpService.put<PageResponse<InvestmentPackage>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/filter/archived`,
-      request,
+      request, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
@@ -71,35 +71,35 @@ export class InvestmentPackageService {
   create(request: InvestmentPackageCreateRequest): Observable<ApiResponse<InvestmentPackage>> {
     return this.httpService.post<ApiResponse<InvestmentPackage>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}`,
-      request,
+      request, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
   updateInvestmentPackage(crowdFundingId: string, request: InvestmentPackageCreateRequest): Observable<ApiResponse<InvestmentPackage>> {
     return this.httpService.put<ApiResponse<InvestmentPackage>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${crowdFundingId}`,
-      request,
+      request, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
   closeInvestmentPackage(id: string, reason: string): Observable<ApiResponse<InvestmentPackage>> {
     return this.httpService.put<ApiResponse<InvestmentPackage>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${id}/close`,
-      {reason},
+      {reason}, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
   completeInvestmentPackage(id: string, remark: string): Observable<ApiResponse<InvestmentPackage>> {
     return this.httpService.put<ApiResponse<InvestmentPackage>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${id}/complete`,
-      {remark},
+      {remark}, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
   deactivateInvestmentPackage(id: string, reason: string): Observable<ApiResponse<InvestmentPackage>> {
     return this.httpService.put<ApiResponse<InvestmentPackage>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${id}/deactivate`,
-      {reason},
+      {reason}, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
@@ -119,6 +119,7 @@ export class InvestmentPackageService {
   getClosedLeaseInvestors(packageId: string): Observable<User[]> {
     return this.httpService.get<User[]>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${packageId}/closed-lease-investors`,
+      undefined, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
@@ -139,35 +140,35 @@ export class InvestmentPackageService {
   createInvestment(request: InvestmentCreateRequest): Observable<ApiResponse<InvestmentRecord>> {
     return this.httpService.post<ApiResponse<InvestmentRecord>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investmentRecord`,
-      request,
+      request, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
   createInvestmentRecord(request: InvestmentRecordCreateRequest): Observable<ApiResponse<InvestmentRecord>> {
     return this.httpService.post<ApiResponse<InvestmentRecord>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investmentRecord`,
-      request,
+      request, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
   adminSetRoi(investmentId: string, roi: string): Observable<ApiResponse<InvestmentRecord>> {
     return this.httpService.post<ApiResponse<InvestmentRecord>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investments/${investmentId}/admin/roi`,
-      {roi},
+      {roi}, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
   send(investmentId: string): Observable<ApiResponse<InvestmentRecord>> {
     return this.httpService.put<ApiResponse<InvestmentRecord>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investments/${investmentId}/send`,
-      null,
+      null, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
   cancel(investmentId: string): Observable<ApiResponse<InvestmentRecord>> {
     return this.httpService.put<ApiResponse<InvestmentRecord>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investmentRecord/${investmentId}/cancel`,
-      null,
+      null, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
@@ -175,21 +176,21 @@ export class InvestmentPackageService {
   investorDecision(investmentId: string, decision: 'ACCEPTED' | 'REJECTED', reason?: string): Observable<ApiResponse<InvestmentRecord>> {
     return this.httpService.put<ApiResponse<InvestmentRecord>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investments/${investmentId}/investor/decision`,
-      { investmentStatus: decision, ...(reason ? { reason } : {}) },
+      { investmentStatus: decision, ...(reason ? { reason } : {}) }, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
   assignExtensionWorker(request: AssignExtensionWorkerRequest): Observable<InvestmentPackage> {
     return this.httpService.post<InvestmentPackage>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/assign-extension-worker`,
-      request,
+      request, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
   changeExtensionWorker(request: ChangeExtensionWorkerRequest): Observable<InvestmentPackage> {
     return this.httpService.put<InvestmentPackage>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/assign-extension-worker/change`,
-      request,
+      request, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
@@ -202,34 +203,35 @@ export class InvestmentPackageService {
   chooseCandidates(request: ChooseCandidatesRequest): Observable<ApiResponse<InvestmentPackage>> {
     return this.httpService.put<ApiResponse<InvestmentPackage>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investmentRecord/choose-candidates`,
-      request,
+      request, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
   investorAgreeResponse(request: InvestorAgreeResponseRequest): Observable<ApiResponse<InvestmentRecord>> {
     return this.httpService.put<ApiResponse<InvestmentRecord>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investmentRecord/choose-candidates/investor-agree-response`,
-      request,
+      request, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
   createAgreement(request: CreateInvestmentAgreementRequest): Observable<InvestmentAgreement> {
     return this.httpService.post<InvestmentAgreement>(
       Endpoints.INVESTMENT_AGGREMENT_ENDPOINT,
-      request,
+      request, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
   getAgreementById(agreementId: string): Observable<InvestmentAgreement> {
     return this.httpService.get<InvestmentAgreement>(
       `${Endpoints.INVESTMENT_AGGREMENT_ENDPOINT}/${agreementId}`,
+      undefined, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
   activateAgreement(agreementId: string): Observable<InvestmentAgreement> {
     return this.httpService.put<InvestmentAgreement>(
       `${Endpoints.INVESTMENT_AGGREMENT_ENDPOINT}/${agreementId}/activate`,
-      null,
+      null, undefined, {requestType: RequestType.LOCAL},
     );
   }
 

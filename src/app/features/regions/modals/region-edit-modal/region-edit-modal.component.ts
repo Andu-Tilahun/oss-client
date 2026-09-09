@@ -27,6 +27,9 @@ export class RegionEditModalComponent {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.regionForm.isValid() || !this.region) {
       this.regionForm.markAllAsTouched();
       return;

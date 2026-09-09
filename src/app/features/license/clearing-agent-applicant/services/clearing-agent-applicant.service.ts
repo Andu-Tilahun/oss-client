@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpService } from '../../../../core/services/http.service';
+import { HttpService, RequestType } from '../../../../core/services/http.service';
 import { Endpoints } from '../../../../core/endpoint/endpoint.model';
 import {
   ClearingAgentApplicant,
@@ -51,6 +51,7 @@ export class ClearingAgentApplicantService {
   getByUserRequestId(userRequestId: string): Observable<ClearingAgentApplicant> {
     return this.httpService.get<ClearingAgentApplicant>(
       `${Endpoints.CLEARING_AGENT_APPLICANTS_ENDPOINT}/by-user-request/${userRequestId}`,
+      undefined, undefined, { requestType: RequestType.LOCAL }
     );
   }
 

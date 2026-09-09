@@ -61,6 +61,9 @@ export class GalleryMediaPickerComponent implements OnChanges {
   }
 
   loadExisting(): void {
+    if (this.loadingExisting) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     this.loadingExisting = true;
     this.fileUploadService.listFiles().subscribe({
       next: (files) => {
@@ -77,6 +80,9 @@ export class GalleryMediaPickerComponent implements OnChanges {
   }
 
   onFileSelected(event: Event): void {
+    if (this.uploading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     input.value = '';

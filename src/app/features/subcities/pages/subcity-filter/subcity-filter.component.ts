@@ -1,11 +1,12 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {FilterBarComponent} from '../../../../shared/components/filter-bar/filter-bar.component';
 
 @Component({
   selector: 'app-subcity-filter',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FilterBarComponent],
   templateUrl: './subcity-filter.component.html',
   styleUrls: ['./subcity-filter.component.css']
 })

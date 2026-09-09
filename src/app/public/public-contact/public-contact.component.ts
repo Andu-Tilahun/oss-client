@@ -84,6 +84,9 @@ export class PublicContactComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (this.isSubmitting) {
+      return; // a submission is already in flight (e.g. Enter pressed again)
+    }
     this.submitted     = true;
     this.submitMessage = '';
     this.submitError   = false;

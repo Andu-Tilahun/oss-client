@@ -160,6 +160,9 @@ export class BankAccountsPageComponent implements OnInit {
   }
 
   onSave(): void {
+    if (this.saving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -196,6 +199,9 @@ export class BankAccountsPageComponent implements OnInit {
   }
 
   onDelete(id: string): void {
+    if (this.deletingId) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!confirm('Delete this bank account?')) return;
     this.deletingId = id;
     if (this.selectedAccount?.id === id) this.selectedAccount = null;
@@ -213,6 +219,9 @@ export class BankAccountsPageComponent implements OnInit {
   }
 
   onToggleActive(account: BankAccount): void {
+    if (this.togglingId) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     this.togglingId = account.id;
     const request = {
       bankName:          account.bankName,

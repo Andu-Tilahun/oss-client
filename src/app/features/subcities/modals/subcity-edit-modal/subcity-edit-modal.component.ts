@@ -47,6 +47,9 @@ export class SubcityEditModalComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.subcityForm.isValid() || !this.subcity) {
       this.subcityForm.markAllAsTouched();
       return;

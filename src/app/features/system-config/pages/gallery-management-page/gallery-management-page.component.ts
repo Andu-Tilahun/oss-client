@@ -161,6 +161,9 @@ export class GalleryManagementPageComponent implements OnInit {
   }
 
   onSave(): void {
+    if (this.saving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
 
     this.saving = true;
@@ -189,6 +192,9 @@ export class GalleryManagementPageComponent implements OnInit {
   }
 
   onDelete(id: string): void {
+    if (this.deletingId) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!confirm('Delete this gallery item?')) return;
     this.deletingId = id;
     this.systemConfigService.deleteGalleryItem(id).subscribe({

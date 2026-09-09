@@ -34,6 +34,9 @@ export class UserCreateModalComponent {
   ) {}
 
   onSubmit() {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.userForm.isValid()) {
       this.userForm.markAllAsTouched();
       return;

@@ -332,6 +332,9 @@ export class InvestmentPackageListComponent implements OnInit {
   }
 
   handleDeactivateConfirmation(): void {
+    if (this.deactivating) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.packageToDeactivate?.id || !this.deactivateReason.trim()) return;
     this.deactivating = true;
     this.investmentPackageService.closeInvestmentPackage(

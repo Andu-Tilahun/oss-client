@@ -29,6 +29,9 @@ export class EmployeeEditModalComponent {
   ) {}
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.employeeForm.isValid() || !this.employee) {
       this.employeeForm.markAllAsTouched();
       return;

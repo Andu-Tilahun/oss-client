@@ -138,6 +138,20 @@ export class HeaderComponent implements OnInit {
     if (user?.profileUrl) {
       return user.profileUrl;
     }
+    return this.fallbackAvatar();
+  }
+
+  /** If the profile image URL fails to load (expired, deleted, broken), swap in the generated fallback. */
+  onAvatarError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    const fallback = this.fallbackAvatar();
+    if (img.src !== fallback) {
+      img.src = fallback;
+    }
+  }
+
+  private fallbackAvatar(): string {
+    const user = this.currentUser;
     const name = user ? `${user.firstName}+${user.lastName}` : 'User';
     return `https://ui-avatars.com/api/?name=${name}&background=6366f1&color=fff`;
   }

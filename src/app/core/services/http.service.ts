@@ -17,7 +17,9 @@ import {AuthService} from "../../features/auth/services/auth.service";
 export enum RequestType {
   BLOCKING,     // Show spinner and handle error globally (default)
   NON_BLOCKING, // Don't show spinner and ignore any error
-  LOCAL,        // Show spinner and handle error locally (component level)
+  LOCAL,        // Show spinner; suppress the generic toast — component shows its own error UI.
+                // skipAuthRedirect is independent: it only controls the 403/session-expiry
+                // redirect in AuthRefreshInterceptor, not toast display.
 }
 
 export interface RequestOption {
@@ -234,9 +236,8 @@ export class HttpService {
         errorMessage = error.message;
       }
       const requestType = httpContext.get(REQUEST_TYPE);
-      const skipAuthRedirect = httpContext.get(SKIP_AUTH_REDIRECT);
       const suppressToast = requestType === RequestType.NON_BLOCKING
-        || (requestType === RequestType.LOCAL && skipAuthRedirect);
+        || requestType === RequestType.LOCAL;
 
       if (!suppressToast) {
         this.toastService.error(errorMessage);

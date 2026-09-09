@@ -569,6 +569,9 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   }
 
   assignExtensionWorker(): void {
+    if (this.assigningExtensionWorker) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     const investmentPackageId = this.investmentPackage?.id;
     const farmPlotId = this.investmentPackage?.farmPlotId || this.investmentPackage?.farmPlot?.id;
     const agreementId = this.investmentPackage?.agreementId;
@@ -1134,6 +1137,9 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   }
 
   approveInvestorPayment(record: InvestmentRecord): void {
+    if (this.approvingInvestorId) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     this.approvingInvestorId = record.id;
     this.investmentPackageService.investorDecision(record.id, 'ACCEPTED').subscribe({
       next: () => {
@@ -1159,6 +1165,9 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   }
 
   rejectInvestorPayment(record: InvestmentRecord, reason: string): void {
+    if (this.approvingInvestorId) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!reason.trim()) return;
     this.approvingInvestorId = record.id;
     this.rejectingInvestorId = null;

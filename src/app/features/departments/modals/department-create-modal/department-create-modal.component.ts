@@ -27,6 +27,9 @@ export class DepartmentCreateModalComponent {
   ) {}
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.form.isValid()) {
       this.form.markAllAsTouched();
       return;

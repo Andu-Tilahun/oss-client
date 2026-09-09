@@ -1130,6 +1130,9 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   }
 
   handleCloseConfirmation(): void {
+    if (this.closing) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.selectedAgreement?.id || !this.closeReason.trim()) return;
 
     this.closing = true;
@@ -1193,6 +1196,9 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   }
 
   handleCompleteConfirmation(): void {
+    if (this.completing) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.packageToComplete?.id || !this.completionRemark.trim()) return;
     this.completing = true;
     this.investmentPackageService.completeInvestmentPackage(
@@ -1225,6 +1231,9 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   }
 
   handleDeactivateConfirmation(): void {
+    if (this.deactivating) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.packageToDeactivate?.id || !this.deactivationReason.trim()) return;
     this.deactivating = true;
     this.investmentPackageService.deactivateInvestmentPackage(
@@ -1332,6 +1341,9 @@ export class InvestmentPackageTypeListComponent implements OnInit {
   }
 
   private onDownload(r: InvestmentPackageTypeAgreement) {
+    if (this.contractLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     const leaseId = this.getPackageTypeAgreementId(r);
     if (!leaseId) {
       return;

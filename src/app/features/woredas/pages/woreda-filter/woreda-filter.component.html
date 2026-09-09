@@ -1,27 +1,7 @@
-<div class="flex items-center space-x-2">
-  <input
-    type="text"
-    class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-    placeholder="Search woreda..."
-    [(ngModel)]="searchText"
-    (ngModelChange)="onSearchTextChange($event)"
-  />
-  <button
-    class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-    (click)="onSearch()"
-  >
-    Search
-  </button>
-  <button
-    type="button"
-    (click)="onClearFilters()"
-    aria-label="Clear"
-    title="Clear"
-    class="flex-shrink-0 h-[34px] w-[34px] rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors flex items-center justify-center"
-  >
-    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-    </svg>
-  </button>
-</div>
-
+<app-filter-bar
+  [searchText]="searchText"
+  (searchTextChange)="onSearchTextChange($event)"
+  searchPlaceholder="Search woreda..."
+  (searchChange)="onSearch()"
+  (clearFilters)="onClearFilters()"
+></app-filter-bar>

@@ -24,7 +24,7 @@
 
     <!-- Apply Button -->
     <button
-      *ngIf="showSearch && !useIconButtons"
+      *ngIf="showApplyButton && !useIconButtons"
       type="button"
       (click)="onSearch()"
       [disabled]="!hasValidSearchText"
@@ -34,7 +34,7 @@
       {{ applyLabel }}
     </button>
     <button
-      *ngIf="showSearch && useIconButtons"
+      *ngIf="showApplyButton && useIconButtons"
       type="button"
       (click)="onSearch()"
       [disabled]="!hasValidSearchText"
@@ -49,30 +49,92 @@
       </svg>
     </button>
 
-    <!-- Divider -->
-    <div *ngIf="showSearch" class="flex-shrink-0 w-px h-5 bg-slate-200 self-center"></div>
+    <!-- Divider (desktop only: on mobile the next control is the filter toggle) -->
+    <div *ngIf="showSearch || showApplyButton" class="hidden md:block flex-shrink-0 w-px h-5 bg-slate-200 self-center"></div>
 
-    <!-- Projected filter controls (dropdowns, ranges, etc.) -->
-    <div class="flex items-end gap-2 flex-1 min-w-0">
-      <ng-content></ng-content>
-    </div>
-
-    <!-- Divider -->
-    <div class="flex-shrink-0 w-px h-5 bg-slate-200 self-center"></div>
-
-    <!-- Clear Button -->
+    <!-- Mobile-only filter toggle -->
     <button
+      *ngIf="collapsible"
       type="button"
-      (click)="onClear()"
-      [attr.aria-label]="clearLabel"
-      [title]="clearLabel"
-      class="flex-shrink-0 h-[34px] w-[34px] rounded-lg bg-red-500 text-white hover:bg-red-600
-             transition-colors flex items-center justify-center"
+      (click)="toggleCollapsed()"
+      [attr.aria-expanded]="!isCollapsed"
+      aria-label="Filters"
+      title="Filters"
+      class="md:hidden flex-shrink-0 h-[34px] w-[34px] rounded-lg border border-slate-200 bg-white text-slate-600
+             hover:bg-slate-50 transition-colors flex items-center justify-center"
     >
       <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        <path stroke-linecap="round" stroke-width="2" d="M4 6h4m4 0h8M4 12h10m4 0h2M4 18h2m4 0h10"/>
+        <circle cx="10" cy="6" r="2" stroke-width="2"/>
+        <circle cx="16" cy="12" r="2" stroke-width="2"/>
+        <circle cx="8" cy="18" r="2" stroke-width="2"/>
       </svg>
     </button>
+
+    <!-- Mobile-only backdrop -->
+    <button
+      type="button"
+      *ngIf="collapsible && !isCollapsed"
+      class="fixed inset-0 z-[59] md:hidden border-0 p-0 m-0 cursor-default bg-slate-900/40 backdrop-blur-[10px]"
+      (click)="toggleCollapsed()"
+      aria-label="Close filters"
+    ></button>
+
+    <!-- Filters + Clear: mobile-first base = bottom sheet; md: restores the plain inline row -->
+    <div
+      class="flex flex-col items-stretch gap-3 fixed inset-x-0 bottom-0 z-[60] bg-white rounded-t-2xl shadow-2xl
+             border-t border-slate-200 p-4 max-h-[75vh] overflow-y-auto transition-transform duration-300 ease-out
+             md:static md:inset-auto md:z-auto md:flex-row md:items-end md:gap-2 md:bg-transparent md:rounded-none
+             md:shadow-none md:border-t-0 md:p-0 md:max-h-none md:overflow-visible md:transition-none"
+      [class.max-md:translate-y-full]="collapsible && isCollapsed"
+    >
+      <!-- Mobile-only sheet header -->
+      <div class="flex md:hidden items-center justify-between">
+        <span class="text-sm font-semibold text-slate-700">Filters</span>
+        <button
+          type="button"
+          (click)="toggleCollapsed()"
+          aria-label="Close filters"
+          class="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Projected filter controls (dropdowns, ranges, etc.) -->
+      <div class="flex flex-wrap md:flex-nowrap items-end gap-2 flex-1 min-w-0">
+        <ng-content></ng-content>
+      </div>
+
+      <!-- Divider (desktop only) -->
+      <div class="hidden md:block flex-shrink-0 w-px h-5 bg-slate-200 self-center"></div>
+
+      <!-- Footer: Clear + mobile-only "Show results" -->
+      <div class="flex items-center gap-2 pt-2 border-t border-slate-100 md:pt-0 md:border-t-0">
+        <button
+          type="button"
+          (click)="onClear()"
+          [attr.aria-label]="clearLabel"
+          [title]="clearLabel"
+          class="flex-shrink-0 h-[34px] w-[34px] rounded-lg bg-red-500 text-white hover:bg-red-600
+                 transition-colors flex items-center justify-center"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          (click)="toggleCollapsed()"
+          class="md:hidden flex-1 px-3 py-1.5 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
+        >
+          Show results
+        </button>
+      </div>
+    </div>
 
   </div>
 </div>

@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {HttpService} from '../../../core/services/http.service';
+import {HttpService, RequestType} from '../../../core/services/http.service';
 import {Endpoints} from '../../../core/endpoint/endpoint.model';
 import {
   FarmFollowUp,
@@ -17,7 +17,12 @@ export class FarmFollowUpService {
   constructor(private httpService: HttpService) {}
 
   createFollowUp(request: FarmFollowUpCreateRequest): Observable<FarmFollowUp> {
-    return this.httpService.post<FarmFollowUp>(Endpoints.FARM_FOLLOWUPS_ENDPOINT, request);
+    return this.httpService.post<FarmFollowUp>(
+      Endpoints.FARM_FOLLOWUPS_ENDPOINT,
+      request,
+      undefined,
+      {requestType: RequestType.LOCAL},
+    );
   }
 
   getByExternalId(externalId: string): Observable<FarmFollowUp[]> {
@@ -29,16 +34,30 @@ export class FarmFollowUpService {
   }
 
   completeFollowUp(followUpId: string, request: FarmFollowUpOutcomeRequest): Observable<FarmFollowUp> {
-    return this.httpService.put<FarmFollowUp>(`${Endpoints.FARM_FOLLOWUPS_ENDPOINT}/${followUpId}/complete`, request);
+    return this.httpService.put<FarmFollowUp>(
+      `${Endpoints.FARM_FOLLOWUPS_ENDPOINT}/${followUpId}/complete`,
+      request,
+      undefined,
+      {requestType: RequestType.LOCAL},
+    );
   }
 
   excludeFollowUp(followUpId: string, request: FarmFollowUpOutcomeRequest): Observable<FarmFollowUp> {
-    return this.httpService.put<FarmFollowUp>(`${Endpoints.FARM_FOLLOWUPS_ENDPOINT}/${followUpId}/exclude`, request);
+    return this.httpService.put<FarmFollowUp>(
+      `${Endpoints.FARM_FOLLOWUPS_ENDPOINT}/${followUpId}/exclude`,
+      request,
+      undefined,
+      {requestType: RequestType.LOCAL},
+    );
   }
 
   addReport(followUpId: string, request: FarmFollowUpReportCreateRequest): Observable<FarmFollowUpReport> {
     return this.httpService.post<FarmFollowUpReport>(
-      `${Endpoints.FARM_FOLLOWUPS_ENDPOINT}/${followUpId}/reports`, request);
+      `${Endpoints.FARM_FOLLOWUPS_ENDPOINT}/${followUpId}/reports`,
+      request,
+      undefined,
+      {requestType: RequestType.LOCAL},
+    );
   }
 
   getReports(followUpId: string): Observable<FarmFollowUpReport[]> {

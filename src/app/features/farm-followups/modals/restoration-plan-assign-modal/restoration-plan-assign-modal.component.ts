@@ -50,6 +50,9 @@ export class RestorationPlanAssignModalComponent implements OnChanges {
   }
 
   onConfirm(): void {
+    if (this.submitting) {
+      return; // a request is already in flight
+    }
     if (!this.canConfirm || !this.farmPlotId) return;
 
     this.submitting = true;

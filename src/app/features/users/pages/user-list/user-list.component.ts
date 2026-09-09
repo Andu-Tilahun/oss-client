@@ -323,6 +323,9 @@ export class UserListComponent implements OnInit {
   }
 
   handleLockUser() {
+    if (this.lockLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.selectedUser) return;
 
     this.lockLoading = true;
@@ -344,6 +347,9 @@ export class UserListComponent implements OnInit {
   }
 
   handleUnlockUser() {
+    if (this.lockLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.selectedUser) return;
 
     this.lockLoading = true;

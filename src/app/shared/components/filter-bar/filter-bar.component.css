@@ -1,3 +1,12 @@
+:host {
+  display: block;
+  width: 100%;
+  /* Allow shrinking below content size when this is a flex item (default min-width:auto
+     would otherwise refuse to shrink, because the overflow-x-auto row below reports its
+     unwrapped content width as the minimum — causing overflow instead of internal scroll). */
+  min-width: 0;
+}
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;

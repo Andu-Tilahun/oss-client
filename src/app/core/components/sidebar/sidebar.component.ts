@@ -28,7 +28,6 @@ export class SidebarComponent implements OnInit {
   /** Menu items filtered for the current user's role */
   visibleMenuItems: MenuItem[] = [];
   currentUser: User | null = null;
-  currentUser$ = this.authService.currentUser$;
 
   constructor(
     private authService: AuthService,
@@ -53,6 +52,19 @@ export class SidebarComponent implements OnInit {
     if (user?.profileUrl) {
       return user.profileUrl;
     }
+    return this.fallbackAvatar(user);
+  }
+
+  /** If the profile image URL fails to load (expired, deleted, broken), swap in the generated fallback. */
+  onAvatarError(event: Event, user: User | null): void {
+    const img = event.target as HTMLImageElement;
+    const fallback = this.fallbackAvatar(user);
+    if (img.src !== fallback) {
+      img.src = fallback;
+    }
+  }
+
+  private fallbackAvatar(user: User | null): string {
     const name = user ? `${user.firstName}+${user.lastName}` : 'User';
     return `https://ui-avatars.com/api/?name=${name}&background=6366f1&color=fff`;
   }
@@ -66,10 +78,12 @@ export class SidebarComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.authService.currentUser$.subscribe(user => {
-      this.currentUser = user;
-      this.updateMenuItemsForUser();
-    });
+    this.authService.currentUser$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(user => {
+        this.currentUser = user;
+        this.updateMenuItemsForUser();
+      });
   }
 
   private updateMenuItemsForUser(): void {

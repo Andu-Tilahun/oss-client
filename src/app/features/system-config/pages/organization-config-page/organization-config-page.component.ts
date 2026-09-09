@@ -129,6 +129,9 @@ export class OrganizationConfigPageComponent implements OnInit {
   }
 
   onSaveBasicInfo(): void {
+    if (this.savingBasic) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (this.basicInfoForm.invalid) {
       this.basicInfoForm.markAllAsTouched();
       return;
@@ -155,6 +158,9 @@ export class OrganizationConfigPageComponent implements OnInit {
   }
 
   onSaveContact(): void {
+    if (this.savingContact) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (this.contactForm.invalid) {
       this.contactForm.markAllAsTouched();
       return;
@@ -175,6 +181,9 @@ export class OrganizationConfigPageComponent implements OnInit {
   }
 
   onSaveAbout(): void {
+    if (this.savingAbout) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     this.savingAbout = true;
     this.systemConfigService.updateOrganizationAboutUs(this.aboutForm.value).subscribe({
       next: (res) => {
@@ -212,6 +221,9 @@ export class OrganizationConfigPageComponent implements OnInit {
   }
 
   saveBranch(): void {
+    if (this.savingBranch) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (this.branchForm.invalid) {
       this.branchForm.markAllAsTouched();
       return;

@@ -5,6 +5,7 @@ import {switchMap} from 'rxjs/operators';
 import {NotificationLogService} from '../../services/notification.service';
 import {NotificationLog} from '../../models/notification.model';
 import {AuthService} from '../../../auth/services/auth.service';
+import {RequestType} from '../../../../core/services/http.service';
 import {
   resolveNotificationRoute,
   formatEventType as formatNotificationEventType,
@@ -38,7 +39,7 @@ export class NotificationsInboxPageComponent implements OnInit {
     this.loading = true;
     this.loadError = null;
     this.authService.ensureValidSession().pipe(
-      switchMap(() => this.notificationService.getInboxNotifications(this.pageIndex, this.pageSize)),
+      switchMap(() => this.notificationService.getInboxNotifications(this.pageIndex, this.pageSize, { requestType: RequestType.LOCAL })),
     ).subscribe({
       next: (res) => {
         this.notifications = res.content ?? [];

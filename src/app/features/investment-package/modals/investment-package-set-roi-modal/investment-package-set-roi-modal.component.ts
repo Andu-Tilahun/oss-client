@@ -37,6 +37,9 @@ export class InvestmentPackageSetRoiModalComponent {
   }
 
   onSubmit(): void {
+    if (this.isSaving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     const id = this.investment?.id;
     if (!id) return;
     if (this.form.invalid) {

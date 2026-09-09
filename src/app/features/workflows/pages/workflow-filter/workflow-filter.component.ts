@@ -2,11 +2,12 @@ import {Component, ElementRef, EventEmitter, HostListener, Input, Output} from '
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {UserRequestType} from '../../models/workflow.model';
+import {FilterBarComponent} from '../../../../shared/components/filter-bar/filter-bar.component';
 
 @Component({
   selector: 'app-workflow-filter',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FilterBarComponent],
   templateUrl: './workflow-filter.component.html',
   styleUrls: ['./workflow-filter.component.css']
 })

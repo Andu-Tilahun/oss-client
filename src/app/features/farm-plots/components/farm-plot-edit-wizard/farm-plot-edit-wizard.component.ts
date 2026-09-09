@@ -233,6 +233,9 @@ export class FarmPlotEditWizardComponent implements OnInit, OnChanges {
   }
 
   onGalleryFileSelected(event: Event): void {
+    if (this.galleryUploading) {
+      return; // a request is already in flight
+    }
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     input.value = '';

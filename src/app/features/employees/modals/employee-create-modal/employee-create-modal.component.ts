@@ -27,6 +27,9 @@ export class EmployeeCreateModalComponent {
   ) {}
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.employeeForm.isValid()) {
       this.employeeForm.markAllAsTouched();
       return;

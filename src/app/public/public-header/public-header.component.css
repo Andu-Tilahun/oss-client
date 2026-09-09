@@ -186,14 +186,14 @@
     left: auto;
     width: 50vw;
     min-width: 220px;
-    background: #ffffff;
+    background: linear-gradient(160deg, #16522f, #1f6c3f);
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: 6px;
     padding: 64px 12px 12px;
     overflow-y: auto;
-    border-left: 1px solid #e0e0e0;
+    border-left: 1px solid rgba(255, 255, 255, 0.18);
     box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
     transform: translateX(100%);
     opacity: 0;
@@ -201,6 +201,15 @@
     pointer-events: none;
     transition: transform 0.25s ease, opacity 0.25s ease, visibility 0.25s ease;
     z-index: 55;
+  }
+
+  .menu .menu-link {
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  .menu .menu-link:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
   }
 
   .menu-overlay {
@@ -237,8 +246,10 @@
     border-radius: 0.6rem;
   }
 
-  .menu-link.active {
-    border-left: 3px solid #047857;
+  .menu .menu-link.active {
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+    border-left: 3px solid #ffffff;
     border-bottom: none;
   }
 

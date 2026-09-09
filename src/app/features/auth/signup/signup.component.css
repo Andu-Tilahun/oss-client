@@ -356,6 +356,7 @@ small {
 
   .signup-shell {
     grid-template-columns: 1fr;
+    border-top-left-radius: 64px;
   }
 
   .brand-panel {

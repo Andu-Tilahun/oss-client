@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {HttpService} from '../../../core/services/http.service';
+import {HttpService, RequestType} from '../../../core/services/http.service';
 import {Endpoints} from '../../../core/endpoint/endpoint.model';
 import {
   InvestmentPackageTypeAgreement,
@@ -28,7 +28,7 @@ export class InvestmentPackageTypeService {
   filterPublished(request: InvestmentPackageTypeFilterRequest): Observable<PageResponse<InvestmentPackageTypeAgreement>> {
     return this.httpService.put<PageResponse<InvestmentPackageTypeAgreement>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/filter/published`,
-      request,
+      request, undefined, {requestType: RequestType.LOCAL},
     );
   }
 
@@ -37,11 +37,15 @@ export class InvestmentPackageTypeService {
   }
 
   create(request: InvestmentPackageTypeCreateRequest): Observable<ApiResponse<InvestmentPackageTypeAgreement>> {
-    return this.httpService.post<ApiResponse<InvestmentPackageTypeAgreement>>(Endpoints.INVESTMENT_PACKAGE_TYPES_ENDPOINT, request);
+    return this.httpService.post<ApiResponse<InvestmentPackageTypeAgreement>>(
+      Endpoints.INVESTMENT_PACKAGE_TYPES_ENDPOINT, request, undefined, {requestType: RequestType.LOCAL},
+    );
   }
 
   update(id: string, request: InvestmentPackageTypeCreateRequest): Observable<ApiResponse<InvestmentPackageTypeAgreement>> {
-    return this.httpService.put<ApiResponse<InvestmentPackageTypeAgreement>>(`${Endpoints.INVESTMENT_PACKAGE_TYPES_ENDPOINT}/${id}`, request);
+    return this.httpService.put<ApiResponse<InvestmentPackageTypeAgreement>>(
+      `${Endpoints.INVESTMENT_PACKAGE_TYPES_ENDPOINT}/${id}`, request, undefined, {requestType: RequestType.LOCAL},
+    );
   }
 
   adminDecide(packageTypeId: string, decision: 'ACCEPTED' | 'REJECTED'): Observable<ApiResponse<InvestmentPackageTypeAgreement>> {
@@ -75,6 +79,7 @@ export class InvestmentPackageTypeService {
   getContractHtml(agreementId: string): Observable<string> {
     return this.httpService.get<string>(
       `${Endpoints.INVESTMENT_AGGREMENT_ENDPOINT}/${agreementId}/contract`,
+      undefined, undefined, {requestType: RequestType.LOCAL},
     );
   }
 }

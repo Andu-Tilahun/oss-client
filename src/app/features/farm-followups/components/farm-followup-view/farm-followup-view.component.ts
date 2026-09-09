@@ -141,6 +141,9 @@ export class FarmFollowUpViewComponent implements OnChanges {
   }
 
   onAddReport(): void {
+    if (this.isSubmittingReport) {
+      return; // a request is already in flight
+    }
     const content = this.reportContent.trim();
     const fileUuids = this.reportFileUuids.filter(u => !!u);
     if (!content && fileUuids.length === 0) {

@@ -80,6 +80,9 @@ export class TrainingProgramCreateModalComponent implements OnInit {
   }
 
   onBasicInfoSubmit(request: TrainingProgramCreateRequest): void {
+    if (this.isSaving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     this.isSaving = true;
     const save$ = this.programId
       ? this.trainingService.updateProgram(this.programId, request)
@@ -104,6 +107,9 @@ export class TrainingProgramCreateModalComponent implements OnInit {
   }
 
   onRegionalQuotaSubmit(request: RegionalQuotaRequest): void {
+    if (this.isSaving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.programId) {
       return;
     }
@@ -124,6 +130,9 @@ export class TrainingProgramCreateModalComponent implements OnInit {
   }
 
   onOrganizationalQuotaSubmit(request: OrganizationalQuotaRequest): void {
+    if (this.isSaving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.programId) {
       return;
     }
@@ -144,6 +153,9 @@ export class TrainingProgramCreateModalComponent implements OnInit {
   }
 
   onConfirm(): void {
+    if (this.isSaving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     this.publishProgram();
   }
 
@@ -152,6 +164,7 @@ export class TrainingProgramCreateModalComponent implements OnInit {
       return;
     }
 
+    this.isSaving = true;
     this.trainingService.publishProgram(this.programId).subscribe({
       next: () => {
         this.isSaving = false;

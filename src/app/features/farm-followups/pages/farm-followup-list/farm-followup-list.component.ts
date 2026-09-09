@@ -129,6 +129,9 @@ export class FarmFollowUpListComponent implements OnChanges {
   }
 
   handleOutcomeConfirm(): void {
+    if (this.outcomeSubmitting) {
+      return; // a request is already in flight
+    }
     if (!this.outcomeTarget?.id || !this.outcomeReason.trim()) return;
     this.outcomeSubmitting = true;
     const request: FarmFollowUpOutcomeRequest = {reason: this.outcomeReason.trim()};

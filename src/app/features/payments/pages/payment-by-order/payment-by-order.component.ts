@@ -21,6 +21,9 @@ export class PaymentByOrderComponent {
   ) {}
 
   fetchPayment(): void {
+    if (this.loading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.orderNumber.trim()) {
       this.toastService.warning('Please enter an order number');
       return;
@@ -43,6 +46,9 @@ export class PaymentByOrderComponent {
   }
 
   processPayment(): void {
+    if (this.processing) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.orderNumber.trim()) {
       this.toastService.warning('Please enter an order number');
       return;

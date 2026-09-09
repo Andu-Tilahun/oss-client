@@ -60,6 +60,9 @@ export class UserProfileModalComponent {
   }
 
   onSubmit() {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.userForm.isValid() || !this.user) {
       this.userForm.markAllAsTouched();
       return;

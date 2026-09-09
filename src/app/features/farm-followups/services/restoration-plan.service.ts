@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {HttpService} from '../../../core/services/http.service';
+import {HttpService, RequestType} from '../../../core/services/http.service';
 import {Endpoints} from '../../../core/endpoint/endpoint.model';
 import {
   RestorationPlan,
@@ -15,7 +15,12 @@ export class RestorationPlanService {
   constructor(private httpService: HttpService) {}
 
   create(request: RestorationPlanCreateRequest): Observable<RestorationPlan> {
-    return this.httpService.post<RestorationPlan>(Endpoints.RESTORATION_PLANS_ENDPOINT, request);
+    return this.httpService.post<RestorationPlan>(
+      Endpoints.RESTORATION_PLANS_ENDPOINT,
+      request,
+      undefined,
+      {requestType: RequestType.LOCAL},
+    );
   }
 
   listAllForAdmin(): Observable<RestorationPlan[]> {
@@ -26,6 +31,8 @@ export class RestorationPlanService {
     return this.httpService.put<RestorationPlan>(
       `${Endpoints.RESTORATION_PLANS_ENDPOINT}/admin/${planId}`,
       request,
+      undefined,
+      {requestType: RequestType.LOCAL},
     );
   }
 
@@ -37,6 +44,8 @@ export class RestorationPlanService {
     return this.httpService.put<RestorationPlan>(
       `${Endpoints.RESTORATION_PLANS_ENDPOINT}/extension-worker/${planId}`,
       request,
+      undefined,
+      {requestType: RequestType.LOCAL},
     );
   }
 }

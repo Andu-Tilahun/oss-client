@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpParams } from '@angular/common/http';
-import { HttpService } from '../../../core/services/http.service';
+import { HttpService, RequestType } from '../../../core/services/http.service';
 import { ApiResponse, PageResponse } from '../../../shared/models/api-response.model';
 import { Endpoints } from '../../../core/endpoint/endpoint.model';
 import { OrganizationAboutRequest, OrganizationBasicInfoRequest, OrganizationConfig, OrganizationConfigRequest, OrganizationContactRequest } from '../models/organization-config.model';
@@ -111,19 +111,27 @@ export class SystemConfigService {
 
   // Bank accounts – admin
   getAllBankAccounts(): Observable<BankAccount[]> {
-    return this.http.get<BankAccount[]>(`${Endpoints.CONFIG_BANK_ACCOUNTS_ENDPOINT}/all`);
+    return this.http.get<BankAccount[]>(
+      `${Endpoints.CONFIG_BANK_ACCOUNTS_ENDPOINT}/all`, undefined, undefined, { requestType: RequestType.LOCAL }
+    );
   }
 
   createBankAccount(request: BankAccountRequest): Observable<ApiResponse<BankAccount>> {
-    return this.http.post<ApiResponse<BankAccount>>(Endpoints.CONFIG_BANK_ACCOUNTS_ENDPOINT, request);
+    return this.http.post<ApiResponse<BankAccount>>(
+      Endpoints.CONFIG_BANK_ACCOUNTS_ENDPOINT, request, undefined, { requestType: RequestType.LOCAL }
+    );
   }
 
   updateBankAccount(id: string, request: BankAccountRequest): Observable<ApiResponse<BankAccount>> {
-    return this.http.put<ApiResponse<BankAccount>>(`${Endpoints.CONFIG_BANK_ACCOUNTS_ENDPOINT}/${id}`, request);
+    return this.http.put<ApiResponse<BankAccount>>(
+      `${Endpoints.CONFIG_BANK_ACCOUNTS_ENDPOINT}/${id}`, request, undefined, { requestType: RequestType.LOCAL }
+    );
   }
 
   deleteBankAccount(id: string): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${Endpoints.CONFIG_BANK_ACCOUNTS_ENDPOINT}/${id}`);
+    return this.http.delete<ApiResponse<void>>(
+      `${Endpoints.CONFIG_BANK_ACCOUNTS_ENDPOINT}/${id}`, undefined, { requestType: RequestType.LOCAL }
+    );
   }
 
   // Templates

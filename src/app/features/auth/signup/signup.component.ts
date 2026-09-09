@@ -147,6 +147,9 @@ export class SignupComponent {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     this.submitted = true;
     if (this.signupForm.invalid) {
       this.toastService.error('Please fill in all required fields');
@@ -183,6 +186,9 @@ export class SignupComponent {
   }
 
   onVerify(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight
+    }
     if (!this.isOtpComplete) {
       this.toastService.error('Please enter the complete 6-digit code');
       return;

@@ -143,6 +143,9 @@ export class SocialMediaPageComponent implements OnInit {
   }
 
   onSave(): void {
+    if (this.saving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving = true;
     const request = this.form.value;
@@ -163,6 +166,9 @@ export class SocialMediaPageComponent implements OnInit {
   }
 
   toggleVisible(link: SocialMediaLink): void {
+    if (this.togglingId) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     this.togglingId = link.id;
     const updated = { ...link, visible: !link.visible };
     this.systemConfigService.updateSocialMedia(link.id, updated).subscribe({
@@ -176,6 +182,9 @@ export class SocialMediaPageComponent implements OnInit {
   }
 
   onDelete(id: string): void {
+    if (this.deletingId) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!confirm('Delete this social media link?')) return;
     this.deletingId = id;
     this.systemConfigService.deleteSocialMedia(id).subscribe({

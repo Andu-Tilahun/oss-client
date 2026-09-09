@@ -30,6 +30,9 @@ export class FarmFollowUpCreateModalComponent {
   ) {}
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.followUpForm.isValid()) {
       this.followUpForm.markAllAsTouched();
       return;

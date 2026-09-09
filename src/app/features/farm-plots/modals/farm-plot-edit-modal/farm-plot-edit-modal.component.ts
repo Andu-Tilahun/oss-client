@@ -46,6 +46,9 @@ export class FarmPlotEditModalComponent {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     for (const step of [1, 2, 3]) {
       if (!this.wizard.isStepValid(step)) {
         this.currentStep = step;

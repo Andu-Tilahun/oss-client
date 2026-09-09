@@ -26,6 +26,9 @@ export class BranchCreateModalComponent {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.branchForm || !this.branchForm.form.valid) {
       this.branchForm?.form.markAllAsTouched();
       return;

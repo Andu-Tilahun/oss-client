@@ -27,6 +27,9 @@ export class ServiceFeeEditModalComponent {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.serviceFeeForm.isValid() || !this.serviceFee) {
       this.serviceFeeForm.markAllAsTouched();
       return;

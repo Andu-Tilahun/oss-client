@@ -78,6 +78,9 @@ export class RestorationPlanViewComponent implements OnChanges {
   }
 
   onSubmitFollowUp(): void {
+    if (this.submitting) {
+      return; // a request is already in flight
+    }
     if (!this.plan?.id) return;
 
     this.submitting = true;

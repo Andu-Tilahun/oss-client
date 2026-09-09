@@ -150,6 +150,9 @@ export class InvestmentPackageCreateInvestmentModalComponent implements OnChange
   }
 
   onSubmit(): void {
+    if (this.isSaving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (this.placedBidReference) {
       this.closeModal();
       return;

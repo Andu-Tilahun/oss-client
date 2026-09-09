@@ -10,7 +10,10 @@
 .login-shell {
   width: min(1120px, 100%);
   min-height: 620px;
-  border-radius: 20px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 64px;
+  border-bottom-right-radius: 20px;
+  border-bottom-left-radius: 20px;
   display: grid;
   grid-template-columns: 1fr 1.15fr;
   background: #f7f7f8;
@@ -279,7 +282,10 @@ small {
 
   .login-shell {
     min-height: 0;
-    border-radius: 16px;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 40px;
+    border-bottom-right-radius: 16px;
+    border-bottom-left-radius: 16px;
   }
 
   .brand-panel {

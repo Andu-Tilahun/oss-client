@@ -56,6 +56,9 @@ export class InvestmentPackageTypeCreateModalComponent implements OnChanges {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.investmentPackageTypeForm.isValid()) {
       this.investmentPackageTypeForm.markAllAsTouched();
       return;

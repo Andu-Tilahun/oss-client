@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-slate-50 text-slate-900 w-full -mx-6 px-6 py-6 sm:py-8">
+<div class="min-h-screen bg-slate-50 text-slate-900 w-full">
   <header class="mb-8 flex flex-col items-center">
     <p class="text-sm font-medium text-indigo-600 uppercase tracking-wide">Investor dashboard</p>
     <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">{{ greeting }}</h1>
@@ -13,29 +13,29 @@
 
   <ng-container *ngIf="!loading">
     <!-- KPI tiles -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
+      <article class="rounded-xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm min-w-0">
         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Deployed capital</p>
-        <p class="text-3xl font-bold text-slate-900 mt-2">{{ formatMoney(totalDeployedCapital) }}</p>
-        <p class="text-sm text-slate-600 mt-1">Paid / active / accepted / sent</p>
+        <p class="text-lg sm:text-3xl font-bold text-slate-900 mt-2 truncate" [title]="formatMoney(totalDeployedCapital)">{{ formatCompactMoney(totalDeployedCapital) }}</p>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1">Paid / active / accepted / sent</p>
       </article>
 
-      <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <article class="rounded-xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm min-w-0">
         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Active investments</p>
-        <p class="text-3xl font-bold text-slate-900 mt-2">{{ activeInvestmentsCount }}</p>
-        <p class="text-sm text-slate-600 mt-1">Currently committed</p>
+        <p class="text-lg sm:text-3xl font-bold text-slate-900 mt-2 truncate">{{ activeInvestmentsCount }}</p>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1">Currently committed</p>
       </article>
 
-      <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <article class="rounded-xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm min-w-0">
         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Blended ROI</p>
-        <p class="text-3xl font-bold text-slate-900 mt-2">{{ blendedRoiPct !== null ? blendedRoiPct + '%' : '—' }}</p>
-        <p class="text-sm text-slate-600 mt-1">Amount-weighted, admin-reported — not audited</p>
+        <p class="text-lg sm:text-3xl font-bold text-slate-900 mt-2 truncate">{{ blendedRoiPct !== null ? blendedRoiPct + '%' : '—' }}</p>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1">Amount-weighted, admin-reported — not audited</p>
       </article>
 
-      <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <article class="rounded-xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm min-w-0">
         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Open opportunities</p>
-        <p class="text-3xl font-bold text-slate-900 mt-2">{{ openOpportunitiesCount }}</p>
-        <p class="text-sm text-slate-600 mt-1">Campaigns accepting investment</p>
+        <p class="text-lg sm:text-3xl font-bold text-slate-900 mt-2 truncate">{{ openOpportunitiesCount }}</p>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1">Campaigns accepting investment</p>
       </article>
     </section>
 

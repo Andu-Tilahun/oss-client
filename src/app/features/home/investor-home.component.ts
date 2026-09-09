@@ -96,6 +96,12 @@ export class InvestorHomeComponent implements OnInit {
     return new Intl.NumberFormat(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}).format(n);
   }
 
+  /** Abbreviated form (e.g. 18,000,000,000 -> "18B") for tight tile/axis space on narrow screens. */
+  formatCompactMoney(n: number | undefined | null): string {
+    if (n === undefined || n === null) return '—';
+    return new Intl.NumberFormat(undefined, {notation: 'compact', maximumFractionDigits: 1}).format(n);
+  }
+
   private setGreeting(): void {
     const hour = new Date().getHours();
     if (hour < 12) this.greeting = 'Good morning';
@@ -163,9 +169,9 @@ export class InvestorHomeComponent implements OnInit {
 
     this.portfolioValueChartOption = {
       tooltip: {trigger: 'axis', valueFormatter: (v) => this.formatMoney(v as number)},
-      grid: {left: 55, right: 20, top: 20, bottom: 30, containLabel: true},
+      grid: {left: 10, right: 16, top: 20, bottom: 30, containLabel: true},
       xAxis: {type: 'category', data: this.portfolioTrend.map((p) => p.label)},
-      yAxis: {type: 'value'},
+      yAxis: {type: 'value', axisLabel: {formatter: (v: number) => this.formatCompactMoney(v)}},
       series: [
         {
           type: 'line',
@@ -187,9 +193,9 @@ export class InvestorHomeComponent implements OnInit {
           return `${p.name}<br/>${this.formatMoney(point.amount)} · ${point.count} investment${point.count === 1 ? '' : 's'}`;
         },
       },
-      grid: {left: 45, right: 20, top: 20, bottom: 30, containLabel: true},
+      grid: {left: 10, right: 16, top: 20, bottom: 30, containLabel: true},
       xAxis: {type: 'category', data: this.monthlyActivity.map((m) => m.label)},
-      yAxis: {type: 'value'},
+      yAxis: {type: 'value', axisLabel: {formatter: (v: number) => this.formatCompactMoney(v)}},
       series: [{type: 'bar', itemStyle: {color: '#4F46E5'}, data: this.monthlyActivity.map((m) => m.amount)}],
     };
   }

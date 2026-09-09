@@ -12,6 +12,7 @@ import { GateScanFormComponent } from '../../components/gate-scan-form/gate-scan
 export class GateLogComponent implements OnInit {
   logs: GateLog[] = [];
   loading = false;
+  scanning = false;
 
   @ViewChild(GateScanFormComponent) scanForm?: GateScanFormComponent;
 
@@ -49,6 +50,9 @@ export class GateLogComponent implements OnInit {
   }
 
   onScan(): void {
+    if (this.scanning) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.scanForm) return;
     if (!this.scanForm.isValid()) {
       this.scanForm.markAllAsTouched();
@@ -56,15 +60,20 @@ export class GateLogComponent implements OnInit {
       return;
     }
 
+    this.scanning = true;
     this.gateLogService
       .scan(this.scanForm.getValue())
       .subscribe({
         next: (log) => {
+          this.scanning = false;
           this.toastService.success(`Scan recorded: ${log.scanType}`);
           this.scanForm?.resetIds();
           this.load();
         },
-        error: (err) => this.toastService.error(err.message || 'Failed to scan', 'Gate Scan'),
+        error: (err) => {
+          this.scanning = false;
+          this.toastService.error(err.message || 'Failed to scan', 'Gate Scan');
+        },
       });
   }
 }

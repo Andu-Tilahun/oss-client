@@ -57,6 +57,9 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   onSubmit() {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     this.submitted = true;
     this.errorMessage = '';
     this.successMessage = '';

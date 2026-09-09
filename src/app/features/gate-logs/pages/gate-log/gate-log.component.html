@@ -4,7 +4,7 @@
   <div class="bg-white rounded border p-4 space-y-3">
     <app-gate-scan-form></app-gate-scan-form>
     <div class="flex justify-end">
-      <button class="px-4 py-2 bg-blue-600 text-white rounded" (click)="onScan()">Scan</button>
+      <button class="px-4 py-2 bg-blue-600 text-white rounded" [disabled]="scanning" (click)="onScan()">Scan</button>
     </div>
   </div>
 

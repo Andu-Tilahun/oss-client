@@ -274,6 +274,9 @@ export class FarmPlotViewComponent implements OnChanges {
   }
 
   onGalleryImageUploaded(imageUuid: string): void {
+    if (this.galleryUploading) {
+      return; // a request is already in flight
+    }
     if (!this.plot?.id) {
       return;
     }
@@ -360,6 +363,9 @@ export class FarmPlotViewComponent implements OnChanges {
   }
 
   handleMaintenanceConfirm(): void {
+    if (this.maintenanceSubmitting) {
+      return; // a request is already in flight
+    }
     if (!this.plot?.id || !this.maintenanceReason.trim()) return;
     this.maintenanceSubmitting = true;
     const request: FarmPlotMaintenanceRequest = {reason: this.maintenanceReason.trim()};
@@ -382,6 +388,9 @@ export class FarmPlotViewComponent implements OnChanges {
   }
 
   confirmMarkRepaired(): void {
+    if (this.repairSubmitting) {
+      return; // a request is already in flight
+    }
     if (!this.plot?.id) return;
     this.repairSubmitting = true;
     this.farmPlotService.markRepaired(this.plot.id).subscribe({
@@ -403,6 +412,9 @@ export class FarmPlotViewComponent implements OnChanges {
   }
 
   confirmArchive(): void {
+    if (this.archiveSubmitting) {
+      return; // a request is already in flight
+    }
     if (!this.plot?.id) return;
     this.archiveSubmitting = true;
     this.farmPlotService.deactivateFarmPlot(this.plot.id).subscribe({

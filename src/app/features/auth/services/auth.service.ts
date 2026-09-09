@@ -49,14 +49,20 @@ export class AuthService {
   signup(request: SignupRequest): Observable<ApiResponse<User>> {
     return this.httpService.post<ApiResponse<User>>(
       `${Endpoints.USERS_ENDPOINT}/signup`,
-      request
+      request, undefined, {
+        // SignupComponent shows its own toast; skip HttpService's generic one
+        requestType: RequestType.LOCAL
+      }
     );
   }
 
   verifyEmail(request: VerifyEmailRequest): Observable<ApiResponse<void>> {
     return this.httpService.post<ApiResponse<void>>(
       `${Endpoints.USERS_ENDPOINT}/verify-email`,
-      request
+      request, undefined, {
+        // SignupComponent shows its own toast; skip HttpService's generic one
+        requestType: RequestType.LOCAL
+      }
     );
   }
 
@@ -108,7 +114,8 @@ export class AuthService {
     return this.httpService.post<ApiResponse<void>>(
       `${Endpoints.AUTH_ENDPOINT}/forgot-password`,
       request, undefined, {
-        requestType: RequestType.BLOCKING
+        // ForgotPasswordComponent shows its own toast; skip HttpService's generic one
+        requestType: RequestType.LOCAL
       }
     );
   }
@@ -117,7 +124,8 @@ export class AuthService {
     return this.httpService.post<ApiResponse<void>>(
       `${Endpoints.AUTH_ENDPOINT}/reset-password`,
       request, undefined, {
-        requestType: RequestType.BLOCKING
+        // ResetPasswordComponent shows its own inline error banner; skip HttpService's generic toast
+        requestType: RequestType.LOCAL
       }
     );
   }

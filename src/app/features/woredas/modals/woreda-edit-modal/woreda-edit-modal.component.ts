@@ -47,12 +47,15 @@ export class WoredaEditModalComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.woredaForm.isValid() || !this.woreda) {
       this.woredaForm.markAllAsTouched();
       return;
     }
 
-    this.isLoading = false;
+    this.isLoading = true;
     const formValue: WoredaRequest = this.woredaForm.getValue();
 
     this.woredaService.updateWoreda(this.woreda.id, formValue).subscribe({

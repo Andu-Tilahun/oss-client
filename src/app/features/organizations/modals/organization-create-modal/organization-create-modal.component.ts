@@ -26,6 +26,9 @@ export class OrganizationCreateModalComponent {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.organizationForm.isValid()) {
       this.organizationForm.markAllAsTouched();
       return;

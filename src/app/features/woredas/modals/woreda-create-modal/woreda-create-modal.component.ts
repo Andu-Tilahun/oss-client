@@ -46,6 +46,9 @@ export class WoredaCreateModalComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.woredaForm.isValid()) {
       this.woredaForm.markAllAsTouched();
       return;

@@ -28,6 +28,9 @@ export class ItemTypeEditModalComponent {
   ) {}
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.form.isValid() || !this.itemType) {
       this.form.markAllAsTouched();
       return;

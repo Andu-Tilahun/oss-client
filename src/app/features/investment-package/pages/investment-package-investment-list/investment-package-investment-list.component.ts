@@ -212,6 +212,9 @@ export class InvestmentPackageInvestmentListComponent implements OnInit {
   }
 
   handleSendConfirmation() {
+    if (this.lockSend) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.selectedInvestment) return;
 
     this.lockSend = true;
@@ -240,6 +243,9 @@ export class InvestmentPackageInvestmentListComponent implements OnInit {
   }
 
   handleCancelConfirmation() {
+    if (this.lockCancel) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.selectedInvestment) return;
 
     this.lockCancel = true;

@@ -80,6 +80,9 @@ export class ProfilePageComponent implements OnInit {
   }
 
   saveProfile(): void {
+    if (this.isSaving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.currentUser || !this.userForm.isValid()) {
       this.userForm?.markAllAsTouched();
       return;

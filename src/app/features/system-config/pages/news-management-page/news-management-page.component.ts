@@ -163,6 +163,9 @@ export class NewsManagementPageComponent implements OnInit {
   }
 
   onSave(): void {
+    if (this.saving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
 
     this.saving = true;
@@ -194,6 +197,9 @@ export class NewsManagementPageComponent implements OnInit {
   }
 
   onDelete(id: string): void {
+    if (this.deleting) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!confirm('Delete this article?')) return;
     this.deleting = id;
     this.systemConfigService.deleteNews(id).subscribe({

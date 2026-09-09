@@ -84,6 +84,9 @@ export class ContractTemplatesPageComponent implements OnInit {
   }
 
   save(): void {
+    if (this.saving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving = true;
     const request: MessageTemplateRequest = { ...this.form.value, type: 'CONTRACT' };

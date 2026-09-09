@@ -44,4 +44,13 @@ export class TabsComponent {
     if (!tab.iconPath) return [];
     return Array.isArray(tab.iconPath) ? tab.iconPath : [tab.iconPath];
   }
+
+  /**
+   * Flex `order` for the (single) projected content panel, so on the mobile/tablet accordion
+   * it visually lands directly under the active header. Irrelevant at lg: and up (plain block flow).
+   */
+  mobileContentOrder(): number {
+    const idx = this.tabs.findIndex((t) => t.key === this.activeTab);
+    return (idx < 0 ? 0 : idx) * 2 + 1;
+  }
 }
