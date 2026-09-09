@@ -78,6 +78,7 @@ export class FarmPlotViewComponent implements OnChanges {
   galleryItems: FarmGallery[] = [];
   previewGalleryUrls: string[] = [];
   allGalleryUrls: string[] = [];
+  previewImageUrls: string[] = [];
   galleryLoading = false;
   showGalleryModal = false;
   galleryModalInitialIndex = 0;
@@ -265,6 +266,7 @@ export class FarmPlotViewComponent implements OnChanges {
     if (this.allGalleryUrls.length === 0) {
       return;
     }
+    this.previewImageUrls = this.allGalleryUrls;
     this.galleryModalInitialIndex = startIndex;
     this.showGalleryModal = true;
   }
@@ -304,9 +306,12 @@ export class FarmPlotViewComponent implements OnChanges {
   }
 
   openImagePreview(url: string): void {
-    if (url) {
-      window.open(url, '_blank');
+    if (!url) {
+      return;
     }
+    this.previewImageUrls = [url];
+    this.galleryModalInitialIndex = 0;
+    this.showGalleryModal = true;
   }
 
   private toStorageUrl(imageUuid?: string): string | null {

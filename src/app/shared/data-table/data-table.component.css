@@ -121,7 +121,7 @@
   padding: 0 0.7rem 0.6rem;
 }
 
-.dt-card__download-btn {
+.dt-card__corner-btn {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
@@ -138,7 +138,7 @@
   backdrop-filter: blur(2px);
 }
 
-.dt-card__download-btn:disabled {
+.dt-card__corner-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

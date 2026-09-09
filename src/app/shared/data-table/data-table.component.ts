@@ -15,6 +15,7 @@ import {DataTableColumn} from './models/data-table-column.model';
 import {ColumnType} from './models/column-types.model';
 import {TableQueryParams} from './models/table-query-params.model';
 import {PageSplitRightAction} from '../components/page-split-layout/page-split-layout/page-split-right-action.model';
+import {ActionIconType} from '../components/action-icons/action-icon-button/action-icon-button.component';
 
 const DEFAULT_PAGE_SIZE = 10;
 /** Matches Tailwind's `lg` breakpoint, and `app-page-split-layout`'s own stacking breakpoint. */
@@ -101,6 +102,9 @@ export class DataTableComponent<T> {
   @Input() showEditButton = false;
   @Input() showDeleteButton = false;
   @Input() rowActions: PageSplitRightAction<T>[] = [];
+  /** Which row-action icon(s), if present on an item, render as a corner badge on the mobile
+   *  card (instead of in the card's action footer). Defaults to the original download-badge. */
+  @Input() cardCornerIcons: ActionIconType[] = ['download'];
   @Input() actionCellLabel?: (item: T) => string;
 
   // Icons (we'll use SVG paths)
@@ -393,7 +397,7 @@ export class DataTableComponent<T> {
     action.action(item);
   }
 
-  cardDownloadAction(item: T): PageSplitRightAction<T> | null {
-    return this.rowActions.find((a) => a.icon === 'download' && this.isRowActionVisible(a, item)) ?? null;
+  cardCornerAction(item: T): PageSplitRightAction<T> | null {
+    return this.rowActions.find((a) => this.cardCornerIcons.includes(a.icon) && this.isRowActionVisible(a, item)) ?? null;
   }
 }

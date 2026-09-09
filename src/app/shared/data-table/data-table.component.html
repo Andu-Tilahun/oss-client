@@ -338,12 +338,12 @@
             (click)="handleRowClick(item, $event)"
           >
             <button
-              *ngIf="cardDownloadAction(item) as dlAction"
+              *ngIf="cardCornerAction(item) as cornerAction"
               type="button"
-              class="dt-card__download-btn"
-              [title]="dlAction.title || 'Download'"
-              [disabled]="isRowActionDisabled(dlAction, item)"
-              (click)="$event.stopPropagation(); onRowActionClick(dlAction, item)"
+              class="dt-card__corner-btn"
+              [title]="cornerAction.title || 'Download'"
+              [disabled]="isRowActionDisabled(cornerAction, item)"
+              (click)="$event.stopPropagation(); onRowActionClick(cornerAction, item)"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -420,7 +420,7 @@
               </button>
               <ng-container *ngFor="let action of rowActions">
                 <app-action-icon-button
-                  *ngIf="action.icon !== 'download' && isRowActionVisible(action, item)"
+                  *ngIf="!cardCornerIcons.includes(action.icon) && isRowActionVisible(action, item)"
                   [icon]="action.icon"
                   [title]="action.title || ''"
                   [disabled]="isRowActionDisabled(action, item)"
