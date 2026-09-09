@@ -13,6 +13,7 @@
       [tabs]="adminTabs"
       [activeTab]="adminActiveTab"
       [centered]="true"
+      [noBodyPadding]="true"
       (activeTabChange)="onAdminTabChange($event)"
     >
       <!-- Operational -->
@@ -34,6 +35,7 @@
           [showDeleteButton]="false"
           [rowActions]="tableRowActions"
           [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
           (pageChange)="onOperationalPageChange($event)"
           (addClick)="onAdd()"
           (refreshClick)="onRefresh()"
@@ -73,6 +75,7 @@
           [showDeleteButton]="false"
           [showActionColumn]="false"
           [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
           [noDataMessage]="'No farm plots under maintenance.'"
           (pageChange)="onRepairPageChange($event)"
           (refreshClick)="onRefresh()"
@@ -111,6 +114,7 @@
           [showDeleteButton]="false"
           [showActionColumn]="false"
           [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
           [noDataMessage]="'No archived farm plots.'"
           (pageChange)="onArchivedPageChange($event)"
           (refreshClick)="onRefresh()"

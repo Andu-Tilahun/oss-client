@@ -16,6 +16,8 @@
         [tabs]="investorTabs"
         [activeTab]="investorActiveTab"
         [centered]="true"
+        [noBodyPadding]="true"
+        [greenAccent]="true"
         (activeTabChange)="onInvestorTabChange($event)"
       >
         <!-- Tab 1: My Farm Leases -->
@@ -37,6 +39,7 @@
             [showActionColumn]="true"
             [rowActions]="tableRowActions"
             [rowClickable]="true"
+            [rowDetailTemplate]="rightContent"
             (rowClick)="onView($event)"
           >
             <div extraTableHeader class="w-full min-w-0">
@@ -71,6 +74,7 @@
             [showActionColumn]="true"
             [rowActions]="tableRowActions"
             [rowClickable]="true"
+            [rowDetailTemplate]="rightContent"
             [noDataMessage]="'No available investment packages found.'"
             (pageChange)="onAvailablePageChange($event)"
             (rowClick)="onView($event)"
@@ -105,6 +109,7 @@
             [showActionColumn]="true"
             [rowActions]="tableRowActions"
             [rowClickable]="true"
+            [rowDetailTemplate]="rightContent"
             [noDataMessage]="'No completed or deactivated investment options yet.'"
             (rowClick)="onView($event)"
           ></app-data-table>
@@ -120,6 +125,7 @@
           [tabs]="adminTabs"
           [activeTab]="adminActiveTab"
           [centered]="true"
+          [noBodyPadding]="true"
           (activeTabChange)="onAdminTabChange($event)"
         >
           <!-- Tab 1: Published Investments -->
@@ -142,6 +148,7 @@
               [rowActions]="tableRowActions"
               [actionCellLabel]="getAdminActionCellLabel"
               [rowClickable]="true"
+            [rowDetailTemplate]="rightContent"
               (refreshClick)="onRefresh()"
               (rowClick)="onView($event)"
             >
@@ -182,6 +189,7 @@
               [showDeleteButton]="false"
               [showActionColumn]="false"
               [rowClickable]="true"
+            [rowDetailTemplate]="rightContent"
               [noDataMessage]="'No archived investment packages found.'"
               (rowClick)="onView($event)"
             >
@@ -206,6 +214,7 @@
           [tabs]="extensionWorkerTabs"
           [activeTab]="extensionWorkerActiveTab"
           [centered]="true"
+          [noBodyPadding]="true"
           (activeTabChange)="onExtensionWorkerTabChange($event)"
         >
           <!-- Tab 1: My Farm Plots -->
@@ -226,6 +235,7 @@
               [showDeleteButton]="false"
               [showActionColumn]="false"
               [rowClickable]="true"
+            [rowDetailTemplate]="rightContent"
               (refreshClick)="onRefresh()"
               (rowClick)="onView($event)"
             >
@@ -260,6 +270,7 @@
               [showDeleteButton]="false"
               [showActionColumn]="false"
               [rowClickable]="true"
+            [rowDetailTemplate]="rightContent"
               [noDataMessage]="'No completed or deactivated assignments yet.'"
               (rowClick)="onView($event)"
             >

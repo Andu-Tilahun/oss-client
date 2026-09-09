@@ -9,7 +9,7 @@
         </div>
       </div>
 
-      <div class="w-full lg:w-5/12 lg:border-l lg:border-gray-200 lg:pl-6">
+      <div class="w-full lg:w-5/12 lg:border-l lg:border-gray-200 lg:pl-6" *ngIf="!isMobile">
         <div *ngIf="showRightTitle && rightTitle" class="mb-3">
           <h2 class="text-sm font-semibold text-slate-700">{{ rightTitle }}</h2>
         </div>
@@ -32,7 +32,7 @@
         </ng-container>
       </section>
 
-      <section class="w-full lg:w-5/12 lg:border-l lg:border-gray-200 lg:pl-6 h-full min-h-0 min-w-0 overflow-y-auto">
+      <section class="w-full lg:w-5/12 lg:border-l lg:border-gray-200 lg:pl-6 h-full min-h-0 min-w-0 overflow-y-auto" *ngIf="!isMobile">
         <div *ngIf="hasRightExtraHeader()" class="mb-4">
           <ng-container *ngTemplateOutlet="rightExtraTableHeader ?? null"></ng-container>
         </div>

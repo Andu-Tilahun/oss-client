@@ -6,7 +6,7 @@
   (back)="goBack()"
 >
   <ng-template #mainContent>
-    <div class="p-6">
+    <div class="px-0 md:px-6 py-6">
       <app-detail-card>
         <div *ngIf="loading" class="text-sm text-gray-600">Loading user…</div>
         <div *ngIf="!user?.id && !loading" class="text-sm text-gray-500">No user selected.</div>

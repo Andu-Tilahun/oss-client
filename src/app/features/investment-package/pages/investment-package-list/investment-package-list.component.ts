@@ -1,6 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
+import {ColumnType} from '../../../../shared/data-table/models/column-types.model';
+import {environment} from '../../../../../environments/environment';
 import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {AuthService} from '../../../auth/services/auth.service';
@@ -57,7 +59,18 @@ export class InvestmentPackageListComponent implements OnInit {
   deactivateReason = '';
   packageToDeactivate: InvestmentPackage | null = null;
 
+  private readonly storageApiUrl = `${environment.apiUrl}/files`;
+
+  private readonly photoColumn: DataTableColumn<InvestmentPackage> = {
+    header: 'Photo',
+    columnType: ColumnType.IMAGE,
+    value: (c) => c.farmPlot?.imageUuid ? `${this.storageApiUrl}/${c.farmPlot.imageUuid}` : null,
+    imageAlt: (c) => c.title,
+    defaultVisible: false,
+  };
+
   columns: DataTableColumn<InvestmentPackage>[] = [
+    this.photoColumn,
     {header: 'Title', value: (c) => c.title, cellClass: 'block max-w-[200px] truncate'},
     {header: 'Package Status', value: (c) => c.packageStatus ?? 'ACTIVE', cellClass: (c) => packageStatusBadgeClass(c.packageStatus)},
     {header: 'Funding Status', value: (c) => c.fundingStatus, defaultVisible: false},
@@ -68,6 +81,7 @@ export class InvestmentPackageListComponent implements OnInit {
   ];
 
   archivedColumns: DataTableColumn<InvestmentPackage>[] = [
+    this.photoColumn,
     {header: 'Title', value: (c) => c.title, cellClass: 'block max-w-[200px] truncate'},
     {header: 'Package Status', value: (c) => c.packageStatus ?? 'ACTIVE', cellClass: (c) => packageStatusBadgeClass(c.packageStatus)},
     {header: 'Type', value: (c) => this.formatPackageType(c.investmentPackageType)},

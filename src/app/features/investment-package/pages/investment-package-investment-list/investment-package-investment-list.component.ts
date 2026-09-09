@@ -1,5 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
+import {ColumnType} from '../../../../shared/data-table/models/column-types.model';
+import {environment} from '../../../../../environments/environment';
 import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {AuthService} from '../../../auth/services/auth.service';
@@ -37,11 +39,23 @@ export class InvestmentPackageInvestmentListComponent implements OnInit {
   showConfirmationModal = false;
   lockCancel = false;
   showCancelModal = false;
+  private readonly storageApiUrl = `${environment.apiUrl}/files`;
+
   columns: DataTableColumn<InvestmentRecord>[] = [
+    {
+      header: 'Photo',
+      columnType: ColumnType.IMAGE,
+      value: (r) => r.investmentPackage?.farmPlot?.imageUuid ? `${this.storageApiUrl}/${r.investmentPackage.farmPlot.imageUuid}` : null,
+      imageAlt: (r) => r.investmentPackage?.title ?? '',
+      defaultVisible: false,
+    },
     {header: 'Amount', value: (r) => this.formatAmount(r.amount)},
     {header: 'Method', value: (r) => r.paymentMethod},
     {header: 'Status', value: (r) => r.status},
   ];
+
+  /** Mobile card title override — the package name reads better than "Amount" as a card headline. */
+  cardTitle = (r: InvestmentRecord): string => r.investmentPackage?.title ?? this.formatAmount(r.amount);
   activeTab = 'detail';
 
   tabs: TabItem[] = [

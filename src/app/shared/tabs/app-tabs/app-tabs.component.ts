@@ -25,6 +25,31 @@ export class TabsComponent {
   /** When true, renders tabs as centered pills instead of left-aligned underlines */
   @Input() centered = false;
 
+  /**
+   * When true, the mobile/tablet accordion body drops its own horizontal padding — for content
+   * that already manages its own edge-to-edge spacing (e.g. a full-width `app-data-table`),
+   * rather than typical form/text content that relies on this component for breathing room.
+   * Desktop spacing is unaffected either way.
+   */
+  @Input() noBodyPadding = false;
+
+  /**
+   * When true, drops the outer card chrome (background/border/shadow/rounded corners) and the
+   * sticky header bar's own background/border — for tabs nested inside content that's already
+   * boxed by an ancestor (e.g. a detail view rendered inside a table's expanded row), so this
+   * component doesn't add a redundant nested card. Mobile accordion headers also become plain
+   * section titles instead of a highlighted pill/button. Desktop layout is unaffected either way.
+   */
+  @Input() noCard = false;
+
+  /**
+   * When true, the mobile/tablet accordion's active-tab highlight uses the app's green brand
+   * color instead of the default blue — for a tab group that should stand out/be easy to spot
+   * at a glance (e.g. an investor's "My Farm / Explore / History" tabs). Opt-in per instance;
+   * every other `app-tabs` consumer keeps the default blue. Desktop nav is unaffected either way.
+   */
+  @Input() greenAccent = false;
+
   /** Emits the key of the tab that was clicked */
   @Output() activeTabChange = new EventEmitter<string>();
 

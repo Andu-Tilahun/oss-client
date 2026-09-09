@@ -24,6 +24,7 @@
       [showDeleteButton]="false"
       [showActionColumn]="false"
       [rowClickable]="true"
+      [rowDetailTemplate]="rightContent"
       [noDataMessage]="'No farm plots are currently under maintenance.'"
       (rowClick)="selectPlot($event)"
     ></app-data-table>

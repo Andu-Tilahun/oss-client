@@ -151,6 +151,8 @@
       *ngIf="tabs.length > 1; else plainDescription"
       [tabs]="tabs"
       [activeTab]="activeTab"
+      [noCard]="true"
+      [noBodyPadding]="true"
       (activeTabChange)="onTabChange($event)"
     >
       <div *ngIf="activeTab === 'description'">

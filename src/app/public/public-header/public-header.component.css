@@ -9,6 +9,14 @@
  * containing block for its position:fixed children (.menu drawer and .menu-overlay), which
  * then get anchored to and clipped by the 52px pill instead of the viewport. The pill is
  * centred with left/right + auto margins, and the frosted background lives on ::before.
+ *
+ * will-change: opacity below is deliberate: it nudges mobile browsers to give .top-nav its own
+ * compositor layer (mitigating the mobile WebKit/Blink bug where a fixed header with a
+ * backdrop-filter background can fail to repaint at the right position right as a scroll
+ * gesture ends/bounces at the page bottom) WITHOUT creating a containing block for fixed
+ * descendants -- unlike transform/filter/perspective/contain/backdrop-filter/will-change:
+ * transform, `opacity` never establishes one per spec, so .menu / .menu-overlay stay correctly
+ * anchored to the viewport.
  */
 .top-nav {
   height: 52px;
@@ -28,6 +36,7 @@
   box-shadow: 0 4px 24px rgba(15, 23, 42, 0.1);
   z-index: 50;
   box-sizing: border-box;
+  will-change: opacity;
 }
 
 .top-nav::before {

@@ -14,6 +14,7 @@
       [tabs]="assignmentsTabs"
       [activeTab]="assignmentsActiveTab"
       [centered]="true"
+      [noBodyPadding]="true"
       (activeTabChange)="onAssignmentsTabChange($event)"
     >
       <div *ngIf="assignmentsActiveTab === 'current'">
@@ -33,6 +34,7 @@
           [showDeleteButton]="false"
           [showActionColumn]="false"
           [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
           [noDataMessage]="'No current assigned investments found.'"
           (rowClick)="selectAgreement($event)"
         >
@@ -66,6 +68,7 @@
           [showDeleteButton]="false"
           [showActionColumn]="false"
           [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
           [noDataMessage]="'No completed or deactivated assignments yet.'"
           (rowClick)="selectAgreement($event)"
         >
@@ -86,7 +89,7 @@
 
   <ng-template #rightContent>
     <div *ngIf="selectedPlot && selectedAgreement; else noSelection">
-      <app-tabs [tabs]="tabs" [activeTab]="activeTab" (activeTabChange)="activeTab = $event">
+      <app-tabs [tabs]="tabs" [activeTab]="activeTab" [noCard]="true" [noBodyPadding]="true" (activeTabChange)="activeTab = $event">
         <div *ngIf="activeTab === 'farm-plot'">
           <app-farm-plot-view [plot]="selectedPlot" [hideInvestmentHistoryForExtensionWorker]="true"></app-farm-plot-view>
         </div>

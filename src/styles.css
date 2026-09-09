@@ -8,11 +8,19 @@
 @layer base {
   html,
   body {
-    @apply m-0 p-0 h-full;
+    @apply m-0 p-0 h-full overscroll-y-none;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
   body.modal-open {
+    overflow: hidden;
+  }
+
+  /* Dashboard shell: <main> is meant to be the only scroll container. Without this, html/body's
+     bare `height: 100%` leaves the document itself as a second, latent scroll path alongside
+     <main> whenever the shell's rendered height doesn't exactly match the visual viewport --
+     exactly the gap that lets a swipe get "eaten" instead of reaching <main> or the header. */
+  body:has(.app-shell) {
     overflow: hidden;
   }
 

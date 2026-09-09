@@ -8,7 +8,8 @@ import {
   HostListener,
   Input,
   Output,
-  TemplateRef
+  TemplateRef,
+  ViewChild
 } from '@angular/core';
 import {DataTableColumn} from './models/data-table-column.model';
 import {ColumnType} from './models/column-types.model';
@@ -16,6 +17,8 @@ import {TableQueryParams} from './models/table-query-params.model';
 import {PageSplitRightAction} from '../components/page-split-layout/page-split-layout/page-split-right-action.model';
 
 const DEFAULT_PAGE_SIZE = 10;
+/** Matches Tailwind's `lg` breakpoint, and `app-page-split-layout`'s own stacking breakpoint. */
+const LG_BREAKPOINT_PX = 1024;
 
 @Component({
   selector: 'app-data-table',
@@ -57,6 +60,36 @@ export class DataTableComponent<T> {
 
   /** If true, clicking a row emits `rowClick` */
   @Input() rowClickable = false;
+
+  /**
+   * Optional per-row detail content, rendered inline in an expanded row when a row is tapped —
+   * but only below the `lg` breakpoint (on desktop, consumers show detail in `app-page-split-layout`'s
+   * side panel instead; pass the *same* `TemplateRef` to both to avoid maintaining two copies).
+   * Context: `{ $implicit: item }`, matching `page-split-layout`'s `#rightContent`.
+   */
+  @Input() rowDetailTemplate: TemplateRef<any> | null = null;
+
+  /**
+   * Optional override for the mobile/tablet card grid's title field — defaults to the first
+   * column that isn't IMAGE/BUTTON/CHECK_BOX. Only needed when that default picks the wrong
+   * column for a given table.
+   */
+  @Input() cardTitleField?: (item: T) => string;
+
+  /** Id of the row currently expanded inline (mobile/tablet only). */
+  expandedRowId: string | number | null = null;
+
+  /** Below `lg`, row taps expand inline detail instead of relying on a side panel. */
+  protected isMobile = false;
+
+  /**
+   * Visible width of the table's horizontal-scroll container, in px — a colspan cell in an
+   * auto-layout table sizes to the table's *total* column width, not the viewport, so the inline
+   * detail content is explicitly pinned to this instead (see template). `null` until measured.
+   */
+  protected detailPanelWidthPx: number | null = null;
+
+  @ViewChild('tableScroller') private tableScroller?: ElementRef<HTMLElement>;
 
   // Action header buttons visibility
   @Input() showAddButton = false;
@@ -102,7 +135,9 @@ export class DataTableComponent<T> {
   constructor(
     private readonly elRef: ElementRef<HTMLElement>,
     private readonly cdr: ChangeDetectorRef,
-  ) {}
+  ) {
+    this.updateIsMobile();
+  }
 
   get visibleColumns(): DataTableColumn<T>[] {
     return this._columns.filter((_, idx) => this.columnVisibility[idx] !== false);
@@ -122,7 +157,23 @@ export class DataTableComponent<T> {
   @HostListener('window:resize')
   onWindowResize(): void {
     this.applyColumnVisibility();
+    const wasMobile = this.isMobile;
+    this.updateIsMobile();
+    if (wasMobile && !this.isMobile) {
+      // Crossing up past `lg`: the side panel takes over, so don't leave a row expanded inline.
+      this.expandedRowId = null;
+    }
+    this.measureDetailPanelWidth();
     this.cdr.markForCheck();
+  }
+
+  private updateIsMobile(): void {
+    this.isMobile = typeof window !== 'undefined' ? window.innerWidth < LG_BREAKPOINT_PX : false;
+  }
+
+  /** Visible (non-scrolled) width of the table's own horizontal-scroll container. */
+  private measureDetailPanelWidth(): void {
+    this.detailPanelWidthPx = this.tableScroller?.nativeElement?.clientWidth || null;
   }
 
   @HostListener('document:click', ['$event'])
@@ -221,6 +272,89 @@ export class DataTableComponent<T> {
       return;
     }
     this.rowClick.emit(item);
+
+    if (this.rowDetailTemplate && this.isMobile) {
+      const id = this.rowIdField(item) ?? null;
+      this.expandedRowId = this.expandedRowId === id ? null : id;
+      if (this.expandedRowId != null) {
+        this.measureDetailPanelWidth();
+        // The table may already be scrolled horizontally (e.g. the user scrolled to read a
+        // truncated column) — reset so the newly-expanded detail isn't clipped by that offset.
+        const scroller = this.tableScroller?.nativeElement;
+        if (scroller) {
+          scroller.scrollLeft = 0;
+        }
+      }
+    }
+  }
+
+  isRowExpanded(item: T): boolean {
+    const id = this.rowIdField(item) ?? null;
+    return id != null && this.expandedRowId === id;
+  }
+
+  // ---- Mobile/tablet gallery card grid ----------------------------------------------------
+
+  /** Even `order` slots reserve each card's own place; detailOrder() interleaves into the
+   *  single odd slot that always falls in a fresh row right after a given pair of cards —
+   *  CSS Grid auto-placement follows order-modified document order, same as flexbox. */
+  cardOrder(i: number): number {
+    return i * 2;
+  }
+
+  detailOrder(i: number): number {
+    const pairIndex = Math.floor(i / 2);
+    return pairIndex * 4 + 3;
+  }
+
+  private get autoImageColumn(): DataTableColumn<T> | undefined {
+    return this._columns.find((c) => c.columnType === ColumnType.IMAGE);
+  }
+
+  private get autoTitleColumn(): DataTableColumn<T> | undefined {
+    return this._columns.find(
+      (c) =>
+        c.columnType !== ColumnType.IMAGE &&
+        c.columnType !== ColumnType.BUTTON &&
+        c.columnType !== ColumnType.CHECK_BOX
+    );
+  }
+
+  cardImageUrl(item: T): string | null {
+    const col = this.autoImageColumn;
+    const url = col?.value?.(item);
+    return url ? String(url) : null;
+  }
+
+  cardMediaKind(item: T): 'image' | 'video' {
+    const col = this.autoImageColumn;
+    return col?.mediaKind?.(item) === 'video' ? 'video' : 'image';
+  }
+
+  cardImageAlt(item: T): string {
+    return this.autoImageColumn?.imageAlt?.(item) ?? '';
+  }
+
+  cardTitle(item: T): string {
+    if (this.cardTitleField) return this.cardTitleField(item);
+    const col = this.autoTitleColumn;
+    return col?.value ? String(col.value(item) ?? '') : '';
+  }
+
+  /** Up to 3 more fields (beyond the title) to surface on the card, in column order. */
+  cardSecondaryFields(item: T): { header: string; value: string }[] {
+    const titleCol = this.autoTitleColumn;
+    const imageCol = this.autoImageColumn;
+    const fields: { header: string; value: string }[] = [];
+    for (const col of this.visibleColumns) {
+      if (fields.length >= 3) break;
+      if (col === titleCol || col === imageCol) continue;
+      if (col.columnType === ColumnType.CHECK_BOX || col.columnType === ColumnType.IMAGE) continue;
+      const raw = col.value ? col.value(item) : '';
+      if (raw === null || raw === undefined || raw === '') continue;
+      fields.push({ header: col.header, value: String(raw) });
+    }
+    return fields;
   }
 
   resolveCellClass(column: DataTableColumn<T>, item: T): string {
@@ -257,5 +391,9 @@ export class DataTableComponent<T> {
       return;
     }
     action.action(item);
+  }
+
+  cardDownloadAction(item: T): PageSplitRightAction<T> | null {
+    return this.rowActions.find((a) => a.icon === 'download' && this.isRowActionVisible(a, item)) ?? null;
   }
 }

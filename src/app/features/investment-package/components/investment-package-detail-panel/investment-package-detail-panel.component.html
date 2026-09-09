@@ -2,6 +2,8 @@
   *ngIf="tabs.length > 0"
   [tabs]="tabs"
   [activeTab]="activeTab"
+  [noCard]="true"
+  [noBodyPadding]="true"
   (activeTabChange)="onTabChange($event)"
 >
   <div *ngIf="activeTab === 'detail' && hasTab('detail')">

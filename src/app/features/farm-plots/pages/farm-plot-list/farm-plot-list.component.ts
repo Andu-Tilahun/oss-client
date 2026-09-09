@@ -12,6 +12,7 @@ import {PageResponse} from '../../../../shared/models/api-response.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
+import {ColumnType} from '../../../../shared/data-table/models/column-types.model';
 import {TabItem} from '../../../../shared/tabs/models/tab-item.model';
 import {environment} from '../../../../../environments/environment';
 import {RegionService} from '../../../regions/services/region.service';
@@ -73,6 +74,13 @@ export class FarmPlotListComponent {
   detailRefreshKey = 0;
 
   columns: DataTableColumn<FarmPlot>[] = [
+    {
+      header: 'Photo',
+      columnType: ColumnType.IMAGE,
+      value: (plot) => plot.imageUuid ? `${this.storageApiUrl}/${plot.imageUuid}` : null,
+      imageAlt: (plot) => plot.title,
+      defaultVisible: false,
+    },
     {
       header: 'Title',
       value: (plot) => plot.title,

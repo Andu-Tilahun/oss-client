@@ -1,7 +1,10 @@
 import {CommonModule} from '@angular/common';
-import {Component, ContentChild, EventEmitter, Input, Output, TemplateRef} from '@angular/core';
+import {Component, ContentChild, EventEmitter, HostListener, Input, OnInit, Output, TemplateRef} from '@angular/core';
 import {ActionIconButtonComponent} from '../../action-icons/action-icon-button/action-icon-button.component';
 import {PageSplitRightAction} from './page-split-right-action.model';
+
+/** Matches Tailwind's `lg` breakpoint, where this layout switches from stacked to side-by-side. */
+const LG_BREAKPOINT_PX = 1024;
 
 @Component({
   selector: 'app-page-split-layout',
@@ -10,7 +13,27 @@ import {PageSplitRightAction} from './page-split-right-action.model';
   templateUrl: './page-split-layout.component.html',
   styleUrls: ['./page-split-layout.component.css'],
 })
-export class PageSplitLayoutComponent {
+export class PageSplitLayoutComponent implements OnInit {
+  /**
+   * Below the `lg` breakpoint, the right (detail) column doesn't render at all — on mobile/tablet,
+   * consumers instead show detail content inline in an expanded table row (see `app-data-table`'s
+   * `rowDetailTemplate`). Computed via resize listener (not CSS-only) so the detail component here
+   * is never mounted at the same time as the inline one.
+   */
+  protected isMobile = false;
+
+  ngOnInit(): void {
+    this.updateIsMobile();
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.updateIsMobile();
+  }
+
+  private updateIsMobile(): void {
+    this.isMobile = typeof window !== 'undefined' ? window.innerWidth < LG_BREAKPOINT_PX : false;
+  }
   @Input() leftTitle: string = '';
   @Input() rightTitle: string = '';
 

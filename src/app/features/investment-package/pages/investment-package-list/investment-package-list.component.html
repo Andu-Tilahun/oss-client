@@ -13,6 +13,7 @@
       [tabs]="adminTabs"
       [activeTab]="adminActiveTab"
       [centered]="true"
+      [noBodyPadding]="true"
       (activeTabChange)="onAdminTabChange($event)"
     >
       <!-- Published Investments -->
@@ -33,6 +34,7 @@
           [showActionColumn]="isAdmin"
           [rowActions]="tableRowActions"
           [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
           [addButtonText]="'Create Investment Package'"
           (addClick)="onAdd()"
           (refreshClick)="onRefresh()"
@@ -71,6 +73,7 @@
           [showDeleteButton]="false"
           [showActionColumn]="false"
           [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
           [noDataMessage]="'No archived investment packages found.'"
           (rowClick)="onView($event)"
           (pageChange)="onArchivedPageChange($event)"

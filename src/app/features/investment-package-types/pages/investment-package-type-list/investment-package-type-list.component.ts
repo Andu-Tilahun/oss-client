@@ -13,6 +13,7 @@ import {
 import {FundingStatus} from '../../../../shared/models/funding-status.model';
 import {InvestmentPackageService} from '../../../investment-package/services/investment-package.service';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
+import {ColumnType} from '../../../../shared/data-table/models/column-types.model';
 import {InvestmentPackageTypeService} from '../../services/investment-package-type.service';
 import {PageResponse} from '../../../../shared/models/api-response.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
@@ -315,6 +316,13 @@ export class InvestmentPackageTypeListComponent implements OnInit {
 
   private buildColumns(): void {
     const base: DataTableColumn<InvestmentPackageTypeAgreement>[] = [
+      {
+        header: 'Photo',
+        columnType: ColumnType.IMAGE,
+        value: (l) => l.farmPlot?.imageUuid ? `${this.storageApiUrl}/${l.farmPlot.imageUuid}` : null,
+        imageAlt: (l) => l.title,
+        defaultVisible: false,
+      },
       {header: 'Title', value: (l) => this.truncateText(l.title), cellClass: 'block max-w-[200px] truncate'},
       {header: 'Farm activity', value: (l) => l.farmActivity},
       {header: 'Water source', value: (l) => l.waterSource},

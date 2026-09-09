@@ -24,6 +24,8 @@
       [showDeleteButton]="false"
       [showActionColumn]="false"
       [rowClickable]="true"
+        [rowDetailTemplate]="rightContent"
+        [cardTitleField]="cardTitle"
       (pageChange)="onPageChange($event)"
       (refreshClick)="onRefresh()"
       (rowClick)="onView($event)"
@@ -44,6 +46,8 @@
     <app-tabs
       [tabs]="tabs"
       [activeTab]="activeTab"
+      [noCard]="true"
+      [noBodyPadding]="true"
       (activeTabChange)="activeTab = $event">
       <!-- Request Tab -->
       <div *ngIf="activeTab === 'detail'">

@@ -25,6 +25,7 @@
       [showDeleteButton]="false"
       [showActionColumn]="false"
       [rowClickable]="true"
+      [rowDetailTemplate]="rightContent"
       (pageChange)="onPageChange($event)"
       (refreshClick)="loadNotifications()"
       (rowClick)="onView($event)"
