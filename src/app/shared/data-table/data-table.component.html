@@ -8,7 +8,7 @@
         *ngIf="showAddButton"
         icon="plus"
         title="Add"
-        (click)="addClick.emit()"
+        (buttonClick)="addClick.emit()"
       ></app-action-icon-button>
 
       <!-- Refresh Button -->
@@ -16,7 +16,7 @@
         *ngIf="showRefreshButton"
         icon="refresh"
         title="Refresh"
-        (click)="refreshClick.emit()"
+        (buttonClick)="refreshClick.emit()"
       ></app-action-icon-button>
 
       <!-- Export Button -->
@@ -24,7 +24,7 @@
         *ngIf="showExportButton"
         icon="export"
         title="Export"
-        (click)="exportClick.emit()"
+        (buttonClick)="exportClick.emit()"
       ></app-action-icon-button>
     </div>
 
@@ -74,7 +74,7 @@
   </div>
 
   <!-- Table Container -->
-  <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+  <div class="bg-white rounded-none md:rounded-xl shadow-sm overflow-hidden border-y md:border border-gray-100">
 
     <!-- Loading Overlay -->
     <div *ngIf="loading" class="relative">
@@ -89,12 +89,28 @@
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="overflow-x-auto">
+    <!-- Shared empty-state content, reused by both the desktop table and mobile card branches -->
+    <ng-template #emptyStateBlock>
+      <ng-container *ngIf="emptyStateTemplate; else defaultEmptyState">
+        <ng-container *ngTemplateOutlet="emptyStateTemplate"></ng-container>
+      </ng-container>
+      <ng-template #defaultEmptyState>
+        <div class="flex flex-col items-center justify-center text-slate-500">
+          <svg class="w-14 h-14 mb-3 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+          </svg>
+          <p class="text-sm font-medium">{{ noDataMessage }}</p>
+        </div>
+      </ng-template>
+    </ng-template>
+
+    <!-- Table (desktop only) -->
+    <div class="overflow-x-auto" #tableScroller *ngIf="!isMobile">
       <table class="min-w-full">
         <!-- Table Head -->
         <thead>
         <tr class="bg-slate-50/80 border-b border-slate-200">
+          <th *ngIf="rowDetailTemplate && isMobile" class="w-8 px-2 py-3"></th>
           <th *ngIf="showIndex" class="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
             #
           </th>
@@ -109,12 +125,28 @@
 
         <!-- Table Body -->
         <tbody class="divide-y divide-slate-100">
+        <ng-container *ngFor="let item of paginatedData; let i = index; trackBy: trackByIndex">
         <tr
-          *ngFor="let item of paginatedData; let i = index; trackBy: trackByIndex"
-          class="hover:bg-slate-50/60 transition-colors duration-150"
-          [class.cursor-pointer]="rowClickable"
+          class="transition-colors duration-150 hover:bg-slate-100/70"
+          [ngClass]="{
+            'bg-indigo-50 hover:bg-indigo-100/70': isRowSelected(item),
+            'bg-slate-50/80': !isRowSelected(item) && i % 2 === 0,
+            'bg-white': !isRowSelected(item) && i % 2 !== 0,
+            'cursor-pointer': rowClickable
+          }"
           (click)="handleRowClick(item, $event)"
         >
+          <!-- Expand Chevron (mobile/tablet only, when a row-detail template is provided) -->
+          <td *ngIf="rowDetailTemplate && isMobile" class="px-2 py-3.5 text-center">
+            <svg
+              class="w-4 h-4 text-slate-400 transition-transform inline-block"
+              [class.rotate-180]="isRowExpanded(item)"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </td>
+
           <!-- Index Column -->
           <td *ngIf="showIndex" class="px-5 py-3.5 whitespace-nowrap text-sm text-slate-700">
             {{ (pageIndex - 1) * pageSize + i + 1 }}
@@ -126,11 +158,18 @@
               <!-- Button Type -->
               <ng-container *ngSwitchCase="columnType.BUTTON">
                 <button
+                  *ngIf="column.value?.(item) && column.actionable?.(item) !== false"
                   (click)="$event.stopPropagation(); column.columnAction?.(item)"
                   class="text-blue-600 hover:text-blue-700 font-medium transition-colors"
                 >
-                  {{ column.value ? column.value(item) : '' }}
+                  {{ column.value?.(item) }}
                 </button>
+                <span
+                  *ngIf="column.value?.(item) && column.actionable?.(item) === false"
+                  class="text-slate-500 text-sm"
+                >
+                  {{ column.value?.(item) }}
+                </span>
               </ng-container>
 
               <!-- Link Type -->
@@ -144,12 +183,34 @@
                 </a>
               </ng-container>
 
+              <!-- Image Type -->
+              <ng-container *ngSwitchCase="columnType.IMAGE">
+                <ng-container *ngIf="column.value?.(item); else noImage">
+                  <video
+                    *ngIf="column.mediaKind?.(item) === 'video'; else imageThumb"
+                    [src]="column.value!(item)"
+                    muted
+                    class="h-10 w-10 rounded-md object-cover border border-slate-200"
+                  ></video>
+                  <ng-template #imageThumb>
+                    <img
+                      [src]="column.value!(item)"
+                      [alt]="column.imageAlt?.(item) ?? ''"
+                      class="h-10 w-10 rounded-md object-cover border border-slate-200"
+                    />
+                  </ng-template>
+                </ng-container>
+                <ng-template #noImage>
+                  <span class="text-xs text-slate-400">—</span>
+                </ng-template>
+              </ng-container>
+
               <!-- Checkbox Type -->
               <ng-container *ngSwitchCase="columnType.CHECK_BOX">
                 <input
                   type="checkbox"
-                  [checked]="column?.defaultValue || false"
-                  [disabled]="column?.disabled"
+                  [checked]="resolveCheckboxChecked(column, item)"
+                  [disabled]="resolveCheckboxDisabled(column, item)"
                   (change)="column.columnAction?.(item)"
                   class="w-4 h-4 text-blue-500 border-slate-300 rounded focus:ring-blue-500"
                 />
@@ -157,7 +218,11 @@
 
               <!-- Default Text -->
               <ng-container *ngSwitchDefault>
-                {{ column.value ? column.value(item) : '' }}
+                <span [class]="'dt-cell-truncate ' + resolveCellClass(column, item)"
+                      [style.max-width.px]="column.maxCellWidth || 320"
+                      [title]="column.value ? column.value(item) : ''">
+                  {{ column.value ? column.value(item) : '' }}
+                </span>
               </ng-container>
             </ng-container>
           </td>
@@ -201,31 +266,191 @@
                 </svg>
                 Delete
               </button>
+
+              <span
+                *ngIf="actionCellLabel?.(item)"
+                class="text-slate-500 text-xs"
+              >
+                {{ actionCellLabel?.(item) }}
+              </span>
+
+              <ng-container *ngFor="let action of rowActions">
+                <app-action-icon-button
+                  *ngIf="isRowActionVisible(action, item)"
+                  [icon]="action.icon"
+                  [title]="action.title || ''"
+                  [disabled]="isRowActionDisabled(action, item)"
+                  [buttonClass]="action.buttonClass || ''"
+                  [svgClass]="action.svgClass || ''"
+                  size="sm"
+                  (buttonClick)="onRowActionClick(action, item)"
+                ></app-action-icon-button>
+              </ng-container>
             </div>
           </td>
         </tr>
 
+        <!-- Inline detail (mobile/tablet only): expands directly beneath the tapped row -->
+        <tr *ngIf="rowDetailTemplate && isRowExpanded(item)" class="lg:hidden bg-slate-50/60">
+          <td
+            [attr.colspan]="visibleColumns.length + (showIndex ? 1 : 0) + (showActionColumn ? 1 : 0) + (rowDetailTemplate && isMobile ? 1 : 0)"
+            class="px-0 py-0"
+          >
+            <!-- A colspan cell in an auto-layout table is sized to the table's *total* column width,
+                 not the visible viewport — on a mobile table that already needs horizontal scroll for
+                 its normal columns, that's wider than the screen. Pin this to the scroll container's
+                 actual visible width (measured via JS, see detailPanelWidthPx) so detail content fits
+                 the screen and wraps/scrolls internally instead of stretching the whole table further. -->
+            <div
+              class="overflow-x-auto px-4 py-4 box-border"
+              [style.width.px]="detailPanelWidthPx"
+              [style.maxWidth.px]="detailPanelWidthPx"
+            >
+              <ng-container *ngTemplateOutlet="rowDetailTemplate; context: { $implicit: item }"></ng-container>
+            </div>
+          </td>
+        </tr>
+        </ng-container>
+
         <!-- Empty State -->
         <tr *ngIf="data.length === 0 && !loading">
-          <td [attr.colspan]="visibleColumns.length + (showIndex ? 1 : 0) + (showActionColumn ? 1 : 0)" class="px-6 py-16">
-            <div class="flex flex-col items-center justify-center text-slate-500">
-              <svg class="w-14 h-14 mb-3 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
-              </svg>
-              <p class="text-sm font-medium">{{ noDataMessage }}</p>
-            </div>
+          <td [attr.colspan]="visibleColumns.length + (showIndex ? 1 : 0) + (showActionColumn ? 1 : 0) + (rowDetailTemplate && isMobile ? 1 : 0)" class="px-6 py-16">
+            <ng-container *ngTemplateOutlet="emptyStateBlock"></ng-container>
           </td>
         </tr>
         </tbody>
       </table>
     </div>
 
+    <!-- Gallery card grid (mobile/tablet only) -->
+    <div class="p-3" *ngIf="isMobile">
+      <div *ngIf="data.length === 0 && !loading" class="px-6 py-16">
+        <ng-container *ngTemplateOutlet="emptyStateBlock"></ng-container>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3" *ngIf="data.length > 0">
+        <ng-container *ngFor="let item of paginatedData; let i = index; trackBy: trackByIndex">
+          <div
+            class="dt-card"
+            [class.dt-card--photo]="cardImageUrl(item)"
+            [class.cursor-pointer]="rowClickable"
+            [style.order]="cardOrder(i)"
+            (click)="handleRowClick(item, $event)"
+          >
+            <button
+              *ngIf="cardCornerAction(item) as cornerAction"
+              type="button"
+              class="dt-card__corner-btn"
+              [title]="cornerAction.title || 'Download'"
+              [disabled]="isRowActionDisabled(cornerAction, item)"
+              (click)="$event.stopPropagation(); onRowActionClick(cornerAction, item)"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+              </svg>
+            </button>
+
+            <!-- Photo variant -->
+            <ng-container *ngIf="cardImageUrl(item) as imageUrl">
+              <div class="dt-card__media-wrap">
+                <video
+                  *ngIf="cardMediaKind(item) === 'video'; else cardImageThumb"
+                  [src]="imageUrl"
+                  muted
+                  class="dt-card__media"
+                ></video>
+                <ng-template #cardImageThumb>
+                  <img [src]="imageUrl" [alt]="cardImageAlt(item)" class="dt-card__media" />
+                </ng-template>
+              </div>
+              <div class="dt-card__overlay">
+                <p class="dt-card__title">{{ cardTitle(item) }}</p>
+                <p class="dt-card__field-line" *ngFor="let f of cardSecondaryFields(item)">
+                  <span class="dt-card__field-label">{{ f.header }}:</span>{{ f.value }}
+                </p>
+              </div>
+            </ng-container>
+
+            <!-- Plain (no-image) variant -->
+            <div class="dt-card__plain-body" *ngIf="!cardImageUrl(item)">
+              <p class="dt-card__plain-title">{{ cardTitle(item) }}</p>
+              <p class="dt-card__plain-field" *ngFor="let f of cardSecondaryFields(item)">
+                <span class="dt-card__field-label">{{ f.header }}:</span>{{ f.value }}
+              </p>
+            </div>
+
+            <!-- Action footer (shared by both variants) -->
+            <div class="dt-card__footer" *ngIf="showActionColumn && (showViewButton || showEditButton || showDeleteButton || rowActions.length)">
+              <button
+                *ngIf="showViewButton"
+                (click)="$event.stopPropagation(); viewClick.emit(item)"
+                [class.text-white]="cardImageUrl(item)"
+                [class.text-blue-600]="!cardImageUrl(item)"
+                class="inline-flex items-center p-1 rounded-md hover:bg-black/10 transition-colors"
+                title="View"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+              </button>
+              <button
+                *ngIf="showEditButton"
+                (click)="$event.stopPropagation(); editClick.emit(item)"
+                [class.text-white]="cardImageUrl(item)"
+                [class.text-slate-700]="!cardImageUrl(item)"
+                class="inline-flex items-center p-1 rounded-md hover:bg-black/10 transition-colors"
+                title="Edit"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+              </button>
+              <button
+                *ngIf="showDeleteButton"
+                (click)="$event.stopPropagation(); deleteClick.emit(item)"
+                [class.text-red-300]="cardImageUrl(item)"
+                [class.text-rose-600]="!cardImageUrl(item)"
+                class="inline-flex items-center p-1 rounded-md hover:bg-black/10 transition-colors"
+                title="Delete"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+              <ng-container *ngFor="let action of rowActions">
+                <app-action-icon-button
+                  *ngIf="!cardCornerIcons.includes(action.icon) && isRowActionVisible(action, item)"
+                  [icon]="action.icon"
+                  [title]="action.title || ''"
+                  [disabled]="isRowActionDisabled(action, item)"
+                  [buttonClass]="action.buttonClass || ''"
+                  [svgClass]="action.svgClass || ''"
+                  size="sm"
+                  (buttonClick)="onRowActionClick(action, item)"
+                ></app-action-icon-button>
+              </ng-container>
+            </div>
+          </div>
+
+          <!-- Inline detail: lands directly under the pair of cards containing the tapped one -->
+          <div
+            *ngIf="rowDetailTemplate && isRowExpanded(item)"
+            class="col-span-2 bg-slate-50/60 rounded-xl px-4 py-4"
+            [style.order]="detailOrder(i)"
+          >
+            <ng-container *ngTemplateOutlet="rowDetailTemplate; context: { $implicit: item }"></ng-container>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
     <!-- Pagination -->
     <div *ngIf="showPagination && data.length > 0" class="bg-slate-50/60 px-5 py-3 border-t border-slate-100">
-      <div class="flex items-center justify-between flex-wrap gap-4">
+      <div class="flex items-center justify-center lg:justify-between flex-wrap gap-4">
 
         <!-- Page Size Selector -->
-        <div class="flex items-center space-x-2">
+        <div class="hidden lg:flex items-center space-x-2">
           <label class="text-sm text-slate-600">Show</label>
           <select
             [value]="pageSize"
@@ -238,7 +463,7 @@
         </div>
 
         <!-- Page Info -->
-        <div class="text-sm text-slate-600">
+        <div class="hidden lg:block text-sm text-slate-600">
           Showing <span class="font-medium">{{ startIndex }}</span> to <span class="font-medium">{{ endIndex }}</span> of <span class="font-medium">{{ total }}</span> results
         </div>
 

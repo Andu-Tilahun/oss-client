@@ -1,7 +1,23 @@
 <div
-  class="rounded-xl p-5 border shadow-sm hover:shadow-md transition-shadow"
+  class="rounded-xl p-5 border shadow-sm hover:shadow-md transition-shadow relative"
   [ngClass]="styles.wrapper"
+  [class.cursor-pointer]="isClickable"
+  [routerLink]="routerLink"
+  [attr.role]="isClickable ? 'button' : null"
+  [attr.tabindex]="isClickable ? 0 : null"
+  (click)="onActivate()"
+  (keydown.enter)="onActivate()"
 >
+  <svg
+    *ngIf="isClickable"
+    class="absolute top-3 right-3 w-4 h-4 text-slate-400"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+  </svg>
+
   <!-- Top row: label + optional icon -->
   <div class="flex items-center justify-between mb-2">
     <p
@@ -30,7 +46,7 @@
 
   <!-- Value row -->
   <p class="text-2xl font-bold" [ngClass]="styles.value">
-    {{ value | number }}
+    {{ isNumericValue ? (value | number) : value }}
     <span *ngIf="suffix" class="text-sm font-medium ml-1 opacity-70">{{ suffix }}</span>
   </p>
 

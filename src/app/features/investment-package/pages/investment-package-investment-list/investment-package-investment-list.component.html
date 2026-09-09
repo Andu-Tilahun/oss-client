@@ -1,0 +1,100 @@
+<app-page-split-layout
+  [showLeftTitle]="true"
+  [showRightTitle]="true"
+  leftTitle="Investments"
+  rightTitle="Investment Detail"
+  [rightItem]="selectedInvestment"
+  [rightEmptyMessage]="'Select a row to view details.'"
+  [showRightEditButton]="false"
+  [rightActions]="rightActions"
+>
+  <ng-template #leftContent>
+    <app-data-table
+      [columns]="columns"
+      [data]="investments"
+      [selectedRowId]="selectedInvestment?.id ?? null"
+      [loading]="loading"
+      [total]="total"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [showAddButton]="false"
+      [showRefreshButton]="true"
+      [showViewButton]="false"
+      [showEditButton]="false"
+      [showDeleteButton]="false"
+      [showActionColumn]="false"
+      [rowClickable]="true"
+        [rowDetailTemplate]="rightContent"
+        [cardTitleField]="cardTitle"
+      (pageChange)="onPageChange($event)"
+      (refreshClick)="onRefresh()"
+      (rowClick)="onView($event)"
+    >
+      <div extraTableHeader class="w-full min-w-0">
+        <app-investment-package-investment-filter
+          [(searchText)]="searchText"
+          [(status)]="status"
+          (filterChange)="onFilterChange()"
+          (searchChange)="onFilterChange()"
+          (clearFilters)="clearFilters()"
+        ></app-investment-package-investment-filter>
+      </div>
+    </app-data-table>
+  </ng-template>
+
+  <ng-template #rightContent let-investment>
+    <app-tabs
+      [tabs]="tabs"
+      [activeTab]="activeTab"
+      [noCard]="true"
+      [noBodyPadding]="true"
+      (activeTabChange)="activeTab = $event">
+      <!-- Request Tab -->
+      <div *ngIf="activeTab === 'detail'">
+        <app-investment-package-investment-view
+          [investment]="investment"
+          [refreshKey]="detailRefreshKey"
+        ></app-investment-package-investment-view>
+      </div>
+      <div *ngIf="activeTab === 'user'">
+        <app-user-view *ngIf="investment"
+                       [user]="investment.investorUser"></app-user-view>
+
+      </div>
+    </app-tabs>
+
+  </ng-template>
+</app-page-split-layout>
+
+<app-investment-package-set-roi-modal
+  [(visible)]="showSetRoiModal"
+  [investment]="selectedInvestment"
+  (roiSaved)="onRoiSaved()"
+></app-investment-package-set-roi-modal>
+
+<app-investment-package-investor-decision-modal
+  [(visible)]="showInvestorDecisionModal"
+  [investment]="selectedInvestment"
+  (decisionSaved)="onDecisionSaved()"
+></app-investment-package-investor-decision-modal>
+
+<app-confirmation-modal
+  [(visible)]="showConfirmationModal"
+  title="Send Investment"
+  [message]="'Are you sure you want to send ?'"
+  type="warning"
+  confirmText="Send Investment"
+  [confirmLoading]="lockSend"
+  (confirm)="handleSendConfirmation()"
+></app-confirmation-modal>
+
+<app-confirmation-modal
+  [(visible)]="showCancelModal"
+  title="Cancel Investment"
+  [message]="'Are you sure you want to cancel ?'"
+  type="warning"
+  confirmText="Cancel Investment"
+  [confirmLoading]="lockCancel"
+  (confirm)="handleCancelConfirmation()"
+></app-confirmation-modal>
+

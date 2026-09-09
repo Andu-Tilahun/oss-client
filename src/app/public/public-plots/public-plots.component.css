@@ -28,3 +28,27 @@
   max-width: 650px;
   margin-inline: auto;
 }
+
+.plots-more-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.plots-more-btn {
+  background: linear-gradient(90deg, #059669, #047857);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  padding: 0.7rem 2rem;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(4, 120, 87, 0.2);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.plots-more-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(4, 120, 87, 0.3);
+}

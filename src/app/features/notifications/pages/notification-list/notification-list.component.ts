@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { NotificationLogService } from '../../services/notification.service';
-import { NotificationLog } from '../../models/notification.model';
+import {
+  NotificationLog,
+  NotificationPriorityValue,
+  NotificationStatusValue,
+} from '../../models/notification.model';
 import { DataTableColumn } from '../../../../shared/data-table/models/data-table-column.model';
 import { TableQueryParams } from '../../../../shared/data-table/models/table-query-params.model';
 import { PageResponse } from '../../../../shared/models/api-response.model';
@@ -19,8 +23,8 @@ export class NotificationListComponent implements OnInit {
   pageSize = 10;
   pageIndex = 1;
   searchText = '';
-  status = '';
-  priority = '';
+  status: NotificationStatusValue | '' = '';
+  priority: NotificationPriorityValue | '' = '';
 
   columns: DataTableColumn<NotificationLog>[] = [
     { header: 'Type', value: n => n.notificationType },
@@ -57,7 +61,6 @@ export class NotificationListComponent implements OnInit {
     ).subscribe({
       next: (response: PageResponse<NotificationLog>) => {
         if (response) {
-          this.toastService.success(`Notification retrieved successfully`);
           this.notifications = response.content;
           this.total = response.totalElements;
           const previousSelectedId = this.selectedNotification?.id;
@@ -73,17 +76,7 @@ export class NotificationListComponent implements OnInit {
         }
         this.loading = false;
       },
-      error: (error) => {
-        const errorCode =
-          error?.error?.error?.code ||
-          error?.error?.code ||
-          error?.code ||
-          error?.status ||
-          'UNKNOWN_ERROR';
-        this.toastService.error(
-          `Failed to load notifications (Error code: ${errorCode})`,
-          'Notification Error'
-        );
+      error: () => {
         this.loading = false;
       }
     });

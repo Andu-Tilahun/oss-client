@@ -2,6 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 import {CompanyProfile, CompanyProfileRequest} from '../../models/company-profile.model';
 import {CompanyProfileService} from '../../services/company-profile.service';
 import {ToastService} from '../../../../shared/toast/toast.service';
+import {RequestType} from '../../../../core/services/http.service';
 import {CompanyProfileFormComponent} from '../../components/company-profile-form/company-profile-form.component';
 
 @Component({
@@ -27,7 +28,7 @@ export class CompanyProfilePageComponent {
 
   loadCompanyProfile(): void {
     this.loading = true;
-    this.companyProfileService.getCompanyProfile().subscribe({
+    this.companyProfileService.getCompanyProfile({ requestType: RequestType.LOCAL }).subscribe({
       next: (profile) => {
         this.companyProfile = profile;
         this.loading = false;
@@ -40,6 +41,9 @@ export class CompanyProfilePageComponent {
   }
 
   onSave(): void {
+    if (this.saving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.companyForm.isValid()) {
       this.companyForm.markAllAsTouched();
       return;

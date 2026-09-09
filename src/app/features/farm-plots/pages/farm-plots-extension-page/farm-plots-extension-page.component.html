@@ -1,130 +1,113 @@
 <app-page-split-layout
   [showLeftTitle]="true"
   [showRightTitle]="true"
-  leftTitle="Assigned Farm Plots"
+  leftTitle="Assigned Investments"
   rightTitle="Assigned Plot Workspace"
-  [rightItem]="selectedLease"
+  [rightItem]="selectedAgreement"
   [showRightEditButton]="false"
   [showRightCloseButton]="false"
   [rightActions]="[]"
-  [rightEmptyMessage]="'Select an assigned plot to view farm plot details, lease agreement, and follow-ups.'"
+  [rightEmptyMessage]="'Select an assigned investment to view farm plot details, lease agreement, and follow-ups.'"
 >
   <ng-template #leftContent>
-    <div class="space-y-8">
-      <section class="space-y-3">
-        <div class="grid items-center justify-center text-center">
-          <h3 class="text-base font-semibold text-gray-900">Current Active Farm Plot</h3>
-          <p class="text-sm text-gray-500 ">Open assignment currently in progress.</p>
-        </div>
-
-        <div *ngIf="!currentActivePlot" class="text-sm text-gray-500">No active assigned farm plots found.</div>
-
-        <div *ngIf="currentActivePlotList.length > 0" class="[&_.bg-white]:!bg-transparent">
-          <app-data-card-layout
-            [data]="currentActivePlotList"
-            [loading]="false"
-            [total]="currentActivePlotList.length"
-            [pageSize]="currentActivePlotList.length || 1"
-            [pageIndex]="1"
-            [showPagination]="false"
-            [showAddButton]="false"
-            [showRefreshButton]="false"
-            [showDownloadButton]="false"
-            [showViewButton]="false"
-            [showEditButton]="false"
-            [showDeleteButton]="false"
-            [showCreatedDate]="false"
-            [titleAccessor]="getCurrentPlotCardTitle"
-            [thumbnailUrlAccessor]="getCurrentPlotThumbnailUrl"
-            [thumbnailAltAccessor]="getCurrentPlotThumbnailAlt"
-            [cardClickEnabled]="true"
-            [noDataMessage]="'No active assigned farm plots found.'"
-            (cardClick)="selectPlot($event)"
-          >
-            <ng-template cardHeaderRightTemplate let-plot>
-              <button
-                type="button"
-                class="action-link action-link--view p-1 ml-2 text-blue-600 hover:text-blue-700"
-                aria-label="View plot details"
-                title="View"
-                (click)="selectPlot(plot); $event.stopPropagation()"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7S3.732 16.057 2.458 12z"></path>
-                </svg>
-              </button>
-            </ng-template>
-          </app-data-card-layout>
-        </div>
-      </section>
-
-      <section class="space-y-3 border-t border-slate-200 pt-6">
-        <div class="grid items-center justify-center text-center">
-          <h3 class="text-base font-semibold text-gray-900">Previously Assigned Farm Plots</h3>
-          <p class="text-sm text-gray-500">Completed or non-active assignments and their details.</p>
-        </div>
-
-        <div *ngIf="previousAssignedLeases.length === 0" class="text-sm text-gray-500">
-          No previously assigned farm plots found.
-        </div>
-
-        <div *ngIf="previousAssignedLeases.length > 0" class="overflow-x-auto rounded-lg border border-slate-200">
-          <table class="min-w-full divide-y divide-slate-200 text-sm">
-            <thead class="bg-slate-50">
-              <tr>
-                <th class="px-3 py-2 text-left font-semibold text-slate-700">Farm Plot</th>
-                <th class="px-3 py-2 text-left font-semibold text-slate-700">Start</th>
-                <th class="px-3 py-2 text-left font-semibold text-slate-700">End</th>
-                <th class="px-3 py-2 text-left font-semibold text-slate-700">Status</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr
-                *ngFor="let lease of previousAssignedLeases"
-                class="cursor-pointer hover:bg-slate-50"
-                (click)="selectPreviousLease(lease)"
-              >
-                <td class="px-3 py-2 text-slate-800">{{ lease.farmPlot.title || '-' }}</td>
-                <td class="px-3 py-2 text-slate-600">{{ lease.startDate | date : 'mediumDate' }}</td>
-                <td class="px-3 py-2 text-slate-600">{{ lease.endDate | date : 'mediumDate' }}</td>
-                <td class="px-3 py-2">
-                  <span class="inline-flex rounded-full border border-slate-200 px-2 py-0.5 text-xs font-medium text-slate-700">
-                    {{ lease.status }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="flex items-center justify-between border-t border-slate-200 bg-white px-3 py-2 text-xs text-slate-500">
-            <span>Show {{ previousAssignedLeases.length }} entries</span>
-            <span>Showing 1 to {{ previousAssignedLeases.length }} of {{ previousAssignedLeases.length }} results</span>
+    <app-tabs
+      [tabs]="assignmentsTabs"
+      [activeTab]="assignmentsActiveTab"
+      [centered]="true"
+      [noBodyPadding]="true"
+      (activeTabChange)="onAssignmentsTabChange($event)"
+    >
+      <div *ngIf="assignmentsActiveTab === 'current'">
+        <app-data-table
+          [columns]="columns"
+          [data]="currentAgreements"
+          [selectedRowId]="selectedAgreement?.id ?? null"
+          [loading]="loading"
+          [total]="currentAgreements.length"
+          [pageSize]="currentAgreements.length || 10"
+          [pageIndex]="1"
+          [showColumnPickerControl]="false"
+          [showAddButton]="false"
+          [showRefreshButton]="false"
+          [showViewButton]="false"
+          [showEditButton]="false"
+          [showDeleteButton]="false"
+          [showActionColumn]="false"
+          [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
+          [noDataMessage]="'No current assigned investments found.'"
+          (rowClick)="selectAgreement($event)"
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-investment-package-type-filter
+              [(searchText)]="searchText"
+              [(status)]="fundingStatus"
+              [(paymentStatus)]="paymentStatus"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onFilterChange()"
+              (clearFilters)="clearFilters()"
+            ></app-investment-package-type-filter>
           </div>
-        </div>
-      </section>
-    </div>
+        </app-data-table>
+      </div>
+
+      <div *ngIf="assignmentsActiveTab === 'history'">
+        <app-data-table
+          [columns]="archivedColumns"
+          [data]="historyAgreements"
+          [selectedRowId]="selectedAgreement?.id ?? null"
+          [loading]="loading"
+          [total]="historyAgreements.length"
+          [pageSize]="historyAgreements.length || 10"
+          [pageIndex]="1"
+          [showColumnPickerControl]="false"
+          [showAddButton]="false"
+          [showRefreshButton]="false"
+          [showViewButton]="false"
+          [showEditButton]="false"
+          [showDeleteButton]="false"
+          [showActionColumn]="false"
+          [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
+          [noDataMessage]="'No completed or deactivated assignments yet.'"
+          (rowClick)="selectAgreement($event)"
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-investment-package-type-filter
+              [(searchText)]="searchText"
+              [(status)]="fundingStatus"
+              [(paymentStatus)]="paymentStatus"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onFilterChange()"
+              (clearFilters)="clearFilters()"
+            ></app-investment-package-type-filter>
+          </div>
+        </app-data-table>
+      </div>
+    </app-tabs>
   </ng-template>
 
   <ng-template #rightContent>
-    <div *ngIf="selectedPlot && selectedLease; else noSelection">
-      <app-tabs [tabs]="tabs" [activeTab]="activeTab" (activeTabChange)="activeTab = $event">
+    <div *ngIf="selectedPlot && selectedAgreement; else noSelection">
+      <app-tabs [tabs]="tabs" [activeTab]="activeTab" [noCard]="true" [noBodyPadding]="true" (activeTabChange)="activeTab = $event">
         <div *ngIf="activeTab === 'farm-plot'">
-          <app-farm-plot-view [plot]="selectedPlot"></app-farm-plot-view>
+          <app-farm-plot-view [plot]="selectedPlot" [hideInvestmentHistoryForExtensionWorker]="true"></app-farm-plot-view>
         </div>
         <div *ngIf="activeTab === 'lease'">
-          <app-farm-lease-view [lease]="selectedLease"></app-farm-lease-view>
+          <app-investment-package-type-view [agreement]="selectedAgreement"></app-investment-package-type-view>
         </div>
         <div *ngIf="activeTab === 'follow-up'">
           <app-farm-followup-list
-            [followUps]="selectedLease.followUpDtoList"
-            [externalId]="selectedLease.id"
+            [followUps]="selectedAgreement.followUpDtoList ?? []"
+            [externalId]="selectedAgreement.id"
+            [readOnly]="isFollowUpReadOnly"
           ></app-farm-followup-list>
         </div>
       </app-tabs>
     </div>
 
     <ng-template #noSelection>
-      <div class="text-sm text-gray-500">Select an assigned plot to open details.</div>
+      <div class="text-sm text-gray-500">Select an assigned investment to open details.</div>
     </ng-template>
   </ng-template>
 </app-page-split-layout>

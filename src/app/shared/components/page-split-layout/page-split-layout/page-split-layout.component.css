@@ -1,2 +1,6 @@
 /* Layout is primarily handled by utility classes in the template. */
 
+:host {
+  display: block;
+  height: 100%;
+}

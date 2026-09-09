@@ -2,11 +2,12 @@ import {Component, EventEmitter, HostListener, Input, Output, ElementRef} from '
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {OrganizationType} from '../../models/organization.model';
+import {FilterBarComponent} from '../../../../shared/components/filter-bar/filter-bar.component';
 
 @Component({
   selector: 'app-organization-filter',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FilterBarComponent],
   templateUrl: './organization-filter.component.html',
   styleUrls: ['./organization-filter.component.css']
 })

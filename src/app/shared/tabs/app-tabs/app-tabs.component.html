@@ -1,24 +1,26 @@
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-  <div class="border-b border-gray-200 px-6 flex items-center justify-between gap-4">
-    <nav class="-mb-px flex space-x-8 flex-1" aria-label="Tabs">
+<div [class]="noCard ? '' : 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden'">
+  <div
+    [class]="(noCard ? '' : 'bg-white rounded-t-xl border-b border-gray-200') + ' sticky top-0 z-10 px-4 py-2 lg:px-6 lg:py-0 flex items-center gap-4'"
+    [ngClass]="centered ? 'justify-end lg:justify-center' : 'justify-end lg:justify-between'">
+    <nav class="hidden lg:flex"
+         [class]="(centered ? 'gap-2 justify-center py-3 flex-1' : '-mb-px space-x-8 flex-1') + ' overflow-x-auto min-w-0 scrollbar-hide'"
+         aria-label="Tabs">
       <button
-        *ngFor="let tab of tabs"
+        *ngFor="let tab of tabs; trackBy: trackByKey"
         (click)="setTab(tab.key)"
-        [class.border-blue-500]="activeTab === tab.key"
-        [class.text-blue-600]="activeTab === tab.key"
-        [class.text-gray-500]="activeTab !== tab.key"
-        [class.border-transparent]="activeTab !== tab.key"
-        class="whitespace-nowrap py-4 px-1 border-b-2 text-sm font-medium
-               hover:text-gray-700 hover:border-gray-300 transition-all duration-200"
+        [ngClass]="centered ? {
+          'bg-blue-600 text-white shadow-sm': activeTab === tab.key,
+          'text-gray-500 hover:text-gray-700 hover:bg-gray-100': activeTab !== tab.key
+        } : {
+          'border-blue-500 text-blue-600': activeTab === tab.key,
+          'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300': activeTab !== tab.key
+        }"
+        [class]="centered
+          ? 'whitespace-nowrap py-2 px-5 rounded-full text-sm font-semibold transition-all duration-200'
+          : 'whitespace-nowrap py-4 px-1 border-b-4 text-sm font-medium transition-all duration-200'"
       >
         <span class="flex items-center gap-2">
-          <svg
-            *ngIf="paths(tab).length"
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg *ngIf="paths(tab).length" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               *ngFor="let p of paths(tab)"
               stroke-linecap="round"
@@ -28,12 +30,69 @@
             />
           </svg>
           {{ tab.label }}
+          <span *ngIf="tab.badge != null && tab.badge > 0" class="relative flex-shrink-0 inline-flex items-center">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span class="relative bg-green-600 text-white text-xs font-bold rounded-full px-1.5 py-0.5 min-w-[1.25rem] leading-tight text-center">
+              {{ tab.badge }}
+            </span>
+          </span>
         </span>
       </button>
     </nav>
     <ng-content select="[actions]"></ng-content>
   </div>
-  <div class="px-6 py-8">
-    <ng-content></ng-content>
+
+  <!-- Body region: flex-col below lg: so accordion headers + the single content panel can be
+       interleaved via CSS `order` (content stays a single, never-recreated DOM node — safe for
+       stateful projected content like forms); becomes plain block flow at lg: where headers are
+       hidden and `order` is inert, rendering identically to the previous fixed layout. -->
+  <div class="flex flex-col lg:block">
+    <button
+      *ngFor="let tab of tabs; trackBy: trackByKey; let i = index"
+      (click)="setTab(tab.key)"
+      type="button"
+      [style.order]="i * 2"
+      [class]="'lg:hidden w-full flex items-center justify-between gap-2 text-left transition-colors ' +
+        (noCard ? 'py-3 text-base font-semibold border-b border-gray-100' : 'px-4 py-3 text-sm font-medium border-b border-gray-100')"
+      [ngClass]="noCard
+        ? (activeTab === tab.key ? (greenAccent ? 'text-green-700' : 'text-gray-900') : 'text-gray-500 hover:text-gray-700')
+        : (activeTab === tab.key ? (greenAccent ? 'bg-green-50 text-green-700' : 'bg-blue-50 text-blue-600') : 'text-gray-700 hover:bg-gray-50')"
+      [attr.aria-expanded]="activeTab === tab.key"
+    >
+      <span class="flex items-center gap-2 min-w-0">
+        <svg *ngIf="paths(tab).length" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            *ngFor="let p of paths(tab)"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            [attr.d]="p"
+          />
+        </svg>
+        <span class="truncate">{{ tab.label }}</span>
+        <span *ngIf="tab.badge != null && tab.badge > 0" class="relative flex-shrink-0 inline-flex items-center">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+          <span class="relative bg-green-600 text-white text-xs font-bold rounded-full px-1.5 py-0.5 min-w-[1.25rem] leading-tight text-center">
+            {{ tab.badge }}
+          </span>
+        </span>
+      </span>
+      <svg
+        class="w-4 h-4 flex-shrink-0 text-gray-400 transition-transform"
+        [class.rotate-180]="activeTab === tab.key"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
+
+    <div
+      [class]="(noBodyPadding ? 'px-0' : 'px-4') + ' py-6 lg:px-6 lg:py-8'"
+      [style.order]="mobileContentOrder()"
+    >
+      <ng-content></ng-content>
+    </div>
   </div>
 </div>

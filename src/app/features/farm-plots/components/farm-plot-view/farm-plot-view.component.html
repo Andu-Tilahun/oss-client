@@ -46,14 +46,13 @@
   <div *ngIf="!plot && !loading" class="text-sm text-gray-500">No farm plot selected.</div>
 
   <ng-container *ngIf="plot && !loading">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
-      <div>
-        <h3 class="text-2xl font-bold text-gray-900">{{ plot.title }}</h3>
-        <p *ngIf="plot.description" class="mt-1 text-sm text-gray-500">{{ plot.description }}</p>
-      </div>
+    <div class="mb-8">
+      <h3 class="text-2xl font-bold text-gray-900">{{ plot.title }}</h3>
+      <p *ngIf="plot.description" class="mt-1 text-sm text-gray-500">{{ plot.description }}</p>
 
       <span
-        class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
+        *ngIf="plot.status"
+        class="mt-3 inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
         [ngClass]="statusPillClass(plot.status)"
       >
         {{ plot.status }}
@@ -62,56 +61,243 @@
 
     <hr class="border-gray-200 mb-8" />
 
-    <app-detail-section title="Farm Plot Information">
-      <!-- <app-detail-field label="Title" [value]="plot.title" /> -->
-      <!-- <app-detail-field label="Status" [value]="plot.status" /> -->
-      <app-detail-field
-        label="Size"
-        [value]="plot.size + ' ' + (plot.sizeType === 'HECTARES' ? 'H' : (plot.sizeType === 'ACRES' ? 'A' : plot.sizeType))"
-      />
-      <app-detail-field label="Soil Type" [value]="plot.soilType" />
-      <app-detail-field label="Latitude" [value]="plot.latitude" />
-      <app-detail-field label="Longitude" [value]="plot.longitude" />
-      <!-- <app-detail-field label="Description" [value]="plot.description || '-'" /> -->
-    </app-detail-section>
-
-    <app-detail-section title="Media">
-      <div class="col-span-full flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-        <div class="flex-1 min-w-0">
-          <app-document-upload
-            label="Image"
-            [currentFileId]="plot.imageUuid"
-            [viewOnly]="true"
-            [required]="false"
-          ></app-document-upload>
+    <ng-template #descriptionContent>
+      <app-detail-section title="Farm Plot Information">
+        <app-detail-field
+          label="Size"
+          [value]="plot.size + ' ' + (plot.sizeType === 'HECTARES' ? 'H' : (plot.sizeType === 'ACRES' ? 'A' : plot.sizeType))"
+        />
+        <app-detail-field label="Soil Type" [value]="plot.soilType" />
+        <app-detail-field label="Latitude" [value]="plot.latitude" />
+        <app-detail-field label="Longitude" [value]="plot.longitude" />
+        <div *ngIf="plot.status === 'UNDER_MAINTENANCE' && plot.maintenanceReason" class="col-span-full bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <p class="text-sm text-gray-700"><span class="font-semibold">Maintenance Reason:</span> {{ plot.maintenanceReason }}</p>
         </div>
-        <button
-          *ngIf="showCreateLeaseButton"
-          type="button"
-          (click)="onCreateLease()"
-          class="shrink-0 md:mt-8 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors"
-        >
-          {{ createLeaseButtonText }}
-        </button>
-      </div>
-    </app-detail-section>
+      </app-detail-section>
 
-    <app-detail-section title="Location Map">
-      <div class="col-span-full">
-        <app-oss-map
-          [interactive]="false"
-          [height]="'300px'"
-          [zoom]="14"
-          [latitude]="plot.latitude"
-          [longitude]="plot.longitude"
-          [locations]="[{ lat: plot.latitude, lng: plot.longitude, name: plot.title }]"
-          [fitBounds]="true"
-        ></app-oss-map>
+      <app-detail-section>
+        <div class="col-span-full space-y-4">
+          <div *ngIf="getMainImageUrl(); else noMainImage">
+            <p class="text-sm font-medium text-gray-700 mb-2">Plot Image</p>
+            <img
+              [src]="getMainImageUrl()!"
+              [alt]="plot.title"
+              class="max-h-48 rounded-lg border border-gray-200 object-cover cursor-pointer"
+              (click)="openImagePreview(getMainImageUrl()!)"
+            />
+          </div>
+          <ng-template #noMainImage>
+            <p class="text-sm text-gray-500">No plot image available.</p>
+          </ng-template>
+
+          <div *ngIf="galleryLoading" class="text-sm text-gray-500">Loading gallery...</div>
+          <div *ngIf="!galleryLoading">
+            <p class="text-sm font-medium text-gray-700 mb-2">Gallery</p>
+            <div class="grid grid-cols-4 gap-3">
+              <ng-container *ngFor="let _ of [0, 1, 2]; let i = index">
+                <img
+                  *ngIf="previewGalleryUrls[i] as url"
+                  [src]="url"
+                  [alt]="'Gallery image ' + (i + 1)"
+                  class="w-full h-24 object-cover rounded-lg border border-gray-200 cursor-pointer"
+                  (click)="openGallery(i)"
+                />
+                <div
+                  *ngIf="!previewGalleryUrls[i]"
+                  class="w-full h-24 rounded-lg border border-gray-100 bg-gray-50"
+                  aria-hidden="true"
+                ></div>
+              </ng-container>
+              <button
+                *ngIf="allowGalleryUpload"
+                type="button"
+                class="w-full h-24 flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-gray-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                [disabled]="galleryUploading"
+                (click)="openGalleryUpload()"
+                aria-label="Add gallery image"
+              >
+                <span class="text-2xl leading-none">+</span>
+              </button>
+            </div>
+          </div>
+
+          <button
+            *ngIf="showCreateLeaseButton"
+            type="button"
+            (click)="onCreateLease()"
+            class="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors"
+          >
+            {{ createLeaseButtonText }}
+          </button>
+        </div>
+      </app-detail-section>
+
+      <app-detail-section *ngIf="plot.latitude != null && plot.longitude != null" title="Location Map">
+        <div class="col-span-full">
+          <app-oss-map
+            [interactive]="false"
+            [height]="'300px'"
+            [zoom]="9"
+            [latitude]="plot.latitude"
+            [longitude]="plot.longitude"
+            [locations]="[{ lat: plot.latitude, lng: plot.longitude, name: plot.title }]"
+            [fitBounds]="false"
+          ></app-oss-map>
+        </div>
+      </app-detail-section>
+    </ng-template>
+
+    <app-tabs
+      *ngIf="tabs.length > 1; else plainDescription"
+      [tabs]="tabs"
+      [activeTab]="activeTab"
+      [noCard]="true"
+      [noBodyPadding]="true"
+      (activeTabChange)="onTabChange($event)"
+    >
+      <div *ngIf="activeTab === 'description'">
+        <ng-container *ngTemplateOutlet="descriptionContent"></ng-container>
       </div>
-    </app-detail-section>
+
+      <div *ngIf="activeTab === 'investment-history'">
+        <app-detail-section title="Farm Plot Investment History">
+          <div class="col-span-full">
+            <div *ngIf="packagesLoading" class="text-sm text-gray-500">Loading...</div>
+            <p *ngIf="!packagesLoading && plotInvestmentPackages.length === 0"
+               class="text-sm text-gray-500">No investment options for this plot.</p>
+            <ol *ngIf="!packagesLoading && plotInvestmentPackages.length > 0">
+              <li *ngFor="let pkg of plotInvestmentPackages; let last = last" class="grid grid-cols-[5rem_1.5rem_1fr] gap-x-3">
+                <div class="text-right text-xs font-medium text-gray-500 pt-3">
+                  {{ pkg.fundingDeadline ? (pkg.fundingDeadline | date:'MMM d, y') : 'No deadline set' }}
+                </div>
+
+                <div class="relative flex justify-center">
+                  <span *ngIf="!last" class="absolute top-0 bottom-0 w-0.5 bg-indigo-100"></span>
+                  <span class="relative z-10 mt-1.5 w-4 h-4 rounded-full border-2 border-white bg-indigo-500 shadow"></span>
+                </div>
+
+                <div
+                  class="min-w-0 mb-4 flex flex-col gap-1.5 rounded-lg border border-gray-100 bg-white px-4 py-3 text-sm cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors"
+                  (click)="navigateToPackage(pkg)"
+                >
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <span class="shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold bg-indigo-100 text-indigo-700 border border-indigo-200">
+                        {{ pkg.investmentPackageType ?? 'LEASING' }}
+                      </span>
+                      <span class="font-medium text-gray-800 truncate">{{ pkg.title }}</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="flex items-center gap-1 text-xs">
+                        <span class="text-gray-400 font-normal">Investment:</span>
+                        <span class="text-xs" [class]="pkgStatusClass(pkg)">
+                          {{ formatStatus(pkg.packageStatus) }}
+                        </span>
+                      </span>
+                      <span class="flex items-center gap-1 text-xs">
+                        <span class="text-gray-400 font-normal">Funding:</span>
+                        <span class="rounded-full px-2 py-0.5 font-medium border border-blue-200 bg-blue-50 text-blue-700">
+                          {{ formatStatus(pkg.fundingStatus) }}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                  <div *ngIf="pkg.packageStatus === 'INACTIVE' && pkg.closureReason"
+                       class="rounded-md bg-slate-50 border border-slate-200 px-3 py-2 text-xs text-slate-600">
+                    <span class="font-semibold text-slate-700">Closed:</span> {{ pkg.closureReason }}
+                  </div>
+                </div>
+              </li>
+            </ol>
+          </div>
+        </app-detail-section>
+      </div>
+
+      <div *ngIf="activeTab === 'actions'">
+        <app-detail-section title="Actions">
+          <div class="col-span-full flex flex-wrap gap-3">
+            <button
+              *ngIf="plot.status === 'ACTIVE'"
+              type="button"
+              (click)="onMarkUnderMaintenance()"
+              class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg hover:bg-yellow-100 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Mark as Repair
+            </button>
+            <button
+              *ngIf="plot.status === 'UNDER_MAINTENANCE'"
+              type="button"
+              (click)="onMarkRepaired()"
+              class="px-4 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
+            >
+              Mark as Repaired
+            </button>
+            <button
+              type="button"
+              (click)="onArchive()"
+              class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Archive
+            </button>
+          </div>
+        </app-detail-section>
+      </div>
+    </app-tabs>
+
+    <ng-template #plainDescription>
+      <ng-container *ngTemplateOutlet="descriptionContent"></ng-container>
+    </ng-template>
 
   </ng-container>
 
   <!-- fallback handled by the "No farm plot selected" block above -->
 </app-detail-card>
+
+<app-image-gallery-modal
+  [(visible)]="showGalleryModal"
+  [loading]="galleryLoading"
+  [title]="galleryTitle"
+  [imageUrls]="previewImageUrls"
+  [initialIndex]="galleryModalInitialIndex"
+></app-image-gallery-modal>
+
+<app-image-upload-modal
+  [(visible)]="showUploadModal"
+  title="Add Gallery Image"
+  (fileUploaded)="onGalleryImageUploaded($event)"
+  (uploadError)="onGalleryUploadError($event)"
+></app-image-upload-modal>
+
+<app-farm-plot-maintenance-modal
+  [(visible)]="showMaintenanceModal"
+  [plotTitle]="plot?.title || ''"
+  [confirmLoading]="maintenanceSubmitting"
+  [(reason)]="maintenanceReason"
+  (confirm)="handleMaintenanceConfirm()"
+></app-farm-plot-maintenance-modal>
+
+<app-confirmation-modal
+  [(visible)]="showRepairModal"
+  title="Mark Farm Plot as Repaired"
+  message="Are you sure this farm plot has been repaired and is ready to become operational again?"
+  confirmText="Mark Repaired"
+  [confirmLoading]="repairSubmitting"
+  (confirm)="confirmMarkRepaired()"
+></app-confirmation-modal>
+
+<app-confirmation-modal
+  [(visible)]="showArchiveModal"
+  title="Archive Farm Plot"
+  message="Are you sure you want to archive this farm plot?"
+  confirmText="Archive"
+  [confirmLoading]="archiveSubmitting"
+  (confirm)="confirmArchive()"
+></app-confirmation-modal>
 

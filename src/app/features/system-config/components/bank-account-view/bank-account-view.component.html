@@ -1,0 +1,26 @@
+<app-detail-card *ngIf="account">
+  <div class="flex items-start justify-between gap-4 mb-8">
+    <div>
+      <h3 class="text-xl font-bold text-gray-900">{{ account.bankName }}</h3>
+      <p class="text-sm text-gray-500 font-mono mt-1">{{ account.accountNumber }}</p>
+    </div>
+    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border"
+          [ngClass]="account.active
+            ? 'bg-green-50 text-green-700 border-green-200'
+            : 'bg-gray-100 text-gray-500 border-gray-200'">
+      {{ account.active ? 'Active' : 'Inactive' }}
+    </span>
+  </div>
+  <hr class="mb-8"/>
+  <app-detail-section title="Account Details">
+    <app-detail-field label="Account Holder" [value]="account.accountHolderName" />
+    <app-detail-field label="Account Number" [value]="account.accountNumber" />
+    <app-detail-field label="Branch" [value]="account.branchName || '—'" />
+    <app-detail-field label="SWIFT / BIC" [value]="account.swiftCode || '—'" />
+    <app-detail-field label="Display Order" [value]="account.displayOrder.toString()" />
+    <app-detail-field label="Status" [value]="account.active ? 'Active' : 'Inactive'" />
+  </app-detail-section>
+  <app-detail-section *ngIf="account.description" title="Description">
+    <div class="col-span-full text-sm text-slate-700 whitespace-pre-wrap">{{ account.description }}</div>
+  </app-detail-section>
+</app-detail-card>

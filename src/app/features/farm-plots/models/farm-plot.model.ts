@@ -1,4 +1,4 @@
-export type FarmPlotStatus = 'ACTIVE' | 'INACTIVE' | 'UNDER_MAINTENANCE' | 'ASSIGNED_TO_LEASE';
+export type FarmPlotStatus = 'ACTIVE' | 'INACTIVE' | 'UNDER_MAINTENANCE' | 'ASSIGNED_TO_LEASE' | 'ASSIGNED_TO_BIDDING' | 'ASSIGNED_TO_CROWDFUNDING' | 'ASSIGNED_TO_INVESTMENT_PACKAGE' | 'ASSIGNED';
 export type FarmPlotSizeType = 'ACRES' | 'HECTARES';
 export type FarmPlotSoilType = 'SANDY' | 'CLAY' | 'LOAMY';
 
@@ -12,23 +12,35 @@ export interface FarmGalleryCreateRequest {
   imageUuid: string;
 }
 
+export interface FarmPlotImageDto {
+  imageUuid: string;
+  farmPlotId: string;
+  farmPlotTitle: string;
+}
+
 export interface FarmPlot {
   id: string;
   title: string;
   description?: string;
   size: number;
   sizeType: FarmPlotSizeType;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
   soilType: FarmPlotSoilType;
-  status: FarmPlotStatus;
+  status?: FarmPlotStatus;
   imageUuid?: string;
+  regionId?: string;
   gallery?: FarmGallery[];
+  maintenanceReason?: string | null;
 
   createdBy?: string;
   createdAt?: Date;
   updatedBy?: string;
   updatedAt?: Date;
+}
+
+export interface FarmPlotMaintenanceRequest {
+  reason: string;
 }
 
 export interface FarmPlotRequest {
@@ -41,6 +53,7 @@ export interface FarmPlotRequest {
   soilType: FarmPlotSoilType;
   status?: FarmPlotStatus;
   imageUuid?: string;
+  regionId: string;
 }
 
 export interface FarmPlotFilterRequest {

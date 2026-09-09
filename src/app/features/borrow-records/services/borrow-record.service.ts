@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpService } from '../../../core/services/http.service';
+import { HttpService, RequestType } from '../../../core/services/http.service';
 import { Endpoints } from '../../../core/endpoint/endpoint.model';
 import { BorrowRecord, BorrowRequest, ReturnRequest } from '../models/borrow-record.model';
 
@@ -11,14 +11,14 @@ export class BorrowRecordService {
   borrow(request: BorrowRequest): Observable<BorrowRecord> {
     return this.httpService.post<BorrowRecord>(
       `${Endpoints.BORROW_RECORDS_ENDPOINT}/borrow`,
-      request
+      request, undefined, { requestType: RequestType.LOCAL }
     );
   }
 
   returnItem(borrowRecordId: string, request: ReturnRequest): Observable<BorrowRecord> {
     return this.httpService.put<BorrowRecord>(
       `${Endpoints.BORROW_RECORDS_ENDPOINT}/${borrowRecordId}/return`,
-      request
+      request, undefined, { requestType: RequestType.LOCAL }
     );
   }
 

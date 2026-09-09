@@ -8,6 +8,10 @@ import {User} from "../../models/user.model";
 import {ToastService} from "../../../../shared/toast/toast.service";
 import {FilterOption} from "../../../../shared/models/filter.model";
 import {FilterRequest} from "../user-filter/filter-request";
+import {TabItem} from "../../../../shared/tabs/models/tab-item.model";
+import {exportRowsToExcel} from "../../../../shared/utils/excel-export.util";
+
+export type UsersTabKey = 'investor' | 'staff' | 'admin';
 
 @Component({
   selector: 'app-user-list',
@@ -15,33 +19,46 @@ import {FilterRequest} from "../user-filter/filter-request";
   templateUrl: './user-list.component.html'
 })
 export class UserListComponent implements OnInit {
-  users: User[] = [];
-  loading = false;
-  total = 0;
-  pageSize = 10;
-  pageIndex = 1;
-  currentPage = 0;
+  usersActiveTab: UsersTabKey = 'investor';
+  usersTabs: TabItem[] = [
+    {key: 'investor', label: 'Investors'},
+    {key: 'staff', label: 'Staff'},
+    {key: 'admin', label: 'Admins'},
+  ];
+
+  /** "Staff" = any user that is neither Investor nor Admin — enforced server-side via excludeRoles. */
+  readonly STAFF_EXCLUDED_ROLES = ['ADMIN', 'INVESTOR'];
+
+  investorUsers: User[] = [];
+  investorLoading = false;
+  investorTotal = 0;
+  investorPageSize = 10;
+  investorPageIndex = 1;
+
+  staffUsers: User[] = [];
+  staffLoading = false;
+  staffTotal = 0;
+  staffPageSize = 10;
+  staffPageIndex = 1;
+
+  adminUsers: User[] = [];
+  adminLoading = false;
+  adminTotal = 0;
+  adminPageSize = 10;
+  adminPageIndex = 1;
+
   // Search
   searchText = '';
-
-  roleFilters: FilterOption[] = [
-    {label: 'Admin', value: 'ADMIN', checked: false},
-    {label: 'Operator', value: 'OPERATOR', checked: false},
-    {label: 'Employee', value: 'EMPLOYEE', checked: false},
-    {label: 'CCA', value: 'CCA', checked: false},
-    {label: 'Investor', value: 'INVESTOR', checked: false},
-  ];
 
   genderFilters: FilterOption[] = [
     {label: 'Male', value: 'MALE', checked: false},
     {label: 'Female', value: 'FEMALE', checked: false},
-    {label: 'Other', value: 'OTHER', checked: false}
   ];
 
-
-  statusFilters: FilterOption[] = [
-    {label: 'Active', value: 'ACTIVE', checked: false},
-    {label: 'Inactive', value: 'INACTIVE', checked: false}
+  /** Role filter is only meaningful on the Staff tab (it spans more than one role); Investor/Admin tabs are already single-role. */
+  staffRoleFilters: FilterOption[] = [
+    {label: 'Operator', value: 'OPERATOR', checked: false},
+    {label: 'Extension Worker', value: 'EXTENSION_WORKER', checked: false},
   ];
 
   // Sorting
@@ -58,109 +75,214 @@ export class UserListComponent implements OnInit {
   // Forces the right-side detail component to re-render after list mutations.
   detailRefreshKey = 0;
 
+  /** Role options offered by the create-user form; set per-tab in onAdd(). */
+  createAllowedRoleNames: string[] = ['INVESTOR'];
+
   columns: DataTableColumn<User>[] = [
     {
       header: 'Username',
-      value: (user) => user.username
+      value: (user) => user.username,
+      defaultVisible: false,
     },
     {
       header: 'Full Name',
-      value: (user) => `${user.firstName} ${user.lastName}`
+      value: (user) => `${user.firstName} ${user.lastName}`,
+      defaultVisible: true,
     },
     {
       header: 'Email',
-      value: (user) => user.email
+      value: (user) => user.email,
+      defaultVisible: true,
+      hiddenBelowPx: 920,
     },
     {
       header: 'Gender',
-      value: (user) => user.gender
+      value: (user) => user.gender,
+      defaultVisible: false,
     },
     {
       header: 'Role',
-      value: (user) => user.role
+      value: (user) => user.role,
+      defaultVisible: true,
     },
     {
       header: 'Status',
-      value: (user) => user.accountNonLocked ? 'ACTIVE' : 'LOCKED'
+      value: (user) => user.accountNonLocked ? 'ACTIVE' : 'LOCKED',
+      defaultVisible: false,
     },
     {
       header: 'Lock/Unlock',
       columnType: ColumnType.LINK,
       value: (user) => user.accountNonLocked ? 'Lock' : 'Unlock',
-      columnAction: (user) => this.onToggleLock(user)
+      columnAction: (user) => this.onToggleLock(user),
+      defaultVisible: false,
     }
   ];
+
+  /** Export should only include real data columns, not the Lock/Unlock action link. */
+  get exportColumns(): DataTableColumn<User>[] {
+    return this.columns.filter((c) => !c.columnAction);
+  }
 
   constructor(private userService: UserService, private toastService: ToastService) {
   }
 
   ngOnInit() {
-    this.loadUsers();
+    this.loadActiveTab();
   }
 
-  loadUsers() {
-    this.loading = true;
-    const filterRequest: FilterRequest = this.buildFilterRequest();
-    const previousSelectedId = this.selectedUser?.id;
-    this.userService.filterUsers(filterRequest).subscribe({
+  onUsersTabChange(key: string): void {
+    this.usersActiveTab = key as UsersTabKey;
+    this.loadActiveTab();
+  }
+
+  private loadActiveTab(previousId?: string | null): void {
+    if (this.usersActiveTab === 'staff') {
+      this.loadStaff(previousId);
+    } else if (this.usersActiveTab === 'admin') {
+      this.loadAdmins(previousId);
+    } else {
+      this.loadInvestors(previousId);
+    }
+  }
+
+  loadInvestors(previousId?: string | null): void {
+    this.investorLoading = true;
+    const request = this.buildTabFilterRequest('investor', this.investorPageIndex - 1, this.investorPageSize);
+    this.userService.filterUsers(request).subscribe({
       next: (response: PageResponse<User>) => {
-        this.users = response.content;
-        this.total = response.totalElements;
-        this.loading = false;
-        this.toastService.success(`Users retrieved successfully`);
-
-        // Default selection (mirrors the farm-plot behavior)
-        // 1) If the list is empty => no selection
-        // 2) If nothing was selected => select first row
-        // 3) If something was selected => keep it if it still exists
-        if (this.users.length === 0) {
-          this.selectedUser = null;
-          return;
-        }
-
-        if (!previousSelectedId) {
-          this.selectedUser = {...this.users[0]};
-          this.detailRefreshKey++;
-          return;
-        }
-
-        const match = this.users.find((u) => u.id === previousSelectedId);
-        if (match) {
-          this.selectedUser = {...match};
-          return;
-        }
-
-        this.selectedUser = {...this.users[0]};
-        this.detailRefreshKey++;
+        this.investorUsers = response.content;
+        this.investorTotal = response.totalElements;
+        this.investorLoading = false;
+        if (this.usersActiveTab !== 'investor') return;
+        this.selectFromList(this.investorUsers, previousId);
       },
-      error: (error) => {
-        this.toastService.error(
-          error.message || 'Failed to fetch users',
-          'Fetch Users'
-        );
-        this.loading = false;
+      error: () => {
+        this.investorLoading = false;
       }
     });
   }
 
-  onPageChange(params: TableQueryParams) {
-    this.pageIndex = params.pageIndex;
-    this.currentPage = this.pageIndex - 1;
-    this.pageSize = params.pageSize;
-    this.loadUsers();
+  loadStaff(previousId?: string | null): void {
+    this.staffLoading = true;
+    const request = this.buildTabFilterRequest('staff', this.staffPageIndex - 1, this.staffPageSize);
+    this.userService.filterUsers(request).subscribe({
+      next: (response: PageResponse<User>) => {
+        this.staffUsers = response.content;
+        this.staffTotal = response.totalElements;
+        this.staffLoading = false;
+        if (this.usersActiveTab !== 'staff') return;
+        this.selectFromList(this.staffUsers, previousId);
+      },
+      error: () => {
+        this.staffLoading = false;
+      }
+    });
   }
 
-  onAdd() {
+  loadAdmins(previousId?: string | null): void {
+    this.adminLoading = true;
+    const request = this.buildTabFilterRequest('admin', this.adminPageIndex - 1, this.adminPageSize);
+    this.userService.filterUsers(request).subscribe({
+      next: (response: PageResponse<User>) => {
+        this.adminUsers = response.content;
+        this.adminTotal = response.totalElements;
+        this.adminLoading = false;
+        if (this.usersActiveTab !== 'admin') return;
+        this.selectFromList(this.adminUsers, previousId);
+      },
+      error: () => {
+        this.adminLoading = false;
+      }
+    });
+  }
+
+  /** Per-tab role scoping shared by the load*() methods and onExport(). */
+  private buildTabFilterRequest(tab: UsersTabKey, page: number, size: number): FilterRequest {
+    const base = this.buildFilterRequest(page, size);
+    if (tab === 'investor') {
+      return {...base, roles: ['INVESTOR']};
+    }
+    if (tab === 'admin') {
+      return {...base, roles: ['ADMIN']};
+    }
+    // Staff: when the admin narrows by specific staff role(s), use an inclusion filter; otherwise
+    // fall back to "everyone who isn't Admin/Investor" via the backend's exclusion filter.
+    const selectedStaffRoles = this.getSelectedValues(this.staffRoleFilters);
+    return {
+      ...base,
+      ...(selectedStaffRoles ? {roles: selectedStaffRoles} : {excludeRoles: this.STAFF_EXCLUDED_ROLES}),
+    };
+  }
+
+  private selectFromList(list: User[], previousId?: string | null): void {
+    if (list.length === 0) {
+      this.selectedUser = null;
+      return;
+    }
+
+    if (previousId) {
+      const match = list.find((u) => u.id === previousId);
+      if (match) {
+        this.selectedUser = {...match};
+        return;
+      }
+    }
+
+    this.selectedUser = {...list[0]};
+    this.detailRefreshKey++;
+  }
+
+  onInvestorPageChange(params: TableQueryParams): void {
+    this.investorPageIndex = params.pageIndex;
+    this.investorPageSize = params.pageSize;
+    this.loadInvestors();
+  }
+
+  onStaffPageChange(params: TableQueryParams): void {
+    this.staffPageIndex = params.pageIndex;
+    this.staffPageSize = params.pageSize;
+    this.loadStaff();
+  }
+
+  onAdminPageChange(params: TableQueryParams): void {
+    this.adminPageIndex = params.pageIndex;
+    this.adminPageSize = params.pageSize;
+    this.loadAdmins();
+  }
+
+  onAdd(tab: UsersTabKey): void {
+    this.createAllowedRoleNames = tab === 'investor'
+      ? ['INVESTOR']
+      : tab === 'admin'
+        ? ['ADMIN']
+        : ['OPERATOR', 'EXTENSION_WORKER'];
     this.showCreateModal = true;
   }
 
-  onRefresh() {
-    this.loadUsers();
+  onRefresh(): void {
+    this.loadActiveTab();
   }
 
-  onExport() {
-    console.log('Export users');
-    // Implement export functionality
+  onExport(): void {
+    const tab = this.usersActiveTab;
+    const total = tab === 'investor' ? this.investorTotal : tab === 'staff' ? this.staffTotal : this.adminTotal;
+    const label = tab === 'investor' ? 'Investors' : tab === 'staff' ? 'Staff' : 'Admins';
+    const request = this.buildTabFilterRequest(tab, 0, Math.max(total, 1));
+
+    this.userService.filterUsers(request).subscribe({
+      next: (response: PageResponse<User>) => {
+        const rows = response.content;
+        const {sizeBytes} = exportRowsToExcel(rows, this.exportColumns, `users-${tab}`);
+        this.userService.notifyExport({
+          exportLabel: label,
+          recordCount: rows.length,
+          fileSizeBytes: sizeBytes,
+        }).subscribe({error: () => {}});
+        this.toastService.success(`Exported ${rows.length} ${label.toLowerCase()}`);
+      },
+      error: () => this.toastService.error('Export failed'),
+    });
   }
 
   onView(user: User) {
@@ -201,6 +323,9 @@ export class UserListComponent implements OnInit {
   }
 
   handleLockUser() {
+    if (this.lockLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.selectedUser) return;
 
     this.lockLoading = true;
@@ -213,19 +338,18 @@ export class UserListComponent implements OnInit {
         this.showEditModal = false;
         this.showDeleteModal = false;
         this.toastService.success(`User locked successfully`);
-        this.loadUsers();
+        this.loadActiveTab();
       },
-      error: (error) => {
+      error: () => {
         this.lockLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to lock user',
-          'Lock User'
-        );
       }
     });
   }
 
   handleUnlockUser() {
+    if (this.lockLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.selectedUser) return;
 
     this.lockLoading = true;
@@ -239,14 +363,10 @@ export class UserListComponent implements OnInit {
         this.showDeleteModal = false;
         this.toastService.success(`User unlocked successfully`);
 
-        this.loadUsers();
+        this.loadActiveTab();
       },
-      error: (error) => {
+      error: () => {
         this.lockLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to unlock user',
-          'Unlock User'
-        );
       }
     });
   }
@@ -268,14 +388,9 @@ export class UserListComponent implements OnInit {
         this.showDeleteModal = false;
         this.selectedUser = null;
         this.toastService.success(`User deleted successfully`);
-        this.loadUsers();
+        this.loadActiveTab();
       },
-      error: (error) => {
-        this.toastService.error(
-          error.message || 'Failed to delete user',
-          'Delete User'
-        );
-      }
+      error: () => {}
     });
   }
 
@@ -289,23 +404,21 @@ export class UserListComponent implements OnInit {
   }
 
   onUserCreated() {
-    this.loadUsers();
+    this.loadActiveTab();
   }
 
   onUserUpdated() {
-    this.loadUsers();
+    this.loadActiveTab();
   }
 
-
-  buildFilterRequest(): FilterRequest {
+  buildFilterRequest(page: number, size: number): Omit<FilterRequest, 'page' | 'size'> & { page: number; size: number } {
     return {
       searchText: this.searchText || undefined,
-      roles: this.getSelectedValues(this.roleFilters),
       genders: this.getSelectedValues(this.genderFilters),
       sortBy: this.sortBy,
       sortDirection: this.sortDirection,
-      page: this.currentPage,
-      size: this.pageSize
+      page,
+      size
     };
   }
 
@@ -315,20 +428,23 @@ export class UserListComponent implements OnInit {
   }
 
   onSearch() {
-    this.currentPage = 0;
-    this.pageIndex = 1;
-    this.loadUsers();
+    this.resetActiveTabPaging();
+    this.loadActiveTab();
   }
 
   onFilterChange() {
-    this.currentPage = 0;
-    this.loadUsers();
+    this.resetActiveTabPaging();
+    this.loadActiveTab();
   }
 
   clearFilters() {
-    this.currentPage = 0;
-    this.loadUsers();
+    this.resetActiveTabPaging();
+    this.loadActiveTab();
   }
 
-
+  private resetActiveTabPaging(): void {
+    if (this.usersActiveTab === 'investor') this.investorPageIndex = 1;
+    else if (this.usersActiveTab === 'staff') this.staffPageIndex = 1;
+    else this.adminPageIndex = 1;
+  }
 }

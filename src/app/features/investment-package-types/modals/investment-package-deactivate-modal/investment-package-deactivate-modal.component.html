@@ -1,0 +1,35 @@
+<app-modal
+  [(visible)]="visible"
+  [title]="title"
+  size="sm"
+  confirmText="Deactivate"
+  cancelText="Cancel"
+  confirmButtonClass="bg-red-600 hover:bg-red-700 text-white"
+  [confirmLoading]="confirmLoading"
+  [confirmDisabled]="!canConfirm"
+  (confirm)="confirm.emit()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <div class="space-y-4 text-sm">
+      <div>
+        <p class="text-gray-500">You are about to deactivate:</p>
+        <p class="font-medium text-gray-900">{{ packageTitle || '-' }}</p>
+        <p class="mt-1 text-xs text-red-600">
+          This deactivates the investment option and releases the farm plot back to its default state. This cannot be undone.
+        </p>
+      </div>
+
+      <div>
+        <label class="text-sm font-medium text-gray-700">Reason <span class="text-red-500">*</span></label>
+        <textarea
+          class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-red-500/50 focus:border-red-500"
+          rows="3"
+          placeholder="Explain what went wrong or why this investment option is being deactivated..."
+          [ngModel]="reason"
+          (ngModelChange)="reasonChange.emit($event)"
+        ></textarea>
+      </div>
+    </div>
+  </ng-template>
+</app-modal>

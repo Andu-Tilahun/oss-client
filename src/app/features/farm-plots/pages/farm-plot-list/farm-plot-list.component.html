@@ -5,65 +5,143 @@
   rightTitle="Farm Plot Detail"
   [rightItem]="selectedPlot"
   [rightEmptyMessage]="'Select a row to view details.'"
-  (rightEdit)="onEdit($event)"
   (rightClose)="onCloseDetail()"
-  [showRightEditButton]="checkIfPlotIsNotAssigned"
-
+  [showRightEditButton]="false"
 >
-  <ng-template #extraTableHeader>
-    <div class="w-full" extraHeader>
-      <app-farm-plot-filter
-        [(searchText)]="searchText"
-        [(status)]="status"
-        [(soilType)]="soilType"
-        [(sizeType)]="sizeType"
-        (filterChange)="onFilterChange()"
-        (searchChange)="onFilterChange()"
-        (clearFilters)="clearFilters()"
-      ></app-farm-plot-filter>
-    </div>
-  </ng-template>
-
   <ng-template #leftContent>
-    <app-data-card-layout
-      [data]="plots"
-      [loading]="loading"
-      [total]="total"
-      [pageSize]="pageSize"
-      [pageIndex]="pageIndex"
-      [showAddButton]="true"
-      [showRefreshButton]="true"
-      [showDownloadButton]="true"
-      [showViewButton]="true"
-      [showEditButton]="checkIfPlotIsNotAssigned"
-      [showDeleteButton]="checkIfPlotIsNotAssigned"
-      [titleAccessor]="getPlotCardTitle"
-      [createdDateAccessor]="getPlotCreatedDate"
-      [thumbnailUrlAccessor]="getPlotThumbnailUrl"
-      [thumbnailAltAccessor]="getPlotThumbnailAlt"
-      (pageChange)="onPageChange($event)"
-      (addClick)="onAdd()"
-      (refreshClick)="onRefresh()"
-      (downloadClick)="onDownload()"
-      (viewClick)="onView($event)"
-      (editClick)="onEdit($event)"
-      (deleteClick)="onDelete($event)"
+    <app-tabs
+      [tabs]="adminTabs"
+      [activeTab]="adminActiveTab"
+      [centered]="true"
+      [noBodyPadding]="true"
+      (activeTabChange)="onAdminTabChange($event)"
     >
-      <ng-container *ngTemplateOutlet="extraTableHeader"></ng-container>
+      <!-- Operational -->
+      <div *ngIf="adminActiveTab === 'operational'">
+        <app-data-table
+          [columns]="columns"
+          [data]="operationalPlots"
+          [selectedRowId]="selectedPlot?.id ?? null"
+          [loading]="operationalLoading"
+          [total]="operationalTotal"
+          [pageSize]="operationalPageSize"
+          [pageIndex]="operationalPageIndex"
+          [showIndex]="true"
+          [showAddButton]="true"
+          [showRefreshButton]="true"
+          [showExportButton]="true"
+          [showViewButton]="false"
+          [showEditButton]="false"
+          [showDeleteButton]="false"
+          [rowActions]="tableRowActions"
+          [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
+          (pageChange)="onOperationalPageChange($event)"
+          (addClick)="onAdd()"
+          (refreshClick)="onRefresh()"
+          (exportClick)="onDownload()"
+          (rowClick)="onView($event)"
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-farm-plot-filter
+              [(searchText)]="searchText"
+              [(status)]="status"
+              [(soilType)]="soilType"
+              [(sizeType)]="sizeType"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onFilterChange()"
+              (clearFilters)="clearFilters()"
+            ></app-farm-plot-filter>
+          </div>
+        </app-data-table>
+      </div>
 
-      <ng-template cardFooterTemplate let-plot>
-        <div class="flex items-center gap-4 text-sm">
-          <button type="button" class="action-link action-link--view" (click)="onView(plot)">View</button>
-          <button type="button" class="action-link action-link--edit" *ngIf="checkIfPlotIsNotAssigned" (click)="onEdit(plot)">Edit</button>
-          <button type="button" class="action-link action-link--delete" *ngIf="checkIfPlotIsNotAssigned" (click)="onDelete(plot)">Delete</button>
-          <button type="button" class="action-link action-link--view" (click)="onOpenGallery(plot)">Gallery</button>
-        </div>
-      </ng-template>
-    </app-data-card-layout>
+      <!-- Repair / Damaged -->
+      <div *ngIf="adminActiveTab === 'repair'">
+        <app-data-table
+          [columns]="columns"
+          [data]="repairPlots"
+          [selectedRowId]="selectedPlot?.id ?? null"
+          [loading]="repairLoading"
+          [total]="repairTotal"
+          [pageSize]="repairPageSize"
+          [pageIndex]="repairPageIndex"
+          [showIndex]="true"
+          [showAddButton]="false"
+          [showRefreshButton]="true"
+          [showExportButton]="false"
+          [showViewButton]="false"
+          [showEditButton]="false"
+          [showDeleteButton]="false"
+          [showActionColumn]="false"
+          [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
+          [noDataMessage]="'No farm plots under maintenance.'"
+          (pageChange)="onRepairPageChange($event)"
+          (refreshClick)="onRefresh()"
+          (rowClick)="onView($event)"
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-farm-plot-filter
+              [(searchText)]="searchText"
+              [(status)]="status"
+              [(soilType)]="soilType"
+              [(sizeType)]="sizeType"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onFilterChange()"
+              (clearFilters)="clearFilters()"
+            ></app-farm-plot-filter>
+          </div>
+        </app-data-table>
+      </div>
+
+      <!-- Archived -->
+      <div *ngIf="adminActiveTab === 'archived'">
+        <app-data-table
+          [columns]="columns"
+          [data]="archivedPlots"
+          [selectedRowId]="selectedPlot?.id ?? null"
+          [loading]="archivedLoading"
+          [total]="archivedTotal"
+          [pageSize]="archivedPageSize"
+          [pageIndex]="archivedPageIndex"
+          [showIndex]="true"
+          [showAddButton]="false"
+          [showRefreshButton]="true"
+          [showExportButton]="false"
+          [showViewButton]="false"
+          [showEditButton]="false"
+          [showDeleteButton]="false"
+          [showActionColumn]="false"
+          [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
+          [noDataMessage]="'No archived farm plots.'"
+          (pageChange)="onArchivedPageChange($event)"
+          (refreshClick)="onRefresh()"
+          (rowClick)="onView($event)"
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-farm-plot-filter
+              [(searchText)]="searchText"
+              [(status)]="status"
+              [(soilType)]="soilType"
+              [(sizeType)]="sizeType"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onFilterChange()"
+              (clearFilters)="clearFilters()"
+            ></app-farm-plot-filter>
+          </div>
+        </app-data-table>
+      </div>
+    </app-tabs>
   </ng-template>
 
   <ng-template #rightContent let-plot>
-    <app-farm-plot-view [plot]="plot" [refreshKey]="detailRefreshKey"></app-farm-plot-view>
+    <app-farm-plot-view
+      [plot]="plot"
+      [refreshKey]="detailRefreshKey"
+      (statusChanged)="onPlotStatusChanged()"
+    ></app-farm-plot-view>
   </ng-template>
 </app-page-split-layout>
 
@@ -80,15 +158,6 @@
   (farmPlotUpdated)="onFarmPlotUpdated()"
 ></app-farm-plot-edit-modal>
 
-<!-- Delete/Deactivate Confirmation Modal -->
-<app-confirmation-modal
-  [(visible)]="showDeleteModal"
-  title="Deactivate Farm Plot"
-  message="Are you sure you want to deactivate this farm plot?"
-  confirmText="Deactivate"
-  (confirm)="confirmDelete()"
-></app-confirmation-modal>
-
 <app-image-gallery-modal
   [(visible)]="showGalleryModal"
   [loading]="galleryLoading"
@@ -96,6 +165,3 @@
   [imageUrls]="galleryImageUrls"
   (visibleChange)="onGalleryVisibilityChange($event)"
 ></app-image-gallery-modal>
-
-
-

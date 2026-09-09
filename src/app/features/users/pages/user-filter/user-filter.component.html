@@ -7,7 +7,7 @@
   (searchChange)="onSearch()"
   (clearFilters)="onClearFilters()"
 >
-  <div class="w-[150px]">
+  <div class="w-[150px]" *ngIf="roleFilters.length > 0">
     <select
       [ngModel]="selectedRole"
       (ngModelChange)="onRoleSelectionChange($event)"
@@ -28,7 +28,7 @@
     >
       <option value="">Gender: All</option>
       <option *ngFor="let gender of genderFilters" [value]="gender.value">
-        Gender: {{ gender.label }}
+        {{ gender.label }}
       </option>
     </select>
   </div>

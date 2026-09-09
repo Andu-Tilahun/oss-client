@@ -11,7 +11,13 @@ import {FarmPlotService} from '../../services/farm-plot.service';
 import {PageResponse} from '../../../../shared/models/api-response.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
+import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
+import {ColumnType} from '../../../../shared/data-table/models/column-types.model';
+import {TabItem} from '../../../../shared/tabs/models/tab-item.model';
 import {environment} from '../../../../../environments/environment';
+import {RegionService} from '../../../regions/services/region.service';
+import {PageSplitRightAction} from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
+import {exportRowsToExcel} from '../../../../shared/utils/excel-export.util';
 
 @Component({
   selector: 'app-farm-plot-list',
@@ -22,12 +28,32 @@ import {environment} from '../../../../../environments/environment';
 export class FarmPlotListComponent {
   private readonly storageApiUrl = `${environment.apiUrl}/files`;
 
-  plots: FarmPlot[] = [];
-  loading = false;
-  total = 0;
-  pageSize = 10;
-  pageIndex = 1;
-  currentPage = 0;
+  regionsMap = new Map<string, string>();
+
+  operationalPlots: FarmPlot[] = [];
+  operationalLoading = false;
+  operationalTotal = 0;
+  operationalPageSize = 10;
+  operationalPageIndex = 1;
+
+  repairPlots: FarmPlot[] = [];
+  repairLoading = false;
+  repairTotal = 0;
+  repairPageSize = 10;
+  repairPageIndex = 1;
+
+  archivedPlots: FarmPlot[] = [];
+  archivedLoading = false;
+  archivedTotal = 0;
+  archivedPageSize = 10;
+  archivedPageIndex = 1;
+
+  adminActiveTab = 'operational';
+  adminTabs: TabItem[] = [
+    {key: 'operational', label: 'Operational'},
+    {key: 'repair', label: 'Repair / Damaged'},
+    {key: 'archived', label: 'Archived'},
+  ];
 
   // Search & filters
   searchText = '';
@@ -37,7 +63,6 @@ export class FarmPlotListComponent {
 
   showCreateModal = false;
   showEditModal = false;
-  showDeleteModal = false;
   showGalleryModal = false;
   galleryLoading = false;
   galleryImageUrls: string[] = [];
@@ -48,28 +73,85 @@ export class FarmPlotListComponent {
   // Forces the right-side detail component to reload after updates.
   detailRefreshKey = 0;
 
-  readonly getPlotCardTitle = (plot: FarmPlot): string => plot.title;
-  readonly getPlotCreatedDate = (plot: FarmPlot): Date | undefined => plot.createdAt;
-  readonly getPlotThumbnailAlt = (plot: FarmPlot): string => `${plot.title} thumbnail`;
-  readonly getPlotThumbnailUrl = (plot: FarmPlot): string | null =>
-    plot.imageUuid ? `${this.storageApiUrl}/${plot.imageUuid}` : null;
+  columns: DataTableColumn<FarmPlot>[] = [
+    {
+      header: 'Photo',
+      columnType: ColumnType.IMAGE,
+      value: (plot) => plot.imageUuid ? `${this.storageApiUrl}/${plot.imageUuid}` : null,
+      imageAlt: (plot) => plot.title,
+      defaultVisible: false,
+    },
+    {
+      header: 'Title',
+      value: (plot) => plot.title,
+      defaultVisible: true,
+    },
+    {
+      header: 'Size',
+      value: (plot) => `${plot.size} ${plot.sizeType}`,
+      defaultVisible: true,
+    },
+    {
+      header: 'Soil Type',
+      value: (plot) => plot.soilType,
+      defaultVisible: true,
+    },
+    {
+      header: 'Region',
+      value: (plot) => this.regionsMap.get(plot.regionId ?? '') ?? '—',
+      defaultVisible: true,
+    },
+  ];
 
-  get checkIfPlotIsNotAssigned() {
-    return true;
-    // return this.selectedPlot?.status != 'ASSIGNED_TO_LEASE'
+  tableRowActions: PageSplitRightAction<FarmPlot>[] = [
+    {
+      id: 'edit',
+      icon: 'edit',
+      title: 'Edit',
+      visible: (p) => p.status !== 'ASSIGNED_TO_LEASE' && p.status !== 'ASSIGNED_TO_INVESTMENT_PACKAGE',
+      action: (p) => this.onEdit(p),
+    },
+  ];
+
+  get checkIfPlotIsNotAssigned(): boolean {
+    return this.selectedPlot?.status !== 'ASSIGNED_TO_LEASE'
+      && this.selectedPlot?.status !== 'ASSIGNED_TO_INVESTMENT_PACKAGE';
   }
 
   constructor(
     private farmPlotService: FarmPlotService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private regionService: RegionService,
   ) {
   }
 
   ngOnInit(): void {
-    this.loadPlots();
+    this.regionService.filterRegions({ page: 0, size: 100 }).subscribe({
+      next: (res) => {
+        this.regionsMap = new Map((res.content ?? []).map(r => [r.id, r.name]));
+      },
+    });
+    this.refreshCurrentTab();
   }
 
-  private buildFilterRequest(): FarmPlotFilterRequest {
+  onAdminTabChange(key: string): void {
+    this.adminActiveTab = key;
+    this.refreshCurrentTab();
+  }
+
+  /** Single entry point for every initial load and post-mutation refresh; dispatches to
+   *  whichever tab is currently active so the other tabs reload lazily on next visit. */
+  refreshCurrentTab(previousId?: string | null): void {
+    if (this.adminActiveTab === 'repair') {
+      this.loadRepair(previousId);
+    } else if (this.adminActiveTab === 'archived') {
+      this.loadArchived(previousId);
+    } else {
+      this.loadOperational(previousId);
+    }
+  }
+
+  private buildFilterRequest(page: number, size: number): FarmPlotFilterRequest {
     return {
       searchText: this.searchText || undefined,
       statuses: this.status ? [this.status] : undefined,
@@ -77,58 +159,100 @@ export class FarmPlotListComponent {
       sizeTypes: this.sizeType ? [this.sizeType] : undefined,
       sortBy: 'title',
       sortDirection: 'ASC',
-      page: this.currentPage,
-      size: this.pageSize,
+      page,
+      size,
     };
   }
 
-  loadPlots(): void {
-    this.loading = true;
-    const request: FarmPlotFilterRequest = this.buildFilterRequest();
-    this.farmPlotService.filterFarmPlots(request).subscribe({
+  loadOperational(previousId?: string | null): void {
+    this.operationalLoading = true;
+    const request = this.buildFilterRequest(this.operationalPageIndex - 1, this.operationalPageSize);
+    this.farmPlotService.filterOperationalFarmPlots(request).subscribe({
       next: (response: PageResponse<FarmPlot>) => {
-        this.plots = response.content;
-        this.total = response.totalElements;
-        this.loading = false;
-        this.toastService.success('Farm plots retrieved successfully');
-
-        // Default selection: show first element only when nothing is selected.
-        // If a plot was already selected, keep it if it still exists in the new page data.
-        const previousSelectedId = this.selectedPlot?.id;
-
-        if (this.plots.length === 0) {
-          this.selectedPlot = null;
-          return;
-        }
-
-        if (!previousSelectedId) {
-          this.selectedPlot = {...this.plots[0]};
-          this.detailRefreshKey++;
-          return;
-        }
-
-        const match = this.plots.find((p) => p.id === previousSelectedId);
-        if (match) {
-          this.selectedPlot = {...match};
-          return;
-        }
-
-        // Selected item is no longer in the list; fall back to the first item.
-        this.selectedPlot = {...this.plots[0]};
-        this.detailRefreshKey++;
+        this.operationalPlots = response.content ?? [];
+        this.operationalTotal = response.totalElements ?? this.operationalPlots.length;
+        this.operationalLoading = false;
+        if (this.adminActiveTab !== 'operational') return;
+        this.selectFromList(this.operationalPlots, previousId);
       },
-      error: (error) => {
-        this.toastService.error(error.message || 'Failed to fetch farm plots', 'Fetch Farm Plots');
-        this.loading = false;
+      error: () => {
+        this.operationalLoading = false;
       },
     });
   }
 
-  onPageChange(params: TableQueryParams) {
-    this.pageIndex = params.pageIndex;
-    this.currentPage = this.pageIndex - 1;
-    this.pageSize = params.pageSize;
-    this.loadPlots();
+  loadRepair(previousId?: string | null): void {
+    this.repairLoading = true;
+    const request = this.buildFilterRequest(this.repairPageIndex - 1, this.repairPageSize);
+    this.farmPlotService.filterRepairFarmPlots(request).subscribe({
+      next: (response: PageResponse<FarmPlot>) => {
+        this.repairPlots = response.content ?? [];
+        this.repairTotal = response.totalElements ?? this.repairPlots.length;
+        this.repairLoading = false;
+        if (this.adminActiveTab !== 'repair') return;
+        this.selectFromList(this.repairPlots, previousId);
+      },
+      error: () => {
+        this.repairLoading = false;
+      },
+    });
+  }
+
+  loadArchived(previousId?: string | null): void {
+    this.archivedLoading = true;
+    const request = this.buildFilterRequest(this.archivedPageIndex - 1, this.archivedPageSize);
+    this.farmPlotService.filterArchivedFarmPlots(request).subscribe({
+      next: (response: PageResponse<FarmPlot>) => {
+        this.archivedPlots = response.content ?? [];
+        this.archivedTotal = response.totalElements ?? this.archivedPlots.length;
+        this.archivedLoading = false;
+        if (this.adminActiveTab !== 'archived') return;
+        this.selectFromList(this.archivedPlots, previousId);
+      },
+      error: () => {
+        this.archivedLoading = false;
+      },
+    });
+  }
+
+  private selectFromList(list: FarmPlot[], previousId?: string | null): void {
+    if (previousId) {
+      const match = list.find((p) => p.id === previousId);
+      if (match) {
+        this.selectedPlot = {...match};
+        return;
+      }
+    }
+    this.selectedPlot = list.length > 0 ? {...list[0]} : null;
+    if (this.selectedPlot) this.detailRefreshKey++;
+  }
+
+  onOperationalPageChange(params: TableQueryParams): void {
+    this.operationalPageIndex = params.pageIndex;
+    this.operationalPageSize = params.pageSize;
+    this.loadOperational();
+  }
+
+  onRepairPageChange(params: TableQueryParams): void {
+    this.repairPageIndex = params.pageIndex;
+    this.repairPageSize = params.pageSize;
+    this.loadRepair();
+  }
+
+  onArchivedPageChange(params: TableQueryParams): void {
+    this.archivedPageIndex = params.pageIndex;
+    this.archivedPageSize = params.pageSize;
+    this.loadArchived();
+  }
+
+  private resetActiveTabPaging(): void {
+    if (this.adminActiveTab === 'repair') {
+      this.repairPageIndex = 1;
+    } else if (this.adminActiveTab === 'archived') {
+      this.archivedPageIndex = 1;
+    } else {
+      this.operationalPageIndex = 1;
+    }
   }
 
   onAdd(): void {
@@ -136,17 +260,29 @@ export class FarmPlotListComponent {
   }
 
   onRefresh(): void {
-    this.loadPlots();
+    this.refreshCurrentTab(this.selectedPlot?.id);
   }
 
   onDownload(): void {
-    this.toastService.info('Farm plot download is not implemented yet', 'Download Farm Plots');
+    const request = this.buildFilterRequest(0, Math.max(this.operationalTotal, 1));
+    this.farmPlotService.filterOperationalFarmPlots(request).subscribe({
+      next: (response: PageResponse<FarmPlot>) => {
+        const rows = response.content ?? [];
+        const {sizeBytes} = exportRowsToExcel(rows, this.columns, 'farm-plots-operational');
+        this.farmPlotService.notifyExport({
+          exportLabel: 'Farm Plots (Operational)',
+          recordCount: rows.length,
+          fileSizeBytes: sizeBytes,
+        }).subscribe({error: () => {}});
+        this.toastService.success(`Exported ${rows.length} farm plots`);
+      },
+      error: () => this.toastService.error('Export failed'),
+    });
   }
 
   onSearch(): void {
-    this.currentPage = 0;
-    this.pageIndex = 1;
-    this.loadPlots();
+    this.resetActiveTabPaging();
+    this.refreshCurrentTab();
   }
 
   onFilterChange(): void {
@@ -158,21 +294,17 @@ export class FarmPlotListComponent {
     this.status = '';
     this.soilType = '';
     this.sizeType = '';
-    this.currentPage = 0;
-    this.pageIndex = 1;
-    this.loadPlots();
+    this.resetActiveTabPaging();
+    this.refreshCurrentTab();
   }
 
   onEdit(plot: FarmPlot): void {
     this.farmPlotService.getFarmPlotGallery(plot.id).subscribe({
       next: (gallery) => {
         this.selectedPlot = {...plot, gallery};
-        this.showDeleteModal = false;
         this.showEditModal = true;
       },
-      error: (error) => {
-        this.toastService.error(error.message || 'Failed to load plot gallery for editing', 'Edit Farm Plot');
-      },
+      error: () => {},
     });
   }
 
@@ -181,44 +313,25 @@ export class FarmPlotListComponent {
     this.selectedPlot = {...plot};
     this.showCreateModal = false;
     this.showEditModal = false;
-    this.showDeleteModal = false;
   }
 
   onCloseDetail(): void {
     this.selectedPlot = null;
     this.showEditModal = false;
-    this.showDeleteModal = false;
   }
 
-  onDelete(plot: FarmPlot): void {
-    this.selectedPlot = plot;
-    this.showEditModal = false;
-    this.showDeleteModal = true;
-  }
-
-  confirmDelete(): void {
-    if (!this.selectedPlot) return;
-    this.farmPlotService.deleteFarmPlot(this.selectedPlot.id).subscribe({
-      next: () => {
-        this.showDeleteModal = false;
-        this.selectedPlot = null;
-        this.loadPlots();
-        this.toastService.success('Farm plot deactivated successfully');
-      },
-      error: (error) => {
-        this.toastService.error(error.message || 'Failed to deactivate farm plot', 'Deactivate Farm Plot');
-      },
-    });
+  onPlotStatusChanged(): void {
+    this.refreshCurrentTab(this.selectedPlot?.id);
   }
 
   onFarmPlotCreated(): void {
     this.detailRefreshKey++;
-    this.loadPlots();
+    this.refreshCurrentTab(this.selectedPlot?.id);
   }
 
   onFarmPlotUpdated(): void {
     this.detailRefreshKey++;
-    this.loadPlots();
+    this.refreshCurrentTab(this.selectedPlot?.id);
   }
 
   onOpenGallery(plot: FarmPlot): void {
@@ -234,9 +347,8 @@ export class FarmPlotListComponent {
           .filter((url): url is string => !!url);
         this.galleryLoading = false;
       },
-      error: (error) => {
+      error: () => {
         this.galleryLoading = false;
-        this.toastService.error(error.message || 'Failed to load farm plot gallery', 'Farm Plot Gallery');
       },
     });
   }

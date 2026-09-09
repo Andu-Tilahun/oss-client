@@ -34,6 +34,9 @@ export class ReturnModalComponent {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.record?.id) return;
     this.isLoading = true;
     this.borrowRecordService

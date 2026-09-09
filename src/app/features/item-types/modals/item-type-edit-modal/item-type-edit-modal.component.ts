@@ -28,6 +28,9 @@ export class ItemTypeEditModalComponent {
   ) {}
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.form.isValid() || !this.itemType) {
       this.form.markAllAsTouched();
       return;
@@ -43,7 +46,6 @@ export class ItemTypeEditModalComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        this.toastService.error(err.message || 'Failed to update item type', 'Update Item Type');
       },
     });
   }

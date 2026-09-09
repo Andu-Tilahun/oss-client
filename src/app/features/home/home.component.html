@@ -2,8 +2,10 @@
 
 <app-extension-home *ngIf="!isInvestor && isExtensionWorker"></app-extension-home>
 
+<app-admin-home *ngIf="!isInvestor && !isExtensionWorker && isAdmin"></app-admin-home>
+
 <div
-  *ngIf="!isInvestor && !isExtensionWorker"
+  *ngIf="!isInvestor && !isExtensionWorker && !isAdmin"
   class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500"
 >
   <div class="text-center px-4">

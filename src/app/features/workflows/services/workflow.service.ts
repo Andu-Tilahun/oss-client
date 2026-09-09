@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {HttpService} from '../../../core/services/http.service';
+import {HttpService, RequestType} from '../../../core/services/http.service';
 import {Endpoints} from '../../../core/endpoint/endpoint.model';
 import {Workflow} from '../models/workflow.model';
 import {PageResponse} from '../../../shared/models/api-response.model';
@@ -18,14 +18,14 @@ export class WorkflowService {
   create(workflow: Workflow): Observable<Workflow> {
     return this.httpService.post<Workflow>(
       this.baseEndpoint,
-      workflow
+      workflow, undefined, { requestType: RequestType.LOCAL }
     );
   }
 
   update(id: string, workflow: Workflow): Observable<Workflow> {
     return this.httpService.put<Workflow>(
       `${this.baseEndpoint}/${id}`,
-      workflow
+      workflow, undefined, { requestType: RequestType.LOCAL }
     );
   }
 

@@ -51,14 +51,14 @@
     <div *ngIf="mainContent">
       <!-- Without Card -->
       <ng-container *ngIf="noCard">
-        <div class="px-6 py-4">
+        <div class="px-0 md:px-6 py-4">
           <ng-container *ngTemplateOutlet="mainContent"></ng-container>
         </div>
       </ng-container>
 
       <!-- With Card -->
       <ng-container *ngIf="!noCard">
-        <div class="px-6 pb-6">
+        <div class="px-0 md:px-6 pb-6">
           <div class="">
             <ng-container *ngTemplateOutlet="mainContent"></ng-container>
           </div>

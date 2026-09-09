@@ -3,13 +3,13 @@
     <app-action-icon-button
       *ngIf="showEditButton"
       icon="edit"
-      (click)="onEditClick()"
+      (buttonClick)="onEditClick()"
     ></app-action-icon-button>
 
     <app-action-icon-button
       *ngIf="showCloseButton"
       icon="close"
-      (click)="close.emit()"
+      (buttonClick)="close.emit()"
     ></app-action-icon-button>
   </div>
 

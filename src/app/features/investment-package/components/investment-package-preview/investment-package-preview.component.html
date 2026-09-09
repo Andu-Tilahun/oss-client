@@ -1,0 +1,80 @@
+<div class="bg-gray-50 rounded-xl border border-gray-200 p-5 space-y-4">
+  <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Preview</h4>
+
+  <div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <p class="text-lg font-semibold text-gray-900">{{ data.title || 'Untitled package' }}</p>
+      <span
+        *ngIf="data.investmentPackageType"
+        class="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-indigo-100 text-indigo-700 border border-indigo-200"
+      >
+        {{ data.investmentPackageType }}
+      </span>
+      <span
+        *ngIf="data.fundingStatus"
+        class="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-200"
+      >
+        {{ data.fundingStatus }}
+      </span>
+    </div>
+    <p class="text-sm text-gray-500 mt-1">{{ data.farmPlotTitle || 'No farm plot selected' }}</p>
+    <p *ngIf="data.description" class="text-sm text-gray-500 mt-1">{{ data.description }}</p>
+  </div>
+
+  <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+    <div>
+      <dt class="text-gray-400">Farm Activity</dt>
+      <dd class="text-gray-900 font-medium">{{ data.farmActivity || '—' }}</dd>
+    </div>
+    <div>
+      <dt class="text-gray-400">Water Source</dt>
+      <dd class="text-gray-900 font-medium">{{ data.waterSource || '—' }}</dd>
+    </div>
+    <div>
+      <dt class="text-gray-400">Start Date</dt>
+      <dd class="text-gray-900 font-medium">{{ data.startDate || '—' }}</dd>
+    </div>
+    <div>
+      <dt class="text-gray-400">End Date</dt>
+      <dd class="text-gray-900 font-medium">{{ data.endDate || '—' }}</dd>
+    </div>
+    <div>
+      <dt class="text-gray-400">Funding Deadline</dt>
+      <dd class="text-gray-900 font-medium">{{ data.fundingDeadline || '—' }}</dd>
+    </div>
+    <div>
+      <dt class="text-gray-400">Target Amount</dt>
+      <dd class="text-gray-900 font-medium">{{ data.targetAmount != null ? data.targetAmount : '—' }}</dd>
+    </div>
+    <ng-container *ngIf="isCrowdfunding">
+      <div>
+        <dt class="text-gray-400">Minimum Contribution</dt>
+        <dd class="text-gray-900 font-medium">{{ data.minimumContribution != null ? data.minimumContribution : '—' }}</dd>
+      </div>
+      <div>
+        <dt class="text-gray-400">Expected Investors</dt>
+        <dd class="text-gray-900 font-medium">{{ data.expectedInvestorNumber != null ? data.expectedInvestorNumber : '—' }}</dd>
+      </div>
+    </ng-container>
+  </dl>
+
+  <div *ngIf="data.allowedPaymentMethods?.length">
+    <p class="text-xs text-gray-400 mb-2">Payment Methods</p>
+    <div class="flex flex-wrap gap-2">
+      <span
+        *ngFor="let m of data.allowedPaymentMethods"
+        class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-white text-gray-700 border border-gray-200"
+      >
+        {{ formatMethodLabel(m) }}
+      </span>
+    </div>
+  </div>
+
+  <div *ngIf="showBankAccounts">
+    <p class="text-xs text-gray-400 mb-2">Allowed Bank Accounts</p>
+    <p *ngIf="!data.allowedBankAccountNames?.length" class="text-sm text-gray-500">All active accounts</p>
+    <ul *ngIf="data.allowedBankAccountNames?.length" class="text-sm text-gray-700 space-y-1">
+      <li *ngFor="let name of data.allowedBankAccountNames">{{ name }}</li>
+    </ul>
+  </div>
+</div>

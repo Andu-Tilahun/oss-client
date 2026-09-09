@@ -27,6 +27,9 @@ export class DepartmentCreateModalComponent {
   ) {}
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.form.isValid()) {
       this.form.markAllAsTouched();
       return;
@@ -44,7 +47,6 @@ export class DepartmentCreateModalComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        this.toastService.error(err.message || 'Failed to create department', 'Create Department');
       },
     });
   }

@@ -110,22 +110,62 @@ export const MENU: MenuItem[] = [
     route: '/farm-plots',
     roles: ['ADMIN', 'OPERATOR', 'INVESTOR','EXTENSION_WORKER'],
     children: [
-      { icon: '', label: 'Company', route: '/farm-company', roles: ['ADMIN'] },
-      { icon: '', label: 'Farm Plots', route: '/farm-plots-extension', roles: ['EXTENSION_WORKER'] },
-      { icon: '', label: 'Leases', route: '/farm-leases', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
-      { icon: '', label: 'Restoration & Follow-ups', route: '/farm-followups', roles: ['EXTENSION_WORKER', 'ADMIN'] },
-      {icon: '', label: 'Investments', route: '/crowd-funding/investments', roles: ['INVESTOR', 'ADMIN']},
+      
       {
         icon: '',
-        label: 'Crowdfunding',
-        route: '/crowd-funding',
-        roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'],
-        children: [
-          {icon: '', label: 'Campaigns', route: '/crowd-funding', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER']},
-          {icon: '', label: 'Investments', route: '/crowd-funding/investments', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER']},
-        ],
+        label: 'Investment Packages',
+        route: '/investment-package',
+        roles: ['ADMIN'],
+
         expanded: false,
       },
+      { icon: '', label: 'Leases', route: '/investment-package-types/leasing', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
+      { icon: '', label: 'Bidding', route: '/investment-package-types/bidding', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
+      { icon: '', label: 'Crowdfunding', route: '/investment-package-types/crowdfunding', roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
+    ],
+    expanded: false
+  },
+    {
+    icon: 'M20 7l-8-4-8 4m16 0v10a2 2 0 01-2 2H6a2 2 0 01-2-2V7m14 0L12 10 2 7',
+    label: 'Farm Restoration',
+    route: '/farm-restoration',
+    roles: ['ADMIN', 'EXTENSION_WORKER'],
+    expanded: false
+  },
+  {
+    icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
+    label: 'CMS',
+    route: '/system-config/organization',
+    roles: ['ADMIN'],
+    children: [
+      { icon: '', label: 'Organization',  route: '/system-config/organization', roles: ['ADMIN'] },
+      { icon: '', label: 'News & Events', route: '/system-config/news',         roles: ['ADMIN'] },
+      { icon: '', label: 'Social Media',  route: '/system-config/social-media', roles: ['ADMIN'] },
+      { icon: '', label: 'Gallery',       route: '/system-config/gallery',      roles: ['ADMIN'] },
+      { icon: '', label: 'Regions',       route: '/system-config/regions',      roles: ['ADMIN'] },
+    ],
+    expanded: false
+  },
+  {
+    icon: 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9m-4-3h2M7 7h10M7 11h10M7 15h10',
+    label: 'Payment',
+    route: '/payment-config/bank-accounts',
+    roles: ['ADMIN'],
+    children: [
+      { icon: '', label: 'Configurations', route: '/payment-config/bank-accounts', roles: ['ADMIN'] },
+      { icon: '', label: 'Analysis',       route: '/payment-config/analysis',      roles: ['ADMIN'] },
+    ],
+    expanded: false,
+  },
+  {
+    icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+    label: 'Templates',
+    route: '/templates/email',
+    roles: ['ADMIN'],
+    children: [
+      { icon: '', label: 'Email',    route: '/templates/email',    roles: ['ADMIN'] },
+      { icon: '', label: 'SMS',      route: '/templates/sms',      roles: ['ADMIN'] },
+      { icon: '', label: 'Contract', route: '/templates/contract', roles: ['ADMIN'] },
     ],
     expanded: false
   }

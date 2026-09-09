@@ -60,12 +60,8 @@ export class UserEditModalComponent {
         this.visibleChange.emit(false);
         this.userUpdated.emit();
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to update user',
-          'Create User'
-        );
       }
     });
   }

@@ -1,16 +1,17 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ModalComponent} from '../../../../shared/modals/modal/modal.component';
-import {FarmPlotFormComponent} from '../../components/farm-plot-form/farm-plot-form.component';
+import {forkJoin, of} from 'rxjs';
+import {MultiStepFormModalComponent} from '../../../../shared/modals/multi-step-form-modal/multi-step-form-modal.component';
+import {StepConfig} from '../../../../shared/components/stepper/stepper.component';
+import {FarmPlotEditWizardComponent} from '../../components/farm-plot-edit-wizard/farm-plot-edit-wizard.component';
 import {FarmPlot, FarmPlotRequest} from '../../models/farm-plot.model';
 import {FarmPlotService} from '../../services/farm-plot.service';
 import {ToastService} from '../../../../shared/toast/toast.service';
-import {forkJoin, of} from 'rxjs';
 
 @Component({
   selector: 'app-farm-plot-edit-modal',
   standalone: true,
-  imports: [CommonModule, ModalComponent, FarmPlotFormComponent],
+  imports: [CommonModule, MultiStepFormModalComponent, FarmPlotEditWizardComponent],
   templateUrl: './farm-plot-edit-modal.component.html',
 })
 export class FarmPlotEditModalComponent {
@@ -20,30 +21,51 @@ export class FarmPlotEditModalComponent {
   @Input() farmPlot: FarmPlot | null = null;
   @Output() farmPlotUpdated = new EventEmitter<void>();
 
-  @ViewChild('farmPlotForm') farmPlotForm!: FarmPlotFormComponent;
+  @ViewChild('wizard') wizard!: FarmPlotEditWizardComponent;
 
+  currentStep = 1;
   isLoading = false;
+
+  readonly steps: StepConfig[] = [
+    {label: 'Basic Info', description: 'Title, description & size', clickable: true},
+    {label: 'Location & Soil', description: 'Coordinates, soil, status & region', clickable: true},
+    {label: 'Images', description: 'Plot & gallery photos', clickable: true},
+  ];
 
   constructor(
     private farmPlotService: FarmPlotService,
-    private toastService: ToastService
+    private toastService: ToastService,
   ) {}
 
+  onNext(): void {
+    if (this.wizard.isStepValid(this.currentStep)) {
+      this.currentStep++;
+    } else {
+      this.wizard.markStepTouched(this.currentStep);
+    }
+  }
+
   onSubmit(): void {
-    if (!this.farmPlotForm.isValid()) {
-      this.farmPlotForm.markAllAsTouched();
-      return;
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
+    for (const step of [1, 2, 3]) {
+      if (!this.wizard.isStepValid(step)) {
+        this.currentStep = step;
+        this.wizard.markStepTouched(step);
+        return;
+      }
     }
     if (!this.farmPlot) {
       return;
     }
 
     this.isLoading = true;
-    const request: FarmPlotRequest = this.farmPlotForm.getValue();
+    const request: FarmPlotRequest = this.wizard.getValue();
 
     this.farmPlotService.updateFarmPlot(this.farmPlot.id, request).subscribe({
       next: (updatedPlot) => {
-        const desiredImageUuids = this.farmPlotForm.getGalleryImageUuids();
+        const desiredImageUuids = this.wizard.getGalleryImageUuids();
 
         this.farmPlotService.getFarmPlotGallery(updatedPlot.id).subscribe({
           next: (existingGallery) => {
@@ -66,6 +88,7 @@ export class FarmPlotEditModalComponent {
                 this.isLoading = false;
                 this.visible = false;
                 this.visibleChange.emit(false);
+                this.currentStep = 1;
                 this.toastService.success('Farm plot updated successfully');
                 this.farmPlotUpdated.emit();
               },
@@ -88,8 +111,8 @@ export class FarmPlotEditModalComponent {
     });
   }
 
-  onCancel(): void {
-    this.farmPlotForm.reset();
+  onCancelled(): void {
+    this.currentStep = 1;
+    this.wizard.reset();
   }
 }
-

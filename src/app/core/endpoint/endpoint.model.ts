@@ -8,7 +8,7 @@ export const Endpoints = {
   AUDITS_ENDPOINT: '/audits',
   NOTIFICATIONS_ENDPOINT: '/notifications',
   PAYMENTS_ENDPOINT: '/payments',
-  REGIONS_ENDPOINT: '/license/regions',
+  REGIONS_ENDPOINT: '/farm/regions',
   ORGANIZATIONS_ENDPOINT: '/license/organizations',
   BRANCHES_ENDPOINT: '/license/branches',
   TRAINING_PROGRAMS_ENDPOINT: '/license/training-programs',
@@ -22,9 +22,16 @@ export const Endpoints = {
   // Farm
   FARM_PLOTS_ENDPOINT: '/farm/farm-plots',
   FARM_COMPANY_ENDPOINT: '/farm/company',
-  FARM_LEASES_ENDPOINT: '/farm/leases',
-  FARM_CROWDFUNDING_ENDPOINT: '/farm/crowdfunding',
+  INVESTMENT_PACKAGE_TYPES_ENDPOINT: '/farm/leases',
+  INVESTMENT_PACKAGES_ENDPOINT: '/farm/investment-packages',
+
+  
+
   FARM_FOLLOWUPS_ENDPOINT: '/farm/followups',
+  RESTORATION_PLANS_ENDPOINT: '/farm/restoration-plans',
+
+    // investment aggrement
+  INVESTMENT_AGGREMENT_ENDPOINT: '/farm/investment-agreements', 
 
   // Inventory
   EMPLOYEES_ENDPOINT: '/inventory/employees',
@@ -35,4 +42,21 @@ export const Endpoints = {
   TRANSFER_RECORDS_ENDPOINT: '/inventory/transfer-records',
   REPLACEMENT_RECORDS_ENDPOINT: '/inventory/replacement-records',
   GATE_LOGS_ENDPOINT: '/inventory/gate-logs',
+
+
+ 
+
+
+
+  // storage
+  STORAGE_ENDPOINT: '/files',
+
+  // System configuration
+  CONFIG_ORGANIZATION_ENDPOINT: '/config/organization',
+  CONFIG_NEWS_ENDPOINT: '/config/news',
+  CONFIG_SOCIAL_MEDIA_ENDPOINT: '/config/social-media',
+  CONFIG_BRANCH_CENTERS_ENDPOINT: '/config/branch-centers',
+  CONFIG_TEMPLATES_ENDPOINT: '/config/templates',
+  CONFIG_BANK_ACCOUNTS_ENDPOINT: '/config/bank-accounts',
+  CONFIG_GALLERY_ENDPOINT: '/config/gallery',
 }

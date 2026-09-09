@@ -5,43 +5,138 @@
   rightTitle="User Detail"
   [rightItem]="selectedUser"
   [rightEmptyMessage]="'Select a row to view details.'"
-  (rightEdit)="onEdit($event)"
+  [showRightEditButton]="false"
   (rightClose)="onCloseDetail()"
 >
   <ng-template #leftContent>
-    <app-data-table
-      [columns]="columns"
-      [data]="users"
-      [loading]="loading"
-      [total]="total"
-      [pageSize]="pageSize"
-      [pageIndex]="pageIndex"
-      [showIndex]="true"
-      [showAddButton]="true"
-      [showRefreshButton]="true"
-      [showExportButton]="true"
-      [showViewButton]="true"
-      [showEditButton]="true"
-      [showDeleteButton]="true"
-      (pageChange)="onPageChange($event)"
-      (addClick)="onAdd()"
-      (refreshClick)="onRefresh()"
-      (exportClick)="onExport()"
-      (viewClick)="onView($event)"
-      (editClick)="onEdit($event)"
-      (deleteClick)="onDelete($event)"
+    <app-tabs
+      [tabs]="usersTabs"
+      [activeTab]="usersActiveTab"
+      [centered]="true"
+      [noBodyPadding]="true"
+      (activeTabChange)="onUsersTabChange($event)"
     >
-      <div extraTableHeader class="w-full min-w-0">
-        <app-user-filter
-          [(searchText)]="searchText"
-          [roleFilters]="roleFilters"
-          [genderFilters]="genderFilters"
-          (filterChange)="onFilterChange()"
-          (searchChange)="onSearch()"
-          (clearFilters)="clearFilters()"
-        ></app-user-filter>
+      <!-- Investors -->
+      <div *ngIf="usersActiveTab === 'investor'">
+        <app-data-table
+          [columns]="columns"
+          [data]="investorUsers"
+          [selectedRowId]="selectedUser?.id ?? null"
+          [loading]="investorLoading"
+          [total]="investorTotal"
+          [pageSize]="investorPageSize"
+          [pageIndex]="investorPageIndex"
+          [showIndex]="true"
+          [showAddButton]="true"
+          [showRefreshButton]="true"
+          [showExportButton]="true"
+          [showViewButton]="false"
+          [showEditButton]="true"
+          [showDeleteButton]="true"
+          [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
+          [addButtonText]="'Add Investor'"
+          (pageChange)="onInvestorPageChange($event)"
+          (addClick)="onAdd('investor')"
+          (refreshClick)="onRefresh()"
+          (exportClick)="onExport()"
+          (rowClick)="onView($event)"
+          (editClick)="onEdit($event)"
+          (deleteClick)="onDelete($event)"
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-user-filter
+              [(searchText)]="searchText"
+              [genderFilters]="genderFilters"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onSearch()"
+              (clearFilters)="clearFilters()"
+            ></app-user-filter>
+          </div>
+        </app-data-table>
       </div>
-    </app-data-table>
+
+      <!-- Staff -->
+      <div *ngIf="usersActiveTab === 'staff'">
+        <app-data-table
+          [columns]="columns"
+          [data]="staffUsers"
+          [selectedRowId]="selectedUser?.id ?? null"
+          [loading]="staffLoading"
+          [total]="staffTotal"
+          [pageSize]="staffPageSize"
+          [pageIndex]="staffPageIndex"
+          [showIndex]="true"
+          [showAddButton]="true"
+          [showRefreshButton]="true"
+          [showExportButton]="true"
+          [showViewButton]="false"
+          [showEditButton]="true"
+          [showDeleteButton]="true"
+          [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
+          [addButtonText]="'Add Staff'"
+          (pageChange)="onStaffPageChange($event)"
+          (addClick)="onAdd('staff')"
+          (refreshClick)="onRefresh()"
+          (exportClick)="onExport()"
+          (rowClick)="onView($event)"
+          (editClick)="onEdit($event)"
+          (deleteClick)="onDelete($event)"
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-user-filter
+              [(searchText)]="searchText"
+              [roleFilters]="staffRoleFilters"
+              [genderFilters]="genderFilters"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onSearch()"
+              (clearFilters)="clearFilters()"
+            ></app-user-filter>
+          </div>
+        </app-data-table>
+      </div>
+
+      <!-- Admins -->
+      <div *ngIf="usersActiveTab === 'admin'">
+        <app-data-table
+          [columns]="columns"
+          [data]="adminUsers"
+          [selectedRowId]="selectedUser?.id ?? null"
+          [loading]="adminLoading"
+          [total]="adminTotal"
+          [pageSize]="adminPageSize"
+          [pageIndex]="adminPageIndex"
+          [showIndex]="true"
+          [showAddButton]="true"
+          [showRefreshButton]="true"
+          [showExportButton]="true"
+          [showViewButton]="false"
+          [showEditButton]="true"
+          [showDeleteButton]="true"
+          [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
+          [addButtonText]="'Add Admin'"
+          (pageChange)="onAdminPageChange($event)"
+          (addClick)="onAdd('admin')"
+          (refreshClick)="onRefresh()"
+          (exportClick)="onExport()"
+          (rowClick)="onView($event)"
+          (editClick)="onEdit($event)"
+          (deleteClick)="onDelete($event)"
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-user-filter
+              [(searchText)]="searchText"
+              [genderFilters]="genderFilters"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onSearch()"
+              (clearFilters)="clearFilters()"
+            ></app-user-filter>
+          </div>
+        </app-data-table>
+      </div>
+    </app-tabs>
   </ng-template>
 
   <ng-template #rightContent let-user>
@@ -52,6 +147,7 @@
 <!-- Create User Modal -->
 <app-user-create-modal
   [(visible)]="showCreateModal"
+  [allowedRoleNames]="createAllowedRoleNames"
   (userCreated)="onUserCreated()"
 ></app-user-create-modal>
 

@@ -1,0 +1,140 @@
+<app-page-split-layout
+  [showLeftTitle]="true"
+  [showRightTitle]="true"
+  leftTitle="Investment Package"
+  rightTitle="Investment Package Detail"
+  [rightItem]="selectedInvestmentPackage"
+  [rightEmptyMessage]="'Select a row to view details.'"
+  [showRightEditButton]="false"
+  [rightActions]="rightActions"
+>
+  <ng-template #leftContent>
+    <app-tabs
+      [tabs]="adminTabs"
+      [activeTab]="adminActiveTab"
+      [centered]="true"
+      [noBodyPadding]="true"
+      (activeTabChange)="onAdminTabChange($event)"
+    >
+      <!-- Published Investments -->
+      <div *ngIf="adminActiveTab === 'published'">
+        <app-data-table
+          [columns]="columns"
+          [data]="publishedPackages"
+          [selectedRowId]="selectedInvestmentPackage?.id ?? null"
+          [loading]="publishedLoading"
+          [total]="publishedTotal"
+          [pageSize]="publishedPageSize"
+          [pageIndex]="publishedPageIndex"
+          [showAddButton]="isAdmin"
+          [showRefreshButton]="true"
+          [showViewButton]="false"
+          [showEditButton]="false"
+          [showDeleteButton]="false"
+          [showActionColumn]="isAdmin"
+          [rowActions]="tableRowActions"
+          [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
+          [addButtonText]="'Create Investment Package'"
+          (addClick)="onAdd()"
+          (refreshClick)="onRefresh()"
+          (rowClick)="onView($event)"
+          (pageChange)="onPublishedPageChange($event)"
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-investment-package-filter
+              [(searchText)]="searchText"
+              [(status)]="status"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onFilterChange()"
+              (clearFilters)="clearFilters()"
+            ></app-investment-package-filter>
+          </div>
+          <ng-template #emptyState>
+            <app-tractor-loader mode="indeterminate" label="No investment packages published yet"></app-tractor-loader>
+          </ng-template>
+        </app-data-table>
+      </div>
+
+      <!-- Archived Investments -->
+      <div *ngIf="adminActiveTab === 'archived'">
+        <app-data-table
+          [columns]="archivedColumns"
+          [data]="archivedPackages"
+          [selectedRowId]="selectedInvestmentPackage?.id ?? null"
+          [loading]="archivedLoading"
+          [total]="archivedTotal"
+          [pageSize]="archivedPageSize"
+          [pageIndex]="archivedPageIndex"
+          [showAddButton]="false"
+          [showRefreshButton]="false"
+          [showViewButton]="false"
+          [showEditButton]="false"
+          [showDeleteButton]="false"
+          [showActionColumn]="false"
+          [rowClickable]="true"
+          [rowDetailTemplate]="rightContent"
+          [noDataMessage]="'No archived investment packages found.'"
+          (rowClick)="onView($event)"
+          (pageChange)="onArchivedPageChange($event)"
+        >
+          <div extraTableHeader class="w-full min-w-0">
+            <app-investment-package-filter
+              [(searchText)]="searchText"
+              [(status)]="status"
+              (filterChange)="onFilterChange()"
+              (searchChange)="onFilterChange()"
+              (clearFilters)="clearFilters()"
+            ></app-investment-package-filter>
+          </div>
+        </app-data-table>
+      </div>
+    </app-tabs>
+  </ng-template>
+
+  <ng-template #rightContent let-investmentPackage>
+    <div
+      *ngIf="!investmentPackage && (adminActiveTab === 'published' ? publishedLoading : archivedLoading); else detailPanel"
+      class="flex flex-col items-center justify-center gap-3 py-12"
+    >
+      <div class="w-4 h-4 rounded-full bg-blue-500 animate-bounce"></div>
+      <span class="text-sm text-gray-500">Loading details…</span>
+    </div>
+    <ng-template #detailPanel>
+    <app-investment-package-detail-panel
+      [investmentPackage]="investmentPackage"
+      [refreshKey]="detailRefreshKey"
+      [tabs]="tabs"
+      (extensionWorkerAssigned)="onExtensionWorkerAssigned($event)"
+      (candidatesChosen)="onCandidatesChosen()"
+      (agreementCreated)="onAgreementCreated()"
+      (completed)="onInvestmentPackageCompleted()"
+    ></app-investment-package-detail-panel>
+    </ng-template>
+  </ng-template>
+</app-page-split-layout>
+
+<app-investment-package-create-modal
+  [(visible)]="showCreateInvestmentPackageModal"
+  (investmentPackageCreated)="onInvestmentPackageCreated()"
+></app-investment-package-create-modal>
+
+<app-investment-package-edit-modal
+  [(visible)]="showEditInvestmentPackageModal"
+  [investmentPackage]="selectedInvestmentPackage"
+  (investmentPackageUpdated)="onInvestmentPackageUpdated()"
+></app-investment-package-edit-modal>
+
+<app-investment-package-create-investment-modal
+  [(visible)]="showCreateInvestmentModal"
+  [investmentPackage]="selectedInvestmentPackage"
+  (investmentCreated)="onInvestmentCreated()"
+></app-investment-package-create-investment-modal>
+
+<app-investment-package-type-close-modal
+  [(visible)]="showDeactivateModal"
+  [packageTitle]="packageToDeactivate?.title || ''"
+  [confirmLoading]="deactivating"
+  [(reason)]="deactivateReason"
+  (confirm)="handleDeactivateConfirmation()"
+></app-investment-package-type-close-modal>

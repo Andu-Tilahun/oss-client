@@ -1,0 +1,31 @@
+<app-modal
+  [(visible)]="visible"
+  [title]="title"
+  size="sm"
+  confirmText="Confirm"
+  cancelText="Cancel"
+  [confirmLoading]="confirmLoading"
+  [confirmDisabled]="!canConfirm"
+  (confirm)="confirm.emit()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <div class="space-y-4 text-sm">
+      <div>
+        <p class="text-gray-500">{{ isChange ? 'Changing the winning investor to:' : 'Selected investor:' }}</p>
+        <p class="font-medium text-gray-900">{{ candidateNames.join(', ') || '-' }}</p>
+      </div>
+
+      <div>
+        <label class="text-sm font-medium text-gray-700">Remark <span class="text-red-500">*</span></label>
+        <textarea
+          class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+          rows="3"
+          placeholder="Explain why this investor is being chosen..."
+          [ngModel]="remark"
+          (ngModelChange)="remarkChange.emit($event)"
+        ></textarea>
+      </div>
+    </div>
+  </ng-template>
+</app-modal>

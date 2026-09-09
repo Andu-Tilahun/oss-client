@@ -1,0 +1,402 @@
+<app-page-split-layout
+  [showLeftTitle]="true"
+  [showRightTitle]="true"
+  [leftTitle]="pageTitle"
+  [rightTitle]="rightPanelTitle"
+  [rightItem]="rightPanelItem"
+  [rightEmptyMessage]="'Select a row to view details.'"
+  [showRightEditButton]="!!selectedAgreement && shouldShowPackageTypeEditButton(selectedAgreement)"
+  [rightActions]="[]"
+  (rightEdit)="onEdit($event)"
+>
+  <ng-template #leftContent>
+    <!-- Investor: tabbed view -->
+    <ng-container *ngIf="isInvestorUser; else staffSections">
+      <app-tabs
+        [tabs]="investorTabs"
+        [activeTab]="investorActiveTab"
+        [centered]="true"
+        [noBodyPadding]="true"
+        [greenAccent]="true"
+        (activeTabChange)="onInvestorTabChange($event)"
+      >
+        <!-- Tab 1: My Farm Leases -->
+        <div *ngIf="investorActiveTab === 'my-leases'">
+          <app-data-table
+            [columns]="columns"
+            [data]="myLeasesPackageTypes"
+            [selectedRowId]="rightPanelItem?.id ?? null"
+            [loading]="myLeasesLoading"
+            [total]="myLeasesPackageTypes.length"
+            [pageSize]="myLeasesPackageTypes.length || 10"
+            [pageIndex]="1"
+            [showColumnPickerControl]="false"
+            [showAddButton]="false"
+            [showRefreshButton]="false"
+            [showViewButton]="false"
+            [showEditButton]="false"
+            [showDeleteButton]="false"
+            [showActionColumn]="true"
+            [rowActions]="tableRowActions"
+            [rowClickable]="true"
+            [rowDetailTemplate]="rightContent"
+            (rowClick)="onView($event)"
+          >
+            <div extraTableHeader class="w-full min-w-0">
+              <app-investment-package-type-filter
+                [(searchText)]="searchText"
+                [(status)]="fundingStatus"
+                [(paymentStatus)]="paymentStatus"
+                (filterChange)="onFilterChange()"
+                (searchChange)="onFilterChange()"
+                (clearFilters)="clearFilters()"
+              ></app-investment-package-type-filter>
+            </div>
+          </app-data-table>
+        </div>
+
+        <!-- Tab 2: Explore More Farm Plots -->
+        <div *ngIf="investorActiveTab === 'explore'">
+          <app-data-table
+            [columns]="columns"
+            [data]="availablePackageTypes"
+            [selectedRowId]="rightPanelItem?.id ?? null"
+            [loading]="availableLoading"
+            [total]="availableTotal"
+            [pageSize]="availablePageSize"
+            [pageIndex]="availablePageIndex"
+            [showColumnPickerControl]="false"
+            [showAddButton]="false"
+            [showRefreshButton]="false"
+            [showViewButton]="false"
+            [showEditButton]="false"
+            [showDeleteButton]="false"
+            [showActionColumn]="true"
+            [rowActions]="tableRowActions"
+            [cardCornerIcons]="['plus']"
+            [rowClickable]="true"
+            [rowDetailTemplate]="rightContent"
+            [noDataMessage]="'No available investment packages found.'"
+            (pageChange)="onAvailablePageChange($event)"
+            (rowClick)="onView($event)"
+          >
+            <div extraTableHeader class="w-full min-w-0">
+              <app-investment-package-type-filter
+                [(searchText)]="availableSearchText"
+                (filterChange)="onAvailableFilterChange()"
+                (searchChange)="onAvailableFilterChange()"
+                (clearFilters)="clearAvailableFilters()"
+              ></app-investment-package-type-filter>
+            </div>
+          </app-data-table>
+        </div>
+
+        <!-- Tab 3: History (completed or deactivated investment options) -->
+        <div *ngIf="investorActiveTab === 'history'">
+          <app-data-table
+            [columns]="archivedColumns"
+            [data]="historyPackageTypes"
+            [selectedRowId]="rightPanelItem?.id ?? null"
+            [loading]="historyLoading"
+            [total]="historyPackageTypes.length"
+            [pageSize]="historyPackageTypes.length || 10"
+            [pageIndex]="1"
+            [showColumnPickerControl]="false"
+            [showAddButton]="false"
+            [showRefreshButton]="false"
+            [showViewButton]="false"
+            [showEditButton]="false"
+            [showDeleteButton]="false"
+            [showActionColumn]="true"
+            [rowActions]="tableRowActions"
+            [rowClickable]="true"
+            [rowDetailTemplate]="rightContent"
+            [noDataMessage]="'No completed or deactivated investment options yet.'"
+            (rowClick)="onView($event)"
+          ></app-data-table>
+        </div>
+      </app-tabs>
+    </ng-container>
+
+    <!-- Admin / extension worker -->
+    <ng-template #staffSections>
+      <!-- Admin: two-tab view (Published / Archived) -->
+      <ng-container *ngIf="isAdmin; else nonAdminStaff">
+        <app-tabs
+          [tabs]="adminTabs"
+          [activeTab]="adminActiveTab"
+          [centered]="true"
+          [noBodyPadding]="true"
+          (activeTabChange)="onAdminTabChange($event)"
+        >
+          <!-- Tab 1: Published Investments -->
+          <div *ngIf="adminActiveTab === 'published'">
+            <app-data-table
+              [columns]="columns"
+              [data]="publishedPackages"
+              [selectedRowId]="rightPanelItem?.id ?? null"
+              [loading]="publishedLoading"
+              [total]="publishedPackages.length"
+              [pageSize]="publishedPackages.length || 10"
+              [pageIndex]="1"
+              [showColumnPickerControl]="false"
+              [showAddButton]="false"
+              [showRefreshButton]="true"
+              [showViewButton]="false"
+              [showEditButton]="false"
+              [showDeleteButton]="false"
+              [showActionColumn]="true"
+              [rowActions]="tableRowActions"
+              [actionCellLabel]="getAdminActionCellLabel"
+              [rowClickable]="true"
+            [rowDetailTemplate]="rightContent"
+              (refreshClick)="onRefresh()"
+              (rowClick)="onView($event)"
+            >
+              <div extraTableHeader class="w-full min-w-0">
+                <app-investment-package-type-filter
+                  [(searchText)]="searchText"
+                  [(status)]="fundingStatus"
+                  [(paymentStatus)]="paymentStatus"
+                  (filterChange)="onFilterChange()"
+                  (searchChange)="onFilterChange()"
+                  (clearFilters)="clearFilters()"
+                ></app-investment-package-type-filter>
+              </div>
+              <ng-template #emptyState>
+                <app-tractor-loader
+                  mode="indeterminate"
+                  [label]="'No ' + (investmentPackageType | lowercase) + ' investment packages published yet'"
+                ></app-tractor-loader>
+              </ng-template>
+            </app-data-table>
+          </div>
+
+          <!-- Tab 2: Archived Investments -->
+          <div *ngIf="adminActiveTab === 'archived'">
+            <app-data-table
+              [columns]="archivedColumns"
+              [data]="archivedPackages"
+              [selectedRowId]="rightPanelItem?.id ?? null"
+              [loading]="archivedLoading"
+              [total]="archivedPackages.length"
+              [pageSize]="archivedPackages.length || 10"
+              [pageIndex]="1"
+              [showColumnPickerControl]="false"
+              [showAddButton]="false"
+              [showRefreshButton]="false"
+              [showViewButton]="false"
+              [showEditButton]="false"
+              [showDeleteButton]="false"
+              [showActionColumn]="false"
+              [rowClickable]="true"
+            [rowDetailTemplate]="rightContent"
+              [noDataMessage]="'No archived investment packages found.'"
+              (rowClick)="onView($event)"
+            >
+              <div extraTableHeader class="w-full min-w-0">
+                <app-investment-package-type-filter
+                  [(searchText)]="searchText"
+                  [(status)]="fundingStatus"
+                  [(paymentStatus)]="paymentStatus"
+                  (filterChange)="onFilterChange()"
+                  (searchChange)="onFilterChange()"
+                  (clearFilters)="clearFilters()"
+                ></app-investment-package-type-filter>
+              </div>
+            </app-data-table>
+          </div>
+        </app-tabs>
+      </ng-container>
+
+      <!-- Extension worker: two-tab view (My Farm Plots / History) -->
+      <ng-template #nonAdminStaff>
+        <app-tabs
+          [tabs]="extensionWorkerTabs"
+          [activeTab]="extensionWorkerActiveTab"
+          [centered]="true"
+          [noBodyPadding]="true"
+          (activeTabChange)="onExtensionWorkerTabChange($event)"
+        >
+          <!-- Tab 1: My Farm Plots -->
+          <div *ngIf="extensionWorkerActiveTab === 'current'">
+            <app-data-table
+              [columns]="extensionWorkerColumns"
+              [data]="subscribedPackageTypes"
+              [selectedRowId]="rightPanelItem?.id ?? null"
+              [loading]="subscribedLoading"
+              [total]="subscribedPackageTypes.length"
+              [pageSize]="subscribedPackageTypes.length || 10"
+              [pageIndex]="1"
+              [showColumnPickerControl]="false"
+              [showAddButton]="false"
+              [showRefreshButton]="true"
+              [showViewButton]="false"
+              [showEditButton]="false"
+              [showDeleteButton]="false"
+              [showActionColumn]="false"
+              [rowClickable]="true"
+            [rowDetailTemplate]="rightContent"
+              (refreshClick)="onRefresh()"
+              (rowClick)="onView($event)"
+            >
+              <div extraTableHeader class="w-full min-w-0">
+                <app-investment-package-type-filter
+                  [(searchText)]="searchText"
+                  [(status)]="fundingStatus"
+                  [(paymentStatus)]="paymentStatus"
+                  (filterChange)="onFilterChange()"
+                  (searchChange)="onFilterChange()"
+                  (clearFilters)="clearFilters()"
+                ></app-investment-package-type-filter>
+              </div>
+            </app-data-table>
+          </div>
+
+          <!-- Tab 2: History -->
+          <div *ngIf="extensionWorkerActiveTab === 'history'">
+            <app-data-table
+              [columns]="extensionWorkerHistoryColumns"
+              [data]="subscribedHistoryPackageTypes"
+              [selectedRowId]="rightPanelItem?.id ?? null"
+              [loading]="subscribedHistoryLoading"
+              [total]="subscribedHistoryPackageTypes.length"
+              [pageSize]="subscribedHistoryPackageTypes.length || 10"
+              [pageIndex]="1"
+              [showColumnPickerControl]="false"
+              [showAddButton]="false"
+              [showRefreshButton]="false"
+              [showViewButton]="false"
+              [showEditButton]="false"
+              [showDeleteButton]="false"
+              [showActionColumn]="false"
+              [rowClickable]="true"
+            [rowDetailTemplate]="rightContent"
+              [noDataMessage]="'No completed or deactivated assignments yet.'"
+              (rowClick)="onView($event)"
+            >
+              <div extraTableHeader class="w-full min-w-0">
+                <app-investment-package-type-filter
+                  [(searchText)]="searchText"
+                  [(status)]="fundingStatus"
+                  [(paymentStatus)]="paymentStatus"
+                  (filterChange)="onFilterChange()"
+                  (searchChange)="onFilterChange()"
+                  (clearFilters)="clearFilters()"
+                ></app-investment-package-type-filter>
+              </div>
+            </app-data-table>
+          </div>
+        </app-tabs>
+      </ng-template>
+    </ng-template>
+  </ng-template>
+
+  <ng-template #rightContent let-item>
+    <div
+      *ngIf="!selectedAgreement && isRightPanelLoading; else detailOrEmpty"
+      class="flex flex-col items-center justify-center gap-3 py-12"
+    >
+      <div class="w-4 h-4 rounded-full bg-blue-500 animate-bounce"></div>
+      <span class="text-sm text-gray-500">Loading details…</span>
+    </div>
+    <ng-template #detailOrEmpty>
+      <app-investment-package-type-plot-detail
+        *ngIf="selectedAgreement; else rightEmptyText"
+        mode="lease"
+        [embedded]="true"
+        [agreement]="item"
+        [investmentPackageType]="investmentPackageType"
+        [refreshKey]="detailRefreshKey"
+        [tabs]="tabs"
+        [forcedTab]="pendingForcedTab"
+        [packageInvestments]="packageInvestments"
+        [packageInvestmentsLoading]="packageInvestmentsLoading"
+        [biddingLeaderboard]="biddingLeaderboard"
+        (tabChange)="onTabChange($event)"
+        (extensionWorkerAssigned)="onExtensionWorkerAssigned($event)"
+        (candidatesChosen)="onCandidatesChosen()"
+        (agreementCreated)="onAgreementCreated()"
+        (investClicked)="onDetailPanelInvestClicked()"
+        (agreementStatusChanged)="onAgreementStatusChanged($event)"
+        (completed)="onCandidatesChosen()"
+      ></app-investment-package-type-plot-detail>
+      <ng-template #rightEmptyText>
+        <div class="text-sm text-gray-500">Select a row to view details.</div>
+      </ng-template>
+    </ng-template>
+  </ng-template>
+</app-page-split-layout>
+
+<app-investment-package-type-create-modal
+  [(visible)]="showCreateModal"
+  (packageTypeCreated)="onPackageTypeCreated()"
+></app-investment-package-type-create-modal>
+
+<app-investment-package-type-edit-modal
+  [(visible)]="showEditModal"
+  [agreement]="selectedAgreement"
+  (packageTypeUpdated)="onPackageTypeUpdated()"
+></app-investment-package-type-edit-modal>
+
+<app-investment-package-create-investment-modal
+  [(visible)]="showCreateInvestmentModal"
+  [investmentPackage]="asInvestmentPackage(selectedAgreement)"
+  [leasePaymentMode]="investmentPackageType === 'LEASING'"
+  [biddingMode]="investmentPackageType === 'BIDDING'"
+  [existingBidRecord]="investorBidRecord"
+  (investmentCreated)="onInvestmentCreated()"
+></app-investment-package-create-investment-modal>
+
+<app-investment-package-edit-modal
+  [(visible)]="showEditInvestmentPackageModal"
+  [investmentPackage]="selectedInvestmentPackageForEdit"
+  (investmentPackageUpdated)="onInvestmentPackageUpdated()"
+></app-investment-package-edit-modal>
+
+<app-investment-package-type-close-modal
+  [(visible)]="showCloseModal"
+  [packageTitle]="selectedAgreement?.title || ''"
+  [confirmLoading]="closing"
+  [(reason)]="closeReason"
+  (confirm)="handleCloseConfirmation()"
+></app-investment-package-type-close-modal>
+
+<app-investment-package-type-complete-modal
+  [(visible)]="showCompleteModal"
+  [packageTitle]="packageToComplete?.title || ''"
+  [confirmLoading]="completing"
+  [(remark)]="completionRemark"
+  (confirm)="handleCompleteConfirmation()"
+></app-investment-package-type-complete-modal>
+
+<app-investment-package-deactivate-modal
+  [(visible)]="showDeactivateModal"
+  [packageTitle]="packageToDeactivate?.title || ''"
+  [confirmLoading]="deactivating"
+  [(reason)]="deactivationReason"
+  (confirm)="handleDeactivateConfirmation()"
+></app-investment-package-deactivate-modal>
+
+<app-modal
+  [(visible)]="showContractModal"
+  title="Lease Contract Preview"
+  [size]="'xxl'"
+  [confirmText]="'Download PDF'"
+  [cancelText]="'Close'"
+  [confirmLoading]="contractLoading"
+  [confirmDisabled]="contractLoading || !contractHtml"
+  (confirm)="onDownloadContractFile()"
+>
+  <ng-template #modalBody>
+    <div *ngIf="contractLoading" class="text-center py-8 text-gray-600">
+      Loading contract...
+    </div>
+    <iframe
+      *ngIf="!contractLoading"
+      class="w-full h-[70vh] border border-gray-200 rounded-md bg-white"
+      [attr.srcdoc]="contractHtml"
+      title="Lease Contract Preview"
+    ></iframe>
+  </ng-template>
+</app-modal>

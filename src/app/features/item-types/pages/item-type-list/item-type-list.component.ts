@@ -49,11 +49,9 @@ export class ItemTypeListComponent implements OnInit {
         this.itemTypes = list ?? [];
         this.applyFilter();
         this.loading = false;
-        this.toastService.success('Item types retrieved successfully');
       },
       error: (err) => {
         this.loading = false;
-        this.toastService.error(err.message || 'Failed to fetch item types', 'Fetch Item Types');
       },
     });
   }
@@ -124,7 +122,6 @@ export class ItemTypeListComponent implements OnInit {
         this.loadItemTypes();
       },
       error: (err) => {
-        this.toastService.error(err.message || 'Failed to delete item type', 'Delete Item Type');
       },
     });
   }

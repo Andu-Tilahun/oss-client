@@ -2,11 +2,12 @@ import {Injectable} from '@angular/core';
 import {HttpParams} from '@angular/common/http';
 import {map, Observable} from 'rxjs';
 import {UpdateUserRequest, User} from '../models/user.model';
-import {HttpService} from "../../../core/services/http.service";
+import {HttpService, RequestType} from "../../../core/services/http.service";
 import {ApiResponse, PageResponse} from "../../../shared/models/api-response.model";
 import {Endpoints} from "../../../core/endpoint/endpoint.model";
 import {FilterRequest} from "../pages/user-filter/filter-request";
 import {Branch} from "../../branches/models/branch.model";
+import {ExportNotificationRequest} from "../../../shared/models/export-notification-request.model";
 
 @Injectable({
   providedIn: 'root'
@@ -80,7 +81,7 @@ export class UserService {
   profileUser(request: UpdateUserRequest): Observable<User> {
     return this.httpService.put<User>(
       `${Endpoints.USERS_ENDPOINT}/profile`,
-      request,
+      request, undefined, { requestType: RequestType.LOCAL }
     );
   }
 
@@ -96,5 +97,9 @@ export class UserService {
 
   unlockUser(id: string): Observable<ApiResponse<User>> {
     return this.httpService.put<ApiResponse<User>>(`${Endpoints.USERS_ENDPOINT}/${id}/unlock`, {});
+  }
+
+  notifyExport(request: ExportNotificationRequest): Observable<ApiResponse<void>> {
+    return this.httpService.post<ApiResponse<void>>(`${Endpoints.USERS_ENDPOINT}/exports/notify`, request);
   }
 }

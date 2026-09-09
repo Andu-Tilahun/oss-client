@@ -26,6 +26,9 @@ export class RegionCreateModalComponent {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.regionForm.isValid()) {
       this.regionForm.markAllAsTouched();
       return;
@@ -43,12 +46,8 @@ export class RegionCreateModalComponent {
         this.toastService.success(`Region created successfully`);
         this.regionCreated.emit();
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to create region',
-          'Create Region'
-        );
       }
     });
   }

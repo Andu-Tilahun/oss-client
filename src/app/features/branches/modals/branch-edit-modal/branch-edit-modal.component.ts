@@ -27,6 +27,9 @@ export class BranchEditModalComponent {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.branchForm || !this.branchForm.form.valid || !this.branch) {
       this.branchForm?.form.markAllAsTouched();
       return;
@@ -43,12 +46,8 @@ export class BranchEditModalComponent {
         this.toastService.success('Branch updated successfully');
         this.branchUpdated.emit();
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to update branch',
-          'Update Branch'
-        );
       }
     });
   }

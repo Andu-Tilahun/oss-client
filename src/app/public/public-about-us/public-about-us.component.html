@@ -5,24 +5,135 @@
       <p>Learn where we operate and how we connect investors with sustainable farms.</p>
     </div>
 
-    <div class="about-grid">
-      <div class="about-card">
-        <h3>{{ company?.name || 'AgriVest Farming' }}</h3>
-        <p>
-          We build trusted bridges between farmers and investors through transparent data, active field management,
-          and measurable outcomes.
-        </p>
+    <div class="about-layout">
+      <div class="about-map-card">
+        <div class="map-wrap">
+          <app-oss-map
+            [latitude]="latitude"
+            [longitude]="longitude"
+            [locations]="mapLocations"
+            [zoom]="9"
+            [height]="'100%'"
+            [fitBounds]="mapLocations.length > 1"
+          ></app-oss-map>
+        </div>
+        <a
+          class="about-action-btn"
+          [href]="googleMapsUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="about-action-icon" aria-hidden="true">📍</span>
+          View on Google Maps
+        </a>
       </div>
-      <div class="map-wrap">
-        <app-oss-map
-          [latitude]="company?.latitude || 9.145"
-          [longitude]="company?.longitude || 40.4897"
-          [locations]="company ? [{ lat: company.latitude, lng: company.longitude, name: company.name }] : []"
-          [zoom]="2"
-          [height]="'320px'"
-          [fitBounds]="true"
-        ></app-oss-map>
+
+      <div class="about-contact-card">
+        <div class="about-hero">
+          <img class="about-hero-image" [src]="headerImageUrl" [alt]="headquartersName" loading="lazy" />
+          <div class="about-hero-overlay">
+            <h3>{{ headquartersName }}</h3>
+            <p>{{ headquartersTagline }}</p>
+          </div>
+        </div>
+
+        <ul class="about-details">
+          <li>
+            <span class="about-detail-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11z" />
+                <circle cx="12" cy="10" r="2.5" />
+              </svg>
+            </span>
+            <div>
+              <span class="about-detail-label">Address</span>
+              <p>{{ address }}</p>
+            </div>
+          </li>
+          <li>
+            <span class="about-detail-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 2" />
+              </svg>
+            </span>
+            <div>
+              <span class="about-detail-label">Operating Hours</span>
+              <p>{{ operatingHours }}</p>
+            </div>
+          </li>
+          <li>
+            <span class="about-detail-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" />
+              </svg>
+            </span>
+            <div>
+              <span class="about-detail-label">Contact</span>
+              <p>{{ phone }}</p>
+            </div>
+          </li>
+          <li>
+            <span class="about-detail-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <path d="M3 7l9 6 9-6" />
+              </svg>
+            </span>
+            <div>
+              <span class="about-detail-label">Email</span>
+              <p>{{ email }}</p>
+            </div>
+          </li>
+        </ul>
+
+        <a
+          class="about-action-btn"
+          [href]="directionsUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="about-action-icon" aria-hidden="true">📍</span>
+          Get Directions
+        </a>
       </div>
     </div>
+
+    <!-- Branch Centers -->
+    <div *ngIf="branchCenters.length > 0" class="branch-section">
+      <h3 class="branch-section-title">Our Branch Offices</h3>
+      <div class="branch-grid">
+        <div *ngFor="let branch of branchCenters" class="branch-card">
+          <div class="branch-card-header">
+            <span class="branch-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11z" />
+                <circle cx="12" cy="10" r="2.5" />
+              </svg>
+            </span>
+            <h4>{{ branch.name }}</h4>
+          </div>
+          <ul class="branch-details">
+            <li *ngIf="branch.address">
+              <span class="branch-detail-label">Address</span>
+              <span>{{ branch.address }}</span>
+            </li>
+            <li *ngIf="branch.operatingHours">
+              <span class="branch-detail-label">Hours</span>
+              <span>{{ branch.operatingHours }}</span>
+            </li>
+            <li *ngIf="branch.phone">
+              <span class="branch-detail-label">Phone</span>
+              <span>{{ branch.phone }}</span>
+            </li>
+            <li *ngIf="branch.email">
+              <span class="branch-detail-label">Email</span>
+              <span>{{ branch.email }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>

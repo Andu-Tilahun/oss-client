@@ -1,0 +1,115 @@
+<app-page-split-layout
+  [showLeftTitle]="true"
+  leftTitle="News & Events"
+  [showRightTitle]="true"
+  rightTitle="Article Detail"
+  [rightItem]="selectedArticle"
+  [rightEmptyMessage]="'Select an article to view details.'"
+  [showRightEditButton]="true"
+  (rightEdit)="openEdit($event)"
+>
+  <ng-template #leftContent>
+    <div class="p-4">
+      <app-data-table
+        [columns]="columns"
+        [data]="articles"
+        [selectedRowId]="selectedArticle?.id ?? null"
+        [loading]="loading"
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [showPagination]="true"
+        [showIndex]="true"
+        [rowClickable]="true"
+        [rowDetailTemplate]="rightContent"
+        [showAddButton]="true"
+        [showEditButton]="false"
+        [showDeleteButton]="false"
+        [rowActions]="rowActions"
+        [noDataMessage]="'No articles yet.'"
+        (pageChange)="onPageChange($event)"
+        (addClick)="openCreate()"
+        (rowClick)="onView($event)"
+      >
+        <div extraTableHeader class="w-full min-w-0">
+          <app-news-filter
+            [(searchText)]="searchText"
+            [(selectedStatus)]="selectedStatus"
+            (filterChange)="onFilterChange()"
+            (searchChange)="onSearch()"
+            (clearFilters)="clearFilters()"
+          ></app-news-filter>
+        </div>
+      </app-data-table>
+    </div>
+  </ng-template>
+
+  <ng-template #rightContent let-article>
+    <app-news-article-view [article]="article"></app-news-article-view>
+  </ng-template>
+</app-page-split-layout>
+
+<!-- Create / Edit Modal -->
+<div *ngIf="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-gray-800">{{ editingId ? 'Edit Article' : 'New Article' }}</h3>
+      <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSave()" class="space-y-3">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+        <input formControlName="title" type="text"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+        <input formControlName="category" type="text"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="e.g. News, Sustainability" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Summary</label>
+        <textarea formControlName="summary" rows="2"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Content</label>
+        <textarea formControlName="content" rows="5"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Media</label>
+        <app-gallery-media-picker
+          [currentMediaUuid]="form.value.mediaUuid"
+          [currentKind]="form.value.kind"
+          (mediaSelected)="onMediaSelected($event)">
+        </app-gallery-media-picker>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Published At</label>
+          <input formControlName="publishedAt" type="datetime-local"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select formControlName="status"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" (click)="closeModal()"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Cancel</button>
+        <button type="submit" [disabled]="saving"
+          class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

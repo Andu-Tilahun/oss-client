@@ -1,0 +1,132 @@
+<div *ngIf="plot" class="space-y-6">
+  <div class="flex items-start justify-between gap-3">
+    <h3 class="text-lg font-bold text-gray-900">{{ plot.title }}</h3>
+    <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium bg-amber-50 text-amber-700 border-amber-200 shrink-0">
+      UNDER MAINTENANCE
+    </span>
+  </div>
+
+  <div *ngIf="plot.maintenanceReason" class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+    <p class="text-sm text-gray-700"><span class="font-semibold">Reason:</span> {{ plot.maintenanceReason }}</p>
+  </div>
+
+  <hr class="border-gray-200" />
+
+  <!-- No plan, or a plan with nobody assigned -->
+  <div *ngIf="!plan?.assignedTo" class="space-y-4">
+    <div class="flex items-start gap-2 bg-slate-50 border border-slate-200 rounded-lg p-4 text-sm text-slate-600">
+      <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+      </svg>
+      Extension worker is not assigned to show followups.
+    </div>
+
+    <button
+      *ngIf="isAdmin"
+      type="button"
+      (click)="assignRequested.emit()"
+      class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors"
+    >
+      Assign Extension Worker
+    </button>
+  </div>
+
+  <!-- Plan with an assigned extension worker -->
+  <div *ngIf="plan?.assignedTo" class="space-y-6">
+    <div class="grid grid-cols-2 gap-4 text-sm">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Assigned To</p>
+        <p class="text-gray-900 font-medium mt-1">{{ assignedWorkerName }}</p>
+        <p class="text-gray-500">{{ assignedWorkerEmail }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Status</p>
+        <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium mt-1" [ngClass]="statusPillClass(plan?.status)">
+          {{ plan?.status }}
+        </span>
+      </div>
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Start Date</p>
+        <p class="text-gray-900 mt-1">{{ plan?.startDate | date:'mediumDate' }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">End Date</p>
+        <p class="text-gray-900 mt-1">{{ plan?.endDate | date:'mediumDate' }}</p>
+      </div>
+    </div>
+
+    <div *ngIf="plan?.remark">
+      <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Remark</p>
+      <p class="text-sm text-gray-700 mt-1">{{ plan?.remark }}</p>
+    </div>
+
+    <hr class="border-gray-200" />
+
+    <!-- Editable follow-up form for the assigned extension worker -->
+    <div *ngIf="isAssignedToCurrentWorker" class="space-y-4">
+      <h4 class="text-sm font-semibold text-gray-800">Update Follow-up</h4>
+
+      <div>
+        <label class="text-sm font-medium text-gray-700">Follow-up Remark</label>
+        <textarea
+          rows="3"
+          class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+          placeholder="What was done during this follow-up..."
+          [(ngModel)]="followUpRemark"
+        ></textarea>
+      </div>
+
+      <div>
+        <label class="text-sm font-medium text-gray-700">Issues Encountered</label>
+        <textarea
+          rows="3"
+          class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+          placeholder="Any issues encountered..."
+          [(ngModel)]="issuesEncountered"
+        ></textarea>
+      </div>
+
+      <div>
+        <label class="text-sm font-medium text-gray-700">Status</label>
+        <select
+          class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+          [(ngModel)]="status"
+        >
+          <option value="SUBMITTED">Submitted</option>
+          <option value="ACTIVE">Active</option>
+          <option value="RESTORATION_END">Restoration Ended</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
+      </div>
+
+      <button
+        type="button"
+        [disabled]="submitting"
+        (click)="onSubmitFollowUp()"
+        class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        {{ submitting ? 'Saving...' : 'Save Follow-up' }}
+      </button>
+    </div>
+
+    <!-- Read-only follow-up info for admin / non-assigned viewers -->
+    <div *ngIf="!isAssignedToCurrentWorker && (plan?.followUpRemark || plan?.issuesEncountered || plan?.reportDate)" class="space-y-3">
+      <h4 class="text-sm font-semibold text-gray-800">Follow-up</h4>
+      <div *ngIf="plan?.followUpRemark">
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Remark</p>
+        <p class="text-sm text-gray-700 mt-1">{{ plan?.followUpRemark }}</p>
+      </div>
+      <div *ngIf="plan?.issuesEncountered">
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Issues Encountered</p>
+        <p class="text-sm text-gray-700 mt-1">{{ plan?.issuesEncountered }}</p>
+      </div>
+      <div *ngIf="plan?.reportDate">
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Report Date</p>
+        <p class="text-sm text-gray-700 mt-1">{{ plan?.reportDate | date:'medium' }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!plot" class="text-sm text-gray-500">Select a farm plot to view its restoration follow-up.</div>

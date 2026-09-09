@@ -145,6 +145,9 @@ export class ClearingAgentUnitRegistrationComponent implements OnInit {
   }
 
   onApplicantInfoSubmit(req: ClearingAgentApplicantCreateRequest): void {
+    if (this.savingApplicant) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.canUsePage || !this.applicantType || !this.externalId) return;
 
     const request: ClearingAgentApplicantCreateRequest = {
@@ -180,6 +183,9 @@ export class ClearingAgentUnitRegistrationComponent implements OnInit {
   }
 
   onDocumentsSubmit(documents: ClearingAgentDocumentRequest[]): void {
+    if (this.savingApplicant) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.applicantId) return;
     this.savingApplicant = true;
     this.applicantService
@@ -237,6 +243,9 @@ export class ClearingAgentUnitRegistrationComponent implements OnInit {
   }
 
   sendSelectedAsUnit(): void {
+    if (this.sendingUnit) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     const selected = this.rows.filter((r) => r.selected).map((r) => r.applicant);
     if (!selected.length) {
       this.toast.error('Select at least one agent to send');

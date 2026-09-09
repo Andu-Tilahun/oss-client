@@ -1,16 +1,31 @@
-/* Animation for modal entrance */
-@keyframes modalFadeIn {
+:host {
+  display: contents;
+}
+
+@keyframes modalBackdropIn {
   from {
     opacity: 0;
-    transform: scale(0.95);
   }
   to {
     opacity: 1;
-    transform: scale(1);
   }
 }
 
-/* Apply animation to modal */
-:host ::ng-deep .inline-block {
-  animation: modalFadeIn 0.2s ease-out;
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-backdrop {
+  animation: modalBackdropIn 0.2s ease-out;
+}
+
+.modal-panel {
+  animation: modalPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }

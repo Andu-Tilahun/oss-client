@@ -6,11 +6,20 @@ import {AuthService} from '../../../auth/services/auth.service';
 import {UserService} from '../../services/user.service';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {UpdateUserRequest, User} from '../../models/user.model';
+import {ProfileImageUploadModalComponent} from '../../../../shared/modals/profile-image-upload-modal/profile-image-upload-modal.component';
+import {ProfilePictureUploadComponent} from '../../../../shared/file-upload/profile-picture-upload/profile-picture-upload.component';
+import {environment} from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-profile-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, UserFormComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    UserFormComponent,
+    ProfileImageUploadModalComponent,
+    ProfilePictureUploadComponent,
+  ],
   templateUrl: './profile-page.component.html',
 })
 export class ProfilePageComponent implements OnInit {
@@ -18,6 +27,8 @@ export class ProfilePageComponent implements OnInit {
 
   currentUser: User | null = null;
   isSaving = false;
+  profileImageModalOpen = false;
+  readonly profileImageUploadUrl = `${environment.apiUrl}/files`;
 
   constructor(
     private authService: AuthService,
@@ -32,7 +43,46 @@ export class ProfilePageComponent implements OnInit {
     });
   }
 
+  openProfileImageModal(): void {
+    this.profileImageModalOpen = true;
+  }
+
+  onProfileImageUploaded(fileId: string): void {
+    this.userForm?.setProfileImageUuid(fileId);
+    if (!this.currentUser) {
+      return;
+    }
+
+    const request: UpdateUserRequest = {
+      email: this.currentUser.email,
+      firstName: this.currentUser.firstName,
+      lastName: this.currentUser.lastName,
+      middleName: this.currentUser.middleName,
+      gender: this.currentUser.gender,
+      profileImageUuid: fileId,
+      branchId: this.currentUser.branchId,
+    };
+
+    this.userService.profileUser(request).subscribe({
+      next: (updatedUser: User) => {
+        this.currentUser = updatedUser;
+        this.authService.updateCurrentUser(updatedUser);
+        this.toastService.success('Profile photo updated');
+      },
+      error: (error) => {
+        this.toastService.error(error.message || 'Failed to save profile photo', 'Profile Photo');
+      },
+    });
+  }
+
+  onProfileImageUploadError(message: string): void {
+    this.toastService.error(message, 'Profile Photo');
+  }
+
   saveProfile(): void {
+    if (this.isSaving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.currentUser || !this.userForm.isValid()) {
       this.userForm?.markAllAsTouched();
       return;

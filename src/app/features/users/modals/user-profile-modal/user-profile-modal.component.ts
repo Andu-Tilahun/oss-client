@@ -33,9 +33,43 @@ export class UserProfileModalComponent {
   ) {
   }
 
+  onProfileImageUploaded(fileId: string): void {
+    if (!this.user) {
+      return;
+    }
+
+    const request: UpdateUserRequest = {
+      email: this.user.email,
+      firstName: this.user.firstName,
+      lastName: this.user.lastName,
+      middleName: this.user.middleName,
+      gender: this.user.gender,
+      profileImageUuid: fileId,
+      branchId: this.user.branchId,
+    };
+
+    this.userService.profileUser(request).subscribe({
+      next: (updatedUser: User) => {
+        this.authService.updateCurrentUser(updatedUser);
+        this.toastService.success('Profile photo updated');
+      },
+      error: (error) => {
+        this.toastService.error(error.message || 'Failed to save profile photo', 'Profile Photo');
+      },
+    });
+  }
+
   onSubmit() {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.userForm.isValid() || !this.user) {
       this.userForm.markAllAsTouched();
+      return;
+    }
+
+    if (this.userForm.hasPendingProfileUpload()) {
+      this.toastService.error('Click Upload to save your profile photo first', 'Profile Photo');
       return;
     }
 

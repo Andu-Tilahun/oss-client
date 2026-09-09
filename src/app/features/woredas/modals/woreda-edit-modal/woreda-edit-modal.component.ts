@@ -42,22 +42,20 @@ export class WoredaEditModalComponent implements OnInit {
       next: response => {
         this.subcities = response.content;
       },
-      error: error => {
-        this.toastService.error(
-          error.message || 'Failed to load subcities/zones',
-          'Load Subcities/Zones'
-        );
-      }
+      error: () => {}
     });
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.woredaForm.isValid() || !this.woreda) {
       this.woredaForm.markAllAsTouched();
       return;
     }
 
-    this.isLoading = false;
+    this.isLoading = true;
     const formValue: WoredaRequest = this.woredaForm.getValue();
 
     this.woredaService.updateWoreda(this.woreda.id, formValue).subscribe({
@@ -70,10 +68,6 @@ export class WoredaEditModalComponent implements OnInit {
       },
       error: (error) => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to update woreda',
-          'Update Woreda'
-        );
       }
     });
   }

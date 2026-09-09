@@ -5,4 +5,6 @@ export interface TabItem {
   label: string;
   /** Optional SVG path(s) for an icon rendered before the label */
   iconPath?: string | string[];
+  /** Optional numeric badge shown next to the label */
+  badge?: number;
 }

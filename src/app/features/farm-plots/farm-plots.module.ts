@@ -3,7 +3,6 @@ import {CommonModule} from '@angular/common';
 import {FarmPlotsRoutingModule} from './farm-plots-routing.module';
 import {SharedModule} from '../../shared/shared.module';
 import {PageHeaderComponent} from '../../shared/components/page-header/page-header.component';
-import {ConfirmationModalComponent} from '../../shared/modals/confirmation-modal/confirmation-modal.component';
 import {FarmPlotFilterComponent} from './pages/farm-plot-filter/farm-plot-filter.component';
 import {FarmPlotListComponent} from './pages/farm-plot-list/farm-plot-list.component';
 import {FarmPlotCreateModalComponent} from './modals/farm-plot-create-modal/farm-plot-create-modal.component';
@@ -16,6 +15,7 @@ import {
 } from "../../shared/components/action-icons/action-icon-button/action-icon-button.component";
 import {FarmPlotViewComponent} from './components/farm-plot-view/farm-plot-view.component';
 import {ImageGalleryModalComponent} from '../../shared/modals/image-gallery-modal/image-gallery-modal.component';
+import {TabsComponent} from '../../shared/tabs/app-tabs/app-tabs.component';
 
 @NgModule({
   declarations: [FarmPlotListComponent],
@@ -24,11 +24,11 @@ import {ImageGalleryModalComponent} from '../../shared/modals/image-gallery-moda
     FarmPlotsRoutingModule,
     SharedModule,
     PageHeaderComponent,
-    ConfirmationModalComponent,
     FarmPlotFilterComponent,
     FarmPlotCreateModalComponent,
     FarmPlotEditModalComponent,
     ImageGalleryModalComponent,
+    TabsComponent,
     PageSplitLayoutComponent,
     FarmPlotViewComponent,
   ],

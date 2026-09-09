@@ -8,8 +8,20 @@
 @layer base {
   html,
   body {
-    @apply m-0 p-0 h-full;
+    @apply m-0 p-0 h-full overscroll-y-none;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  body.modal-open {
+    overflow: hidden;
+  }
+
+  /* Dashboard shell: <main> is meant to be the only scroll container. Without this, html/body's
+     bare `height: 100%` leaves the document itself as a second, latent scroll path alongside
+     <main> whenever the shell's rendered height doesn't exactly match the visual viewport --
+     exactly the gap that lets a swipe get "eaten" instead of reaching <main> or the header. */
+  body:has(.app-shell) {
+    overflow: hidden;
   }
 
   /* Ensure all elements inherit the font (buttons, inputs, menus, modals, etc.) */
@@ -55,16 +67,16 @@ nav button,
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #d1fae5;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: #065f46;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #047857;
 }
 
 /* Public header: lock page scroll while mobile nav is open (frosted overlay blocks interaction) */
@@ -72,4 +84,9 @@ html:has(#public-header-menu-toggle:checked),
 body:has(#public-header-menu-toggle:checked) {
   overflow: hidden;
   touch-action: none;
+}
+
+/* Login: paint the canvas so overscroll / keyboard-driven scroll never shows white under the card */
+body:has(app-login) {
+  background-color: #0e4129;
 }

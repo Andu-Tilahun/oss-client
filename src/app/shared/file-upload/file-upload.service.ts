@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpEvent, HttpEventType} from '@angular/common/http';
-import {map, Observable} from 'rxjs';
+import {filter, map, Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
 
 export interface FileMetadata {
@@ -27,14 +27,15 @@ export class FileUploadService {
   constructor(private http: HttpClient) {
   }
 
-  uploadFile(file: File): Observable<UploadProgress> {
+  uploadFile(file: File, uploadUrl?: string): Observable<UploadProgress> {
+    const url = uploadUrl ?? this.STORAGE_API_URL;
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<FileMetadata>(this.STORAGE_API_URL, formData, {
+    return this.http.post<FileMetadata>(url, formData, {
       reportProgress: true,
       observe: 'events'
     }).pipe(
-      map((event: HttpEvent<any>) => {
+      map((event: HttpEvent<any>): UploadProgress | null => {
         switch (event.type) {
           case HttpEventType.UploadProgress:
             const progress = event.total ? Math.round((100 * event.loaded) / event.total) : 0;
@@ -42,14 +43,23 @@ export class FileUploadService {
           case HttpEventType.Response:
             return {progress: 100, file: event.body};
           default:
-            return {progress: 0};
+            return null;
         }
-      })
+      }),
+      filter((x): x is UploadProgress => x !== null)
     );
   }
 
   getFileMetadata(fileId: string): Observable<FileMetadata> {
     return this.http.get<FileMetadata>(`${this.STORAGE_API_URL}/${fileId}/metadata`);
+  }
+
+  getFilesByIds(ids: string[]): Observable<FileMetadata[]> {
+    return this.http.post<FileMetadata[]>(`${this.STORAGE_API_URL}/batch`, { ids });
+  }
+
+  listFiles(): Observable<FileMetadata[]> {
+    return this.http.get<FileMetadata[]>(this.STORAGE_API_URL);
   }
 
   getPresignedUrl(fileId: string): Observable<string> {
@@ -64,5 +74,9 @@ export class FileUploadService {
 
   getFileUrl(fileId: string | undefined): string {
     return `${this.STORAGE_API_URL}/${fileId}`;
+  }
+
+  getStreamUrl(fileId: string | undefined): string {
+    return `${this.STORAGE_API_URL}/${fileId}/stream`;
   }
 }

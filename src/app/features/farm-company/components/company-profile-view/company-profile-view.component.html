@@ -27,11 +27,11 @@
         <app-oss-map
           [interactive]="false"
           [height]="'300px'"
-          [zoom]="14"
+          [zoom]="9"
           [latitude]="companyProfile.latitude"
           [longitude]="companyProfile.longitude"
           [locations]="[{ lat: companyProfile.latitude, lng: companyProfile.longitude, name: companyProfile.name }]"
-          [fitBounds]="true"
+          [fitBounds]="false"
         ></app-oss-map>
       </div>
     </app-detail-section>

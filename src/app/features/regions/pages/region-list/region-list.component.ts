@@ -57,14 +57,9 @@ export class RegionListComponent {
           this.regions = response.content;
           this.total = response.totalElements;
           this.loading = false;
-          this.toastService.success(`Regions retrieved successfully`);
         }
       },
-      error: (error) => {
-        this.toastService.error(
-          error.message || 'Failed to fetch regions',
-          'Fetch Regions'
-        );
+      error: () => {
         this.loading = false;
       }
     });
@@ -117,13 +112,7 @@ export class RegionListComponent {
         this.selectedRegion = null;
         this.loadRegions();
       },
-      error: (error) => {
-        console.error('Error deleting region:', error);
-        this.toastService.error(
-          error.message || 'Failed to delete region',
-          'Delete Region'
-        );
-      }
+      error: () => {}
     });
   }
 

@@ -5,8 +5,8 @@
   (back)="goBack()"
 >
   <ng-template #mainContent>
-    <div class="p-6">
-      <app-region-view [id]="id ?? undefined"></app-region-view>
+    <div class="px-0 md:px-6 py-6">
+      <app-region-view [region]="region"></app-region-view>
     </div>
   </ng-template>
 </app-page-header>

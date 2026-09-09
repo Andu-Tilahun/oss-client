@@ -42,16 +42,14 @@ export class SubcityEditModalComponent implements OnInit {
       next: response => {
         this.regions = response.content;
       },
-      error: error => {
-        this.toastService.error(
-          error.message || 'Failed to load regions',
-          'Load Regions'
-        );
-      }
+      error: () => {}
     });
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.subcityForm.isValid() || !this.subcity) {
       this.subcityForm.markAllAsTouched();
       return;
@@ -70,10 +68,6 @@ export class SubcityEditModalComponent implements OnInit {
       },
       error: (error) => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to update subcity/zone',
-          'Update Subcity/Zone'
-        );
       }
     });
   }
