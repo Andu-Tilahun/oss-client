@@ -10,6 +10,7 @@ const MOCK_TEMPLATE: MessageTemplate = {
   type: 'EMAIL',
   purpose: 'USER_INVITATION',
   subject: 'Welcome!',
+  variables: '["firstName","accessUrl"]',
   body: '<p>Hello</p>',
   active: true,
   defaultTemplate: true,
@@ -128,6 +129,11 @@ describe('EmailTemplatesPageComponent', () => {
     expect(component.form.get('body')?.value).toBe('<p>Hello</p>');
   });
 
+  it('openEdit patches variables as a comma-separated list', () => {
+    component.openEdit(MOCK_TEMPLATE);
+    expect(component.form.get('variables')?.value).toBe('firstName, accessUrl');
+  });
+
   it('openEdit does nothing when called with null', () => {
     component.showModal = false;
     component.openEdit(null);
@@ -177,6 +183,25 @@ describe('EmailTemplatesPageComponent', () => {
     expect(mockService.updateTemplate).toHaveBeenCalledWith(
       'uuid-1',
       expect.objectContaining({ name: 'Updated', type: 'EMAIL' })
+    );
+  });
+
+  it('save round-trips the variables field back into a JSON array string', () => {
+    component.openEdit(MOCK_TEMPLATE);
+    component.form.patchValue({ variables: 'firstName, accessUrl, plotTitle' });
+    component.save();
+    expect(mockService.updateTemplate).toHaveBeenCalledWith(
+      'uuid-1',
+      expect.objectContaining({ variables: '["firstName","accessUrl","plotTitle"]' })
+    );
+  });
+
+  it('save stores an empty array when variables is left blank', () => {
+    component.form.patchValue({ name: 'New', body: '<p>body</p>', variables: '' });
+    component.editingId = null;
+    component.save();
+    expect(mockService.createTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({ variables: '[]' })
     );
   });
 

@@ -18,8 +18,8 @@ import {PageSplitRightAction} from '../components/page-split-layout/page-split-l
 import {ActionIconType} from '../components/action-icons/action-icon-button/action-icon-button.component';
 
 const DEFAULT_PAGE_SIZE = 10;
-/** Matches Tailwind's `lg` breakpoint, and `app-page-split-layout`'s own stacking breakpoint. */
-const LG_BREAKPOINT_PX = 1024;
+/** Matches `app-page-split-layout`'s own stacking breakpoint — must stay numerically identical. */
+const DESKTOP_BREAKPOINT_PX = 1280;
 
 @Component({
   selector: 'app-data-table',
@@ -64,9 +64,9 @@ export class DataTableComponent<T> {
 
   /**
    * Optional per-row detail content, rendered inline in an expanded row when a row is tapped —
-   * but only below the `lg` breakpoint (on desktop, consumers show detail in `app-page-split-layout`'s
-   * side panel instead; pass the *same* `TemplateRef` to both to avoid maintaining two copies).
-   * Context: `{ $implicit: item }`, matching `page-split-layout`'s `#rightContent`.
+   * but only below {@link DESKTOP_BREAKPOINT_PX} (on desktop, consumers show detail in
+   * `app-page-split-layout`'s side panel instead; pass the *same* `TemplateRef` to both to avoid
+   * maintaining two copies). Context: `{ $implicit: item }`, matching `page-split-layout`'s `#rightContent`.
    */
   @Input() rowDetailTemplate: TemplateRef<any> | null = null;
 
@@ -80,7 +80,7 @@ export class DataTableComponent<T> {
   /** Id of the row currently expanded inline (mobile/tablet only). */
   expandedRowId: string | number | null = null;
 
-  /** Below `lg`, row taps expand inline detail instead of relying on a side panel. */
+  /** Below {@link DESKTOP_BREAKPOINT_PX}, row taps expand inline detail instead of relying on a side panel. */
   protected isMobile = false;
 
   /**
@@ -172,7 +172,7 @@ export class DataTableComponent<T> {
   }
 
   private updateIsMobile(): void {
-    this.isMobile = typeof window !== 'undefined' ? window.innerWidth < LG_BREAKPOINT_PX : false;
+    this.isMobile = typeof window !== 'undefined' ? window.innerWidth < DESKTOP_BREAKPOINT_PX : false;
   }
 
   /** Visible (non-scrolled) width of the table's own horizontal-scroll container. */

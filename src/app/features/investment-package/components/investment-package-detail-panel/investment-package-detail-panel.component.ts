@@ -78,6 +78,15 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
   @Input() packageInvestmentsLoading = false;
   @Input() biddingLeaderboard: InvestmentRecord[] = [];
 
+  /**
+   * Whether this panel is nested inside a split-layout panel whose right column already gets a
+   * `lg:bg-white` background (the common case), vs. rendered as a standalone full page with no
+   * white ancestor. Controls whether the tabs' sticky header gets its own opaque background — see
+   * `app-tabs`'s `stickyBgClass`. Defaults to true since that's how this panel is used everywhere
+   * except the standalone `.../package/:id` route.
+   */
+  @Input() embedded = true;
+
   @Output() tabChange = new EventEmitter<string>();
   @Output() extensionWorkerAssigned = new EventEmitter<InvestmentPackage>();
   @Output() candidatesChosen = new EventEmitter<void>();
@@ -922,7 +931,13 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
 
     if (this.isInvestorRole) {
       const currentUserId = this.authService.getCurrentUser()?.id;
-      if (!currentUserId || !this.investmentPackage?.investorIdList?.includes(currentUserId)) {
+      // For BIDDING packages, investorIdList holds every original applicant, not just the
+      // winner, but the agreement is scoped to the winner only. Use the winner-only investorId
+      // instead, so losing bidders don't attempt to fetch (and get rejected from) the agreement.
+      const isOwner = this.isBiddingType
+        ? !!currentUserId && this.investmentPackage?.investorId === currentUserId
+        : !!currentUserId && !!this.investmentPackage?.investorIdList?.includes(currentUserId);
+      if (!isOwner) {
         this.agreement = null;
         this.loadedAgreementId = null;
         return;

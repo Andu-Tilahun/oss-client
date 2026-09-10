@@ -58,6 +58,7 @@ export class EmailTemplatesPageComponent implements OnInit {
       name:            ['', Validators.required],
       purpose:         [null],
       subject:         [''],
+      variables:       [''],
       body:            ['', Validators.required],
       active:          [true],
       defaultTemplate: [false],
@@ -110,7 +111,7 @@ export class EmailTemplatesPageComponent implements OnInit {
   openCreate(): void {
     this.editingId = null;
     const sampleBody = this.buildSampleHtml();
-    this.form.reset({ active: true, defaultTemplate: false, name: '', purpose: null, subject: '', body: sampleBody });
+    this.form.reset({ active: true, defaultTemplate: false, name: '', purpose: null, subject: '', variables: '', body: sampleBody });
     this.previewHtml = this.getPreviewHtml(sampleBody);
     this.showModal = true;
   }
@@ -120,10 +121,26 @@ export class EmailTemplatesPageComponent implements OnInit {
     this.editingId = t.id;
     this.form.patchValue({
       name: t.name, purpose: t.purpose || null, subject: t.subject || '',
+      variables: this.variablesToText(t.variables),
       body: t.body, active: t.active, defaultTemplate: t.defaultTemplate,
     });
     this.previewHtml = this.getPreviewHtml(t.body);
     this.showModal = true;
+  }
+
+  private variablesToText(json?: string): string {
+    if (!json) return '';
+    try {
+      const arr = JSON.parse(json);
+      return Array.isArray(arr) ? arr.join(', ') : '';
+    } catch {
+      return '';
+    }
+  }
+
+  private variablesToJson(text?: string): string {
+    const names = (text || '').split(',').map(s => s.trim()).filter(Boolean);
+    return JSON.stringify(names);
   }
 
   save(): void {
@@ -132,7 +149,11 @@ export class EmailTemplatesPageComponent implements OnInit {
     }
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving = true;
-    const request: MessageTemplateRequest = { ...this.form.value, type: 'EMAIL' };
+    const request: MessageTemplateRequest = {
+      ...this.form.value,
+      type: 'EMAIL',
+      variables: this.variablesToJson(this.form.value.variables),
+    };
     const obs = this.editingId
       ? this.service.updateTemplate(this.editingId, request)
       : this.service.createTemplate(request);

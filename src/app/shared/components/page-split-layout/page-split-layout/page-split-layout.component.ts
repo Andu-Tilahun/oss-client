@@ -3,8 +3,12 @@ import {Component, ContentChild, EventEmitter, HostListener, Input, OnInit, Outp
 import {ActionIconButtonComponent} from '../../action-icons/action-icon-button/action-icon-button.component';
 import {PageSplitRightAction} from './page-split-right-action.model';
 
-/** Matches Tailwind's `lg` breakpoint, where this layout switches from stacked to side-by-side. */
-const LG_BREAKPOINT_PX = 1024;
+/**
+ * Above Tailwind's `lg` breakpoint (1024px), with headroom for OS display scaling/zoom — common
+ * on Windows laptops at 125-150% scaling — which can report an effective CSS width well below the
+ * physical resolution, incorrectly classifying a real desktop/laptop window as mobile.
+ */
+const DESKTOP_BREAKPOINT_PX = 1280;
 
 @Component({
   selector: 'app-page-split-layout',
@@ -15,10 +19,10 @@ const LG_BREAKPOINT_PX = 1024;
 })
 export class PageSplitLayoutComponent implements OnInit {
   /**
-   * Below the `lg` breakpoint, the right (detail) column doesn't render at all — on mobile/tablet,
-   * consumers instead show detail content inline in an expanded table row (see `app-data-table`'s
-   * `rowDetailTemplate`). Computed via resize listener (not CSS-only) so the detail component here
-   * is never mounted at the same time as the inline one.
+   * Below {@link DESKTOP_BREAKPOINT_PX}, the right (detail) column doesn't render at all —
+   * on mobile/tablet, consumers instead show detail content inline in an expanded table row
+   * (see `app-data-table`'s `rowDetailTemplate`). Computed via resize listener (not CSS-only)
+   * so the detail component here is never mounted at the same time as the inline one.
    */
   protected isMobile = false;
 
@@ -32,7 +36,7 @@ export class PageSplitLayoutComponent implements OnInit {
   }
 
   private updateIsMobile(): void {
-    this.isMobile = typeof window !== 'undefined' ? window.innerWidth < LG_BREAKPOINT_PX : false;
+    this.isMobile = typeof window !== 'undefined' ? window.innerWidth < DESKTOP_BREAKPOINT_PX : false;
   }
   @Input() leftTitle: string = '';
   @Input() rightTitle: string = '';

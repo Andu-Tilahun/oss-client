@@ -1,6 +1,6 @@
 <div [class]="noCard ? '' : 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden'">
   <div
-    [class]="(noCard ? '' : 'bg-white rounded-t-xl border-b border-gray-200') + ' sticky top-0 z-10 px-4 py-2 lg:px-6 lg:py-0 flex items-center gap-4'"
+    [class]="(noCard ? stickyBgClass : 'bg-white rounded-t-xl border-b border-gray-200') + ' sticky top-0 z-10 px-4 py-2 lg:px-6 lg:py-0 flex items-center gap-4'"
     [ngClass]="centered ? 'justify-end lg:justify-center' : 'justify-end lg:justify-between'">
     <nav class="hidden lg:flex"
          [class]="(centered ? 'gap-2 justify-center py-3 flex-1' : '-mb-px space-x-8 flex-1') + ' overflow-x-auto min-w-0 scrollbar-hide'"

@@ -43,6 +43,16 @@ export class TabsComponent {
   @Input() noCard = false;
 
   /**
+   * Extra class(es) applied to the sticky header bar's own background when `noCard` is true
+   * (ignored otherwise, since the card chrome already supplies `bg-white`). A sticky bar with no
+   * background of its own lets scrolled-past content bleed through it visually, so pass this
+   * whenever the tabs sit inside an independently-scrolling container — e.g. `'lg:bg-white'` when
+   * the ancestor providing the "boxed" white background (per `noCard`'s own doc) only does so at
+   * that breakpoint. Defaults to empty so existing `noCard` consumers keep their current look.
+   */
+  @Input() stickyBgClass = '';
+
+  /**
    * When true, the mobile/tablet accordion's active-tab highlight uses the app's green brand
    * color instead of the default blue — for a tab group that should stand out/be easy to spot
    * at a glance (e.g. an investor's "My Farm / Explore / History" tabs). Opt-in per instance;
