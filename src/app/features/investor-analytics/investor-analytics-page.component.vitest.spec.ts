@@ -22,7 +22,8 @@ function mockPackage(overrides: Partial<InvestmentPackage>): InvestmentPackage {
     minimumContribution: 500,
     fundingStatus: 'OPEN' as any,
     investmentPackageType: 'CROWDFUNDING',
-    expectedInvestorNumber: 10,
+    roiPercent: 12,
+    remainingCapacity: 10000,
     investorIdList: [],
     farmPlot: {id: 'plot-1', title: 'Plot 1', size: 10, sizeType: 'HECTARES', soilType: 'LOAMY'} as any,
     ...overrides,
@@ -152,9 +153,9 @@ describe('InvestorAnalyticsPageComponent', () => {
     expect(crypto?.value).toBe(3000);
   });
 
-  it('crowdfunding fill rate computes investorIdList.length / expectedInvestorNumber for open CROWDFUNDING packages only', () => {
+  it('crowdfunding funding progress computes (targetAmount - remainingCapacity) / targetAmount for open CROWDFUNDING packages only', () => {
     const openPackages = [
-      mockPackage({id: 'p1', investmentPackageType: 'CROWDFUNDING', expectedInvestorNumber: 10, investorIdList: ['a', 'b', 'c', 'd', 'e']}),
+      mockPackage({id: 'p1', investmentPackageType: 'CROWDFUNDING', targetAmount: 10000, remainingCapacity: 5000}),
       mockPackage({id: 'p2', investmentPackageType: 'LEASING'}),
     ];
     mockInvestmentPackageService.filterPublishedInvestmentPackages.mockReturnValue(of(mockPage(openPackages)));
@@ -163,7 +164,7 @@ describe('InvestorAnalyticsPageComponent', () => {
 
     expect(component.crowdfundingFillRate).toHaveLength(1);
     expect(component.crowdfundingFillRate[0].value).toBe(50);
-    expect(component.crowdfundingFillRate[0].investorCount).toBe(5);
+    expect(component.crowdfundingFillRate[0].fundedAmount).toBe(5000);
   });
 
   it('minimum contribution bucketing places packages into the correct tier', () => {

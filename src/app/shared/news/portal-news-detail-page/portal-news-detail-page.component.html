@@ -1,0 +1,94 @@
+<div class="max-w-3xl mx-auto px-4 py-6">
+  <button type="button" (click)="goBack()" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4">
+    &larr; Back to News
+  </button>
+
+  <div *ngIf="loading" class="text-center text-gray-400 py-16">Loading article...</div>
+
+  <div *ngIf="!loading && error" class="rounded-2xl border border-red-200 bg-red-50 px-6 py-8 text-center text-red-600">
+    Unable to load this article right now. Please try again later.
+  </div>
+
+  <article *ngIf="!loading && !error && article">
+    <p class="text-xs text-gray-400 mb-2">{{ formatDate(article.publishedAt) }} &middot; {{ article.category || 'News' }}</p>
+    <h1 class="text-2xl font-bold text-gray-900 mb-4">{{ article.title }}</h1>
+
+    <div *ngIf="coverUrl" class="rounded-xl overflow-hidden mb-6 bg-gray-50">
+      <img *ngIf="article.kind !== 'VIDEO'" [src]="coverUrl" [alt]="article.title" class="w-full max-h-96 object-cover" />
+      <video *ngIf="article.kind === 'VIDEO'" [src]="coverUrl" controls class="w-full max-h-96"></video>
+    </div>
+
+    <p *ngIf="article.summary" class="text-base font-medium text-gray-700 mb-4">{{ article.summary }}</p>
+    <p *ngIf="article.content" class="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed mb-8">{{ article.content }}</p>
+
+    <section *ngIf="galleryItems.length" class="gallery-section">
+      <h2 class="text-lg font-semibold text-gray-900 mb-3">Gallery</h2>
+      <div class="gallery-grid">
+        <figure *ngFor="let item of galleryItems; index as i" class="gallery-tile">
+          <button type="button" class="gallery-tile-btn" (click)="openGallery(i)" aria-label="View media">
+            <img
+              *ngIf="item.kind === 'image'"
+              [src]="item.src"
+              loading="lazy"
+              class="gallery-media"
+            />
+            <video
+              *ngIf="item.kind === 'video'"
+              class="gallery-media"
+              [src]="item.src"
+              muted
+              loop
+              playsinline
+              preload="metadata"
+              (mouseenter)="onVideoEnter($event)"
+              (mouseleave)="onVideoLeave($event)"
+            ></video>
+          </button>
+        </figure>
+      </div>
+    </section>
+  </article>
+</div>
+
+<div
+  *ngIf="activeItem"
+  class="gallery-detail-overlay"
+  role="dialog"
+  aria-modal="true"
+>
+  <button type="button" class="gallery-detail-backdrop" (click)="closeGallery()" aria-label="Close"></button>
+
+  <div class="gallery-detail-panel">
+    <div class="gallery-detail-media-wrap">
+      <button type="button" class="gallery-detail-close" (click)="closeGallery()" aria-label="Close">&times;</button>
+
+      <img
+        *ngIf="activeItem.kind === 'image'"
+        class="gallery-detail-media"
+        [src]="activeItem.src"
+      />
+
+      <video
+        *ngIf="activeItem.kind === 'video'"
+        #modalVideo
+        class="gallery-detail-media gallery-detail-media--video"
+        [src]="activeItem.src"
+        autoplay
+        muted
+        loop
+        playsinline
+        disablePictureInPicture
+        controlsList="nodownload nofullscreen noremoteplayback"
+      ></video>
+    </div>
+
+    <div class="gallery-detail-nav">
+      <button type="button" class="gallery-nav-btn" (click)="goPrevious()" aria-label="Previous item">
+        &#10094; Previous
+      </button>
+      <button type="button" class="gallery-nav-btn" (click)="goNext()" aria-label="Next item">
+        Next &#10095;
+      </button>
+    </div>
+  </div>
+</div>

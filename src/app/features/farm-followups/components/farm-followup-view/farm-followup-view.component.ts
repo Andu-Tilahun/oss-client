@@ -2,6 +2,7 @@ import {Component, inject, Input, OnChanges, SimpleChanges} from '@angular/core'
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {FarmFollowUp, FarmFollowUpReport, FarmFollowUpReportCreateRequest} from '../../models/farm-followup.model';
+import {User} from '../../../users/models/user.model';
 import {DetailCardComponent} from '../../../../shared/components/detail-field/detail-card/detail-card.component';
 import {DetailSectionComponent} from '../../../../shared/components/detail-field/detail-section/detail-section.component';
 import {DetailFieldComponent} from '../../../../shared/components/detail-field/detail-field/detail-field.component';
@@ -172,5 +173,16 @@ export class FarmFollowUpViewComponent implements OnChanges {
     this.reportContent = '';
     this.reportFileUuids = [];
     this.reportFileSlots = [0];
+  }
+
+  formatUserName(user: User | null | undefined): string {
+    if (!user) return '-';
+    return [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || '-';
+  }
+
+  get completedByLabel(): string {
+    if (!this.followUp || this.followUp.taskStatus === 'ACTIVE') return '-';
+    if (!this.followUp.completedBy) return 'System';
+    return this.formatUserName(this.followUp.completedByUser);
   }
 }

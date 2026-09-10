@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SystemConfigService } from '../../features/system-config/services/system-config.service';
 import { NewsArticle } from '../../features/system-config/models/news-article.model';
@@ -28,8 +28,10 @@ const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1500382017468-9049fed74
   templateUrl: './public-news.component.html',
   styleUrl: './public-news.component.css',
 })
-export class PublicNewsComponent implements OnInit {
+export class PublicNewsComponent implements OnInit, AfterViewInit, OnDestroy {
+  private static readonly MOBILE_BREAKPOINT_PX = 900;
   private readonly pageSize = 5;
+  private readonly feedPageSize = 8;
 
   allNewsItems: PublicNewsItem[] = [];
   loading = true;
@@ -38,6 +40,18 @@ export class PublicNewsComponent implements OnInit {
   sidebarPage = 0;
   activeItemIndex = 0;
   bodyExpanded = false;
+
+  isMobile = typeof window !== 'undefined' && window.innerWidth <= PublicNewsComponent.MOBILE_BREAKPOINT_PX;
+
+  feedItems: PublicNewsItem[] = [];
+  feedPage = 0;
+  feedLoadingMore = false;
+  feedReachedEnd = false;
+  loopBannerBeforeIndex = new Set<number>();
+  expandedFeedItemIds = new Set<string>();
+
+  @ViewChild('feedSentinel') feedSentinel?: ElementRef<HTMLElement>;
+  private observer?: IntersectionObserver;
 
   constructor(private systemConfigService: SystemConfigService) {}
 
@@ -53,6 +67,77 @@ export class PublicNewsComponent implements OnInit {
         this.error = true;
       },
     });
+
+    if (this.isMobile) {
+      this.loadNextFeedPage();
+    }
+  }
+
+  ngAfterViewInit(): void {
+    this.trySetupObserver();
+  }
+
+  ngOnDestroy(): void {
+    this.observer?.disconnect();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    const wasMobile = this.isMobile;
+    this.isMobile = typeof window !== 'undefined' && window.innerWidth <= PublicNewsComponent.MOBILE_BREAKPOINT_PX;
+    if (this.isMobile && !wasMobile && this.feedItems.length === 0) {
+      this.loadNextFeedPage();
+    }
+  }
+
+  /**
+   * Idempotent: safe to call repeatedly. Needed because ngAfterViewInit only fires once, but the
+   * sentinel element (and thus the need for an observer) only exists once the user has switched into
+   * mobile mode — which can happen after the initial view check if they resize down without reloading.
+   */
+  private trySetupObserver(): void {
+    if (this.observer || !this.isMobile || typeof IntersectionObserver === 'undefined' || !this.feedSentinel) {
+      return;
+    }
+    this.observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting && !this.feedLoadingMore) {
+        this.loadNextFeedPage();
+      }
+    }, { rootMargin: '200px' });
+    this.observer.observe(this.feedSentinel.nativeElement);
+  }
+
+  loadNextFeedPage(): void {
+    if (this.feedLoadingMore) return;
+    this.feedLoadingMore = true;
+    const requestedPage = this.feedReachedEnd ? 0 : this.feedPage;
+    this.systemConfigService.getPublishedNews(requestedPage, this.feedPageSize).subscribe({
+      next: (page) => {
+        if (this.feedReachedEnd) {
+          this.loopBannerBeforeIndex.add(this.feedItems.length);
+        }
+        this.feedItems = [...this.feedItems, ...page.content.map(a => this.toPublicItem(a))];
+        this.feedReachedEnd = page.last;
+        this.feedPage = page.last ? 0 : requestedPage + 1;
+        this.feedLoadingMore = false;
+        setTimeout(() => this.trySetupObserver(), 0);
+      },
+      error: () => {
+        this.feedLoadingMore = false;
+      },
+    });
+  }
+
+  toggleFeedItemExpanded(id: string): void {
+    if (this.expandedFeedItemIds.has(id)) {
+      this.expandedFeedItemIds.delete(id);
+    } else {
+      this.expandedFeedItemIds.add(id);
+    }
+  }
+
+  trackByFeedIndex(index: number): number {
+    return index;
   }
 
   private toPublicItem(article: NewsArticle): PublicNewsItem {

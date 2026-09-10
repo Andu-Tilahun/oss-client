@@ -336,6 +336,34 @@ export const routes: Routes = [
     data: { roles: ['INVESTOR'] },
   },
   {
+    path: 'investor-news',
+    loadComponent: () =>
+      import('./shared/news/portal-news-page/portal-news-page.component').then(m => m.PortalNewsPageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['INVESTOR'] },
+  },
+  {
+    path: 'investor-news/:id',
+    loadComponent: () =>
+      import('./shared/news/portal-news-detail-page/portal-news-detail-page.component').then(m => m.PortalNewsDetailPageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['INVESTOR'] },
+  },
+  {
+    path: 'farm-plots-extension-news',
+    loadComponent: () =>
+      import('./shared/news/portal-news-page/portal-news-page.component').then(m => m.PortalNewsPageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['EXTENSION_WORKER'] },
+  },
+  {
+    path: 'farm-plots-extension-news/:id',
+    loadComponent: () =>
+      import('./shared/news/portal-news-detail-page/portal-news-detail-page.component').then(m => m.PortalNewsDetailPageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['EXTENSION_WORKER'] },
+  },
+  {
     path: 'investment-package-types',
     loadChildren: () => import('./features/investment-package-types/investment-package-types.module').then(m => m.InvestmentPackageTypesModule),
     canActivate: [AuthGuard, RoleGuard],

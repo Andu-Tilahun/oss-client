@@ -218,10 +218,22 @@
 
               <!-- Default Text -->
               <ng-container *ngSwitchDefault>
-                <span [class]="'dt-cell-truncate ' + resolveCellClass(column, item)"
-                      [style.max-width.px]="column.maxCellWidth || 320"
-                      [title]="column.value ? column.value(item) : ''">
-                  {{ column.value ? column.value(item) : '' }}
+                <span class="relative inline-block max-w-full align-middle">
+                  <span
+                    *ngIf="column.cornerBadge?.(item) as badge"
+                    class="absolute -top-1.5 -left-1.5 z-10 inline-flex items-center justify-center w-3.5 h-3.5 rounded-full ring-2 ring-white"
+                    [ngClass]="badge.colorClass"
+                    [title]="badge.title || ''"
+                  >
+                    <svg *ngIf="badge.icon === 'check'" class="w-2 h-2 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </span>
+                  <span [class]="'dt-cell-truncate ' + resolveCellClass(column, item)"
+                        [style.max-width.px]="column.maxCellWidth || 320"
+                        [title]="column.value ? column.value(item) : ''">
+                    {{ column.value ? column.value(item) : '' }}
+                  </span>
                 </span>
               </ng-container>
             </ng-container>

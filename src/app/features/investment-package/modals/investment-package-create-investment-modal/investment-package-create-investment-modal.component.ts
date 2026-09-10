@@ -127,6 +127,16 @@ export class InvestmentPackageCreateInvestmentModalComponent implements OnChange
     return this.investmentPackage?.minimumContribution ?? 0;
   }
 
+  get remainingCapacity(): number {
+    return this.investmentPackage?.remainingCapacity ?? 0;
+  }
+
+  get roiPreview(): number {
+    const amount = Number(this.form.get('amount')?.value) || 0;
+    const roiPercent = this.investmentPackage?.roiPercent ?? 0;
+    return amount * roiPercent / 100;
+  }
+
   get selectedBankAccount(): BankAccount | null {
     const id = this.form.get('bankAccountId')?.value;
     return this.bankAccounts.find(b => b.id === id) ?? null;
@@ -325,6 +335,8 @@ export class InvestmentPackageCreateInvestmentModalComponent implements OnChange
         return !isNaN(v) && v > minBid ? null : {aboveMin: true};
       };
       this.form.get('amount')?.setValidators([Validators.required, aboveMin]);
+    } else if (!this.leasePaymentMode && this.remainingCapacity > 0) {
+      this.form.get('amount')?.setValidators([Validators.required, Validators.min(minBid), Validators.max(this.remainingCapacity)]);
     } else {
       this.form.get('amount')?.setValidators([Validators.required, Validators.min(minBid)]);
     }

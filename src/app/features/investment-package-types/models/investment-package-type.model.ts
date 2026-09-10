@@ -37,7 +37,8 @@ export interface InvestmentPackageTypeAgreement {
   attachmentIdList?: string[];
   paymentStatus?: InvestmentPaymentStatus;
   investorIdList?: string[];
-  expectedInvestorNumber?: number;
+  roiPercent?: number;
+  remainingCapacity?: number;
   fundingDeadline?: string;
   fundingStatus: FundingStatus;
   investmentPackageType?: InvestmentPackageType;

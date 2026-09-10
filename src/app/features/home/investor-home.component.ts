@@ -290,29 +290,20 @@ export class InvestorHomeComponent implements OnInit {
     return months.map((m) => ({label: m.label, count: counts[m.key], amount: amounts[m.key]}));
   }
 
+  /** Amount-weighted ROI %: each record's roi is already an absolute return (amount × the package's
+   *  roiPercent / 100), so the weighted average simplifies to 100 × Σroi / Σamount. */
   private weightedRoi(investments: InvestmentRecord[]): number | null {
-    let num = 0;
-    let den = 0;
+    let totalRoi = 0;
+    let totalAmount = 0;
     for (const i of investments) {
-      const pct = this.parseRoiPercent(i.roi);
-      if (pct === null) continue;
+      if (i.roi === undefined || i.roi === null) continue;
       const a = i.amount ?? 0;
       if (a <= 0) continue;
-      num += a * pct;
-      den += a;
+      totalRoi += i.roi;
+      totalAmount += a;
     }
-    if (den <= 0) return null;
-    return Math.round((num / den) * 10) / 10;
-  }
-
-  private parseRoiPercent(roi: string | undefined): number | null {
-    if (roi === undefined || roi === null) return null;
-    const s = String(roi).trim();
-    if (!s) return null;
-    const withPct = s.endsWith('%') ? parseFloat(s.slice(0, -1)) : parseFloat(s);
-    if (!Number.isFinite(withPct)) return null;
-    if (withPct > 0 && withPct <= 1) return withPct * 100;
-    return withPct;
+    if (totalAmount <= 0) return null;
+    return Math.round((totalRoi / totalAmount) * 1000) / 10;
   }
 
   private titleCase(s: string): string {

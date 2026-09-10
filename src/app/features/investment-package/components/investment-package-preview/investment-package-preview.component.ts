@@ -20,7 +20,7 @@ export interface InvestmentPackagePreviewData {
   fundingDeadline?: string;
   targetAmount?: number;
   minimumContribution?: number;
-  expectedInvestorNumber?: number;
+  roiPercent?: number | null;
   fundingStatus?: FundingStatus;
   allowedPaymentMethods?: InvestmentPaymentMethod[];
   allowedBankAccountNames?: string[];

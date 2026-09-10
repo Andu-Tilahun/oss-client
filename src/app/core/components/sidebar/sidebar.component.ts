@@ -48,6 +48,10 @@ export class SidebarComponent implements OnInit {
     this.mobileOpenChange.emit(false);
   }
 
+  logout(): void {
+    this.authService.logout().subscribe();
+  }
+
   userAvatar(user: User | null): string {
     if (user?.profileUrl) {
       return user.profileUrl;
@@ -114,6 +118,9 @@ export class SidebarComponent implements OnInit {
     }
     if (item.route === '/farm-plots' && role === 'EXTENSION_WORKER') {
       return '/farm-plots-extension';
+    }
+    if (item.route === '/investor-news' && role === 'EXTENSION_WORKER') {
+      return '/farm-plots-extension-news';
     }
     return item.route;
   }

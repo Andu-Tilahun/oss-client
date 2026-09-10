@@ -4,6 +4,7 @@ export type TemplatePurpose =
   // EMAIL
   | 'USER_INVITATION' | 'PASSWORD_RESET' | 'WELCOME'
   | 'INVESTMENT_APPROVED' | 'INVESTMENT_REJECTED' | 'PAYMENT_REMINDER' | 'LEASE_RENEWAL_NOTICE'
+  | 'STATUS_UPDATE'
   // SMS
   | 'OTP_VERIFICATION' | 'INVESTMENT_UPDATE' | 'ACCOUNT_NOTIFICATION'
   // CONTRACT
@@ -23,6 +24,7 @@ export const PURPOSE_OPTIONS: Record<TemplateType, PurposeOption[]> = {
     { value: 'INVESTMENT_REJECTED', label: 'Investment Rejected' },
     { value: 'PAYMENT_REMINDER',    label: 'Payment Reminder' },
     { value: 'LEASE_RENEWAL_NOTICE',label: 'Lease Renewal Notice' },
+    { value: 'STATUS_UPDATE',       label: 'Status Update' },
   ],
   SMS: [
     { value: 'OTP_VERIFICATION',    label: 'OTP Verification' },

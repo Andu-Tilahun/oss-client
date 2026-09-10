@@ -44,7 +44,7 @@ function fillPayment(component: InvestmentPackageCreateWizardComponent, override
   component.paymentForm.patchValue({
     targetAmount: 1000,
     minimumContribution: 100,
-    expectedInvestorNumber: 5,
+    roiPercent: 12,
     ...overrides,
   });
 }
@@ -76,15 +76,15 @@ describe('InvestmentPackageCreateWizardComponent', () => {
       expect(component.isStepValid(2)).toBe(true);
     });
 
-    it('step 3 (CROWDFUNDING) requires minimumContribution and expectedInvestorNumber', () => {
+    it('step 3 (CROWDFUNDING) requires minimumContribution and roiPercent', () => {
       fillDetails(component, { investmentPackageType: 'CROWDFUNDING' });
       component.paymentForm.patchValue({ targetAmount: 1000 });
       expect(component.isStepValid(3)).toBe(false);
-      fillPayment(component, { targetAmount: 1000, minimumContribution: 100, expectedInvestorNumber: 5 });
+      fillPayment(component, { targetAmount: 1000, minimumContribution: 100, roiPercent: 12 });
       expect(component.isStepValid(3)).toBe(true);
     });
 
-    it('step 3 (LEASING) does not require minimumContribution/expectedInvestorNumber', () => {
+    it('step 3 (LEASING) does not require minimumContribution/roiPercent', () => {
       fillDetails(component, { investmentPackageType: 'LEASING' });
       component.paymentForm.patchValue({ targetAmount: 1000 });
       expect(component.isStepValid(3)).toBe(true);
@@ -92,10 +92,10 @@ describe('InvestmentPackageCreateWizardComponent', () => {
   });
 
   describe('type-driven payment validators', () => {
-    it('clears minimumContribution/expectedInvestorNumber requirements and forces investor count to 1 for non-crowdfunding', () => {
+    it('clears minimumContribution/roiPercent requirements and nulls out roiPercent for non-crowdfunding', () => {
       fillDetails(component, { investmentPackageType: 'BIDDING' });
       expect(component.paymentForm.get('minimumContribution')?.validator).toBeNull();
-      expect(component.paymentForm.get('expectedInvestorNumber')?.value).toBe(1);
+      expect(component.paymentForm.get('roiPercent')?.value).toBeNull();
     });
 
     it('re-applies required validators when switching back to CROWDFUNDING', () => {
@@ -149,7 +149,7 @@ describe('InvestmentPackageCreateWizardComponent', () => {
     it('maps all three step forms into an InvestmentPackageCreateRequest for CROWDFUNDING', () => {
       fillDetails(component, { investmentPackageType: 'CROWDFUNDING' });
       fillDates(component);
-      fillPayment(component, { targetAmount: 1000, minimumContribution: 100, expectedInvestorNumber: 5 });
+      fillPayment(component, { targetAmount: 1000, minimumContribution: 100, roiPercent: 12 });
 
       const value = component.getValue();
 
@@ -158,11 +158,11 @@ describe('InvestmentPackageCreateWizardComponent', () => {
       expect(value.investmentPackageType).toBe('CROWDFUNDING');
       expect(value.targetAmount).toBe(1000);
       expect(value.minimumContribution).toBe(100);
-      expect(value.expectedInvestorNumber).toBe(5);
+      expect(value.roiPercent).toBe(12);
       expect(value.fundingDeadline).toBe(new Date('2026-03-01T00:00').toISOString());
     });
 
-    it('defaults minimumContribution to targetAmount and expectedInvestorNumber to 1 for non-crowdfunding', () => {
+    it('defaults minimumContribution to targetAmount and roiPercent to null for non-crowdfunding', () => {
       fillDetails(component, { investmentPackageType: 'LEASING' });
       fillDates(component);
       component.paymentForm.patchValue({ targetAmount: 2500 });
@@ -170,7 +170,7 @@ describe('InvestmentPackageCreateWizardComponent', () => {
       const value = component.getValue();
 
       expect(value.minimumContribution).toBe(2500);
-      expect(value.expectedInvestorNumber).toBe(1);
+      expect(value.roiPercent).toBeNull();
     });
   });
 
@@ -178,7 +178,7 @@ describe('InvestmentPackageCreateWizardComponent', () => {
     it('reflects live values across all three step forms', () => {
       fillDetails(component, { investmentPackageType: 'CROWDFUNDING' });
       fillDates(component);
-      fillPayment(component, { targetAmount: 1000, minimumContribution: 100, expectedInvestorNumber: 5 });
+      fillPayment(component, { targetAmount: 1000, minimumContribution: 100, roiPercent: 12 });
 
       const preview = component.previewData;
 
@@ -188,7 +188,7 @@ describe('InvestmentPackageCreateWizardComponent', () => {
       expect(preview.startDate).toBe('2026-01-01');
       expect(preview.targetAmount).toBe(1000);
       expect(preview.minimumContribution).toBe(100);
-      expect(preview.expectedInvestorNumber).toBe(5);
+      expect(preview.roiPercent).toBe(12);
     });
 
     it('resolves allowedBankAccountNames from the loaded bank accounts by id', () => {

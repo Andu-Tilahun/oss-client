@@ -1,4 +1,16 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  Output,
+  QueryList,
+  ViewChildren,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
 import { TableQueryParams } from '../data-table/models/table-query-params.model';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -9,7 +21,7 @@ const DEFAULT_PAGE_SIZE = 10;
   styleUrls: ['./public-card-layout.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PublicCardLayoutComponent<T> {
+export class PublicCardLayoutComponent<T> implements AfterViewInit, OnDestroy {
   @Input() data: T[] = [];
   @Input() loading = false;
   @Input() total = 0;
@@ -18,6 +30,13 @@ export class PublicCardLayoutComponent<T> {
   @Input() showPagination = true;
   @Input() noDataMessage = 'No data available';
   @Input() showRefreshButton = false;
+
+  /** When true, replaces the numbered pager's role: emits (nearEnd) once the user scrolls to
+   *  within `nearEndThreshold` cards of the end of the currently rendered `data`, instead of
+   *  requiring a page click. Off by default — existing consumers (e.g. public-plots) are unaffected. */
+  @Input() infiniteScroll = false;
+  @Input() nearEndThreshold = 5;
+  @Output() nearEnd = new EventEmitter<void>();
 
   @Input() titleAccessor: (item: T) => string = () => '';
   @Input() subtitleAccessor: (item: T) => string = () => '';
@@ -86,6 +105,43 @@ export class PublicCardLayoutComponent<T> {
 
   getImageUrl(item: T): string | null | undefined {
     return this.imageUrlAccessor ? this.imageUrlAccessor(item) : null;
+  }
+
+  @ViewChildren('cardEl') private cardEls?: QueryList<ElementRef<HTMLElement>>;
+  private observer?: IntersectionObserver;
+  private changesSub?: Subscription;
+
+  ngAfterViewInit(): void {
+    if (!this.infiniteScroll || typeof IntersectionObserver === 'undefined' || !this.cardEls) {
+      return;
+    }
+    this.changesSub = this.cardEls.changes.subscribe(() => this.observeNearEndCard());
+    this.observeNearEndCard();
+  }
+
+  ngOnDestroy(): void {
+    this.observer?.disconnect();
+    this.changesSub?.unsubscribe();
+  }
+
+  /** Re-targets the observer at the card sitting `nearEndThreshold` positions before the end of
+   *  the currently rendered list, so the trigger point automatically follows the list as it grows
+   *  with each appended batch. */
+  private observeNearEndCard(): void {
+    if (!this.cardEls) return;
+    const cards = this.cardEls.toArray();
+    const targetIndex = cards.length - 1 - this.nearEndThreshold;
+    const target = targetIndex >= 0 ? cards[targetIndex]?.nativeElement : undefined;
+
+    this.observer?.disconnect();
+    if (!target) return;
+
+    this.observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) {
+        this.nearEnd.emit();
+      }
+    });
+    this.observer.observe(target);
   }
 
   private emitPageChange(): void {

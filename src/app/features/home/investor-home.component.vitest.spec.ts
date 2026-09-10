@@ -81,18 +81,17 @@ describe('InvestorHomeComponent', () => {
     expect(component.activeInvestmentsCount).toBe(4);
   });
 
-  it('blended ROI is amount-weighted and ignores unparseable roi values', () => {
+  it('blended ROI is amount-weighted and ignores investments with no roi', () => {
     const investments = [
-      mockInvestment({id: '1', amount: 1000, roi: '10%'}),
-      mockInvestment({id: '2', amount: 3000, roi: '20%'}),
+      mockInvestment({id: '1', amount: 1000, roi: 100}),
+      mockInvestment({id: '2', amount: 3000, roi: 600}),
       mockInvestment({id: '3', amount: 5000, roi: undefined}),
-      mockInvestment({id: '4', amount: 2000, roi: 'not-a-number'}),
     ];
     mockInvestmentPackageService.filterInvestments.mockReturnValue(of(mockPage(investments)));
 
     component.ngOnInit();
 
-    // Weighted: (1000*10 + 3000*20) / (1000+3000) = 70000/4000 = 17.5
+    // Weighted: 100 * (100 + 600) / (1000 + 3000) = 17.5
     expect(component.blendedRoiPct).toBe(17.5);
   });
 

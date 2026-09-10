@@ -105,7 +105,7 @@ export class InvestorAnalyticsPageComponent implements OnInit {
   openByPackageType: CountSlice[] = [];
   openByFarmActivity: CountSlice[] = [];
   contributionTiers: LabeledValue[] = [];
-  crowdfundingFillRate: (LabeledValue & {expected: number; investorCount: number})[] = [];
+  crowdfundingFillRate: (LabeledValue & {target: number; fundedAmount: number})[] = [];
   platformFundingOutcomes: CountSlice[] = [];
   platformLifecycleStatus: CountSlice[] = [];
   soilWaterMatrix: {soilType: string; IRRIGATION: number; RIVER_ACCESS: number; RAIN_FED: number}[] = [];
@@ -217,7 +217,7 @@ export class InvestorAnalyticsPageComponent implements OnInit {
       .slice(0, 8);
 
     this.roiByPackage = investments
-      .map((i) => ({label: i.investmentPackage?.title ?? 'Package', value: this.parseRoiPercent(i.roi)}))
+      .map((i) => ({label: i.investmentPackage?.title ?? 'Package', value: i.investmentPackage?.roiPercent ?? null}))
       .filter((r): r is LabeledValue => r.value !== null)
       .sort((a, b) => b.value - a.value)
       .slice(0, 15);
@@ -246,13 +246,14 @@ export class InvestorAnalyticsPageComponent implements OnInit {
     this.crowdfundingFillRate = openPackages
       .filter((p) => p.investmentPackageType === 'CROWDFUNDING')
       .map((p) => {
-        const investorCount = p.investorIdList?.length ?? 0;
-        const expected = p.expectedInvestorNumber ?? 0;
+        const target = p.targetAmount ?? 0;
+        const remaining = p.remainingCapacity ?? target;
+        const fundedAmount = target - remaining;
         return {
           label: p.title,
-          value: expected > 0 ? Math.round((investorCount / expected) * 100) : 0,
-          investorCount,
-          expected,
+          value: target > 0 ? Math.round((fundedAmount / target) * 100) : 0,
+          fundedAmount,
+          target,
         };
       })
       .sort((a, b) => b.value - a.value)
@@ -355,7 +356,7 @@ export class InvestorAnalyticsPageComponent implements OnInit {
       tooltip: {trigger: 'axis', formatter: (params) => {
         const p = Array.isArray(params) ? params[0] : params;
         const row = this.crowdfundingFillRate[p.dataIndex as number];
-        return row ? `${row.label}<br/>${row.investorCount} of ${row.expected} investors (${row.value}%)` : '';
+        return row ? `${row.label}<br/>${this.formatMoney(row.fundedAmount)} of ${this.formatMoney(row.target)} funded (${row.value}%)` : '';
       }},
       grid: {left: 100, right: 16, top: 20, bottom: 20, containLabel: true},
       xAxis: {type: 'value', name: 'Fill %', max: 100, splitNumber: 3, axisLabel: smallAxisLabel},
@@ -456,16 +457,6 @@ export class InvestorAnalyticsPageComponent implements OnInit {
     const d = new Date(dateStr).getTime();
     if (!Number.isFinite(d)) return null;
     return Math.max(0, Math.round((d - Date.now()) / 86400000));
-  }
-
-  private parseRoiPercent(roi: string | undefined): number | null {
-    if (roi === undefined || roi === null) return null;
-    const s = String(roi).trim();
-    if (!s) return null;
-    const withPct = s.endsWith('%') ? parseFloat(s.slice(0, -1)) : parseFloat(s);
-    if (!Number.isFinite(withPct)) return null;
-    if (withPct > 0 && withPct <= 1) return withPct * 100;
-    return withPct;
   }
 
   private titleCase(s: string): string {

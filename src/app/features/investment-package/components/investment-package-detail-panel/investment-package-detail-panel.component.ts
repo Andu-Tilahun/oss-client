@@ -451,16 +451,16 @@ export class InvestmentPackageDetailPanelComponent implements OnChanges {
     return idx === -1 ? -1 : idx + 1;
   }
 
-  get confirmedInvestorCount(): number {
-    const ids = this.investmentPackage?.investorIdList ?? [];
-    return ids.filter(id => this.packageInvestments.find(r => r.investorId === id)?.status !== 'REJECTED').length;
+  get fundedAmount(): number {
+    const target = this.investmentPackage?.targetAmount ?? 0;
+    const remaining = this.investmentPackage?.remainingCapacity ?? target;
+    return target - remaining;
   }
 
-  get investorProgressPercent(): number {
-    const current = this.confirmedInvestorCount;
-    const expected = this.investmentPackage?.expectedInvestorNumber ?? 0;
-    if (!expected) return 0;
-    return Math.min(100, Math.round((current / expected) * 100));
+  get fundedPercent(): number {
+    const target = this.investmentPackage?.targetAmount ?? 0;
+    if (!target) return 0;
+    return Math.min(100, Math.round((this.fundedAmount / target) * 100));
   }
 
   /** The logged-in investor's own profile on this lease, matched by id against the lease's investor reference. */

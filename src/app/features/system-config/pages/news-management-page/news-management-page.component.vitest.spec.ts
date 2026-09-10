@@ -12,16 +12,28 @@ const PUBLISHED_ARTICLE: NewsArticle = {
   category: 'Farming',
   publishedAt: '2026-01-15T00:00:00Z',
   status: 'PUBLISHED',
+  audience: 'PUBLIC',
 };
 
 const DRAFT_ARTICLE: NewsArticle = {
   id: 'news-uuid-2',
   title: 'Upcoming event',
   status: 'DRAFT',
+  audience: 'PUBLIC',
+};
+
+const INACTIVE_ARTICLE: NewsArticle = {
+  id: 'news-uuid-3',
+  title: 'Shelved draft',
+  status: 'INACTIVE',
+  audience: 'PUBLIC',
 };
 
 function mockPage(content: NewsArticle[]) {
-  return { content, totalElements: content.length, totalPages: 1, number: 0, size: content.length || 10, first: true, last: true };
+  // Shallow-clone each article so a test that mutates component.articles (e.g. deactivating one
+  // in place) can't leak that mutation into the shared fixture constants used by other tests.
+  const cloned = content.map(a => ({ ...a }));
+  return { content: cloned, totalElements: cloned.length, totalPages: 1, number: 0, size: cloned.length || 10, first: true, last: true };
 }
 
 function makeComponent() {
@@ -29,7 +41,7 @@ function makeComponent() {
     filterNews: vi.fn(() => of(mockPage([PUBLISHED_ARTICLE, DRAFT_ARTICLE]))),
     createNews: vi.fn(() => of({ success: true, data: PUBLISHED_ARTICLE })),
     updateNews: vi.fn(() => of({ success: true, data: PUBLISHED_ARTICLE })),
-    deleteNews: vi.fn(() => of({ success: true })),
+    deactivateNews: vi.fn(() => of({ success: true })),
   };
   const mockToastService = { success: vi.fn(), error: vi.fn() };
   const component = new NewsManagementPageComponent(new FormBuilder(), mockService as any, mockToastService as any);
@@ -47,8 +59,10 @@ describe('NewsManagementPageComponent', () => {
 
   it('should create', () => expect(component).toBeTruthy());
 
-  it('calls filterNews on init with default paging', () => {
-    expect(mockService.filterNews).toHaveBeenCalledWith(expect.objectContaining({ page: 0, size: 10 }));
+  it('calls filterNews on init with default paging, sorted by last edit', () => {
+    expect(mockService.filterNews).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 0, size: 10, sortBy: 'modifiedDate', sortDirection: 'DESC' }),
+    );
   });
 
   it('populates articles and auto-selects the first one', () => {
@@ -91,16 +105,23 @@ describe('NewsManagementPageComponent', () => {
     expect(mockService.updateNews).toHaveBeenCalledWith('news-uuid-1', expect.objectContaining({ title: 'Updated title' }));
   });
 
-  it('onDelete calls deleteNews after confirm', () => {
+  it('onDeactivate calls deactivateNews after confirm', () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true);
-    component.onDelete('news-uuid-1');
-    expect(mockService.deleteNews).toHaveBeenCalledWith('news-uuid-1');
+    component.onDeactivate('news-uuid-2');
+    expect(mockService.deactivateNews).toHaveBeenCalledWith('news-uuid-2');
   });
 
-  it('onDelete does NOT call service when confirm is cancelled', () => {
+  it('onDeactivate does NOT call service when confirm is cancelled', () => {
     vi.spyOn(window, 'confirm').mockReturnValue(false);
-    component.onDelete('news-uuid-1');
-    expect(mockService.deleteNews).not.toHaveBeenCalled();
+    component.onDeactivate('news-uuid-2');
+    expect(mockService.deactivateNews).not.toHaveBeenCalled();
+  });
+
+  it('onDeactivate flips the article status to INACTIVE in place, not filtering it out', () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    component.onDeactivate('news-uuid-2');
+    expect(component.articles).toHaveLength(2);
+    expect(component.articles.find(a => a.id === 'news-uuid-2')?.status).toBe('INACTIVE');
   });
 
   describe('search, filter and pagination', () => {
@@ -140,11 +161,12 @@ describe('NewsManagementPageComponent', () => {
       expect(statusColumn.value!(DRAFT_ARTICLE)).toBe('DRAFT');
     });
 
-    it('Status column cellClass is green for PUBLISHED and gray for DRAFT', () => {
+    it('Status column cellClass is green for PUBLISHED, gray for DRAFT, red for INACTIVE', () => {
       const statusColumn = component.columns.find(c => c.header === 'Status')!;
       const cellClass = statusColumn.cellClass as (item: NewsArticle) => string;
       expect(cellClass(PUBLISHED_ARTICLE)).toContain('bg-green-100');
       expect(cellClass(DRAFT_ARTICLE)).toContain('bg-gray-100');
+      expect(cellClass(INACTIVE_ARTICLE)).toContain('bg-red-100');
     });
 
     it('Category column falls back to an em-dash when missing', () => {
@@ -152,24 +174,38 @@ describe('NewsManagementPageComponent', () => {
       expect(categoryColumn.value!(DRAFT_ARTICLE)).toBe('—');
     });
 
-    it('rowActions edit/delete call the right handlers', () => {
+    it('rowActions edit/deactivate call the right handlers', () => {
       const editAction = component.rowActions.find(a => a.id === 'edit')!;
-      const deleteAction = component.rowActions.find(a => a.id === 'delete')!;
+      const deactivateAction = component.rowActions.find(a => a.id === 'deactivate')!;
       const openEditSpy = vi.spyOn(component, 'openEdit');
-      const onDeleteSpy = vi.spyOn(component, 'onDelete');
+      const onDeactivateSpy = vi.spyOn(component, 'onDeactivate');
 
       editAction.action(PUBLISHED_ARTICLE);
       expect(openEditSpy).toHaveBeenCalledWith(PUBLISHED_ARTICLE);
 
-      deleteAction.action(PUBLISHED_ARTICLE);
-      expect(onDeleteSpy).toHaveBeenCalledWith('news-uuid-1');
+      deactivateAction.action(DRAFT_ARTICLE);
+      expect(onDeactivateSpy).toHaveBeenCalledWith('news-uuid-2');
     });
 
-    it('delete rowAction is disabled while that article is deleting', () => {
-      component.deleting = 'news-uuid-1';
-      const deleteAction = component.rowActions.find(a => a.id === 'delete')!;
-      expect(deleteAction.disabled!(PUBLISHED_ARTICLE)).toBe(true);
-      expect(deleteAction.disabled!(DRAFT_ARTICLE)).toBe(false);
+    it('deactivate rowAction is only visible for DRAFT articles', () => {
+      const deactivateAction = component.rowActions.find(a => a.id === 'deactivate')!;
+      expect(deactivateAction.visible!(DRAFT_ARTICLE)).toBe(true);
+      expect(deactivateAction.visible!(PUBLISHED_ARTICLE)).toBe(false);
+      expect(deactivateAction.visible!(INACTIVE_ARTICLE)).toBe(false);
+    });
+
+    it('edit rowAction is hidden for INACTIVE articles', () => {
+      const editAction = component.rowActions.find(a => a.id === 'edit')!;
+      expect(editAction.visible!(DRAFT_ARTICLE)).toBe(true);
+      expect(editAction.visible!(PUBLISHED_ARTICLE)).toBe(true);
+      expect(editAction.visible!(INACTIVE_ARTICLE)).toBe(false);
+    });
+
+    it('deactivate rowAction is disabled while that article is deactivating', () => {
+      component.deactivating = 'news-uuid-2';
+      const deactivateAction = component.rowActions.find(a => a.id === 'deactivate')!;
+      expect(deactivateAction.disabled!(DRAFT_ARTICLE)).toBe(true);
+      expect(deactivateAction.disabled!(INACTIVE_ARTICLE)).toBe(false);
     });
   });
 });

@@ -43,8 +43,9 @@ export class InvestmentPackageViewComponent implements OnChanges {
       }],
     };
     const planned = this.investmentPackage?.targetAmount ?? 0;
-    const collected = this.totalContributed;
-    const overFunded = planned > 0 && collected >= planned;
+    const remaining = this.investmentPackage?.remainingCapacity ?? Math.max(0, planned - this.totalContributed);
+    const collected = planned - remaining;
+    const fullyFunded = planned > 0 && remaining <= 0;
     this.fundingProgressChartOption = {
       tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
       legend: { orient: 'horizontal', bottom: 0 },
@@ -53,12 +54,12 @@ export class InvestmentPackageViewComponent implements OnChanges {
         left: 'center',
         top: '38%',
         style: {
-          text: overFunded
-            ? `Target Exceeded\n+${this.formatAmount(collected - planned)}`
+          text: fullyFunded
+            ? `Fully Funded\n${this.formatAmount(planned)}`
             : `Planned\n${this.formatAmount(planned)}`,
           fontSize: 12,
           fontWeight: 'bold',
-          fill: overFunded ? '#16A34A' : '#374151',
+          fill: fullyFunded ? '#16A34A' : '#374151',
           textAlign: 'center',
         },
       }] as any[],
@@ -68,16 +69,12 @@ export class InvestmentPackageViewComponent implements OnChanges {
         center: ['50%', '45%'],
         label: { show: false },
         emphasis: { label: { show: true, fontWeight: 'bold' } },
-        data: overFunded
-          ? [
-              // Goal fully met: show planned (green) as the base, excess collected (indigo) on top
-              { name: 'Planned', value: planned, itemStyle: { color: '#16A34A' } },
-              { name: 'Collected', value: collected - planned, itemStyle: { color: '#4F46E5' } },
-            ]
+        data: fullyFunded
+          ? [{ name: 'Funded', value: planned, itemStyle: { color: '#16A34A' } }]
           : [
               // In progress: show what's collected (indigo) and what remains to planned (green)
               { name: 'Collected', value: collected, itemStyle: { color: '#4F46E5' } },
-              { name: 'Remaining', value: planned - collected, itemStyle: { color: '#16A34A' } },
+              { name: 'Remaining', value: remaining, itemStyle: { color: '#16A34A' } },
             ],
       }],
     };
@@ -93,14 +90,10 @@ export class InvestmentPackageViewComponent implements OnChanges {
     return this.activeInvestments.reduce((sum, r) => sum + (r.amount ?? 0), 0);
   }
 
-  get exceedanceAmount(): number {
-    return Math.max(0, this.totalContributed - (this.investmentPackage?.targetAmount ?? 0));
-  }
-
-  get exceedancePercent(): string {
+  get isFullyFunded(): boolean {
     const planned = this.investmentPackage?.targetAmount ?? 0;
-    if (planned === 0) return '0.0';
-    return ((this.totalContributed - planned) / planned * 100).toFixed(1);
+    const remaining = this.investmentPackage?.remainingCapacity ?? Math.max(0, planned - this.totalContributed);
+    return planned > 0 && remaining <= 0;
   }
 
   formatInvestorName(record: InvestmentRecord): string {

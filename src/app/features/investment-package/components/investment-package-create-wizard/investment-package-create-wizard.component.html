@@ -170,18 +170,18 @@
 
       <div *ngIf="isCrowdfunding">
         <label class="block text-sm font-medium text-gray-700 mb-2">
-          Expected investors <span class="text-red-500">*</span>
+          Expected ROI (%) <span class="text-red-500">*</span>
         </label>
         <input
           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-          [class.border-red-500]="paymentForm.get('expectedInvestorNumber')?.invalid && paymentForm.get('expectedInvestorNumber')?.touched"
+          [class.border-red-500]="paymentForm.get('roiPercent')?.invalid && paymentForm.get('roiPercent')?.touched"
           type="number"
-          step="1"
-          min="1"
-          formControlName="expectedInvestorNumber"
+          step="0.01"
+          min="0.01"
+          formControlName="roiPercent"
         />
-        <div class="text-xs text-red-600 mt-1" *ngIf="paymentForm.get('expectedInvestorNumber')?.touched && paymentForm.get('expectedInvestorNumber')?.invalid">
-          Expected investor number is required (minimum 1)
+        <div class="text-xs text-red-600 mt-1" *ngIf="paymentForm.get('roiPercent')?.touched && paymentForm.get('roiPercent')?.invalid">
+          Expected ROI is required (minimum 0.01%)
         </div>
       </div>
 

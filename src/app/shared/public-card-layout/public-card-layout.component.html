@@ -33,6 +33,7 @@
   <div *ngIf="data.length > 0" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
     <article
       class="public-card"
+      #cardEl
       *ngFor="let item of data; trackBy: trackByIndex"
       role="button"
       tabindex="0"

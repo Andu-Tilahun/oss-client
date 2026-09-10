@@ -8,7 +8,33 @@
     <div *ngIf="!loading && error" class="news-empty">Unable to load news at this time.</div>
     <div *ngIf="!loading && !error && allNewsItems.length === 0" class="news-empty">No news articles published yet.</div>
 
-    <div *ngIf="!loading && !error && allNewsItems.length > 0 && activeItem" class="news-layout">
+    <div *ngIf="isMobile && !loading && !error && feedItems.length > 0" class="news-feed">
+      <ng-container *ngFor="let item of feedItems; let i = index; trackBy: trackByFeedIndex">
+        <div *ngIf="loopBannerBeforeIndex.has(i)" class="news-loop-banner">
+          You're all caught up — here are earlier stories again
+        </div>
+        <article class="news-feed-card">
+          <img *ngIf="item.mediaKind !== 'VIDEO'" class="news-feed-card-image" [src]="item.mediaUrl" [alt]="item.title" loading="lazy" />
+          <video *ngIf="item.mediaKind === 'VIDEO'" class="news-feed-card-image" [src]="item.mediaUrl" controls></video>
+          <div class="news-feed-card-body">
+            <span class="news-feature-badge">{{ item.category }}</span>
+            <h3>{{ item.title }}</h3>
+            <p class="news-feature-date">{{ item.date }}</p>
+            <p>{{ item.summary }}</p>
+            <p *ngIf="expandedFeedItemIds.has(item.id)">{{ item.body }}</p>
+            <button type="button" class="news-view-more" (click)="toggleFeedItemExpanded(item.id)">
+              {{ expandedFeedItemIds.has(item.id) ? 'View Less' : 'View More' }}
+              <span class="news-chevron" [class.news-chevron--up]="expandedFeedItemIds.has(item.id)">&#9662;</span>
+            </button>
+          </div>
+        </article>
+      </ng-container>
+      <div #feedSentinel class="news-feed-sentinel">
+        <span *ngIf="feedLoadingMore">Loading more...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!isMobile && !loading && !error && allNewsItems.length > 0 && activeItem" class="news-layout">
       <article class="news-feature">
         <div class="news-feature-image-wrap">
           <img *ngIf="activeItem.mediaKind !== 'VIDEO'" class="news-feature-image" [src]="activeItem.mediaUrl" [alt]="activeItem.title" loading="lazy" />

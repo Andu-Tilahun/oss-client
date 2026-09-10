@@ -5,7 +5,7 @@ import { HttpService, RequestType } from '../../../core/services/http.service';
 import { ApiResponse, PageResponse } from '../../../shared/models/api-response.model';
 import { Endpoints } from '../../../core/endpoint/endpoint.model';
 import { OrganizationAboutRequest, OrganizationBasicInfoRequest, OrganizationConfig, OrganizationConfigRequest, OrganizationContactRequest } from '../models/organization-config.model';
-import { NewsArticle, NewsArticleFilterRequest, NewsArticleRequest } from '../models/news-article.model';
+import { NewsArticle, NewsArticleFilterRequest, NewsArticleMediaItem, NewsArticleMediaRequest, NewsArticleRequest } from '../models/news-article.model';
 import { SocialMediaLink, SocialMediaLinkFilterRequest, SocialMediaLinkRequest } from '../models/social-media.model';
 import { BranchCenter, BranchCenterRequest } from '../models/branch-center.model';
 import { MessageTemplate, MessageTemplateRequest, TemplateType } from '../models/message-template.model';
@@ -43,6 +43,12 @@ export class SystemConfigService {
     return this.http.get<PageResponse<NewsArticle>>(Endpoints.CONFIG_NEWS_ENDPOINT, undefined, params);
   }
 
+  // News – portal (authenticated: public + caller's role-specific audience)
+  getPortalNews(page = 0, size = 20): Observable<PageResponse<NewsArticle>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<PageResponse<NewsArticle>>(`${Endpoints.CONFIG_NEWS_ENDPOINT}/portal`, undefined, params);
+  }
+
   // News – admin
   filterNews(request: NewsArticleFilterRequest): Observable<PageResponse<NewsArticle>> {
     return this.http.post<PageResponse<NewsArticle>>(`${Endpoints.CONFIG_NEWS_ENDPOINT}/admin/filter`, request);
@@ -60,8 +66,16 @@ export class SystemConfigService {
     return this.http.put<ApiResponse<NewsArticle>>(`${Endpoints.CONFIG_NEWS_ENDPOINT}/${id}`, request);
   }
 
-  deleteNews(id: string): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${Endpoints.CONFIG_NEWS_ENDPOINT}/${id}`);
+  deactivateNews(id: string): Observable<ApiResponse<void>> {
+    return this.http.put<ApiResponse<void>>(`${Endpoints.CONFIG_NEWS_ENDPOINT}/${id}/deactivate`, {});
+  }
+
+  addNewsMedia(articleId: string, request: NewsArticleMediaRequest): Observable<NewsArticleMediaItem> {
+    return this.http.post<NewsArticleMediaItem>(`${Endpoints.CONFIG_NEWS_ENDPOINT}/${articleId}/media`, request);
+  }
+
+  deleteNewsMedia(articleId: string, mediaId: string): Observable<void> {
+    return this.http.delete<void>(`${Endpoints.CONFIG_NEWS_ENDPOINT}/${articleId}/media/${mediaId}`);
   }
 
   // Social media – public

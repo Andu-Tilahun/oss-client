@@ -27,7 +27,9 @@ export interface InvestmentPackage {
   fundingDeadline?: string;
   fundingStatus: FundingStatus;
   investmentPackageType?: InvestmentPackageType;
-  expectedInvestorNumber?: number;
+  roiPercent?: number;
+  /** Server-computed: targetAmount minus everything currently reserving capacity. */
+  remainingCapacity?: number;
   remark?: string;
   agreementId?: string | null;
   paidDate?: string | null;
@@ -56,7 +58,7 @@ export interface InvestmentPackageCreateRequest {
   endDate: string;
   targetAmount: number;
   minimumContribution: number;
-  expectedInvestorNumber: number;
+  roiPercent: number | null;
   fundingDeadline: string;
   investmentPackageType: InvestmentPackageType;
   farmActivity: FarmActivity;
@@ -88,7 +90,7 @@ export interface InvestmentRecord {
   investorId: string;
   amount: number;
   paymentMethod: InvestmentPaymentMethod;
-  roi?: string;
+  roi?: number;
   status: InvestmentStatus;
   paymentStatus?: InvestmentPaymentStatus;
   investmentPackage?: InvestmentPackage;

@@ -151,13 +151,6 @@ export class InvestmentPackageService {
     );
   }
 
-  adminSetRoi(investmentId: string, roi: string): Observable<ApiResponse<InvestmentRecord>> {
-    return this.httpService.post<ApiResponse<InvestmentRecord>>(
-      `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investments/${investmentId}/admin/roi`,
-      {roi}, undefined, {requestType: RequestType.LOCAL},
-    );
-  }
-
   send(investmentId: string): Observable<ApiResponse<InvestmentRecord>> {
     return this.httpService.put<ApiResponse<InvestmentRecord>>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/investments/${investmentId}/send`,

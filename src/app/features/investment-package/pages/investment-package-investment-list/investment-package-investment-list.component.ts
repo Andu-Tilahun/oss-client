@@ -33,7 +33,6 @@ export class InvestmentPackageInvestmentListComponent implements OnInit {
   searchText = '';
   status: InvestmentStatus | '' = '';
 
-  showSetRoiModal = false;
   showInvestorDecisionModal = false;
   lockSend = false;
   showConfirmationModal = false;
@@ -185,7 +184,6 @@ export class InvestmentPackageInvestmentListComponent implements OnInit {
 
   onView(r: InvestmentRecord): void {
     this.selectedInvestment = {...r};
-    this.showSetRoiModal = false;
     this.showInvestorDecisionModal = false;
   }
 
@@ -204,12 +202,6 @@ export class InvestmentPackageInvestmentListComponent implements OnInit {
   onInvestorDecision(r: InvestmentRecord): void {
     this.selectedInvestment = {...r};
     this.showInvestorDecisionModal = true;
-  }
-
-  onRoiSaved(): void {
-    this.showSetRoiModal = false;
-    this.detailRefreshKey++;
-    this.loadInvestments();
   }
 
   onDecisionSaved(): void {

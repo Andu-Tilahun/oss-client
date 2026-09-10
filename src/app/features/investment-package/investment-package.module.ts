@@ -12,7 +12,6 @@ import {InvestmentPackageEditModalComponent} from './modals/investment-package-e
 import {InvestmentPackageCreateInvestmentModalComponent} from './modals/investment-package-create-investment-modal/investment-package-create-investment-modal.component';
 import {InvestmentPackageInvestmentListComponent} from './pages/investment-package-investment-list/investment-package-investment-list.component';
 import {InvestmentPackageInvestmentViewComponent} from './components/investment-package-investment-view/investment-package-investment-view.component';
-import {InvestmentPackageSetRoiModalComponent} from './modals/investment-package-set-roi-modal/investment-package-set-roi-modal.component';
 import {InvestmentPackageInvestorDecisionModalComponent} from './modals/investment-package-investor-decision-modal/investment-package-investor-decision-modal.component';
 import {InvestmentPackageFilterComponent} from './pages/investment-package-filter/investment-package-filter.component';
 import {InvestmentPackageInvestmentFilterComponent} from './pages/investment-package-investment-filter/investment-package-investment-filter.component';
@@ -44,7 +43,6 @@ import {TractorLoaderComponent} from "../../shared/components/tractor-loader/tra
         InvestmentPackageCreateModalComponent,
         InvestmentPackageEditModalComponent,
         InvestmentPackageCreateInvestmentModalComponent,
-        InvestmentPackageSetRoiModalComponent,
         InvestmentPackageInvestorDecisionModalComponent,
         ConfirmationModalComponent,
         TabsComponent,

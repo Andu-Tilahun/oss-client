@@ -1,0 +1,32 @@
+<div class="max-w-6xl mx-auto px-4 py-6">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">News</h1>
+    <p class="text-sm text-gray-500 mt-1">Public announcements plus updates for your account.</p>
+  </div>
+
+  <div *ngIf="error" class="rounded-2xl border border-red-200 bg-red-50 px-6 py-8 text-center text-red-600">
+    Unable to load news right now. Please try again later.
+  </div>
+
+  <app-public-card-layout
+    *ngIf="!error"
+    [data]="articles"
+    [loading]="loading"
+    [showPagination]="false"
+    [infiniteScroll]="true"
+    [nearEndThreshold]="nearEndThreshold"
+    [showRefreshButton]="false"
+    [titleAccessor]="getTitle"
+    [subtitleAccessor]="getSubtitle"
+    [descriptionAccessor]="getDescription"
+    [imageUrlAccessor]="getImageUrl"
+    [imageAltAccessor]="getImageAlt"
+    [badgesAccessor]="getBadges"
+    [primaryActionLabel]="'Read more'"
+    [showSecondaryAction]="false"
+    [noDataMessage]="'No news yet.'"
+    (nearEnd)="onNearEnd()"
+    (primaryActionClick)="onArticleClick($event)"
+  ></app-public-card-layout>
+  <div *ngIf="loadingMore" class="mt-4 text-center text-sm text-gray-500">Loading more...</div>
+</div>

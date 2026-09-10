@@ -111,7 +111,7 @@ export class InvestmentPackageCreateWizardComponent implements OnInit {
       {
         targetAmount: [null, [Validators.required, Validators.min(0.01)]],
         minimumContribution: [null, [Validators.required, Validators.min(0.01)]],
-        expectedInvestorNumber: [null, [Validators.required, Validators.min(1)]],
+        roiPercent: [null, [Validators.required, Validators.min(0.01)]],
         allowedPaymentMethods: [['CRYPTO'] as InvestmentPaymentMethod[]],
         allowedBankAccountIds: [[] as string[]],
       },
@@ -132,19 +132,19 @@ export class InvestmentPackageCreateWizardComponent implements OnInit {
 
   private applyTypeValidators(type: InvestmentPackageType): void {
     const minimumContribution = this.paymentForm.get('minimumContribution');
-    const expectedInvestorNumber = this.paymentForm.get('expectedInvestorNumber');
+    const roiPercent = this.paymentForm.get('roiPercent');
 
     if (type === 'CROWDFUNDING') {
       minimumContribution?.setValidators([Validators.required, Validators.min(0.01)]);
-      expectedInvestorNumber?.setValidators([Validators.required, Validators.min(1)]);
+      roiPercent?.setValidators([Validators.required, Validators.min(0.01)]);
     } else {
       minimumContribution?.clearValidators();
-      expectedInvestorNumber?.clearValidators();
-      expectedInvestorNumber?.setValue(1, { emitEvent: false });
+      roiPercent?.clearValidators();
+      roiPercent?.setValue(null, { emitEvent: false });
     }
 
     minimumContribution?.updateValueAndValidity({ emitEvent: false });
-    expectedInvestorNumber?.updateValueAndValidity({ emitEvent: false });
+    roiPercent?.updateValueAndValidity({ emitEvent: false });
     this.paymentForm.updateValueAndValidity({ emitEvent: false });
   }
 
@@ -187,7 +187,7 @@ export class InvestmentPackageCreateWizardComponent implements OnInit {
       fundingDeadline: dates.fundingDeadline,
       targetAmount: payment.targetAmount,
       minimumContribution: payment.minimumContribution,
-      expectedInvestorNumber: payment.expectedInvestorNumber,
+      roiPercent: payment.roiPercent,
       allowedPaymentMethods: payment.allowedPaymentMethods,
       allowedBankAccountNames: allowedBankAccountIds
         .map((id) => this.bankAccounts.find((b) => b.id === id)?.bankName)
@@ -274,7 +274,7 @@ export class InvestmentPackageCreateWizardComponent implements OnInit {
       endDate: dates.endDate,
       targetAmount,
       minimumContribution: isCrowdfunding ? Number(payment.minimumContribution) : targetAmount,
-      expectedInvestorNumber: isCrowdfunding ? Number(payment.expectedInvestorNumber) : 1,
+      roiPercent: isCrowdfunding ? Number(payment.roiPercent) : null,
       fundingDeadline: new Date(dates.fundingDeadline).toISOString(),
       investmentPackageType: details.investmentPackageType,
       farmActivity: details.farmActivity,
@@ -298,7 +298,7 @@ export class InvestmentPackageCreateWizardComponent implements OnInit {
     this.paymentForm.reset({
       targetAmount: null,
       minimumContribution: null,
-      expectedInvestorNumber: null,
+      roiPercent: null,
       allowedPaymentMethods: ['CRYPTO'],
       allowedBankAccountIds: [],
     });

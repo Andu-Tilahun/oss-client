@@ -15,4 +15,12 @@
     <option value="">Status: All</option>
     <option *ngFor="let s of statuses" [value]="s">Status: {{ s }}</option>
   </select>
+  <select
+    [ngModel]="selectedAudience"
+    (ngModelChange)="onAudienceChange($event)"
+    class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 w-44"
+  >
+    <option value="">Audience: All</option>
+    <option *ngFor="let a of audiences" [value]="a">Audience: {{ a }}</option>
+  </select>
 </app-filter-bar>

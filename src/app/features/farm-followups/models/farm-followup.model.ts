@@ -1,4 +1,6 @@
-export type FollowUpTaskStatus = 'ACTIVE' | 'DONE' | 'EXCLUDED';
+import {User} from '../../users/models/user.model';
+
+export type FollowUpTaskStatus = 'ACTIVE' | 'DONE' | 'EXCLUDED' | 'REJECTED';
 
 export interface FarmFollowUp {
   id: string;
@@ -11,10 +13,11 @@ export interface FarmFollowUp {
   createdAt?: string | null;
   updatedBy?: string | null;
   updatedAt?: string | null;
-  extensionWorker?: any;
+  extensionWorker?: User;
   taskStatus: FollowUpTaskStatus;
   outcomeReason?: string | null;
   completedBy?: string | null;
+  completedByUser?: User;
   completedAt?: string | null;
   referenceNumber: string;
 }

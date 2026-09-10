@@ -121,12 +121,12 @@
         <img [src]="userAvatar()" (error)="onAvatarError($event)" alt="Profile" class="w-full h-full object-cover" />
       </button>
 
-      <!-- Logout: always visible -->
+      <!-- Logout: desktop only — moves to the sidebar footer on mobile/tablet -->
       <button
         type="button"
         *ngIf="currentUser"
         (click)="logout()"
-        class="flex items-center gap-1.5 shrink-0 px-3 py-1.5 text-sm font-medium text-red-300 hover:text-red-200 hover:bg-white/10 rounded-lg transition-colors"
+        class="max-md:hidden flex items-center gap-1.5 shrink-0 px-3 py-1.5 text-sm font-medium text-red-300 hover:text-red-200 hover:bg-white/10 rounded-lg transition-colors"
         aria-label="Logout"
       >
         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -35,6 +35,7 @@
           <app-news-filter
             [(searchText)]="searchText"
             [(selectedStatus)]="selectedStatus"
+            [(selectedAudience)]="selectedAudience"
             (filterChange)="onFilterChange()"
             (searchChange)="onSearch()"
             (clearFilters)="clearFilters()"
@@ -87,17 +88,42 @@
           (mediaSelected)="onMediaSelected($event)">
         </app-gallery-media-picker>
       </div>
-      <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Additional Media</label>
+        <p *ngIf="!editingId" class="text-xs text-gray-500">Save the article first, then edit it to attach more images or videos.</p>
+        <div *ngIf="editingId">
+          <div *ngIf="editingArticleMedia.length" class="flex flex-wrap gap-2 mb-2">
+            <div *ngFor="let item of editingArticleMedia" class="relative rounded-lg border border-gray-200 overflow-hidden w-20 h-20 bg-gray-50">
+              <img *ngIf="item.kind !== 'VIDEO'" [src]="mediaUrl(item)" alt="" class="w-full h-full object-cover" />
+              <video *ngIf="item.kind === 'VIDEO'" [src]="mediaUrl(item)" muted class="w-full h-full object-cover"></video>
+              <button type="button" (click)="onRemoveMedia(item)" [disabled]="removingMediaId === item.id"
+                class="absolute top-0.5 right-0.5 z-10 inline-flex items-center justify-center w-4 h-4 rounded-full bg-black/60 text-white text-xs leading-none hover:bg-red-600 disabled:opacity-50">
+                &times;
+              </button>
+            </div>
+          </div>
+          <app-gallery-media-picker (mediaSelected)="onAddMedia($event)"></app-gallery-media-picker>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Published At</label>
           <input formControlName="publishedAt" type="datetime-local"
             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p class="text-xs text-gray-500 mt-1">A future date saves this as Draft and publishes it automatically when reached.</p>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
           <select formControlName="status"
             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Audience</label>
+          <select formControlName="audience"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option *ngFor="let a of audienceOptions" [value]="a">{{ a }}</option>
           </select>
         </div>
       </div>

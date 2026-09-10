@@ -21,4 +21,7 @@ export interface DataTableColumn<T> {
   mediaKind?: (item: T) => 'image' | 'video';
   /** Max width (px) for automatic truncation in the default TEXT cell. Default: 320. */
   maxCellWidth?: number;
+  /** Optional small corner-icon overlay for the default TEXT cell (e.g. a status dot on a title).
+   *  Absolutely positioned over the cell's text — consumes no row/column space. */
+  cornerBadge?: (item: T) => { colorClass: string; title?: string; icon?: 'check' | 'dot' } | null;
 }

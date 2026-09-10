@@ -133,6 +133,12 @@ export const MENU: MenuItem[] = [
     expanded: false
   },
   {
+    icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h4l2 2h8a2 2 0 012 2v10a2 2 0 01-2 2z',
+    label: 'News',
+    route: '/investor-news',
+    roles: ['INVESTOR', 'EXTENSION_WORKER'],
+  },
+  {
     icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
     label: 'CMS',
     route: '/system-config/organization',

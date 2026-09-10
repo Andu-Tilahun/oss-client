@@ -18,7 +18,7 @@ function mockPackage(overrides: Partial<InvestmentPackage> = {}): InvestmentPack
     fundingDeadline: '2026-03-01T00:00:00Z',
     targetAmount: 1000,
     minimumContribution: 100,
-    expectedInvestorNumber: 5,
+    roiPercent: 12,
     fundingStatus: 'OPEN' as any,
     allowedPaymentMethods: ['CRYPTO'],
     allowedBankAccountIds: [],
@@ -61,7 +61,7 @@ describe('InvestmentPackageEditWizardComponent', () => {
       expect(component.datesForm.value.endDate).toBe('2026-06-01');
       expect(component.paymentForm.value.targetAmount).toBe(1000);
       expect(component.paymentForm.value.minimumContribution).toBe(100);
-      expect(component.paymentForm.value.expectedInvestorNumber).toBe(5);
+      expect(component.paymentForm.value.roiPercent).toBe(12);
       expect(component.paymentForm.value.fundingStatus).toBe('OPEN');
     });
 
@@ -101,14 +101,14 @@ describe('InvestmentPackageEditWizardComponent', () => {
       expect(component.getValue().fundingStatus).toBe('CLOSED');
     });
 
-    it('defaults minimumContribution to targetAmount and expectedInvestorNumber to 1 for non-crowdfunding', () => {
+    it('defaults minimumContribution to targetAmount and roiPercent to null for non-crowdfunding', () => {
       patch(component, mockPackage({ investmentPackageType: 'LEASING' }));
       component.paymentForm.patchValue({ targetAmount: 2500 });
 
       const value = component.getValue();
 
       expect(value.minimumContribution).toBe(2500);
-      expect(value.expectedInvestorNumber).toBe(1);
+      expect(value.roiPercent).toBeNull();
     });
   });
 

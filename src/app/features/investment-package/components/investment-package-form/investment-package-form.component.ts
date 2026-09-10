@@ -58,7 +58,7 @@ export class InvestmentPackageFormComponent implements OnInit, OnChanges, OnDest
         title: ['', [Validators.required, Validators.maxLength(100)]],
         targetAmount: [null, [Validators.required, Validators.min(0.01)]],
         minimumContribution: [null, [Validators.required, Validators.min(0.01)]],
-        expectedInvestorNumber: [null, [Validators.required, Validators.min(1)]],
+        roiPercent: [null, [Validators.required, Validators.min(0.01)]],
         fundingDeadline: ['', Validators.required],
         fundingStatus: [FundingStatus.OPEN, Validators.required],
         description: [''],
@@ -94,7 +94,7 @@ export class InvestmentPackageFormComponent implements OnInit, OnChanges, OnDest
         title: pkg.title,
         targetAmount: pkg.targetAmount,
         minimumContribution: pkg.minimumContribution,
-        expectedInvestorNumber: pkg.expectedInvestorNumber ?? null,
+        roiPercent: pkg.roiPercent ?? null,
         fundingDeadline: this.toDateTimeLocal(pkg.fundingDeadline),
         fundingStatus: pkg.fundingStatus,
         description: pkg.description ?? '',
@@ -174,7 +174,7 @@ export class InvestmentPackageFormComponent implements OnInit, OnChanges, OnDest
       endDate: v.endDate,
       targetAmount,
       minimumContribution: isCrowdfunding ? Number(v.minimumContribution) : targetAmount,
-      expectedInvestorNumber: isCrowdfunding ? Number(v.expectedInvestorNumber) : 1,
+      roiPercent: isCrowdfunding ? Number(v.roiPercent) : null,
       fundingDeadline: new Date(v.fundingDeadline).toISOString(),
       investmentPackageType: v.investmentPackageType,
       farmActivity: v.farmActivity,
@@ -203,7 +203,7 @@ export class InvestmentPackageFormComponent implements OnInit, OnChanges, OnDest
       title: '',
       targetAmount: null,
       minimumContribution: null,
-      expectedInvestorNumber: null,
+      roiPercent: null,
       fundingDeadline: '',
       fundingStatus: FundingStatus.OPEN,
       description: '',
@@ -216,19 +216,19 @@ export class InvestmentPackageFormComponent implements OnInit, OnChanges, OnDest
 
   private applyTypeValidators(type: InvestmentPackageType): void {
     const minimumContribution = this.form.get('minimumContribution');
-    const expectedInvestorNumber = this.form.get('expectedInvestorNumber');
+    const roiPercent = this.form.get('roiPercent');
 
     if (type === 'CROWDFUNDING') {
       minimumContribution?.setValidators([Validators.required, Validators.min(0.01)]);
-      expectedInvestorNumber?.setValidators([Validators.required, Validators.min(1)]);
+      roiPercent?.setValidators([Validators.required, Validators.min(0.01)]);
     } else {
       minimumContribution?.clearValidators();
-      expectedInvestorNumber?.clearValidators();
-      expectedInvestorNumber?.setValue(1, {emitEvent: false});
+      roiPercent?.clearValidators();
+      roiPercent?.setValue(null, {emitEvent: false});
     }
 
     minimumContribution?.updateValueAndValidity({emitEvent: false});
-    expectedInvestorNumber?.updateValueAndValidity({emitEvent: false});
+    roiPercent?.updateValueAndValidity({emitEvent: false});
     this.form.updateValueAndValidity({emitEvent: false});
   }
 

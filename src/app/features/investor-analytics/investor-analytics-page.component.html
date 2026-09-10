@@ -89,7 +89,7 @@
         </div>
 
         <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 grow basis-[520px] min-w-[260px] sm:min-w-[320px]">
-          <h3 class="text-sm font-semibold text-slate-800 mb-3">Crowdfunding fill rate</h3>
+          <h3 class="text-sm font-semibold text-slate-800 mb-3">Crowdfunding funding progress</h3>
           <div *ngIf="crowdfundingFillRate.length === 0" class="text-sm text-slate-500 py-10 text-center">No open crowdfunding campaigns.</div>
           <div *ngIf="crowdfundingFillRate.length > 0" echarts [options]="crowdfundingFillRateChartOption" class="h-56 w-full"></div>
         </div>
