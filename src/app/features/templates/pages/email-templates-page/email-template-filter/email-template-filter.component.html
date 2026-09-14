@@ -1,0 +1,18 @@
+<app-filter-bar
+  [(searchText)]="searchText"
+  (searchTextChange)="onSearchTextInput($event)"
+  searchPlaceholder="Search by name, subject, or purpose..."
+  applyLabel="Search"
+  clearLabel="Clear"
+  (searchChange)="onSearch()"
+  (clearFilters)="onClearFilters()"
+>
+  <select
+    [ngModel]="selectedService"
+    (ngModelChange)="onServiceChange($event)"
+    class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 w-44"
+  >
+    <option value="">Service: All</option>
+    <option *ngFor="let s of serviceOptions" [value]="s.value">Service: {{ s.label }}</option>
+  </select>
+</app-filter-bar>

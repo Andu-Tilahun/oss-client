@@ -7,23 +7,29 @@ import { ToastService } from '../../../../shared/toast/toast.service';
 import {
   MessageTemplate, MessageTemplateRequest,
   PURPOSE_OPTIONS, PurposeOption, purposeLabel,
+  TemplateService, purposeService,
 } from '../../../system-config/models/message-template.model';
 import { OrganizationConfig } from '../../../system-config/models/organization-config.model';
 import { DataTableColumn } from '../../../../shared/data-table/models/data-table-column.model';
 import { PageSplitRightAction } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
 import { SharedModule } from '../../../../shared/shared.module';
 import { PageSplitLayoutComponent } from '../../../../shared/components/page-split-layout/page-split-layout/page-split-layout.component';
+import { EmailTemplateFilterComponent } from './email-template-filter/email-template-filter.component';
 
 @Component({
   selector: 'app-email-templates-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SharedModule, PageSplitLayoutComponent],
+  imports: [CommonModule, ReactiveFormsModule, SharedModule, PageSplitLayoutComponent, EmailTemplateFilterComponent],
   templateUrl: './email-templates-page.component.html',
 })
 export class EmailTemplatesPageComponent implements OnInit {
   templates: MessageTemplate[] = [];
+  filteredTemplates: MessageTemplate[] = [];
   loading = true;
   saving = false;
+
+  searchText = '';
+  selectedService: TemplateService | '' = '';
 
   selectedTemplate: MessageTemplate | null = null;
   showModal = false;
@@ -81,12 +87,39 @@ export class EmailTemplatesPageComponent implements OnInit {
       next: (list) => {
         this.templates = list;
         this.loading = false;
+        this.applyFilter();
         if (!this.selectedTemplate && list.length > 0) {
           this.selectedTemplate = list[0];
         }
       },
       error: () => { this.loading = false; },
     });
+  }
+
+  private applyFilter(): void {
+    const q = (this.searchText || '').toLowerCase().trim();
+    this.filteredTemplates = this.templates.filter(t => {
+      const matchesSearch = !q
+        || t.name.toLowerCase().includes(q)
+        || (t.subject || '').toLowerCase().includes(q)
+        || purposeLabel(t.purpose).toLowerCase().includes(q);
+      const matchesService = !this.selectedService || purposeService(t.purpose) === this.selectedService;
+      return matchesSearch && matchesService;
+    });
+  }
+
+  onSearch(): void {
+    this.applyFilter();
+  }
+
+  onServiceFilterChange(): void {
+    this.applyFilter();
+  }
+
+  clearFilters(): void {
+    this.searchText = '';
+    this.selectedService = '';
+    this.applyFilter();
   }
 
   onRowClick(t: MessageTemplate): void {

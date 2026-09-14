@@ -11,12 +11,13 @@
   <ng-template #leftContent>
     <app-data-table
       [columns]="columns"
-      [data]="templates"
+      [data]="filteredTemplates"
       [selectedRowId]="selectedTemplate?.id ?? null"
       [loading]="loading"
-      [total]="templates.length"
-      [pageSize]="templates.length || 10"
+      [total]="filteredTemplates.length"
+      [pageSize]="filteredTemplates.length || 10"
       [showPagination]="false"
+      [showIndex]="true"
       [rowClickable]="true"
       [rowDetailTemplate]="rightContent"
       [showAddButton]="true"
@@ -30,6 +31,15 @@
       (rowClick)="onRowClick($event)"
       (addClick)="openCreate()"
     >
+      <div extraTableHeader class="w-full min-w-0">
+        <app-email-template-filter
+          [(searchText)]="searchText"
+          (searchChange)="onSearch()"
+          [(selectedService)]="selectedService"
+          (filterChange)="onServiceFilterChange()"
+          (clearFilters)="clearFilters()"
+        ></app-email-template-filter>
+      </div>
     </app-data-table>
   </ng-template>
 
