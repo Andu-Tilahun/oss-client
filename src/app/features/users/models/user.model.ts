@@ -75,6 +75,19 @@ export interface AuthResponse {
   user: User;
 }
 
+/** One login (device/browser) of the current user, as returned by GET /auth/sessions. */
+export interface UserSession {
+  sessionId: string;
+  deviceLabel: string;
+  ipAddress: string;
+  createdAt: string;
+  lastSeenAt: string;
+  expiresAt: string;
+  revoked: boolean;
+  /** True only for the session making this request. */
+  current: boolean;
+}
+
 
 export interface ForgotPasswordRequest {
   email: string;

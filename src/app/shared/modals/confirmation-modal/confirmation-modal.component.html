@@ -6,6 +6,7 @@
   [cancelText]="cancelText"
   [confirmLoading]="confirmLoading"
   [confirmButtonClass]="iconConfig.buttonColor"
+  [cancelButtonClass]="cancelButtonClass"
   (confirm)="handleConfirm()"
   (cancel)="handleCancel()"
   (visibleChange)="visibleChange.emit($event)"

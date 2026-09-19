@@ -12,6 +12,8 @@ import { NewsArticleViewComponent } from '../../components/news-article-view/new
 import { NewsFilterComponent } from '../../components/news-filter/news-filter.component';
 import { GalleryMediaPickerComponent, GalleryMediaSelection } from '../../components/gallery-media-picker/gallery-media-picker.component';
 import { GalleryMediaKind } from '../../models/gallery-item.model';
+import { MultiStepFormModalComponent } from '../../../../shared/modals/multi-step-form-modal/multi-step-form-modal.component';
+import { StepConfig } from '../../../../shared/components/stepper/stepper.component';
 import { SharedModule } from '../../../../shared/shared.module';
 import { environment } from '../../../../../environments/environment';
 import { Endpoints } from '../../../../core/endpoint/endpoint.model';
@@ -22,7 +24,7 @@ import { PageSplitRightAction } from '../../../../shared/components/page-split-l
 @Component({
   selector: 'app-news-management-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SharedModule, PageSplitLayoutComponent, NewsArticleViewComponent, NewsFilterComponent, GalleryMediaPickerComponent],
+  imports: [CommonModule, ReactiveFormsModule, SharedModule, MultiStepFormModalComponent, PageSplitLayoutComponent, NewsArticleViewComponent, NewsFilterComponent, GalleryMediaPickerComponent],
   templateUrl: './news-management-page.component.html',
 })
 export class NewsManagementPageComponent implements OnInit, OnDestroy {
@@ -47,6 +49,17 @@ export class NewsManagementPageComponent implements OnInit, OnDestroy {
   selectedAudience: NewsAudience | '' = '';
 
   form!: FormGroup;
+
+  currentStep = 1;
+  readonly steps: StepConfig[] = [
+    { label: 'Details', clickable: true },
+    { label: 'Content', clickable: true },
+    { label: 'Media', clickable: true },
+    { label: 'Publishing', clickable: true },
+    { label: 'Preview', clickable: true },
+  ];
+  readonly titleMaxLength = 300;
+  readonly summaryMaxLength = 600;
 
   readonly statusOptions: NewsStatus[] = ['DRAFT', 'PUBLISHED'];
   readonly audienceOptions: NewsAudience[] = ['PUBLIC', 'INVESTOR', 'EXTENSION_WORKER'];
@@ -195,6 +208,7 @@ export class NewsManagementPageComponent implements OnInit, OnDestroy {
   }
 
   openCreate(): void {
+    this.currentStep = 1;
     this.editingId = null;
     this.editingArticleMedia = [];
     this.form.reset({ status: 'DRAFT', audience: 'PUBLIC', mediaUuid: '', kind: null });
@@ -202,6 +216,7 @@ export class NewsManagementPageComponent implements OnInit, OnDestroy {
   }
 
   openEdit(article: NewsArticle): void {
+    this.currentStep = 1;
     this.editingId = article.id;
     this.editingArticleMedia = article.media ?? [];
     this.form.patchValue({
@@ -220,6 +235,68 @@ export class NewsManagementPageComponent implements OnInit, OnDestroy {
 
   closeModal(): void {
     this.showModal = false;
+    this.currentStep = 1;
+  }
+
+  /** Only the Details step has required/limited fields; the others can always be passed. */
+  stepValid(step: number): boolean {
+    if (step === 1) {
+      return !!this.form.get('title')?.valid && !!this.form.get('summary')?.valid;
+    }
+    return true;
+  }
+
+  onNext(): void {
+    if (this.stepValid(this.currentStep)) {
+      this.currentStep++;
+      return;
+    }
+    this.form.get('title')?.markAsTouched();
+    this.form.get('summary')?.markAsTouched();
+  }
+
+  titleError(): string | null {
+    const control = this.form.get('title');
+    if (!control?.touched || !control.errors) return null;
+    return control.errors['required'] ? 'Title is required' : `Max ${this.titleMaxLength} characters`;
+  }
+
+  summaryError(): string | null {
+    const control = this.form.get('summary');
+    return control?.touched && control.errors ? `Max ${this.summaryMaxLength} characters` : null;
+  }
+
+  /** A future published-at date makes the backend save the article as Draft until that time. */
+  get isScheduled(): boolean {
+    const value = this.form.get('publishedAt')?.value;
+    return !!value && new Date(value).getTime() > Date.now();
+  }
+
+  get scheduledNotice(): string | null {
+    if (!this.isScheduled || this.form.get('status')?.value !== 'PUBLISHED') return null;
+    const when = new Date(this.form.get('publishedAt')!.value).toLocaleString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit',
+    });
+    return `Scheduled: this will be saved as Draft and published automatically on ${when}.`;
+  }
+
+  /** The article as it will appear in the detail pane, built from the unsaved form. */
+  get previewArticle(): NewsArticle {
+    const value = this.form.value;
+    const status: NewsStatus = this.isScheduled && value.status === 'PUBLISHED' ? 'DRAFT' : value.status;
+    return {
+      id: this.editingId ?? 'preview',
+      title: value.title || 'Untitled article',
+      summary: value.summary || undefined,
+      content: value.content || undefined,
+      category: value.category || undefined,
+      mediaUuid: value.mediaUuid || undefined,
+      kind: value.kind || undefined,
+      publishedAt: value.publishedAt || undefined,
+      status,
+      audience: value.audience,
+      media: this.editingArticleMedia,
+    };
   }
 
   onMediaSelected(selection: GalleryMediaSelection): void {
@@ -254,7 +331,11 @@ export class NewsManagementPageComponent implements OnInit, OnDestroy {
     if (this.saving) {
       return; // a request is already in flight (e.g. Enter pressed again)
     }
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.currentStep = 1; // the only step with validated fields
+      return;
+    }
 
     this.saving = true;
     const value = this.form.value;

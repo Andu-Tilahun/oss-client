@@ -50,62 +50,86 @@
   </ng-template>
 </app-page-split-layout>
 
-<!-- Create / Edit Modal -->
-<div *ngIf="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6 dark:bg-gray-900">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">{{ editingId ? 'Edit Article' : 'New Article' }}</h3>
-      <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none dark:text-gray-500">&times;</button>
-    </div>
+<!-- Create / Edit wizard: one short step at a time, so long text never stretches the popup -->
+<app-multi-step-form-modal
+  [(visible)]="showModal"
+  [title]="editingId ? 'Edit Article' : 'New Article'"
+  [steps]="steps"
+  [(currentStep)]="currentStep"
+  size="xl"
+  [isSubmitting]="saving"
+  [submitLabel]="editingId ? 'Save Changes' : 'Create Article'"
+  (next)="onNext()"
+  (submitForm)="onSave()"
+  (cancelled)="closeModal()"
+>
+  <ng-template #stepBody>
+    <form [formGroup]="form" (ngSubmit)="onSave()" class="space-y-4">
 
-    <form [formGroup]="form" (ngSubmit)="onSave()" class="space-y-3">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Title *</label>
-        <input formControlName="title" type="text"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600" />
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Category</label>
-        <input formControlName="category" type="text"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600"
-          placeholder="e.g. News, Sustainability" />
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Summary</label>
-        <textarea formControlName="summary" rows="2"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600"></textarea>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Content</label>
-        <textarea formControlName="content" rows="5"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600"></textarea>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Media</label>
-        <app-gallery-media-picker
-          [currentMediaUuid]="form.value.mediaUuid"
-          [currentKind]="form.value.kind"
-          (mediaSelected)="onMediaSelected($event)">
-        </app-gallery-media-picker>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Additional Media</label>
-        <p *ngIf="!editingId" class="text-xs text-gray-500 dark:text-gray-400">Save the article first, then edit it to attach more images or videos.</p>
-        <div *ngIf="editingId">
-          <div *ngIf="editingArticleMedia.length" class="flex flex-wrap gap-2 mb-2">
-            <div *ngFor="let item of editingArticleMedia" class="relative rounded-lg border border-gray-200 overflow-hidden w-20 h-20 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-              <img *ngIf="item.kind !== 'VIDEO'" [src]="mediaUrl(item)" alt="" class="w-full h-full object-cover" />
-              <video *ngIf="item.kind === 'VIDEO'" [src]="mediaUrl(item)" muted class="w-full h-full object-cover"></video>
-              <button type="button" (click)="onRemoveMedia(item)" [disabled]="removingMediaId === item.id"
-                class="absolute top-0.5 right-0.5 z-10 inline-flex items-center justify-center w-4 h-4 rounded-full bg-black/60 text-white text-xs leading-none hover:bg-red-600 disabled:opacity-50">
-                &times;
-              </button>
-            </div>
+      <!-- 1. Details -->
+      <div *ngIf="currentStep === 1" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Title *</label>
+          <input formControlName="title" type="text" [attr.maxlength]="titleMaxLength"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600" [class.border-red-400]="titleError()" />
+          <p *ngIf="titleError() as error" class="text-xs text-red-600 mt-1" role="alert">{{ error }}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Category</label>
+          <input formControlName="category" type="text"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600"
+            placeholder="e.g. News, Sustainability" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Summary</label>
+          <textarea formControlName="summary" rows="4"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 resize-y max-h-[40vh] break-words" [class.border-red-400]="summaryError()"></textarea>
+          <div class="flex justify-between mt-1">
+            <p *ngIf="summaryError() as error" class="text-xs text-red-600" role="alert">{{ error }}</p>
+            <p class="text-xs text-gray-500 ml-auto dark:text-gray-400">{{ (form.value.summary || '').length }} / {{ summaryMaxLength }}</p>
           </div>
-          <app-gallery-media-picker (mediaSelected)="onAddMedia($event)"></app-gallery-media-picker>
         </div>
       </div>
-      <div class="grid grid-cols-3 gap-3">
+
+      <!-- 2. Content -->
+      <div *ngIf="currentStep === 2">
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Content</label>
+        <textarea formControlName="content" rows="12"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 resize-y max-h-[50vh] break-words"></textarea>
+        <p class="text-xs text-gray-500 mt-1 text-right dark:text-gray-400">{{ (form.value.content || '').length }} characters</p>
+      </div>
+
+      <!-- 3. Media -->
+      <div *ngIf="currentStep === 3" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Media</label>
+          <app-gallery-media-picker
+            [currentMediaUuid]="form.value.mediaUuid"
+            [currentKind]="form.value.kind"
+            (mediaSelected)="onMediaSelected($event)">
+          </app-gallery-media-picker>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Additional Media</label>
+          <p *ngIf="!editingId" class="text-xs text-gray-500 dark:text-gray-400">Save the article first, then edit it to attach more images or videos.</p>
+          <div *ngIf="editingId">
+            <div *ngIf="editingArticleMedia.length" class="flex flex-wrap gap-2 mb-2">
+              <div *ngFor="let item of editingArticleMedia" class="relative rounded-lg border border-gray-200 overflow-hidden w-20 h-20 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+                <img *ngIf="item.kind !== 'VIDEO'" [src]="mediaUrl(item)" alt="" class="w-full h-full object-cover" />
+                <video *ngIf="item.kind === 'VIDEO'" [src]="mediaUrl(item)" muted class="w-full h-full object-cover"></video>
+                <button type="button" (click)="onRemoveMedia(item)" [disabled]="removingMediaId === item.id"
+                  class="absolute top-0.5 right-0.5 z-10 inline-flex items-center justify-center w-4 h-4 rounded-full bg-black/60 text-white text-xs leading-none hover:bg-red-600 disabled:opacity-50">
+                  &times;
+                </button>
+              </div>
+            </div>
+            <app-gallery-media-picker (mediaSelected)="onAddMedia($event)"></app-gallery-media-picker>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Publishing -->
+      <div *ngIf="currentStep === 4" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Published At</label>
           <input formControlName="publishedAt" type="datetime-local"
@@ -128,14 +152,19 @@
         </div>
       </div>
 
-      <div class="flex justify-end gap-3 pt-2">
-        <button type="button" (click)="closeModal()"
-          class="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600">Cancel</button>
-        <button type="submit" [disabled]="saving"
-          class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
-          {{ saving ? 'Saving...' : 'Save' }}
-        </button>
+      <!-- 5. Preview -->
+      <div *ngIf="currentStep === 5" class="space-y-4">
+        <p class="text-sm text-gray-500 dark:text-gray-400">This is how the article will look once saved. Go back to any earlier step to change it.</p>
+        <p *ngIf="scheduledNotice as notice" class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700" role="status">{{ notice }}</p>
+        <app-news-article-view [article]="previewArticle"></app-news-article-view>
+        <div *ngIf="editingId && editingArticleMedia.length" class="flex flex-wrap items-center gap-2">
+          <span class="text-xs text-gray-500 dark:text-gray-400">Additional media ({{ editingArticleMedia.length }}):</span>
+          <div *ngFor="let item of editingArticleMedia" class="rounded-lg border border-gray-200 overflow-hidden w-16 h-16 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+            <img *ngIf="item.kind !== 'VIDEO'" [src]="mediaUrl(item)" alt="" class="w-full h-full object-cover" />
+            <video *ngIf="item.kind === 'VIDEO'" [src]="mediaUrl(item)" muted class="w-full h-full object-cover"></video>
+          </div>
+        </div>
       </div>
     </form>
-  </div>
-</div>
+  </ng-template>
+</app-multi-step-form-modal>

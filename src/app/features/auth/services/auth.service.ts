@@ -12,6 +12,7 @@ import {
   ResetPasswordRequest,
   SignupRequest,
   User,
+  UserSession,
   VerifyEmailRequest
 } from '../../users/models/user.model';
 import {HttpService, RequestType} from "../../../core/services/http.service";
@@ -128,6 +129,16 @@ export class AuthService {
         requestType: RequestType.LOCAL
       }
     );
+  }
+
+  /** The signed-in user's own sessions: active ones plus recent history (capped server-side). */
+  getSessions(): Observable<UserSession[]> {
+    return this.httpService.get<UserSession[]>(`${Endpoints.AUTH_ENDPOINT}/sessions`);
+  }
+
+  /** Ends one of the user's own sessions; that device is signed out on its next request. */
+  terminateSession(sessionId: string): Observable<string> {
+    return this.httpService.delete<string>(`${Endpoints.AUTH_ENDPOINT}/sessions/${encodeURIComponent(sessionId)}`);
   }
 
   validateToken(): Observable<ApiResponse<User>> {

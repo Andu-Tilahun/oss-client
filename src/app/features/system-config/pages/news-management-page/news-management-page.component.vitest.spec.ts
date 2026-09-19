@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { FormBuilder } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { NewsManagementPageComponent } from './news-management-page.component';
@@ -210,6 +210,145 @@ describe('NewsManagementPageComponent', () => {
       expect(deactivateAction.disabled!(DRAFT_ARTICLE)).toBe(true);
       expect(deactivateAction.disabled!(INACTIVE_ARTICLE)).toBe(false);
     });
+  });
+});
+
+describe('NewsManagementPageComponent wizard', () => {
+  afterEach(() => vi.useRealTimers());
+
+  it('has five steps in order and opens on step 1 for create and edit', () => {
+    const { component } = makeComponent();
+    expect(component.steps.map(s => s.label)).toEqual(['Details', 'Content', 'Media', 'Publishing', 'Preview']);
+
+    component.openCreate();
+    expect(component.currentStep).toBe(1);
+    component.openEdit(PUBLISHED_ARTICLE);
+    expect(component.currentStep).toBe(1);
+  });
+
+  it('starts over at step 1 when re-opened after being cancelled on a later step', () => {
+    const { component } = makeComponent();
+    component.openCreate();
+    component.currentStep = 4;
+
+    component.closeModal();
+    expect(component.currentStep).toBe(1);
+
+    component.currentStep = 3;
+    component.openCreate();
+    expect(component.currentStep).toBe(1);
+  });
+
+  it('will not leave Details with a missing title, and shows why', () => {
+    const { component } = makeComponent();
+    component.openCreate();
+
+    component.onNext();
+
+    expect(component.currentStep).toBe(1);
+    expect(component.titleError()).toBe('Title is required');
+  });
+
+  it('will not leave Details with a title or summary that is too long', () => {
+    const { component } = makeComponent();
+    component.openCreate();
+    component.form.patchValue({ title: 'x'.repeat(301) });
+    component.onNext();
+    expect(component.currentStep).toBe(1);
+    expect(component.titleError()).toBe('Max 300 characters');
+
+    component.form.patchValue({ title: 'ok', summary: 'y'.repeat(601) });
+    component.onNext();
+    expect(component.currentStep).toBe(1);
+    expect(component.summaryError()).toBe('Max 600 characters');
+  });
+
+  it('advances through every step once the title is valid', () => {
+    const { component } = makeComponent();
+    component.openCreate();
+    component.form.patchValue({ title: 'A title' });
+
+    for (const expected of [2, 3, 4, 5]) {
+      component.onNext();
+      expect(component.currentStep).toBe(expected);
+    }
+  });
+
+  it('builds the preview from the unsaved form, including existing additional media when editing', () => {
+    const { component } = makeComponent();
+    const media = [{ id: 'm1', mediaUuid: 'u1', kind: 'IMAGE', sortOrder: 0 }] as any;
+    component.openEdit({ ...PUBLISHED_ARTICLE, media });
+    component.form.patchValue({ title: 'Edited title', content: 'Long\ncontent', category: 'Farming', audience: 'INVESTOR' });
+
+    expect(component.previewArticle).toMatchObject({
+      id: 'news-uuid-1',
+      title: 'Edited title',
+      content: 'Long\ncontent',
+      category: 'Farming',
+      audience: 'INVESTOR',
+      status: 'PUBLISHED',
+      media,
+    });
+  });
+
+  it('previews a brand-new article with a placeholder title until one is typed', () => {
+    const { component } = makeComponent();
+    component.openCreate();
+
+    expect(component.previewArticle.id).toBe('preview');
+    expect(component.previewArticle.title).toBe('Untitled article');
+    expect(component.previewArticle.status).toBe('DRAFT');
+  });
+
+  it('previews a future published date as Draft and explains the scheduling', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 8, 19, 12, 0));
+    const { component } = makeComponent();
+    component.openCreate();
+    component.form.patchValue({ title: 'Soon', status: 'PUBLISHED', publishedAt: '2026-10-01T09:00' });
+
+    expect(component.isScheduled).toBe(true);
+    expect(component.previewArticle.status).toBe('DRAFT');
+    expect(component.scheduledNotice).toContain('published automatically');
+  });
+
+  it('shows no scheduling notice for a past date, no date, or a draft', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 8, 19, 12, 0));
+    const { component } = makeComponent();
+    component.openCreate();
+
+    component.form.patchValue({ title: 'Now', status: 'PUBLISHED', publishedAt: '2026-09-01T09:00' });
+    expect(component.scheduledNotice).toBeNull();
+    expect(component.previewArticle.status).toBe('PUBLISHED');
+
+    component.form.patchValue({ publishedAt: '' });
+    expect(component.scheduledNotice).toBeNull();
+
+    component.form.patchValue({ status: 'DRAFT', publishedAt: '2026-10-01T09:00' });
+    expect(component.scheduledNotice).toBeNull();
+  });
+
+  it('jumps back to Details and does not save when the form is invalid', () => {
+    const { component, mockService } = makeComponent();
+    component.openCreate();
+    component.currentStep = 5;
+
+    component.onSave();
+
+    expect(component.currentStep).toBe(1);
+    expect(mockService.createNews).not.toHaveBeenCalled();
+  });
+
+  it('does not save twice while a save is in flight', () => {
+    const { component, mockService } = makeComponent();
+    component.openCreate();
+    component.form.patchValue({ title: 'Once' });
+    component.saving = true;
+
+    component.onSave();
+
+    expect(mockService.createNews).not.toHaveBeenCalled();
   });
 });
 
