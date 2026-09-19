@@ -1,7 +1,7 @@
 import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
-import {FarmFollowUp, FarmFollowUpOutcomeRequest} from '../../models/farm-followup.model';
-import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
-import {PageSplitRightAction} from '../../../../shared/components/page-split-layout/page-split-layout/page-split-right-action.model';
+import {FarmFollowUp, FarmFollowUpOutcomeRequest, FollowUpTaskStatus} from '../../models/farm-followup.model';
+import {DeadlineChip, deadlineChip, deadlineClass, formatDate, statusClass} from '../../utils/follow-up-display.util';
+import {User} from '../../../users/models/user.model';
 import {TabItem} from '../../../../shared/tabs/models/tab-item.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
 import {FarmFollowUpService} from '../../services/farm-followup.service';
@@ -31,9 +31,7 @@ export class FarmFollowUpListComponent implements OnChanges {
   private lastExternalId: string | null = null;
 
   showCreateButton = false;
-  showEditButton = false;
-  showViewButton = false;
-  showActionColumn = false;
+  isPrivilegedUser = false;
 
   showCreateModal = false;
   showViewModal = false;
@@ -43,37 +41,6 @@ export class FarmFollowUpListComponent implements OnChanges {
   followUpTabs: TabItem[] = [
     {key: 'active', label: 'Active'},
     {key: 'completed', label: 'Completed'},
-  ];
-
-  columns: DataTableColumn<FarmFollowUp>[] = [
-    {header: 'Reference', value: (x) => x.referenceNumber},
-    {header: 'Remark', value: (x) => x.remark},
-    {header: 'Start Date', value: (x) => this.formatDate(x.startDate)},
-    {header: 'End Date', value: (x) => this.formatDate(x.endDate)},
-  ];
-
-  completedColumns: DataTableColumn<FarmFollowUp>[] = [
-    {header: 'Reference', value: (x) => x.referenceNumber},
-    {header: 'Remark', value: (x) => x.remark},
-    {header: 'Status', value: (x) => x.taskStatus},
-    {header: 'Outcome Reason', value: (x) => x.outcomeReason || '-'},
-  ];
-
-  followUpRowActions: PageSplitRightAction<FarmFollowUp>[] = [
-    {
-      id: 'mark-done',
-      icon: 'check',
-      title: 'Mark Done',
-      visible: (f) => f.taskStatus === 'ACTIVE' && this.canActOn(f),
-      action: (f) => this.onMarkOutcome(f, 'DONE'),
-    },
-    {
-      id: 'mark-excluded',
-      icon: 'ban',
-      title: 'Mark Excluded',
-      visible: (f) => f.taskStatus === 'ACTIVE' && this.canActOn(f),
-      action: (f) => this.onMarkOutcome(f, 'EXCLUDED'),
-    },
   ];
 
   showOutcomeModal = false;
@@ -101,8 +68,7 @@ export class FarmFollowUpListComponent implements OnChanges {
   private updateActionVisibility(): void {
     const isWorker = this.authService.isExtensionWorker();
     this.showCreateButton = isWorker && !this.readOnly;
-    this.showEditButton = isWorker && !this.readOnly;
-    this.showActionColumn = (isWorker || this.authService.isAdmin()) && !this.readOnly;
+    this.isPrivilegedUser = isWorker || this.authService.isAdmin();
   }
 
   get activeFollowUps(): FarmFollowUp[] {
@@ -111,6 +77,37 @@ export class FarmFollowUpListComponent implements OnChanges {
 
   get completedFollowUps(): FarmFollowUp[] {
     return this.displayedFollowUps.filter((f) => f.taskStatus !== 'ACTIVE');
+  }
+
+  /** Mark Done / Mark Excluded are offered on active cards to the admin or the worker who created it. */
+  canShowActions(f: FarmFollowUp): boolean {
+    return this.isPrivilegedUser && !this.readOnly && f.taskStatus === 'ACTIVE' && this.canActOn(f);
+  }
+
+  statusClass(status: FollowUpTaskStatus | undefined): string {
+    return statusClass(status);
+  }
+
+  deadlineClass(chip: DeadlineChip): string {
+    return deadlineClass(chip);
+  }
+
+  /** Days left until the follow-up's end date, for active cards only. */
+  deadlineChip(f: FarmFollowUp, now: Date = new Date()): DeadlineChip | null {
+    return deadlineChip(f, now);
+  }
+
+  userName(user: User | null | undefined): string {
+    if (!user) return '-';
+    return [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || '-';
+  }
+
+  completedByLabel(f: FarmFollowUp): string {
+    return f.completedBy ? this.userName(f.completedByUser) : 'System';
+  }
+
+  trackById(_: number, f: FarmFollowUp): string {
+    return f.id;
   }
 
   private canActOn(f: FarmFollowUp): boolean {
@@ -126,6 +123,14 @@ export class FarmFollowUpListComponent implements OnChanges {
     this.isAdminActingOnBehalf = this.authService.isAdmin()
       && followUp.createdBy !== this.authService.getCurrentUser()?.id;
     this.showOutcomeModal = true;
+  }
+
+  /** Mark Done / Excluded picked inside the detail popup: close it and reuse the normal outcome flow. */
+  onOutcomeFromDetail(action: 'DONE' | 'EXCLUDED'): void {
+    const target = this.selectedFollowUp;
+    if (!target || !this.canShowActions(target)) return;
+    this.showViewModal = false;
+    this.onMarkOutcome(target, action);
   }
 
   handleOutcomeConfirm(): void {
@@ -208,14 +213,7 @@ export class FarmFollowUpListComponent implements OnChanges {
     this.onRefresh();
   }
 
-  private formatDate(value?: string | null): string {
-    if (!value) return '-';
-    const d = new Date(value);
-    if (!Number.isFinite(d.getTime())) return '-';
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    return `${day}-${month}-${year}`;
+  formatDate(value?: string | null): string {
+    return formatDate(value);
   }
 }
-

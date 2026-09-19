@@ -11,6 +11,7 @@ import {
   CardFooterTemplateDirective
 } from './data-card-layout/data-card-layout-templates.directive';
 import { CardItemLayoutComponent } from './card-item-layout/card-item-layout.component';
+import { PaginationComponent } from './components/pagination/pagination.component';
 import { PublicCardLayoutComponent } from './public-card-layout/public-card-layout.component';
 
 
@@ -36,6 +37,7 @@ import { PublicCardLayoutComponent } from './public-card-layout/public-card-layo
     imports: [
         CommonModule,
         ActionIconButtonComponent,
+        PaginationComponent,
         SharedRoutingModule
     ]
 })

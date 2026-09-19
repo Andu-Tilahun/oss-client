@@ -1,5 +1,7 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {Subscription} from 'rxjs';
+import {deepLinkParam$} from '../../../../shared/utils/deep-link.util';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
 import {ColumnType} from '../../../../shared/data-table/models/column-types.model';
 import {environment} from '../../../../../environments/environment';
@@ -26,7 +28,7 @@ import {packageStatusBadgeClass} from '../../utils/investment-package-status.uti
   templateUrl: './investment-package-list.component.html',
   styleUrl: './investment-package-list.component.css',
 })
-export class InvestmentPackageListComponent implements OnInit {
+export class InvestmentPackageListComponent implements OnInit, OnDestroy {
   publishedPackages: InvestmentPackage[] = [];
   publishedLoading = false;
   publishedTotal = 0;
@@ -41,6 +43,10 @@ export class InvestmentPackageListComponent implements OnInit {
 
   selectedInvestmentPackage: InvestmentPackage | null = null;
   detailRefreshKey = 0;
+  /** Tab of the detail panel to open (set only by a global-search deep link, cleared once applied). */
+  forcedPanel: string | null = null;
+  private pendingDeepLink: InvestmentPackage | null = null;
+  private deepLinkSub?: Subscription;
 
   adminActiveTab = 'published';
   adminTabs: TabItem[] = [
@@ -152,12 +158,37 @@ export class InvestmentPackageListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const queryParams = this.route.snapshot.queryParamMap;
-    const deepLinkId = queryParams.get('id');
-    if (deepLinkId && queryParams.get('tab') === 'archived') {
-      this.adminActiveTab = 'archived';
+    // Subscribed (not read from the snapshot) so a deep link still applies when this page is
+    // already open, e.g. clicking a global-search result while on /investment-package.
+    this.deepLinkSub = deepLinkParam$(this.route).subscribe((id) => this.openDeepLink(id));
+
+    if (!this.route.snapshot.queryParamMap.get('id')) {
+      this.refreshCurrentTab();
     }
-    this.refreshCurrentTab(deepLinkId);
+  }
+
+  /** Fetches the package by id (it may be on any page of any tab), switches to the tab its status
+   *  belongs to, then loads that tab and selects it — instead of silently selecting row 0. */
+  private openDeepLink(id: string): void {
+    const panel = this.route.snapshot.queryParamMap.get('panel');
+    this.investmentPackageService.getInvestmentPackageById(id).subscribe({
+      next: (pkg) => {
+        this.adminActiveTab = pkg.packageStatus === 'INACTIVE' || pkg.packageStatus === 'COMPLITED'
+          ? 'archived'
+          : 'published';
+        this.pendingDeepLink = pkg;
+        this.forcedPanel = panel;
+        this.refreshCurrentTab(id);
+      },
+      error: () => {
+        // HttpService already toasted the failure; still show the list so the page isn't empty.
+        this.refreshCurrentTab();
+      },
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.deepLinkSub?.unsubscribe();
   }
 
   onAdminTabChange(key: string): void {
@@ -269,9 +300,17 @@ export class InvestmentPackageListComponent implements OnInit {
 
   private selectFromList(list: InvestmentPackage[], previousId?: string | null): void {
     if (previousId) {
-      const match = list.find((c) => c.id === previousId);
+      const match = list.find((c) => c.id === previousId)
+        ?? (this.pendingDeepLink?.id === previousId ? this.pendingDeepLink : null);
       if (match) {
         this.selectedInvestmentPackage = {...match};
+        if (this.pendingDeepLink?.id === previousId) {
+          // Deep link: bump the key so the panel applies forcedTab, then release the forced tab so
+          // later row selections don't keep snapping back to it.
+          this.detailRefreshKey++;
+          this.pendingDeepLink = null;
+          setTimeout(() => (this.forcedPanel = null));
+        }
         return;
       }
     }

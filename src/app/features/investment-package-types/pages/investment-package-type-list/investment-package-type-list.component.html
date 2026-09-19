@@ -298,7 +298,7 @@
       class="flex flex-col items-center justify-center gap-3 py-12"
     >
       <div class="w-4 h-4 rounded-full bg-blue-500 animate-bounce"></div>
-      <span class="text-sm text-gray-500">Loading details…</span>
+      <span class="text-sm text-gray-500 dark:text-gray-400">Loading details…</span>
     </div>
     <ng-template #detailOrEmpty>
       <app-investment-package-type-plot-detail
@@ -322,7 +322,7 @@
         (completed)="onCandidatesChosen()"
       ></app-investment-package-type-plot-detail>
       <ng-template #rightEmptyText>
-        <div class="text-sm text-gray-500">Select a row to view details.</div>
+        <div class="text-sm text-gray-500 dark:text-gray-400">Select a row to view details.</div>
       </ng-template>
     </ng-template>
   </ng-template>
@@ -389,12 +389,12 @@
   (confirm)="onDownloadContractFile()"
 >
   <ng-template #modalBody>
-    <div *ngIf="contractLoading" class="text-center py-8 text-gray-600">
+    <div *ngIf="contractLoading" class="text-center py-8 text-gray-600 dark:text-gray-400">
       Loading contract...
     </div>
     <iframe
       *ngIf="!contractLoading"
-      class="w-full h-[70vh] border border-gray-200 rounded-md bg-white"
+      class="w-full h-[70vh] border border-gray-200 rounded-md bg-white dark:bg-gray-900 dark:border-gray-700"
       [attr.srcdoc]="contractHtml"
       title="Lease Contract Preview"
     ></iframe>

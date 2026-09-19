@@ -1,6 +1,6 @@
 <div [class.max-w-5xl]="!embedded" [class.mx-auto]="!embedded" [class.px-4]="!embedded" [class.sm:px-6]="!embedded" [class.py-6]="!embedded">
   <div *ngIf="!embedded" class="flex items-center justify-between mb-5">
-    <h1 class="text-xl font-bold text-gray-900">{{ pageHeading }}</h1>
+    <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ pageHeading }}</h1>
     <a
       [routerLink]="listRoute"
       class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
@@ -19,7 +19,7 @@
   </ng-container>
 
   <ng-container *ngIf="mode === 'lease'">
-    <div *ngIf="loading" class="text-sm text-gray-600">Loading package detail...</div>
+    <div *ngIf="loading" class="text-sm text-gray-600 dark:text-gray-400">Loading package detail...</div>
     <div *ngIf="error && !loading" class="text-sm text-red-600">{{ error }}</div>
 
     <app-investment-package-detail-panel

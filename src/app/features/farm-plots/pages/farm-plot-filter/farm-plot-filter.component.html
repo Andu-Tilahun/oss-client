@@ -11,7 +11,7 @@
     <select
       [ngModel]="status"
       (ngModelChange)="onStatusChange($event)"
-      class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+      class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700 dark:text-gray-300 dark:border-gray-700"
     >
       <option [ngValue]="''">Status: All</option>
       <option *ngFor="let s of statuses" [ngValue]="s">Status: {{ s }}</option>
@@ -22,7 +22,7 @@
     <select
       [ngModel]="soilType"
       (ngModelChange)="onSoilTypeChange($event)"
-      class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+      class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700 dark:text-gray-300 dark:border-gray-700"
     >
       <option [ngValue]="''">Soil: All</option>
       <option *ngFor="let s of soilTypes" [ngValue]="s">Soil: {{ s }}</option>
@@ -33,7 +33,7 @@
     <select
       [ngModel]="sizeType"
       (ngModelChange)="onSizeTypeChange($event)"
-      class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+      class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700 dark:text-gray-300 dark:border-gray-700"
     >
       <option [ngValue]="''">Size: All</option>
       <option *ngFor="let s of sizeTypes" [ngValue]="s">Size: {{ s }}</option>

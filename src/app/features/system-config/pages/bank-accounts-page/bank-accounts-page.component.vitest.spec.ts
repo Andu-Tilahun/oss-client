@@ -3,6 +3,7 @@ import { FormBuilder } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { BankAccountsPageComponent } from './bank-accounts-page.component';
 import { BankAccount } from '../../models/bank-account.model';
+import { mockRouteWithQueryParams } from '../../../../shared/utils/deep-link.testing';
 
 const ACTIVE_ACCOUNT: BankAccount = {
   id: 'bank-uuid-1',
@@ -38,10 +39,11 @@ function makeComponent() {
     updateBankAccount: vi.fn(() => of({ success: true, data: ACTIVE_ACCOUNT })),
     deleteBankAccount: vi.fn(() => of({ success: true })),
   };
-  const mockToastService = { success: vi.fn(), error: vi.fn() };
-  const component = new BankAccountsPageComponent(new FormBuilder(), mockService as any, mockToastService as any);
+  const mockToastService = { success: vi.fn(), error: vi.fn(), warning: vi.fn() };
+  const routeMock = mockRouteWithQueryParams();
+  const component = new BankAccountsPageComponent(new FormBuilder(), mockService as any, mockToastService as any, routeMock.route as any);
   component.ngOnInit();
-  return { component, mockService };
+  return { component, mockService, mockToastService, setQueryParams: routeMock.setQueryParams };
 }
 
 describe('BankAccountsPageComponent', () => {
@@ -207,5 +209,35 @@ describe('BankAccountsPageComponent', () => {
       expect(component.displayedAccounts).toEqual([ACTIVE_ACCOUNT]);
       expect(component.selectedAccount?.id).toBe('bank-uuid-1');
     });
+  });
+});
+
+describe('BankAccountsPageComponent deep-link (?id=)', () => {
+  it('selects the account named in ?id= once the list has loaded', () => {
+    const { component, setQueryParams } = makeComponent();
+    setQueryParams({ id: INACTIVE_ACCOUNT.id });
+
+    component.ngOnInit();
+
+    expect(component.selectedAccount?.id).toBe(INACTIVE_ACCOUNT.id);
+  });
+
+  it('re-selects when the id changes while the page is already open', () => {
+    const { component, setQueryParams } = makeComponent();
+    component.ngOnInit();
+
+    setQueryParams({ id: INACTIVE_ACCOUNT.id });
+    expect(component.selectedAccount?.id).toBe(INACTIVE_ACCOUNT.id);
+    setQueryParams({ id: ACTIVE_ACCOUNT.id });
+    expect(component.selectedAccount?.id).toBe(ACTIVE_ACCOUNT.id);
+  });
+
+  it('warns when the account no longer exists', () => {
+    const { component, mockToastService, setQueryParams } = makeComponent();
+    component.ngOnInit();
+
+    setQueryParams({ id: 'nope' });
+
+    expect(mockToastService.warning).toHaveBeenCalled();
   });
 });

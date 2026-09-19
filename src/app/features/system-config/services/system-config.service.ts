@@ -176,6 +176,10 @@ export class SystemConfigService {
   }
 
   // Gallery – admin
+  getGalleryItemById(id: string): Observable<GalleryItem> {
+    return this.http.get<GalleryItem>(`${Endpoints.CONFIG_GALLERY_ENDPOINT}/${id}`);
+  }
+
   filterGalleryItems(request: GalleryItemFilterRequest): Observable<PageResponse<GalleryItem>> {
     return this.http.post<PageResponse<GalleryItem>>(`${Endpoints.CONFIG_GALLERY_ENDPOINT}/admin/filter`, request);
   }

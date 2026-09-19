@@ -3,6 +3,7 @@ import { FormBuilder } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { NewsManagementPageComponent } from './news-management-page.component';
 import { NewsArticle } from '../../models/news-article.model';
+import { mockRouteWithQueryParams } from '../../../../shared/utils/deep-link.testing';
 
 const PUBLISHED_ARTICLE: NewsArticle = {
   id: 'news-uuid-1',
@@ -42,11 +43,13 @@ function makeComponent() {
     createNews: vi.fn(() => of({ success: true, data: PUBLISHED_ARTICLE })),
     updateNews: vi.fn(() => of({ success: true, data: PUBLISHED_ARTICLE })),
     deactivateNews: vi.fn(() => of({ success: true })),
+    getNewsById: vi.fn(),
   };
   const mockToastService = { success: vi.fn(), error: vi.fn() };
-  const component = new NewsManagementPageComponent(new FormBuilder(), mockService as any, mockToastService as any);
+  const routeMock = mockRouteWithQueryParams();
+  const component = new NewsManagementPageComponent(new FormBuilder(), mockService as any, mockToastService as any, routeMock.route as any);
   component.ngOnInit();
-  return { component, mockService };
+  return { component, mockService, setQueryParams: routeMock.setQueryParams };
 }
 
 describe('NewsManagementPageComponent', () => {
@@ -207,5 +210,45 @@ describe('NewsManagementPageComponent', () => {
       expect(deactivateAction.disabled!(DRAFT_ARTICLE)).toBe(true);
       expect(deactivateAction.disabled!(INACTIVE_ARTICLE)).toBe(false);
     });
+  });
+});
+
+describe('NewsManagementPageComponent deep-link (?id=)', () => {
+  it('selects an article that is not on the loaded page by fetching it by id', () => {
+    const { component, mockService, setQueryParams } = makeComponent();
+    mockService.getNewsById.mockReturnValue(of({ ...PUBLISHED_ARTICLE, id: 'far-away', title: 'Old story' }));
+
+    setQueryParams({ id: 'far-away' });
+
+    expect(mockService.getNewsById).toHaveBeenCalledWith('far-away');
+    expect(component.selectedArticle?.id).toBe('far-away');
+  });
+
+  it('selects the article when it is on the loaded page', () => {
+    const { component, mockService, setQueryParams } = makeComponent();
+    mockService.getNewsById.mockReturnValue(of(DRAFT_ARTICLE));
+
+    setQueryParams({ id: 'news-uuid-2' });
+
+    expect(component.selectedArticle?.id).toBe('news-uuid-2');
+  });
+
+  it('re-selects when the id changes while the page is already open', () => {
+    const { component, mockService, setQueryParams } = makeComponent();
+    mockService.getNewsById.mockImplementation((id: string) => of({ ...PUBLISHED_ARTICLE, id }));
+
+    setQueryParams({ id: 'a' });
+    expect(component.selectedArticle?.id).toBe('a');
+    setQueryParams({ id: 'b' });
+    expect(component.selectedArticle?.id).toBe('b');
+  });
+
+  it('keeps the normal list selection when the by-id fetch fails', () => {
+    const { component, mockService, setQueryParams } = makeComponent();
+    mockService.getNewsById.mockReturnValue(throwError(() => new Error('404')));
+
+    setQueryParams({ id: 'gone' });
+
+    expect(component.selectedArticle?.id).toBe('news-uuid-1');
   });
 });

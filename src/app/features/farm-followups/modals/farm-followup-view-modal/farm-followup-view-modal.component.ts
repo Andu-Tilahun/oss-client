@@ -16,5 +16,7 @@ export class FarmFollowUpViewModalComponent {
 
   @Input() followUp: FarmFollowUp | null = null;
   @Input() readOnly = false;
+  @Input() canAct = false;
+  @Output() outcomeRequested = new EventEmitter<'DONE' | 'EXCLUDED'>();
 }
 

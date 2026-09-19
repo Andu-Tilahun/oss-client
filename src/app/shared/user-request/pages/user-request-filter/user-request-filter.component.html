@@ -4,7 +4,7 @@
     <div class="flex-1 min-w-[250px]">
       <div class="relative">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="h-5 w-5 text-slate-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -19,7 +19,7 @@
           (ngModelChange)="onSearchTextChange($event)"
           (keyup.enter)="onSearch()"
           placeholder="Search user requests..."
-          class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+          class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700 dark:text-gray-300 dark:border-gray-700"
         />
       </div>
     </div>
@@ -29,12 +29,12 @@
       <button
         type="button"
         (click)="toggleRequestTypeDropdown($event)"
-        class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 min-w-[170px] justify-between text-left"
+        class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2 min-w-[170px] justify-between text-left dark:border-gray-700"
       >
-        <span class="text-sm text-slate-700">
+        <span class="text-sm text-slate-700 dark:text-gray-300">
           <span class="font-medium">Type:</span> {{ getSelectedRequestTypeLabels() }}
         </span>
-        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 text-slate-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
         </svg>
         <span
@@ -47,7 +47,7 @@
 
       <div
         *ngIf="requestTypeDropdownOpen"
-        class="absolute z-50 mt-1 w-56 bg-white rounded-lg shadow-lg border border-slate-200 py-2"
+        class="absolute z-50 mt-1 w-56 bg-white rounded-lg shadow-lg border border-slate-200 py-2 dark:bg-gray-900 dark:border-gray-700"
       >
         <div class="space-y-1 px-2">
           <label
@@ -58,9 +58,9 @@
               type="checkbox"
               [checked]="isRequestTypeSelected(type)"
               (change)="onRequestTypeToggle(type, $any($event.target).checked)"
-              class="w-4 h-4 text-blue-500 border-slate-300 rounded focus:ring-blue-500"
+              class="w-4 h-4 text-blue-500 border-slate-300 rounded focus:ring-blue-500 dark:border-gray-600"
             />
-            <span class="ml-2 text-sm text-slate-700">{{ type }}</span>
+            <span class="ml-2 text-sm text-slate-700 dark:text-gray-300">{{ type }}</span>
           </label>
         </div>
       </div>
@@ -71,7 +71,7 @@
       <select
         [ngModel]="selectedStatus"
         (ngModelChange)="onStatusChange($event)"
-        class="px-4 py-2 border border-slate-200 rounded-lg bg-white text-sm text-slate-700 min-w-[170px] focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+        class="px-4 py-2 border border-slate-200 rounded-lg bg-white text-sm text-slate-700 min-w-[170px] focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700"
       >
         <option value="">Status: All</option>
         <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>

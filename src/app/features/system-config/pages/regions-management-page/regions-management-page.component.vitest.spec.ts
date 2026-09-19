@@ -3,6 +3,7 @@ import { FormBuilder } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { RegionsManagementPageComponent } from './regions-management-page.component';
 import { Region } from '../../../regions/models/region.model';
+import { mockRouteWithQueryParams } from '../../../../shared/utils/deep-link.testing';
 
 const REGION_A: Region = { id: 'region-uuid-1', name: 'Oromia' };
 const REGION_B: Region = { id: 'region-uuid-2', name: 'Amhara' };
@@ -18,10 +19,11 @@ function makeComponent() {
     updateRegion: vi.fn(() => of({ success: true, data: REGION_A })),
     deleteRegion: vi.fn(() => of({ success: true })),
   };
-  const mockToastService = { success: vi.fn(), error: vi.fn() };
-  const component = new RegionsManagementPageComponent(new FormBuilder(), mockRegionService as any, mockToastService as any);
+  const mockToastService = { success: vi.fn(), error: vi.fn(), warning: vi.fn() };
+  const routeMock = mockRouteWithQueryParams();
+  const component = new RegionsManagementPageComponent(new FormBuilder(), mockRegionService as any, mockToastService as any, routeMock.route as any);
   component.ngOnInit();
-  return { component, mockRegionService };
+  return { component, mockRegionService, mockToastService, setQueryParams: routeMock.setQueryParams };
 }
 
 describe('RegionsManagementPageComponent', () => {
@@ -140,5 +142,27 @@ describe('RegionsManagementPageComponent', () => {
       expect(deleteAction.disabled!(REGION_A)).toBe(true);
       expect(deleteAction.disabled!(REGION_B)).toBe(false);
     });
+  });
+});
+
+describe('RegionsManagementPageComponent deep-link (?id=)', () => {
+  it('selects the region resolved from the region list', () => {
+    const { component, mockRegionService, setQueryParams } = makeComponent();
+    component.ngOnInit();
+
+    setQueryParams({ id: REGION_B.id });
+
+    expect(mockRegionService.filterRegions).toHaveBeenCalledWith(expect.objectContaining({ size: 500 }));
+    expect(component.selectedRegion?.id).toBe(REGION_B.id);
+  });
+
+  it('warns and keeps the normal selection when the region no longer exists', () => {
+    const { component, mockToastService, setQueryParams } = makeComponent();
+    component.ngOnInit();
+
+    setQueryParams({ id: 'nope' });
+
+    expect(mockToastService.warning).toHaveBeenCalled();
+    expect(component.selectedRegion?.id).toBe(REGION_A.id);
   });
 });

@@ -3,6 +3,7 @@ import { FormBuilder } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { EmailTemplatesPageComponent } from './email-templates-page.component';
 import { MessageTemplate } from '../../../system-config/models/message-template.model';
+import { mockRouteWithQueryParams } from '../../../../shared/utils/deep-link.testing';
 
 const MOCK_TEMPLATE: MessageTemplate = {
   id: 'uuid-1',
@@ -32,15 +33,18 @@ function makeComponent() {
   const mockToastService = {
     success: vi.fn(),
     error: vi.fn(),
+    warning: vi.fn(),
   };
+  const routeMock = mockRouteWithQueryParams();
   const component = new EmailTemplatesPageComponent(
     new FormBuilder(),
     mockService as any,
     mockSanitizer as any,
     mockToastService as any,
+    routeMock.route as any,
   );
   component.ngOnInit();
-  return { component, mockService, mockSanitizer };
+  return { component, mockService, mockSanitizer, mockToastService, setQueryParams: routeMock.setQueryParams };
 }
 
 describe('EmailTemplatesPageComponent', () => {
@@ -222,5 +226,31 @@ describe('EmailTemplatesPageComponent', () => {
     vi.spyOn(window, 'confirm').mockReturnValue(false);
     component.delete('uuid-1');
     expect(mockService.deleteTemplate).not.toHaveBeenCalled();
+  });
+});
+
+describe('EmailTemplatesPageComponent deep-link (?id=)', () => {
+  it('selects the template named in ?id= and clears filters that would hide it', () => {
+    const { component, mockService, setQueryParams } = makeComponent();
+    const other = { ...MOCK_TEMPLATE, id: 'uuid-2', name: 'Payment Reminder Email', subject: 'Pay now', purpose: 'PAYMENT_REMINDER' as const };
+    mockService.getTemplates.mockReturnValue(of([MOCK_TEMPLATE, other]));
+    component.load();
+    component.searchText = 'invitation';
+    component.onSearch();
+
+    setQueryParams({ id: 'uuid-2' });
+
+    expect(component.selectedTemplate?.id).toBe('uuid-2');
+    expect(component.searchText).toBe('');
+    expect(component.filteredTemplates.map(t => t.id)).toContain('uuid-2');
+  });
+
+  it('warns when the template no longer exists', () => {
+    const { component, mockToastService, setQueryParams } = makeComponent();
+
+    setQueryParams({ id: 'nope' });
+
+    expect(mockToastService.warning).toHaveBeenCalled();
+    expect(component.selectedTemplate?.id).toBe(MOCK_TEMPLATE.id);
   });
 });

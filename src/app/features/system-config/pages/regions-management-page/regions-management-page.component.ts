@@ -1,4 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { deepLinkParam$ } from '../../../../shared/utils/deep-link.util';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RegionService } from '../../../regions/services/region.service';
@@ -18,7 +21,7 @@ import { PageSplitRightAction } from '../../../../shared/components/page-split-l
   imports: [CommonModule, ReactiveFormsModule, SharedModule, PageSplitLayoutComponent, RegionViewComponent, FilterBarComponent],
   templateUrl: './regions-management-page.component.html',
 })
-export class RegionsManagementPageComponent implements OnInit {
+export class RegionsManagementPageComponent implements OnInit, OnDestroy {
   regions: Region[] = [];
   selectedRegion: Region | null = null;
   detailRefreshKey = 0;
@@ -49,18 +52,49 @@ export class RegionsManagementPageComponent implements OnInit {
     private fb: FormBuilder,
     private regionService: RegionService,
     private toastService: ToastService,
+    private route: ActivatedRoute,
   ) {}
+
+  private deepLinkSub?: Subscription;
+  private pendingDeepLink: Region | null = null;
 
   ngOnInit(): void {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(200)]],
     });
-    this.loadRegions();
+    // Subscribed (not a snapshot read) so a global-search click still opens the region when this
+    // page is already open.
+    this.deepLinkSub = deepLinkParam$(this.route).subscribe(id => this.openDeepLink(id));
+    if (!this.route.snapshot.queryParamMap.get('id')) {
+      this.loadRegions();
+    }
   }
 
-  loadRegions(): void {
+  ngOnDestroy(): void {
+    this.deepLinkSub?.unsubscribe();
+  }
+
+  /** The farm-service has no get-region-by-id endpoint, so resolve the region from one large page
+   *  (regions are a short reference list) and then select it in the table. */
+  private openDeepLink(id: string): void {
+    this.regionService.filterRegions({ page: 0, size: 500 }).subscribe({
+      next: (page) => {
+        const region = (page.content ?? []).find(r => r.id === id);
+        if (region) {
+          this.pendingDeepLink = region;
+          this.loadRegions(id);
+        } else {
+          this.toastService.warning('Region not found — it may have been removed.');
+          this.loadRegions();
+        }
+      },
+      error: () => this.loadRegions(),
+    });
+  }
+
+  loadRegions(selectId?: string): void {
     this.loading = true;
-    const previousId = this.selectedRegion?.id;
+    const previousId = selectId ?? this.selectedRegion?.id;
     this.regionService.filterRegions({
       searchText: this.searchText || undefined,
       page: this.pageIndex - 1,
@@ -70,11 +104,19 @@ export class RegionsManagementPageComponent implements OnInit {
         this.regions = page.content;
         this.total = page.totalElements;
         this.loading = false;
-        if (this.regions.length === 0) { this.selectedRegion = null; return; }
-        if (previousId) {
-          const match = this.regions.find(r => r.id === previousId);
-          if (match) { this.selectedRegion = { ...match }; return; }
+        const match = previousId
+          ? this.regions.find(r => r.id === previousId)
+            ?? (this.pendingDeepLink?.id === previousId ? this.pendingDeepLink : null)
+          : null;
+        if (match) {
+          this.selectedRegion = { ...match };
+          if (this.pendingDeepLink?.id === previousId) {
+            this.detailRefreshKey++;
+            this.pendingDeepLink = null;
+          }
+          return;
         }
+        if (this.regions.length === 0) { this.selectedRegion = null; return; }
         this.selectedRegion = { ...this.regions[0] };
         this.detailRefreshKey++;
       },

@@ -1,20 +1,20 @@
-<div *ngIf="!article" class="p-6 text-sm text-gray-400 text-center">Select an article to view details.</div>
+<div *ngIf="!article" class="p-6 text-sm text-gray-400 text-center dark:text-gray-500">Select an article to view details.</div>
 
 <div *ngIf="article">
   <app-detail-card>
     <div class="flex items-start justify-between gap-4 mb-8">
-      <h3 class="text-xl font-bold text-gray-900 leading-snug">{{ article.title }}</h3>
+      <h3 class="text-xl font-bold text-gray-900 leading-snug dark:text-gray-100">{{ article.title }}</h3>
       <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium flex-shrink-0"
             [ngClass]="statusPillClass(article.status)">
         {{ article.status }}
       </span>
     </div>
-    <div *ngIf="article.mediaUuid" class="rounded-lg overflow-hidden mb-8 bg-gray-50 max-h-80">
+    <div *ngIf="article.mediaUuid" class="rounded-lg overflow-hidden mb-8 bg-gray-50 max-h-80 dark:bg-gray-800">
       <img *ngIf="article.kind !== 'VIDEO'" [src]="mediaUrl" [alt]="article.title" class="w-full max-h-80 object-contain" />
       <video *ngIf="article.kind === 'VIDEO'" [src]="mediaUrl" controls class="w-full max-h-80"></video>
     </div>
 
-    <hr class="border-gray-200 mb-8" />
+    <hr class="border-gray-200 mb-8 dark:border-gray-700" />
 
     <app-detail-section title="Details">
       <app-detail-field label="Category" [value]="article.category"></app-detail-field>
@@ -25,11 +25,11 @@
     </app-detail-section>
 
     <app-detail-section *ngIf="article.summary" title="Summary">
-      <div class="col-span-full text-sm text-slate-700 whitespace-pre-wrap">{{ article.summary }}</div>
+      <div class="col-span-full text-sm text-slate-700 whitespace-pre-wrap dark:text-gray-300">{{ article.summary }}</div>
     </app-detail-section>
 
     <app-detail-section *ngIf="article.content" title="Content">
-      <div class="col-span-full text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{{ article.content }}</div>
+      <div class="col-span-full text-sm text-slate-700 whitespace-pre-wrap leading-relaxed dark:text-gray-300">{{ article.content }}</div>
     </app-detail-section>
   </app-detail-card>
 </div>

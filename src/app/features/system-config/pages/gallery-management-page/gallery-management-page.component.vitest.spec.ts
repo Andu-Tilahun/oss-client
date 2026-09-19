@@ -3,6 +3,7 @@ import { FormBuilder } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { GalleryManagementPageComponent } from './gallery-management-page.component';
 import { GalleryItem } from '../../models/gallery-item.model';
+import { mockRouteWithQueryParams } from '../../../../shared/utils/deep-link.testing';
 
 const MOCK_ITEM: GalleryItem = {
   id: 'gallery-uuid-1',
@@ -34,11 +35,13 @@ function makeComponent() {
     createGalleryItem: vi.fn(() => of({ success: true, data: MOCK_ITEM })),
     updateGalleryItem: vi.fn(() => of({ success: true, data: MOCK_ITEM })),
     deleteGalleryItem: vi.fn(() => of({ success: true })),
+    getGalleryItemById: vi.fn(),
   };
   const mockToastService = { success: vi.fn(), error: vi.fn() };
-  const component = new GalleryManagementPageComponent(new FormBuilder(), mockService as any, mockToastService as any);
+  const routeMock = mockRouteWithQueryParams();
+  const component = new GalleryManagementPageComponent(new FormBuilder(), mockService as any, mockToastService as any, routeMock.route as any);
   component.ngOnInit();
-  return { component, mockService, mockToastService };
+  return { component, mockService, mockToastService, setQueryParams: routeMock.setQueryParams };
 }
 
 describe('GalleryManagementPageComponent', () => {
@@ -191,5 +194,28 @@ describe('GalleryManagementPageComponent', () => {
       editAction.action(MOCK_ITEM);
       expect(openEditSpy).toHaveBeenCalledWith(MOCK_ITEM);
     });
+  });
+});
+
+describe('GalleryManagementPageComponent deep-link (?id=)', () => {
+  it('selects an item that is not on the loaded page by fetching it by id', () => {
+    const { component, mockService, setQueryParams } = makeComponent();
+    mockService.getGalleryItemById.mockReturnValue(of({ ...MOCK_ITEM, id: 'far-away' }));
+    component.ngOnInit();
+
+    setQueryParams({ id: 'far-away' });
+
+    expect(mockService.getGalleryItemById).toHaveBeenCalledWith('far-away');
+    expect(component.selectedItem?.id).toBe('far-away');
+  });
+
+  it('falls back to the list when the by-id fetch fails', () => {
+    const { component, mockService, setQueryParams } = makeComponent();
+    mockService.getGalleryItemById.mockReturnValue(throwError(() => new Error('404')));
+    component.ngOnInit();
+
+    setQueryParams({ id: 'gone' });
+
+    expect(component.selectedItem?.id).toBe(MOCK_ITEM.id);
   });
 });

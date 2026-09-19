@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
-import { of } from 'rxjs';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { convertToParamMap, ParamMap } from '@angular/router';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 import { InvestmentPackageListComponent } from './investment-package-list.component';
 import { InvestmentPackage } from '../../models/investment-package.model';
 
@@ -24,15 +25,19 @@ function makeComponent(opts: { isAdmin?: boolean; isInvestor?: boolean } = {}) {
   const mockInvestmentPackageService = {
     filterPublishedInvestmentPackages: vi.fn(() => of({ content: [], totalElements: 0 } as any)),
     filterArchivedInvestmentPackages: vi.fn(() => of({ content: [], totalElements: 0 } as any)),
+    getInvestmentPackageById: vi.fn(),
   };
   const mockToastService = { success: vi.fn(), error: vi.fn(), info: vi.fn(), warning: vi.fn() };
   const mockAuthService = {
     isAdmin: vi.fn(() => opts.isAdmin ?? true),
     isInvestor: vi.fn(() => opts.isInvestor ?? false),
   };
+  const queryParams$ = new BehaviorSubject<ParamMap>(convertToParamMap({}));
   const mockActivatedRoute = {
-    snapshot: { queryParamMap: { get: vi.fn(() => null) } },
+    get snapshot() { return { queryParamMap: queryParams$.value }; },
+    queryParamMap: queryParams$.asObservable(),
   };
+  const setQueryParams = (params: Record<string, string>) => queryParams$.next(convertToParamMap(params));
 
   const component = new InvestmentPackageListComponent(
     mockInvestmentPackageService as any,
@@ -41,7 +46,7 @@ function makeComponent(opts: { isAdmin?: boolean; isInvestor?: boolean } = {}) {
     mockActivatedRoute as any,
   );
 
-  return { component, mockInvestmentPackageService, mockToastService, mockAuthService, mockActivatedRoute };
+  return { component, mockInvestmentPackageService, mockToastService, mockAuthService, mockActivatedRoute, setQueryParams };
 }
 
 describe('InvestmentPackageListComponent stage-gated tabs', () => {
@@ -140,27 +145,90 @@ describe('InvestmentPackageListComponent stage-gated tabs', () => {
   });
 });
 
-describe('InvestmentPackageListComponent deep-link on init', () => {
-  it('selects the row matching ?id= from a notification deep link', () => {
-    const { component, mockInvestmentPackageService, mockActivatedRoute } = makeComponent();
-    mockActivatedRoute.snapshot.queryParamMap.get = vi.fn((key: string) => (key === 'id' ? 'pkg-1' : null));
+describe('InvestmentPackageListComponent deep-link (?id=)', () => {
+  afterEach(() => vi.useRealTimers());
+
+  it('selects the deep-linked package when it is on the loaded page', () => {
+    const { component, mockInvestmentPackageService, setQueryParams } = makeComponent();
+    const pkg = mockPackage({ id: 'pkg-1', packageStatus: 'ACTIVE' });
+    mockInvestmentPackageService.getInvestmentPackageById.mockReturnValue(of(pkg));
     mockInvestmentPackageService.filterPublishedInvestmentPackages.mockReturnValue(
-      of({ content: [mockPackage({ id: 'pkg-1' })], totalElements: 1 } as any),
+      of({ content: [pkg], totalElements: 1 } as any),
     );
+    setQueryParams({ id: 'pkg-1' });
 
     component.ngOnInit();
 
+    expect(mockInvestmentPackageService.getInvestmentPackageById).toHaveBeenCalledWith('pkg-1');
     expect(component.selectedInvestmentPackage?.id).toBe('pkg-1');
   });
 
-  it('lands on the archived tab when ?tab=archived accompanies the deep-linked id', () => {
-    const { component, mockActivatedRoute } = makeComponent();
-    mockActivatedRoute.snapshot.queryParamMap.get = vi.fn((key: string) =>
-      key === 'id' ? 'pkg-1' : key === 'tab' ? 'archived' : null);
+  it('selects the fetched package even when it is NOT on the first loaded page', () => {
+    const { component, mockInvestmentPackageService, setQueryParams } = makeComponent();
+    mockInvestmentPackageService.getInvestmentPackageById.mockReturnValue(
+      of(mockPackage({ id: 'old-pkg', packageStatus: 'ACTIVE' })),
+    );
+    mockInvestmentPackageService.filterPublishedInvestmentPackages.mockReturnValue(
+      of({ content: [mockPackage({ id: 'other' })], totalElements: 30 } as any),
+    );
+    setQueryParams({ id: 'old-pkg' });
+
+    component.ngOnInit();
+
+    expect(component.selectedInvestmentPackage?.id).toBe('old-pkg');
+  });
+
+  it('switches to the archived tab when the package status is archived', () => {
+    const { component, mockInvestmentPackageService, setQueryParams } = makeComponent();
+    mockInvestmentPackageService.getInvestmentPackageById.mockReturnValue(
+      of(mockPackage({ id: 'pkg-9', packageStatus: 'COMPLITED' })),
+    );
+    setQueryParams({ id: 'pkg-9' });
 
     component.ngOnInit();
 
     expect(component.adminActiveTab).toBe('archived');
+    expect(mockInvestmentPackageService.filterArchivedInvestmentPackages).toHaveBeenCalled();
+    expect(component.selectedInvestmentPackage?.id).toBe('pkg-9');
+  });
+
+  it('forces the requested detail-panel tab once, then releases it', () => {
+    vi.useFakeTimers();
+    const { component, mockInvestmentPackageService, setQueryParams } = makeComponent();
+    mockInvestmentPackageService.getInvestmentPackageById.mockReturnValue(
+      of(mockPackage({ id: 'pkg-1', packageStatus: 'IN_USE' })),
+    );
+    setQueryParams({ id: 'pkg-1', panel: 'contract' });
+    const keyBefore = component.detailRefreshKey;
+
+    component.ngOnInit();
+
+    expect(component.forcedPanel).toBe('contract');
+    expect(component.detailRefreshKey).toBeGreaterThan(keyBefore);
+    vi.runAllTimers();
+    expect(component.forcedPanel).toBeNull();
+  });
+
+  it('re-selects when the id changes while the page is already open', () => {
+    const { component, mockInvestmentPackageService, setQueryParams } = makeComponent();
+    mockInvestmentPackageService.getInvestmentPackageById.mockImplementation((id: string) =>
+      of(mockPackage({ id, packageStatus: 'ACTIVE' })));
+    component.ngOnInit();
+
+    setQueryParams({ id: 'pkg-a' });
+    expect(component.selectedInvestmentPackage?.id).toBe('pkg-a');
+    setQueryParams({ id: 'pkg-b' });
+    expect(component.selectedInvestmentPackage?.id).toBe('pkg-b');
+  });
+
+  it('still loads the list when the by-id fetch fails', () => {
+    const { component, mockInvestmentPackageService, setQueryParams } = makeComponent();
+    mockInvestmentPackageService.getInvestmentPackageById.mockReturnValue(throwError(() => new Error('404')));
+    setQueryParams({ id: 'gone' });
+
+    component.ngOnInit();
+
+    expect(mockInvestmentPackageService.filterPublishedInvestmentPackages).toHaveBeenCalled();
   });
 
   it('loads the published tab as usual with no deep-link query params', () => {
@@ -169,32 +237,7 @@ describe('InvestmentPackageListComponent deep-link on init', () => {
     component.ngOnInit();
 
     expect(component.adminActiveTab).toBe('published');
-    expect(mockInvestmentPackageService.filterPublishedInvestmentPackages).toHaveBeenCalled();
-  });
-});
-
-describe('InvestmentPackageListComponent mutation refresh handlers', () => {
-  it('onAgreementCreated refreshes the current tab and bumps detailRefreshKey', () => {
-    const { component, mockInvestmentPackageService } = makeComponent();
-    component.onView(mockPackage({}));
-    mockInvestmentPackageService.filterPublishedInvestmentPackages.mockClear();
-    const keyBefore = component.detailRefreshKey;
-
-    component.onAgreementCreated();
-
-    expect(component.detailRefreshKey).toBe(keyBefore + 1);
-    expect(mockInvestmentPackageService.filterPublishedInvestmentPackages).toHaveBeenCalled();
-  });
-
-  it('onCandidatesChosen refreshes the current tab and bumps detailRefreshKey', () => {
-    const { component, mockInvestmentPackageService } = makeComponent();
-    component.onView(mockPackage({}));
-    mockInvestmentPackageService.filterPublishedInvestmentPackages.mockClear();
-    const keyBefore = component.detailRefreshKey;
-
-    component.onCandidatesChosen();
-
-    expect(component.detailRefreshKey).toBe(keyBefore + 1);
+    expect(mockInvestmentPackageService.getInvestmentPackageById).not.toHaveBeenCalled();
     expect(mockInvestmentPackageService.filterPublishedInvestmentPackages).toHaveBeenCalled();
   });
 });

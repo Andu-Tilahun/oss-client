@@ -1,0 +1,121 @@
+<div class="max-w-7xl mx-auto p-4 md:p-0">
+  <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">Search</h2>
+  <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+    Find any user, plot, package, agreement, payment, news item and more — then open the record.
+  </p>
+
+  <div class="relative mb-4 max-w-3xl">
+    <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+    </svg>
+    <input
+      type="search"
+      name="global-search"
+      autocomplete="off"
+      autofocus
+      [ngModel]="query"
+      (ngModelChange)="onQueryChange($event)"
+      placeholder="Search by name, email, title, reference, order number…"
+      aria-label="Search records"
+      class="block w-full pl-9 pr-9 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700"
+    />
+    <button
+      *ngIf="query"
+      type="button"
+      (click)="clear()"
+      aria-label="Clear search"
+      class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Type filter chips: totals are the real number of matches per type -->
+  <div *ngIf="chips.length > 1" class="flex flex-wrap gap-2 mb-4">
+    <button
+      *ngFor="let chip of chips"
+      type="button"
+      (click)="selectType(chip.type)"
+      class="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors"
+      [ngClass]="activeType === chip.type ? typeClass(chip.type) : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700'"
+      [attr.aria-pressed]="activeType === chip.type"
+    >
+      {{ chip.label }}
+      <span class="opacity-70">{{ chip.total }}</span>
+    </button>
+  </div>
+
+  <div *ngIf="failedTypes.length" class="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700" role="status">
+    Couldn't search: <span *ngFor="let type of failedTypes; let last = last">{{ typeLabel(type) }}<span *ngIf="!last">, </span></span>.
+    Other results are still shown.
+  </div>
+
+  <div *ngIf="loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3" aria-busy="true" aria-label="Searching">
+    <div
+      *ngFor="let n of skeletonCards"
+      class="min-h-[9rem] rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 animate-pulse"
+    >
+      <div class="h-4 w-16 rounded-full bg-gray-200 dark:bg-gray-700 mb-3"></div>
+      <div class="h-3.5 w-3/4 rounded bg-gray-200 dark:bg-gray-700 mb-2"></div>
+      <div class="h-3 w-full rounded bg-gray-100 dark:bg-gray-800"></div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && tooShort" class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-400 dark:text-gray-500 py-8 text-center">
+    Type at least {{ minLength }} characters to search.
+  </div>
+
+  <div *ngIf="!loading && !tooShort && searched && totalResults === 0" class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-500 dark:text-gray-400 py-8 text-center">
+    No records match “{{ query.trim() }}”.
+  </div>
+
+  <ng-container *ngIf="!loading && totalResults > 0">
+    <div
+      class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 transition-opacity"
+      [class.opacity-50]="pageLoading"
+      [attr.aria-busy]="pageLoading"
+    >
+      <a
+        *ngFor="let result of pagedResults; trackBy: trackByResult"
+        [routerLink]="result.route.commands"
+        [queryParams]="result.route.queryParams"
+        class="group flex min-h-[9rem] flex-col gap-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 shadow-sm transition hover:border-emerald-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60"
+      >
+        <span class="self-start inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold" [ngClass]="typeClass(result.type)">
+          {{ typeLabel(result.type) }}
+        </span>
+        <p class="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2 break-words" [attr.title]="result.title">{{ result.title }}</p>
+        <p *ngIf="result.description" class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 break-words">{{ result.description }}</p>
+        <div class="mt-auto flex flex-wrap gap-1 pt-1">
+          <span
+            *ngFor="let tag of result.tags | slice: 0 : 3"
+            class="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
+          >{{ tag }}</span>
+          <span *ngIf="result.tags.length > 3" class="text-[10px] text-gray-400 self-center">+{{ result.tags.length - 3 }}</span>
+        </div>
+      </a>
+    </div>
+
+    <p *ngIf="truncatedTypes.length" class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+      Each type shows its first {{ fetchSize }} matches —
+      <ng-container *ngFor="let chip of truncatedTypes; let last = last">
+        <button type="button" (click)="selectType(chip.type)" class="font-medium text-emerald-700 hover:underline dark:text-emerald-400">
+          browse all {{ chip.total }} {{ chip.label }} results</button><span *ngIf="!last">, </span>
+      </ng-container>.
+    </p>
+
+    <!-- Shared admin pagination (same footer as the tables): page size left, range centred, pages right -->
+    <div class="mt-4 rounded-xl border border-slate-100 bg-slate-50/60 px-5 py-3 dark:border-gray-700 dark:bg-gray-800/40">
+      <app-pagination
+        [total]="total"
+        [pageSize]="pageSize"
+        [pageIndex]="page"
+        [pageSizeOptions]="pageSizeOptions"
+        [disabled]="pageLoading"
+        (pageChange)="onPagination($event)"
+      ></app-pagination>
+    </div>
+  </ng-container>
+</div>

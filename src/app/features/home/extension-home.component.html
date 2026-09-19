@@ -1,33 +1,33 @@
-<div class="min-h-screen bg-slate-50 text-slate-900 w-full">
+<div class="min-h-screen bg-slate-50 text-slate-900 w-full dark:bg-gray-800 dark:text-gray-100">
   <header class="mb-8">
     
-    <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 text-center">{{ greeting }}, {{ currentUser?.firstName || 'User' }}</h1>
+    <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 text-center dark:text-gray-100">{{ greeting }}, {{ currentUser?.firstName || 'User' }}</h1>
     <p class="text-sm font-medium text-emerald-600 uppercase tracking-wide">Extension worker dashboard</p>
   </header>
 
-  <div *ngIf="loading" class="rounded-xl border border-slate-200 bg-white p-10 text-center text-slate-500">
+  <div *ngIf="loading" class="rounded-xl border border-slate-200 bg-white p-10 text-center text-slate-500 dark:bg-gray-900 dark:text-gray-400 dark:border-gray-700">
     Loading your dashboard…
   </div>
 
   <ng-container *ngIf="!loading">
     <!-- KPI tiles -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-      <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Farm plots</p>
-        <p class="text-3xl font-bold text-slate-900 mt-2">{{ totalPlots }}</p>
-        <p class="text-sm text-slate-600 mt-1">Currently assigned farm plots</p>
+      <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:bg-gray-900 dark:border-gray-700">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-gray-400">Farm plots</p>
+        <p class="text-3xl font-bold text-slate-900 mt-2 dark:text-gray-100">{{ totalPlots }}</p>
+        <p class="text-sm text-slate-600 mt-1 dark:text-gray-400">Currently assigned farm plots</p>
       </article>
 
-      <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Active assignments</p>
-        <p class="text-3xl font-bold text-slate-900 mt-2">{{ activeAssignments }}</p>
-        <p class="text-sm text-slate-600 mt-1">Leases, bids &amp; crowdfunding in progress</p>
+      <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:bg-gray-900 dark:border-gray-700">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-gray-400">Active assignments</p>
+        <p class="text-3xl font-bold text-slate-900 mt-2 dark:text-gray-100">{{ activeAssignments }}</p>
+        <p class="text-sm text-slate-600 mt-1 dark:text-gray-400">Leases, bids &amp; crowdfunding in progress</p>
       </article>
 
-      <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Follow-ups</p>
-        <p class="text-3xl font-bold text-slate-900 mt-2">{{ totalFollowUps }}</p>
-        <p class="text-sm text-slate-600 mt-1">Total follow-up plans logged</p>
+      <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:bg-gray-900 dark:border-gray-700">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-gray-400">Follow-ups</p>
+        <p class="text-3xl font-bold text-slate-900 mt-2 dark:text-gray-100">{{ totalFollowUps }}</p>
+        <p class="text-sm text-slate-600 mt-1 dark:text-gray-400">Total follow-up plans logged</p>
       </article>
 
       <article class="rounded-xl border border-emerald-100 bg-emerald-50 p-5 shadow-sm">
@@ -41,27 +41,28 @@
       <article class="rounded-xl border border-amber-100 bg-amber-50 p-5 shadow-sm">
         <p class="text-xs font-semibold uppercase tracking-wide text-amber-700">Needs attention</p>
         <p class="text-3xl font-bold text-amber-900 mt-2">{{ openFollowUpsCount }}</p>
-        <p class="text-sm text-amber-700 mt-1">Follow-ups still open</p>
+        <p class="text-sm text-amber-700 mt-1">Follow-ups still in progress</p>
+        <p *ngIf="closedFollowUpsCount > 0" class="text-xs text-amber-700 mt-1">{{ closedFollowUpsCount }} rejected / excluded</p>
       </article>
     </section>
 
     <!-- Progress & completions -->
-    <section class="mb-8 rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
-      <h2 class="text-lg font-semibold text-slate-900 mb-1">Your completion progress</h2>
-      <p class="text-sm text-slate-500 mb-6">How much of your follow-up workload is done, and how it's trending.</p>
+    <section class="mb-8 rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm dark:bg-gray-900 dark:border-gray-700">
+      <h2 class="text-lg font-semibold text-slate-900 mb-1 dark:text-gray-100">Your completion progress</h2>
+      <p class="text-sm text-slate-500 mb-6 dark:text-gray-400">How much of your follow-up workload is done, and how it's trending.</p>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
-          <h3 class="text-sm font-semibold text-slate-800 mb-3">Overall completion rate</h3>
-          <div *ngIf="totalFollowUps === 0" class="text-sm text-slate-500 py-10 text-center">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 dark:border-gray-700">
+          <h3 class="text-sm font-semibold text-slate-800 mb-3 dark:text-gray-200">Overall completion rate</h3>
+          <div *ngIf="totalFollowUps === 0" class="text-sm text-slate-500 py-10 text-center dark:text-gray-400">
             No follow-ups logged yet.
           </div>
           <div *ngIf="totalFollowUps > 0" echarts [options]="completionGaugeOption" class="h-56 w-full"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
-          <h3 class="text-sm font-semibold text-slate-800 mb-3">Completed vs. open by month</h3>
-          <div *ngIf="totalFollowUps === 0" class="text-sm text-slate-500 py-10 text-center">
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 dark:border-gray-700">
+          <h3 class="text-sm font-semibold text-slate-800 mb-3 dark:text-gray-200">Completed, open &amp; closed by month</h3>
+          <div *ngIf="totalFollowUps === 0" class="text-sm text-slate-500 py-10 text-center dark:text-gray-400">
             No follow-ups logged yet.
           </div>
           <div *ngIf="totalFollowUps > 0" echarts [options]="followUpTrendChartOption" class="h-56 w-full"></div>
@@ -70,14 +71,14 @@
     </section>
 
     <!-- Assignment progress -->
-    <section class="mb-8 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section class="mb-8 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:bg-gray-900 dark:border-gray-700">
       <div class="flex items-center justify-between gap-2 mb-1">
-        <h2 class="text-lg font-semibold text-slate-900">Assignment progress</h2>
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-gray-100">Assignment progress</h2>
         <a routerLink="/farm-plots-extension" class="text-sm font-medium text-emerald-600 hover:text-emerald-800 shrink-0">View all</a>
       </div>
-      <p class="text-sm text-slate-500 mb-4">How far along each active assignment is, soonest-ending first.</p>
+      <p class="text-sm text-slate-500 mb-4 dark:text-gray-400">How far along each active assignment is, soonest-ending first.</p>
 
-      <div *ngIf="assignmentProgress.length === 0" class="text-sm text-slate-500 py-6 text-center">
+      <div *ngIf="assignmentProgress.length === 0" class="text-sm text-slate-500 py-6 text-center dark:text-gray-400">
         No active assignments right now.
       </div>
 
@@ -86,18 +87,18 @@
           <button
             type="button"
             (click)="goToAgreement(item.agreementId, item.agreement)"
-            class="w-full text-left rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/40 p-3 transition"
+            class="w-full text-left rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/40 p-3 transition dark:border-gray-700"
           >
             <div class="flex justify-between items-center gap-2 mb-2">
-              <span class="font-medium text-slate-900 text-sm truncate">{{ item.plotTitle }}</span>
-              <span class="text-xs text-slate-500 shrink-0">
+              <span class="font-medium text-slate-900 text-sm truncate dark:text-gray-100">{{ item.plotTitle }}</span>
+              <span class="text-xs text-slate-500 shrink-0 dark:text-gray-400">
                 {{ item.daysRemaining !== null ? item.daysRemaining + ' days left' : '—' }}
               </span>
             </div>
-            <div class="h-2 rounded-full bg-slate-200 overflow-hidden">
+            <div class="h-2 rounded-full bg-slate-200 overflow-hidden dark:bg-gray-700">
               <div class="h-full rounded-full bg-emerald-500" [style.width.%]="item.pct"></div>
             </div>
-            <p class="text-xs text-slate-500 mt-1">{{ item.pct }}% of assignment duration elapsed</p>
+            <p class="text-xs text-slate-500 mt-1 dark:text-gray-400">{{ item.pct }}% of assignment duration elapsed</p>
           </button>
         </li>
       </ul>
@@ -105,30 +106,30 @@
 
     <!-- Breakdown charts -->
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h3 class="text-sm font-semibold text-slate-800 mb-1">Assignments by status</h3>
-        <p class="text-xs text-slate-500 mb-4">Where your plots stand in their lifecycle</p>
-        <div *ngIf="statusBreakdown.length === 0" class="text-sm text-slate-500 py-10 text-center">No data yet.</div>
+      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:bg-gray-900 dark:border-gray-700">
+        <h3 class="text-sm font-semibold text-slate-800 mb-1 dark:text-gray-200">Assignments by status</h3>
+        <p class="text-xs text-slate-500 mb-4 dark:text-gray-400">Where your plots stand in their lifecycle</p>
+        <div *ngIf="statusBreakdown.length === 0" class="text-sm text-slate-500 py-10 text-center dark:text-gray-400">No data yet.</div>
         <div *ngIf="statusBreakdown.length > 0" echarts [options]="statusChartOption" class="h-56 w-full"></div>
       </div>
 
-      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h3 class="text-sm font-semibold text-slate-800 mb-1">Assignments by type</h3>
-        <p class="text-xs text-slate-500 mb-4">Leasing, bidding &amp; crowdfunding mix</p>
-        <div *ngIf="typeBreakdown.length === 0" class="text-sm text-slate-500 py-10 text-center">No data yet.</div>
+      <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:bg-gray-900 dark:border-gray-700">
+        <h3 class="text-sm font-semibold text-slate-800 mb-1 dark:text-gray-200">Assignments by type</h3>
+        <p class="text-xs text-slate-500 mb-4 dark:text-gray-400">Leasing, bidding &amp; crowdfunding mix</p>
+        <div *ngIf="typeBreakdown.length === 0" class="text-sm text-slate-500 py-10 text-center dark:text-gray-400">No data yet.</div>
         <div *ngIf="typeBreakdown.length > 0" echarts [options]="typeChartOption" class="h-56 w-full"></div>
       </div>
     </section>
 
     <!-- Upcoming follow-ups -->
-    <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm mb-8">
+    <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm mb-8 dark:bg-gray-900 dark:border-gray-700">
       <div class="flex items-center justify-between gap-2 mb-1">
-        <h2 class="text-lg font-semibold text-slate-900">Upcoming follow-ups</h2>
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-gray-100">Upcoming follow-ups</h2>
         <a routerLink="/farm-followups" class="text-sm font-medium text-emerald-600 hover:text-emerald-800 shrink-0">View all</a>
       </div>
-      <p class="text-sm text-slate-500 mb-4">Open follow-ups, soonest due first</p>
+      <p class="text-sm text-slate-500 mb-4 dark:text-gray-400">Open follow-ups, soonest due first</p>
 
-      <div *ngIf="upcomingFollowUps.length === 0" class="text-sm text-slate-500 py-6 text-center">
+      <div *ngIf="upcomingFollowUps.length === 0" class="text-sm text-slate-500 py-6 text-center dark:text-gray-400">
         No open follow-ups. You're all caught up.
       </div>
 
@@ -137,13 +138,13 @@
           <button
             type="button"
             (click)="goToAgreement(item.agreementId)"
-            class="w-full text-left flex justify-between items-center gap-3 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/40 p-3 transition"
+            class="w-full text-left flex justify-between items-center gap-3 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/40 p-3 transition dark:border-gray-700"
           >
             <span class="min-w-0">
-              <span class="block font-medium text-slate-900 text-sm truncate">{{ item.plotTitle }}</span>
-              <span class="block text-xs text-slate-500 truncate">{{ item.remark }}</span>
+              <span class="block font-medium text-slate-900 text-sm truncate dark:text-gray-100">{{ item.plotTitle }}</span>
+              <span class="block text-xs text-slate-500 truncate dark:text-gray-400">{{ item.remark }}</span>
             </span>
-            <span class="text-xs text-slate-500 shrink-0">{{ (item.endDate || item.startDate) | date : 'mediumDate' }}</span>
+            <span class="text-xs text-slate-500 shrink-0 dark:text-gray-400">{{ (item.endDate || item.startDate) | date : 'mediumDate' }}</span>
           </button>
         </li>
       </ul>

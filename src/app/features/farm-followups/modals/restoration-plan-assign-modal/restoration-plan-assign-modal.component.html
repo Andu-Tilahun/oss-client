@@ -12,9 +12,9 @@
   <ng-template #modalBody>
     <div class="space-y-4 text-sm">
       <div>
-        <label class="text-sm font-medium text-gray-700">Extension Worker <span class="text-red-500">*</span></label>
+        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Extension Worker <span class="text-red-500">*</span></label>
         <select
-          class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+          class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:text-gray-300 dark:border-gray-700"
           [(ngModel)]="selectedWorkerId"
         >
           <option value="" disabled>Select an extension worker</option>
@@ -27,18 +27,18 @@
 
       <div *ngIf="!existingPlanId" class="grid grid-cols-2 gap-3">
         <div>
-          <label class="text-sm font-medium text-gray-700">Start Date <span class="text-red-500">*</span></label>
+          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Start Date <span class="text-red-500">*</span></label>
           <input
             type="date"
-            class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+            class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:text-gray-300 dark:border-gray-700"
             [(ngModel)]="startDate"
           />
         </div>
         <div>
-          <label class="text-sm font-medium text-gray-700">End Date <span class="text-red-500">*</span></label>
+          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">End Date <span class="text-red-500">*</span></label>
           <input
             type="date"
-            class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+            class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:text-gray-300 dark:border-gray-700"
             [(ngModel)]="endDate"
           />
         </div>

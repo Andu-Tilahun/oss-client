@@ -1,4 +1,4 @@
-<div *ngIf="!config" class="p-6 text-sm text-gray-400 text-center">Loading...</div>
+<div *ngIf="!config" class="p-6 text-sm text-gray-400 text-center dark:text-gray-500">Loading...</div>
 
 <div *ngIf="config">
   <app-detail-card>
@@ -10,11 +10,11 @@
         size="large"
       ></app-profile-picture-upload>
       <div>
-        <h3 class="text-xl font-bold text-gray-900">{{ config.name }}</h3>
-        <p class="text-sm text-gray-500 mt-0.5">{{ config.tagline || '—' }}</p>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ config.name }}</h3>
+        <p class="text-sm text-gray-500 mt-0.5 dark:text-gray-400">{{ config.tagline || '—' }}</p>
       </div>
     </div>
-    <hr class="border-gray-200 mb-8" />
+    <hr class="border-gray-200 mb-8 dark:border-gray-700" />
 
     <app-detail-section title="Identity">
       <app-detail-field label="Address" [value]="config.address"></app-detail-field>
@@ -31,7 +31,7 @@
     </app-detail-section>
 
     <app-detail-section title="About Us">
-      <div class="col-span-full text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+      <div class="col-span-full text-sm text-slate-700 whitespace-pre-wrap leading-relaxed dark:text-gray-300">
         {{ config.aboutUs || '—' }}
       </div>
     </app-detail-section>

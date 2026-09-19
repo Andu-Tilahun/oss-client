@@ -1,4 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { deepLinkParam$ } from '../../../../shared/utils/deep-link.util';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SystemConfigService } from '../../services/system-config.service';
@@ -19,7 +22,7 @@ import { BankAccountFilterComponent } from '../../components/bank-account-filter
   imports: [CommonModule, ReactiveFormsModule, SharedModule, PageSplitLayoutComponent, BankAccountViewComponent, BankAccountFilterComponent],
   templateUrl: './bank-accounts-page.component.html',
 })
-export class BankAccountsPageComponent implements OnInit {
+export class BankAccountsPageComponent implements OnInit, OnDestroy {
   accounts: BankAccount[] = [];
   allFiltered: BankAccount[] = [];
   displayedAccounts: BankAccount[] = [];
@@ -58,7 +61,11 @@ export class BankAccountsPageComponent implements OnInit {
     private fb: FormBuilder,
     private systemConfigService: SystemConfigService,
     private toastService: ToastService,
+    private route: ActivatedRoute,
   ) {}
+
+  private deepLinkSub?: Subscription;
+  private pendingSelectId: string | null = null;
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -71,7 +78,29 @@ export class BankAccountsPageComponent implements OnInit {
       active:            [true],
       displayOrder:      [0],
     });
+    // Subscribed (not a snapshot read) so a global-search click still selects the account when this
+    // page is already open.
+    this.deepLinkSub = deepLinkParam$(this.route).subscribe(id => {
+      this.pendingSelectId = id;
+      this.applyPendingSelection();
+    });
     this.loadAccounts();
+  }
+
+  ngOnDestroy(): void {
+    this.deepLinkSub?.unsubscribe();
+  }
+
+  /** The page loads every account, so a deep link is a plain lookup once the list has arrived. */
+  private applyPendingSelection(): void {
+    if (!this.pendingSelectId || this.loading) return;
+    const match = this.accounts.find(a => a.id === this.pendingSelectId);
+    if (match) {
+      this.selectedAccount = { ...match };
+    } else {
+      this.toastService.warning('Bank account not found — it may have been removed.');
+    }
+    this.pendingSelectId = null;
   }
 
   loadAccounts(): void {
@@ -85,6 +114,7 @@ export class BankAccountsPageComponent implements OnInit {
         if (accounts.length === 0) { this.selectedAccount = null; return; }
         const match = accounts.find(a => a.id === previousId);
         this.selectedAccount = match ? { ...match } : { ...accounts[0] };
+        this.applyPendingSelection();
       },
       error: () => {
         this.toastService.error('Failed to load bank accounts');

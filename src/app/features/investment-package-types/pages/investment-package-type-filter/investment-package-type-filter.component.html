@@ -19,14 +19,14 @@
   ></app-funding-status-filter>
 
   <div class="flex items-center gap-2 flex-shrink-0 min-w-0">
-    <label class="text-sm font-medium text-slate-600 whitespace-nowrap shrink-0" for="investment-package-type-payment-status">
+    <label class="text-sm font-medium text-slate-600 whitespace-nowrap shrink-0 dark:text-gray-400" for="investment-package-type-payment-status">
       Payment
     </label>
     <select
       id="investment-package-type-payment-status"
       [ngModel]="paymentStatus"
       (ngModelChange)="onPaymentStatusChange($event)"
-      class="min-w-[7rem] w-40 max-w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700 bg-white"
+      class="min-w-[7rem] w-40 max-w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700 bg-white dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700"
     >
       <option [ngValue]="''">All</option>
       <option *ngFor="let s of paymentStatuses" [ngValue]="s">{{ s }}</option>
@@ -34,14 +34,14 @@
   </div>
 
   <div *ngIf="showSoilType" class="flex items-center gap-2 flex-shrink-0 min-w-0">
-    <label class="text-sm font-medium text-slate-600 whitespace-nowrap shrink-0" for="investment-package-type-soil-type">
+    <label class="text-sm font-medium text-slate-600 whitespace-nowrap shrink-0 dark:text-gray-400" for="investment-package-type-soil-type">
       Soil
     </label>
     <select
       id="investment-package-type-soil-type"
       [ngModel]="soilType"
       (ngModelChange)="onSoilTypeChange($event)"
-      class="min-w-[7rem] w-40 max-w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700 bg-white"
+      class="min-w-[7rem] w-40 max-w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700 bg-white dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700"
     >
       <option [ngValue]="''">All</option>
       <option *ngFor="let s of soilTypes" [ngValue]="s">{{ s }}</option>

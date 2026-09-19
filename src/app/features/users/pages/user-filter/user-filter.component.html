@@ -11,7 +11,7 @@
     <select
       [ngModel]="selectedRole"
       (ngModelChange)="onRoleSelectionChange($event)"
-      class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+      class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700 dark:text-gray-300 dark:border-gray-700"
     >
       <option value="">Role: All</option>
       <option *ngFor="let role of roleFilters" [value]="role.value">
@@ -24,7 +24,7 @@
     <select
       [ngModel]="selectedGender"
       (ngModelChange)="onGenderSelectionChange($event)"
-      class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700"
+      class="w-full px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-700 dark:text-gray-300 dark:border-gray-700"
     >
       <option value="">Gender: All</option>
       <option *ngFor="let gender of genderFilters" [value]="gender.value">

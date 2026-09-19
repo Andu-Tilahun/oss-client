@@ -1,4 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { deepLinkParam$ } from '../../../../shared/utils/deep-link.util';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SystemConfigService } from '../../services/system-config.service';
@@ -22,7 +25,7 @@ import { PageSplitRightAction } from '../../../../shared/components/page-split-l
   imports: [CommonModule, ReactiveFormsModule, SharedModule, PageSplitLayoutComponent, GalleryItemViewComponent, GalleryMediaPickerComponent, GalleryFilterComponent],
   templateUrl: './gallery-management-page.component.html',
 })
-export class GalleryManagementPageComponent implements OnInit {
+export class GalleryManagementPageComponent implements OnInit, OnDestroy {
   items: GalleryItem[] = [];
   selectedItem: GalleryItem | null = null;
   detailRefreshKey = 0;
@@ -66,11 +69,35 @@ export class GalleryManagementPageComponent implements OnInit {
     private fb: FormBuilder,
     private systemConfigService: SystemConfigService,
     private toastService: ToastService,
+    private route: ActivatedRoute,
   ) {}
+
+  private deepLinkSub?: Subscription;
+  private pendingDeepLink: GalleryItem | null = null;
 
   ngOnInit(): void {
     this.buildForm();
-    this.loadItems();
+    // Subscribed (not a snapshot read) so a global-search click still opens the item when this
+    // page is already open.
+    this.deepLinkSub = deepLinkParam$(this.route).subscribe(id => this.openDeepLink(id));
+    if (!this.route.snapshot.queryParamMap.get('id')) {
+      this.loadItems();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.deepLinkSub?.unsubscribe();
+  }
+
+  /** Fetches the item by id (it may not be on the current page/filter) and selects it. */
+  private openDeepLink(id: string): void {
+    this.systemConfigService.getGalleryItemById(id).subscribe({
+      next: (item) => {
+        this.pendingDeepLink = item;
+        this.loadItems(id);
+      },
+      error: () => this.loadItems(),
+    });
   }
 
   private buildForm(): void {
@@ -83,9 +110,9 @@ export class GalleryManagementPageComponent implements OnInit {
     });
   }
 
-  loadItems(): void {
+  loadItems(selectId?: string): void {
     this.loading = true;
-    const previousId = this.selectedItem?.id;
+    const previousId = selectId ?? this.selectedItem?.id;
     const request: GalleryItemFilterRequest = {
       searchText: this.searchText || undefined,
       kind: this.selectedKind || undefined,
@@ -97,11 +124,19 @@ export class GalleryManagementPageComponent implements OnInit {
         this.items = page.content;
         this.total = page.totalElements;
         this.loading = false;
-        if (this.items.length === 0) { this.selectedItem = null; return; }
-        if (previousId) {
-          const match = this.items.find(i => i.id === previousId);
-          if (match) { this.selectedItem = { ...match }; return; }
+        const match = previousId
+          ? this.items.find(i => i.id === previousId)
+            ?? (this.pendingDeepLink?.id === previousId ? this.pendingDeepLink : null)
+          : null;
+        if (match) {
+          this.selectedItem = { ...match };
+          if (this.pendingDeepLink?.id === previousId) {
+            this.detailRefreshKey++;
+            this.pendingDeepLink = null;
+          }
+          return;
         }
+        if (this.items.length === 0) { this.selectedItem = null; return; }
         this.selectedItem = { ...this.items[0] };
         this.detailRefreshKey++;
       },

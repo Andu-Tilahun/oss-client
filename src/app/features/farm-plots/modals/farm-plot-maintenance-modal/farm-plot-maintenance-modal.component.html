@@ -13,17 +13,17 @@
   <ng-template #modalBody>
     <div class="space-y-4 text-sm">
       <div>
-        <p class="text-gray-500">You are about to mark this farm plot as under maintenance:</p>
-        <p class="font-medium text-gray-900">{{ plotTitle || '-' }}</p>
+        <p class="text-gray-500 dark:text-gray-400">You are about to mark this farm plot as under maintenance:</p>
+        <p class="font-medium text-gray-900 dark:text-gray-100">{{ plotTitle || '-' }}</p>
         <p class="mt-1 text-xs text-amber-600">
           It will move to the Repair / Damaged tab until it's marked repaired.
         </p>
       </div>
 
       <div>
-        <label class="text-sm font-medium text-gray-700">Reason <span class="text-red-500">*</span></label>
+        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Reason <span class="text-red-500">*</span></label>
         <textarea
-          class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+          class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:text-gray-300 dark:border-gray-700"
           rows="3"
           placeholder="Explain what's damaged or needs repair..."
           [ngModel]="reason"

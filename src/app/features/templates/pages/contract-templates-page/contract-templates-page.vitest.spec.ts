@@ -3,6 +3,7 @@ import { FormBuilder } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { ContractTemplatesPageComponent } from './contract-templates-page.component';
 import { MessageTemplate } from '../../../system-config/models/message-template.model';
+import { mockRouteWithQueryParams } from '../../../../shared/utils/deep-link.testing';
 
 const MOCK_CONTRACT: MessageTemplate = {
   id: 'contract-uuid-1',
@@ -22,10 +23,11 @@ function makeComponent() {
     updateTemplate: vi.fn(() => of(MOCK_CONTRACT)),
     deleteTemplate: vi.fn(() => of(null)),
   };
-  const mockToastService = { success: vi.fn(), error: vi.fn() };
-  const component = new ContractTemplatesPageComponent(new FormBuilder(), mockService as any, mockToastService as any);
+  const mockToastService = { success: vi.fn(), error: vi.fn(), warning: vi.fn() };
+  const routeMock = mockRouteWithQueryParams();
+  const component = new ContractTemplatesPageComponent(new FormBuilder(), mockService as any, mockToastService as any, routeMock.route as any);
   component.ngOnInit();
-  return { component, mockService };
+  return { component, mockService, mockToastService, setQueryParams: routeMock.setQueryParams };
 }
 
 describe('ContractTemplatesPageComponent', () => {
@@ -149,5 +151,26 @@ describe('ContractTemplatesPageComponent', () => {
     vi.spyOn(window, 'confirm').mockReturnValue(false);
     component.delete('contract-uuid-1');
     expect(mockService.deleteTemplate).not.toHaveBeenCalled();
+  });
+});
+
+describe('ContractTemplatesPageComponent deep-link (?id=)', () => {
+  it('selects the template named in ?id= when the id changes on an open page', () => {
+    const { component, mockService, setQueryParams } = makeComponent();
+    const other = { ...MOCK_CONTRACT, id: 'contract-uuid-2', name: 'Other' };
+    mockService.getTemplates.mockReturnValue(of([MOCK_CONTRACT, other]));
+    component.load();
+
+    setQueryParams({ id: 'contract-uuid-2' });
+
+    expect(component.selectedTemplate?.id).toBe('contract-uuid-2');
+  });
+
+  it('warns when the template no longer exists', () => {
+    const { component, mockToastService, setQueryParams } = makeComponent();
+
+    setQueryParams({ id: 'nope' });
+
+    expect(mockToastService.warning).toHaveBeenCalled();
   });
 });

@@ -3,7 +3,7 @@
 <app-toast-container></app-toast-container>
 
 <!-- Single router-outlet that persists - layout changes around it -->
-<div class="font-sans" [class.flex]="showLayout" [class.app-shell]="showLayout" [class.bg-gray-100]="showLayout" [class.overflow-hidden]="showLayout">
+<div class="font-sans" [class.flex]="showLayout" [class.app-shell]="showLayout" [ngClass]="{'bg-gray-100 dark:bg-gray-900': showLayout}" [class.overflow-hidden]="showLayout">
   <!-- Sidebar (only for dashboard); aside takes no width on small screens so the drawer is overlay-only -->
   <aside *ngIf="showLayout" class="flex-shrink-0 w-0 min-w-0 overflow-visible md:w-auto md:min-w-0">
     <app-sidebar [(mobileOpen)]="mobileSidebarOpen"></app-sidebar>
@@ -32,8 +32,8 @@
     </main>
 
     <!-- Footer (only for dashboard) -->
-    <!-- <footer *ngIf="showLayout" class="bg-white border-t border-gray-200 px-6 py-4">
-      <div class="flex items-center justify-between text-sm text-gray-600">
+    <!-- <footer *ngIf="showLayout" class="bg-white border-t border-gray-200 px-6 py-4 dark:bg-gray-900 dark:border-gray-700">
+      <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
         <p>© 202 AgriVest. All rights reserved.</p>
         <div class="flex space-x-4">
           <a href="#" class="hover:text-indigo-600 transition-colors">Privacy Policy</a>

@@ -6,7 +6,7 @@
       [checked]="choice === 'existing'"
       (change)="onSelect('existing')"
     />
-    <span class="text-sm font-medium text-gray-900">{{ existingLabel }}</span>
+    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ existingLabel }}</span>
   </label>
 
   <label class="inline-flex items-center gap-2 cursor-pointer">
@@ -16,7 +16,7 @@
       [checked]="choice === 'new'"
       (change)="onSelect('new')"
     />
-    <span class="text-sm font-medium text-gray-900">{{ newLabel }}</span>
+    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ newLabel }}</span>
   </label>
 </div>
 
@@ -26,7 +26,7 @@
       type="text"
       formControlName="referenceNumber"
       [placeholder]="placeholder"
-      class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono w-72"
+      class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono w-72 dark:border-gray-600"
     />
     <button
       type="submit"

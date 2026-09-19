@@ -51,34 +51,34 @@
 
 <!-- Create / Edit Modal -->
 <div *ngIf="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6 dark:bg-gray-900">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-semibold text-gray-800">{{ editingId ? 'Edit Link' : 'Add Social Media Link' }}</h3>
-      <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">{{ editingId ? 'Edit Link' : 'Add Social Media Link' }}</h3>
+      <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none dark:text-gray-500">&times;</button>
     </div>
 
     <form [formGroup]="form" (ngSubmit)="onSave()" class="space-y-3">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Platform *</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Platform *</label>
         <select formControlName="platform"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600">
           <option *ngFor="let p of platforms" [value]="p">{{ p }}</option>
         </select>
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">URL *</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">URL *</label>
         <input formControlName="url" type="url"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600"
           placeholder="https://..." />
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Display Order</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Display Order</label>
           <input formControlName="displayOrder" type="number"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600" />
         </div>
         <div class="flex items-end pb-2">
-          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer dark:text-gray-300">
             <input formControlName="visible" type="checkbox" class="rounded" />
             Visible on site
           </label>
@@ -87,7 +87,7 @@
 
       <div class="flex justify-end gap-3 pt-2">
         <button type="button" (click)="closeModal()"
-          class="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Cancel</button>
+          class="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600">Cancel</button>
         <button type="submit" [disabled]="saving"
           class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
           {{ saving ? 'Saving...' : 'Save' }}

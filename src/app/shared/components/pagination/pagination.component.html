@@ -1,0 +1,85 @@
+<nav aria-label="Pagination">
+  <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-4">
+    <!-- Left: page size -->
+    <div *ngIf="showPageSize" class="items-center space-x-2 justify-self-start" [ngClass]="metaVisibility.flex">
+      <label class="text-sm text-slate-600 dark:text-gray-400">Show</label>
+      <select
+        [value]="pageSize"
+        [disabled]="disabled"
+        (change)="onPageSizeChange($event)"
+        class="border border-slate-200 rounded-lg px-2.5 py-1 text-sm text-slate-700 focus:ring-2 bg-white dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700"
+        [ngClass]="accentClasses.select"
+        aria-label="Entries per page"
+      >
+        <option *ngFor="let size of sizeChoices" [value]="size" [selected]="size === pageSize">{{ size }}</option>
+      </select>
+      <span class="text-sm text-slate-600 dark:text-gray-400">entries</span>
+    </div>
+
+    <div *ngIf="!showPageSize" class="hidden lg:block" aria-hidden="true"></div>
+
+    <!-- Middle: range -->
+    <div class="text-sm text-slate-600 dark:text-gray-400 text-center" [ngClass]="metaVisibility.block">
+      Showing <span class="font-medium">{{ startIndex }}</span> to <span class="font-medium">{{ endIndex }}</span> of <span class="font-medium">{{ total }}</span> results
+    </div>
+
+    <!-- Right: page buttons -->
+    <div class="flex items-center justify-center space-x-2 lg:justify-self-end">
+      <button
+        type="button"
+        (click)="onPageChange(1)"
+        [disabled]="pageIndex === 1 || disabled"
+        class="px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:text-gray-300 dark:border-gray-700"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        (click)="onPageChange(pageIndex - 1)"
+        [disabled]="pageIndex === 1 || disabled"
+        class="px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:text-gray-300 dark:border-gray-700"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        *ngFor="let page of visiblePages"
+        (click)="onPageChange(page)"
+        [disabled]="disabled"
+        [attr.aria-current]="page === pageIndex ? 'page' : null"
+        [ngClass]="page === pageIndex ? accentClasses.active : 'hover:bg-slate-100'"
+        class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 transition-colors dark:text-gray-300 dark:border-gray-700"
+      >
+        {{ page }}
+      </button>
+
+      <button
+        type="button"
+        (click)="onPageChange(pageIndex + 1)"
+        [disabled]="pageIndex === totalPages || disabled"
+        class="px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:text-gray-300 dark:border-gray-700"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        (click)="onPageChange(totalPages)"
+        [disabled]="pageIndex === totalPages || disabled"
+        class="px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:text-gray-300 dark:border-gray-700"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</nav>

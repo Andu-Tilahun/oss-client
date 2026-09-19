@@ -1,6 +1,6 @@
-<div class="min-h-full bg-gray-50">
-  <div class="border-b border-gray-200 bg-white px-6 pt-6">
-    <h1 class="text-2xl font-bold text-gray-900 mb-4">Content Management</h1>
+<div class="min-h-full bg-gray-50 dark:bg-gray-800">
+  <div class="border-b border-gray-200 bg-white px-6 pt-6 dark:bg-gray-900 dark:border-gray-700">
+    <h1 class="text-2xl font-bold text-gray-900 mb-4 dark:text-gray-100">Content Management</h1>
     <nav class="flex gap-1">
       <button
         *ngFor="let tab of tabs"
@@ -15,7 +15,7 @@
     </nav>
   </div>
 
-  <div class="bg-white min-h-full">
+  <div class="bg-white min-h-full dark:bg-gray-900">
     <app-organization-config-page  *ngIf="activeTab === 'organization'"></app-organization-config-page>
     <app-news-management-page     *ngIf="activeTab === 'news'"></app-news-management-page>
     <app-social-media-page        *ngIf="activeTab === 'social-media'"></app-social-media-page>

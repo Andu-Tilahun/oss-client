@@ -1,4 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { deepLinkParam$ } from '../../../../shared/utils/deep-link.util';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SystemConfigService } from '../../services/system-config.service';
@@ -22,7 +25,7 @@ import { PageSplitRightAction } from '../../../../shared/components/page-split-l
   imports: [CommonModule, ReactiveFormsModule, SharedModule, PageSplitLayoutComponent, NewsArticleViewComponent, NewsFilterComponent, GalleryMediaPickerComponent],
   templateUrl: './news-management-page.component.html',
 })
-export class NewsManagementPageComponent implements OnInit {
+export class NewsManagementPageComponent implements OnInit, OnDestroy {
   articles: NewsArticle[] = [];
   selectedArticle: NewsArticle | null = null;
   detailRefreshKey = 0;
@@ -84,11 +87,35 @@ export class NewsManagementPageComponent implements OnInit {
     private fb: FormBuilder,
     private systemConfigService: SystemConfigService,
     private toastService: ToastService,
+    private route: ActivatedRoute,
   ) {}
+
+  private deepLinkSub?: Subscription;
+  private pendingDeepLink: NewsArticle | null = null;
 
   ngOnInit(): void {
     this.buildForm();
-    this.loadArticles();
+    // Subscribed (not a snapshot read) so a global-search click still opens the article when this
+    // page is already open.
+    this.deepLinkSub = deepLinkParam$(this.route).subscribe(id => this.openDeepLink(id));
+    if (!this.route.snapshot.queryParamMap.get('id')) {
+      this.loadArticles();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.deepLinkSub?.unsubscribe();
+  }
+
+  /** Fetches the article by id (it may not be on the current page/filter) and selects it. */
+  private openDeepLink(id: string): void {
+    this.systemConfigService.getNewsById(id).subscribe({
+      next: (article) => {
+        this.pendingDeepLink = article;
+        this.loadArticles(id);
+      },
+      error: () => this.loadArticles(),
+    });
   }
 
   private buildForm(): void {
@@ -105,9 +132,9 @@ export class NewsManagementPageComponent implements OnInit {
     });
   }
 
-  loadArticles(): void {
+  loadArticles(selectId?: string): void {
     this.loading = true;
-    const previousId = this.selectedArticle?.id;
+    const previousId = selectId ?? this.selectedArticle?.id;
     const request: NewsArticleFilterRequest = {
       searchText: this.searchText || undefined,
       status: this.selectedStatus || undefined,
@@ -122,11 +149,19 @@ export class NewsManagementPageComponent implements OnInit {
         this.articles = page.content;
         this.total = page.totalElements;
         this.loading = false;
-        if (this.articles.length === 0) { this.selectedArticle = null; return; }
-        if (previousId) {
-          const match = this.articles.find(a => a.id === previousId);
-          if (match) { this.selectedArticle = { ...match }; return; }
+        const match = previousId
+          ? this.articles.find(a => a.id === previousId)
+            ?? (this.pendingDeepLink?.id === previousId ? this.pendingDeepLink : null)
+          : null;
+        if (match) {
+          this.selectedArticle = { ...match };
+          if (this.pendingDeepLink?.id === previousId) {
+            this.detailRefreshKey++;
+            this.pendingDeepLink = null;
+          }
+          return;
         }
+        if (this.articles.length === 0) { this.selectedArticle = null; return; }
         this.selectedArticle = { ...this.articles[0] };
         this.detailRefreshKey++;
       },

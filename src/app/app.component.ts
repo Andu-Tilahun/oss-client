@@ -7,6 +7,7 @@ import { LoadingSpinnerComponent } from './shared/components/loading-spinner/loa
 import { AuthService } from './features/auth/services/auth.service';
 import {ToastContainerComponent} from "./shared/toast/toast-container/toast-container.component";
 import { filter } from 'rxjs/operators';
+import { ThemeService } from './core/services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -22,7 +23,7 @@ export class AppComponent implements OnInit {
   private isAuthenticated = false;
   private currentUrl = '';
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router, private themeService: ThemeService) {}
 
   ngOnInit() {
     this.currentUrl = this.router.url;

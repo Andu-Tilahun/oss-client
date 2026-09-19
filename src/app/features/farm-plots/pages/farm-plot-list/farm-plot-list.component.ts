@@ -1,4 +1,7 @@
-import {Component} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {Subscription} from 'rxjs';
+import {deepLinkParam$} from '../../../../shared/utils/deep-link.util';
 import {
   FarmGallery,
   FarmPlot,
@@ -25,7 +28,7 @@ import {exportRowsToExcel} from '../../../../shared/utils/excel-export.util';
   templateUrl: './farm-plot-list.component.html',
   styleUrl: './farm-plot-list.component.css',
 })
-export class FarmPlotListComponent {
+export class FarmPlotListComponent implements OnInit, OnDestroy {
   private readonly storageApiUrl = `${environment.apiUrl}/files`;
 
   regionsMap = new Map<string, string>();
@@ -122,8 +125,12 @@ export class FarmPlotListComponent {
     private farmPlotService: FarmPlotService,
     private toastService: ToastService,
     private regionService: RegionService,
+    private route: ActivatedRoute,
   ) {
   }
+
+  private deepLinkSub?: Subscription;
+  private pendingDeepLink: FarmPlot | null = null;
 
   ngOnInit(): void {
     this.regionService.filterRegions({ page: 0, size: 100 }).subscribe({
@@ -131,7 +138,31 @@ export class FarmPlotListComponent {
         this.regionsMap = new Map((res.content ?? []).map(r => [r.id, r.name]));
       },
     });
-    this.refreshCurrentTab();
+    // Subscribed (not a snapshot read) so a global-search click still selects the plot when this
+    // page is already open.
+    this.deepLinkSub = deepLinkParam$(this.route).subscribe((id) => this.openDeepLink(id));
+    if (!this.route.snapshot.queryParamMap.get('id')) {
+      this.refreshCurrentTab();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.deepLinkSub?.unsubscribe();
+  }
+
+  /** Fetches the plot by id (it may be on any page of any tab), switches to the tab its status
+   *  belongs to, then loads that tab and selects it. */
+  private openDeepLink(id: string): void {
+    this.farmPlotService.getFarmPlotById(id).subscribe({
+      next: (plot) => {
+        this.adminActiveTab = plot.status === 'UNDER_MAINTENANCE'
+          ? 'repair'
+          : plot.status === 'INACTIVE' ? 'archived' : 'operational';
+        this.pendingDeepLink = plot;
+        this.refreshCurrentTab(id);
+      },
+      error: () => this.refreshCurrentTab(),
+    });
   }
 
   onAdminTabChange(key: string): void {
@@ -217,9 +248,14 @@ export class FarmPlotListComponent {
 
   private selectFromList(list: FarmPlot[], previousId?: string | null): void {
     if (previousId) {
-      const match = list.find((p) => p.id === previousId);
+      const match = list.find((p) => p.id === previousId)
+        ?? (this.pendingDeepLink?.id === previousId ? this.pendingDeepLink : null);
       if (match) {
         this.selectedPlot = {...match};
+        if (this.pendingDeepLink?.id === previousId) {
+          this.detailRefreshKey++;
+          this.pendingDeepLink = null;
+        }
         return;
       }
     }

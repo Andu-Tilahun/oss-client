@@ -2,53 +2,53 @@
   <div *ngIf="loading" class="animate-pulse space-y-8" aria-label="Loading farm plot">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
       <div class="space-y-2">
-        <div class="h-7 w-64 rounded bg-gray-200"></div>
-        <div class="h-4 w-80 rounded bg-gray-100"></div>
+        <div class="h-7 w-64 rounded bg-gray-200 dark:bg-gray-700"></div>
+        <div class="h-4 w-80 rounded bg-gray-100 dark:bg-gray-800"></div>
       </div>
-      <div class="h-6 w-28 rounded-full bg-gray-200"></div>
+      <div class="h-6 w-28 rounded-full bg-gray-200 dark:bg-gray-700"></div>
     </div>
 
-    <hr class="border-gray-200" />
+    <hr class="border-gray-200 dark:border-gray-700" />
 
     <div class="space-y-4">
-      <div class="h-5 w-52 rounded bg-gray-200"></div>
+      <div class="h-5 w-52 rounded bg-gray-200 dark:bg-gray-700"></div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="space-y-2">
-          <div class="h-3 w-24 rounded bg-gray-100"></div>
-          <div class="h-4 w-40 rounded bg-gray-200"></div>
+          <div class="h-3 w-24 rounded bg-gray-100 dark:bg-gray-800"></div>
+          <div class="h-4 w-40 rounded bg-gray-200 dark:bg-gray-700"></div>
         </div>
         <div class="space-y-2">
-          <div class="h-3 w-24 rounded bg-gray-100"></div>
-          <div class="h-4 w-40 rounded bg-gray-200"></div>
+          <div class="h-3 w-24 rounded bg-gray-100 dark:bg-gray-800"></div>
+          <div class="h-4 w-40 rounded bg-gray-200 dark:bg-gray-700"></div>
         </div>
         <div class="space-y-2">
-          <div class="h-3 w-24 rounded bg-gray-100"></div>
-          <div class="h-4 w-40 rounded bg-gray-200"></div>
+          <div class="h-3 w-24 rounded bg-gray-100 dark:bg-gray-800"></div>
+          <div class="h-4 w-40 rounded bg-gray-200 dark:bg-gray-700"></div>
         </div>
         <div class="space-y-2">
-          <div class="h-3 w-24 rounded bg-gray-100"></div>
-          <div class="h-4 w-40 rounded bg-gray-200"></div>
+          <div class="h-3 w-24 rounded bg-gray-100 dark:bg-gray-800"></div>
+          <div class="h-4 w-40 rounded bg-gray-200 dark:bg-gray-700"></div>
         </div>
       </div>
     </div>
 
     <div class="space-y-4">
-      <div class="h-5 w-20 rounded bg-gray-200"></div>
-      <div class="h-28 w-full rounded bg-gray-100"></div>
+      <div class="h-5 w-20 rounded bg-gray-200 dark:bg-gray-700"></div>
+      <div class="h-28 w-full rounded bg-gray-100 dark:bg-gray-800"></div>
     </div>
 
     <div class="space-y-4">
-      <div class="h-5 w-28 rounded bg-gray-200"></div>
-      <div class="h-[300px] w-full rounded bg-gray-100"></div>
+      <div class="h-5 w-28 rounded bg-gray-200 dark:bg-gray-700"></div>
+      <div class="h-[300px] w-full rounded bg-gray-100 dark:bg-gray-800"></div>
     </div>
   </div>
   <div *ngIf="error && !loading" class="text-sm text-red-600">{{ error }}</div>
-  <div *ngIf="!plot && !loading" class="text-sm text-gray-500">No farm plot selected.</div>
+  <div *ngIf="!plot && !loading" class="text-sm text-gray-500 dark:text-gray-400">No farm plot selected.</div>
 
   <ng-container *ngIf="plot && !loading">
     <div class="mb-8">
-      <h3 class="text-2xl font-bold text-gray-900">{{ plot.title }}</h3>
-      <p *ngIf="plot.description" class="mt-1 text-sm text-gray-500">{{ plot.description }}</p>
+      <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ plot.title }}</h3>
+      <p *ngIf="plot.description" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ plot.description }}</p>
 
       <span
         *ngIf="plot.status"
@@ -59,7 +59,7 @@
       </span>
     </div>
 
-    <hr class="border-gray-200 mb-8" />
+    <hr class="border-gray-200 mb-8 dark:border-gray-700" />
 
     <ng-template #descriptionContent>
       <app-detail-section title="Farm Plot Information">
@@ -71,47 +71,47 @@
         <app-detail-field label="Latitude" [value]="plot.latitude" />
         <app-detail-field label="Longitude" [value]="plot.longitude" />
         <div *ngIf="plot.status === 'UNDER_MAINTENANCE' && plot.maintenanceReason" class="col-span-full bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <p class="text-sm text-gray-700"><span class="font-semibold">Maintenance Reason:</span> {{ plot.maintenanceReason }}</p>
+          <p class="text-sm text-gray-700 dark:text-gray-300"><span class="font-semibold">Maintenance Reason:</span> {{ plot.maintenanceReason }}</p>
         </div>
       </app-detail-section>
 
       <app-detail-section>
         <div class="col-span-full space-y-4">
           <div *ngIf="getMainImageUrl(); else noMainImage">
-            <p class="text-sm font-medium text-gray-700 mb-2">Plot Image</p>
+            <p class="text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Plot Image</p>
             <img
               [src]="getMainImageUrl()!"
               [alt]="plot.title"
-              class="max-h-48 rounded-lg border border-gray-200 object-cover cursor-pointer"
+              class="max-h-48 rounded-lg border border-gray-200 object-cover cursor-pointer dark:border-gray-700"
               (click)="openImagePreview(getMainImageUrl()!)"
             />
           </div>
           <ng-template #noMainImage>
-            <p class="text-sm text-gray-500">No plot image available.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">No plot image available.</p>
           </ng-template>
 
-          <div *ngIf="galleryLoading" class="text-sm text-gray-500">Loading gallery...</div>
+          <div *ngIf="galleryLoading" class="text-sm text-gray-500 dark:text-gray-400">Loading gallery...</div>
           <div *ngIf="!galleryLoading">
-            <p class="text-sm font-medium text-gray-700 mb-2">Gallery</p>
+            <p class="text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Gallery</p>
             <div class="grid grid-cols-4 gap-3">
               <ng-container *ngFor="let _ of [0, 1, 2]; let i = index">
                 <img
                   *ngIf="previewGalleryUrls[i] as url"
                   [src]="url"
                   [alt]="'Gallery image ' + (i + 1)"
-                  class="w-full h-24 object-cover rounded-lg border border-gray-200 cursor-pointer"
+                  class="w-full h-24 object-cover rounded-lg border border-gray-200 cursor-pointer dark:border-gray-700"
                   (click)="openGallery(i)"
                 />
                 <div
                   *ngIf="!previewGalleryUrls[i]"
-                  class="w-full h-24 rounded-lg border border-gray-100 bg-gray-50"
+                  class="w-full h-24 rounded-lg border border-gray-100 bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
                   aria-hidden="true"
                 ></div>
               </ng-container>
               <button
                 *ngIf="allowGalleryUpload"
                 type="button"
-                class="w-full h-24 flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-gray-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                class="w-full h-24 flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-gray-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:text-gray-500 dark:border-gray-600"
                 [disabled]="galleryUploading"
                 (click)="openGalleryUpload()"
                 aria-label="Add gallery image"
@@ -162,12 +162,12 @@
       <div *ngIf="activeTab === 'investment-history'">
         <app-detail-section title="Farm Plot Investment History">
           <div class="col-span-full">
-            <div *ngIf="packagesLoading" class="text-sm text-gray-500">Loading...</div>
+            <div *ngIf="packagesLoading" class="text-sm text-gray-500 dark:text-gray-400">Loading...</div>
             <p *ngIf="!packagesLoading && plotInvestmentPackages.length === 0"
-               class="text-sm text-gray-500">No investment options for this plot.</p>
+               class="text-sm text-gray-500 dark:text-gray-400">No investment options for this plot.</p>
             <ol *ngIf="!packagesLoading && plotInvestmentPackages.length > 0">
               <li *ngFor="let pkg of plotInvestmentPackages; let last = last" class="grid grid-cols-[5rem_1.5rem_1fr] gap-x-3">
-                <div class="text-right text-xs font-medium text-gray-500 pt-3">
+                <div class="text-right text-xs font-medium text-gray-500 pt-3 dark:text-gray-400">
                   {{ pkg.fundingDeadline ? (pkg.fundingDeadline | date:'MMM d, y') : 'No deadline set' }}
                 </div>
 
@@ -177,7 +177,7 @@
                 </div>
 
                 <div
-                  class="min-w-0 mb-4 flex flex-col gap-1.5 rounded-lg border border-gray-100 bg-white px-4 py-3 text-sm cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors"
+                  class="min-w-0 mb-4 flex flex-col gap-1.5 rounded-lg border border-gray-100 bg-white px-4 py-3 text-sm cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors dark:bg-gray-900 dark:border-gray-700"
                   (click)="navigateToPackage(pkg)"
                 >
                   <div class="flex flex-wrap items-center justify-between gap-2">
@@ -185,17 +185,17 @@
                       <span class="shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold bg-indigo-100 text-indigo-700 border border-indigo-200">
                         {{ pkg.investmentPackageType ?? 'LEASING' }}
                       </span>
-                      <span class="font-medium text-gray-800 truncate">{{ pkg.title }}</span>
+                      <span class="font-medium text-gray-800 truncate dark:text-gray-200">{{ pkg.title }}</span>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
                       <span class="flex items-center gap-1 text-xs">
-                        <span class="text-gray-400 font-normal">Investment:</span>
+                        <span class="text-gray-400 font-normal dark:text-gray-500">Investment:</span>
                         <span class="text-xs" [class]="pkgStatusClass(pkg)">
                           {{ formatStatus(pkg.packageStatus) }}
                         </span>
                       </span>
                       <span class="flex items-center gap-1 text-xs">
-                        <span class="text-gray-400 font-normal">Funding:</span>
+                        <span class="text-gray-400 font-normal dark:text-gray-500">Funding:</span>
                         <span class="rounded-full px-2 py-0.5 font-medium border border-blue-200 bg-blue-50 text-blue-700">
                           {{ formatStatus(pkg.fundingStatus) }}
                         </span>
@@ -203,8 +203,8 @@
                     </div>
                   </div>
                   <div *ngIf="pkg.packageStatus === 'INACTIVE' && pkg.closureReason"
-                       class="rounded-md bg-slate-50 border border-slate-200 px-3 py-2 text-xs text-slate-600">
-                    <span class="font-semibold text-slate-700">Closed:</span> {{ pkg.closureReason }}
+                       class="rounded-md bg-slate-50 border border-slate-200 px-3 py-2 text-xs text-slate-600 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700">
+                    <span class="font-semibold text-slate-700 dark:text-gray-300">Closed:</span> {{ pkg.closureReason }}
                   </div>
                 </div>
               </li>

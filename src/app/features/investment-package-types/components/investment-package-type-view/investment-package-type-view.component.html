@@ -1,12 +1,12 @@
 <app-detail-card>
-  <div *ngIf="loading" class="text-sm text-gray-600">Loading lease…</div>
+  <div *ngIf="loading" class="text-sm text-gray-600 dark:text-gray-400">Loading lease…</div>
   <div *ngIf="error && !loading" class="text-sm text-red-600">{{ error }}</div>
-  <div *ngIf="!agreement && !loading" class="text-sm text-gray-500">No lease selected.</div>
+  <div *ngIf="!agreement && !loading" class="text-sm text-gray-500 dark:text-gray-400">No lease selected.</div>
 
   <ng-container *ngIf="agreement && !loading && detail">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
       <div>
-        <h3 class="text-2xl font-bold text-gray-900">Lease agreement</h3>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Lease agreement</h3>
       </div>
 
       <span
@@ -18,7 +18,7 @@
       </span>
     </div>
 
-    <hr class="border-gray-200 mb-8"/>
+    <hr class="border-gray-200 mb-8 dark:border-gray-700"/>
 
     <app-detail-section title="Lease terms">
       <app-detail-field label="Start date" [value]="detail.startDate"/>

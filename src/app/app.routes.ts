@@ -31,8 +31,8 @@ export const routes: Routes = [
   },
   {
     path: 'profile',
-    loadComponent: () => import('./features/users/pages/profile-page/profile-page.component').then(m => m.ProfilePageComponent),
-    canActivate: [AuthGuard]
+    redirectTo: 'settings/profile',
+    pathMatch: 'full'
   },
   {
     path: 'notifications-inbox',
@@ -322,6 +322,13 @@ export const routes: Routes = [
     data: { roles: ['EXTENSION_WORKER', 'ADMIN'] },
   },
   {
+    path: 'search',
+    loadComponent: () =>
+      import('./features/search/pages/search-page/search-page.component').then(m => m.SearchPageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] },
+  },
+  {
     path: 'analytics',
     loadComponent: () =>
       import('./features/analytics/analytics-page.component').then(m => m.AnalyticsPageComponent),
@@ -418,6 +425,43 @@ export const routes: Routes = [
             .then(m => m.ContractTemplatesPageComponent),
       },
       { path: '', redirectTo: 'email', pathMatch: 'full' },
+    ],
+  },
+  {
+    path: 'settings',
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/users/pages/profile-page/profile-page.component').then(m => m.ProfilePageComponent),
+      },
+      {
+        path: 'devices',
+        loadComponent: () =>
+          import('./features/settings/pages/devices-page/devices-page.component').then(m => m.DevicesPageComponent),
+      },
+      {
+        path: 'dark-mode',
+        loadComponent: () =>
+          import('./features/settings/pages/dark-mode-page/dark-mode-page.component').then(m => m.DarkModePageComponent),
+      },
+      {
+        path: 'password-reset',
+        loadComponent: () =>
+          import('./features/settings/pages/change-password-page/change-password-page.component').then(m => m.ChangePasswordPageComponent),
+      },
+      {
+        path: 'about',
+        loadComponent: () =>
+          import('./features/settings/pages/about-page/about-page.component').then(m => m.AboutPageComponent),
+      },
+      {
+        path: 'contact',
+        loadComponent: () =>
+          import('./features/settings/pages/contact-page/contact-page.component').then(m => m.ContactPageComponent),
+      },
+      { path: '', redirectTo: 'profile', pathMatch: 'full' },
     ],
   },
   {

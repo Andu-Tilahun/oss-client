@@ -5,13 +5,13 @@
     <div [hidden]="currentStep !== 1">
       <form [formGroup]="basicInfoForm" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
             Title <span class="text-red-500">*</span>
           </label>
           <input
             type="text"
             formControlName="title"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600"
             [class.border-red-500]="basicInfoForm.get('title')?.invalid && basicInfoForm.get('title')?.touched"
           />
           <p *ngIf="basicInfoForm.get('title')?.invalid && basicInfoForm.get('title')?.touched" class="mt-1 text-sm text-red-600">
@@ -20,35 +20,35 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Description</label>
           <textarea
             formControlName="description"
             rows="3"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600"
           ></textarea>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
               Size <span class="text-red-500">*</span>
             </label>
             <input
               type="number"
               formControlName="size"
               min="0"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600"
               [class.border-red-500]="basicInfoForm.get('size')?.invalid && basicInfoForm.get('size')?.touched"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
               Size Type <span class="text-red-500">*</span>
             </label>
             <select
               formControlName="sizeType"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600"
               [class.border-red-500]="basicInfoForm.get('sizeType')?.invalid && basicInfoForm.get('sizeType')?.touched"
             >
               <option value="">Select Size Type</option>
@@ -70,12 +70,12 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
               Soil Type <span class="text-red-500">*</span>
             </label>
             <select
               formControlName="soilType"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600"
               [class.border-red-500]="locationForm.get('soilType')?.invalid && locationForm.get('soilType')?.touched"
             >
               <option value="">Select Soil Type</option>
@@ -84,22 +84,22 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
               Status <span *ngIf="isStatusEditable" class="text-red-500">*</span>
             </label>
             <select
               *ngIf="isStatusEditable; else lockedStatus"
               formControlName="status"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600"
               [class.border-red-500]="locationForm.get('status')?.invalid && locationForm.get('status')?.touched"
             >
               <option *ngFor="let st of editableStatuses" [value]="st">{{ st }}</option>
             </select>
             <ng-template #lockedStatus>
-              <span class="inline-block px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium">
+              <span class="inline-block px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium dark:bg-gray-800 dark:text-gray-300">
                 {{ farmPlot.status }}
               </span>
-              <p class="text-xs text-gray-500 mt-1">
+              <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">
                 This status is managed automatically by lease/bidding/crowdfunding/investment workflows and can't be changed here.
               </p>
             </ng-template>
@@ -107,12 +107,12 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
             Region <span class="text-red-500">*</span>
           </label>
           <select
             formControlName="regionId"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600"
             [class.border-red-500]="locationForm.get('regionId')?.invalid && locationForm.get('regionId')?.touched"
           >
             <option value="">{{ regionsLoading ? 'Loading regions...' : 'Select Region' }}</option>
@@ -128,7 +128,7 @@
     <!-- Step 3: Media -->
     <div [hidden]="currentStep !== 3" class="space-y-6">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Plot Image</label>
+        <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Plot Image</label>
         <app-profile-picture-upload
           #mainImageUpload
           [currentFileId]="farmPlot.imageUuid"
@@ -150,7 +150,7 @@
         />
 
         <div class="flex items-center justify-between">
-          <label class="block text-sm font-medium text-gray-700">Gallery Images</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Gallery Images</label>
           <button
             type="button"
             class="rounded bg-blue-600 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
@@ -161,15 +161,15 @@
           </button>
         </div>
 
-        <p *ngIf="galleryImages.length === 0" class="text-xs text-gray-500">No gallery images yet.</p>
+        <p *ngIf="galleryImages.length === 0" class="text-xs text-gray-500 dark:text-gray-400">No gallery images yet.</p>
 
         <div *ngIf="galleryImages.length > 0" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div
             *ngFor="let image of galleryImages; let i = index"
-            class="min-w-0 rounded-lg border border-gray-200 p-2"
+            class="min-w-0 rounded-lg border border-gray-200 p-2 dark:border-gray-700"
           >
             <div class="mb-2 flex items-center justify-between gap-1">
-              <span class="text-xs text-gray-600 truncate">Image {{ i + 1 }}</span>
+              <span class="text-xs text-gray-600 truncate dark:text-gray-400">Image {{ i + 1 }}</span>
               <button
                 type="button"
                 class="shrink-0 text-xs font-semibold text-rose-600 hover:text-rose-700"
@@ -181,7 +181,7 @@
             <img
               [src]="image.previewUrl"
               [alt]="'Gallery image ' + (i + 1)"
-              class="w-full h-24 object-cover rounded-lg border border-gray-200 cursor-pointer"
+              class="w-full h-24 object-cover rounded-lg border border-gray-200 cursor-pointer dark:border-gray-700"
               (click)="openGalleryPreview(image.previewUrl)"
             />
           </div>

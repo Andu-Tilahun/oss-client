@@ -157,7 +157,7 @@ export class HeaderComponent implements OnInit {
   }
 
   editProfile(): void {
-    void this.router.navigateByUrl('/profile');
+    void this.router.navigateByUrl('/settings/profile');
   }
 
   logout(): void {

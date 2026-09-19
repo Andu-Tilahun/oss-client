@@ -52,7 +52,6 @@ export class AppGridComponent<TParent, TChild> implements OnChanges {
   @Input() showPagination = true;
   @Input() pageSize = DEFAULT_PAGE_SIZE;
   @Input() pageIndex = 1;
-  pageSizeOptions = [10, 20, 50, 100];
 
   // ── Child pagination ─────────────────────────────────────────────────────
   @Input() childPageSize = 5;
@@ -208,41 +207,9 @@ export class AppGridComponent<TParent, TChild> implements OnChanges {
   }
 
   // ── Parent pagination ─────────────────────────────────────────────────────
-  get totalPages(): number {
-    return Math.ceil(this.total / this.pageSize);
-  }
-
-  get startIndex(): number {
-    return (this.pageIndex - 1) * this.pageSize + 1;
-  }
-
-  get endIndex(): number {
-    return Math.min(this.pageIndex * this.pageSize, this.total);
-  }
-
-  get visiblePages(): number[] {
-    const pages: number[] = [];
-    const maxVisible = 5;
-    let start = Math.max(1, this.pageIndex - Math.floor(maxVisible / 2));
-    let end = Math.min(this.totalPages, start + maxVisible - 1);
-    if (end - start < maxVisible - 1) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
-    for (let i = start; i <= end; i++) pages.push(i);
-    return pages;
-  }
-
-  onPageChange(page: number): void {
-    if (page >= 1 && page <= this.totalPages && page !== this.pageIndex) {
-      this.pageIndex = page;
-      this.emitPageChange();
-    }
-  }
-
-  onPageSizeChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    this.pageSize = Number(target.value);
-    this.pageIndex = 1;
+  onPaginationChange(params: TableQueryParams): void {
+    this.pageIndex = params.pageIndex;
+    this.pageSize = params.pageSize;
     this.emitPageChange();
   }
 

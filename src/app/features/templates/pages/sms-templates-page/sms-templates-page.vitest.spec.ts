@@ -3,6 +3,7 @@ import { FormBuilder } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { SmsTemplatesPageComponent } from './sms-templates-page.component';
 import { MessageTemplate } from '../../../system-config/models/message-template.model';
+import { mockRouteWithQueryParams } from '../../../../shared/utils/deep-link.testing';
 
 const MOCK_SMS: MessageTemplate = {
   id: 'sms-uuid-1',
@@ -21,10 +22,11 @@ function makeComponent() {
     updateTemplate: vi.fn(() => of(MOCK_SMS)),
     deleteTemplate: vi.fn(() => of(null)),
   };
-  const mockToastService = { success: vi.fn(), error: vi.fn() };
-  const component = new SmsTemplatesPageComponent(new FormBuilder(), mockService as any, mockToastService as any);
+  const mockToastService = { success: vi.fn(), error: vi.fn(), warning: vi.fn() };
+  const routeMock = mockRouteWithQueryParams();
+  const component = new SmsTemplatesPageComponent(new FormBuilder(), mockService as any, mockToastService as any, routeMock.route as any);
   component.ngOnInit();
-  return { component, mockService };
+  return { component, mockService, mockToastService, setQueryParams: routeMock.setQueryParams };
 }
 
 describe('SmsTemplatesPageComponent', () => {
@@ -146,5 +148,27 @@ describe('SmsTemplatesPageComponent', () => {
     vi.spyOn(window, 'confirm').mockReturnValue(false);
     component.delete('sms-uuid-1');
     expect(mockService.deleteTemplate).not.toHaveBeenCalled();
+  });
+});
+
+describe('SmsTemplatesPageComponent deep-link (?id=)', () => {
+  it('selects the template named in ?id= (applies once the list is loaded)', () => {
+    const { component, mockService, setQueryParams } = makeComponent();
+    const other = { ...MOCK_SMS, id: 'sms-uuid-2', name: 'Other' };
+    mockService.getTemplates.mockReturnValue(of([MOCK_SMS, other]));
+    component.load();
+
+    setQueryParams({ id: 'sms-uuid-2' });
+
+    expect(component.selectedTemplate?.id).toBe('sms-uuid-2');
+  });
+
+  it('warns when the template no longer exists', () => {
+    const { component, mockToastService, setQueryParams } = makeComponent();
+    component.ngOnInit();
+
+    setQueryParams({ id: 'nope' });
+
+    expect(mockToastService.warning).toHaveBeenCalled();
   });
 });

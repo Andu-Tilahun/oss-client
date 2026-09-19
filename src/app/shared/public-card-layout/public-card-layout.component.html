@@ -21,12 +21,12 @@
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
         </svg>
-        <span class="text-sm text-slate-700">Loading...</span>
+        <span class="text-sm text-slate-700 dark:text-gray-300">Loading...</span>
       </div>
     </div>
   </div>
 
-  <div *ngIf="data.length === 0 && !loading" class="rounded-3xl border border-slate-200/80 bg-white/90 px-6 py-16 text-center text-slate-500">
+  <div *ngIf="data.length === 0 && !loading" class="rounded-3xl border border-slate-200/80 bg-white/90 px-6 py-16 text-center text-slate-500 dark:text-gray-400">
     {{ noDataMessage }}
   </div>
 
@@ -80,54 +80,14 @@
     </article>
   </div>
 
-  <div *ngIf="showPagination && data.length > 0" class="mt-4 rounded-2xl border border-slate-100 bg-white/80 px-5 py-3">
-    <div class="flex flex-row flex-wrap items-center justify-center gap-x-6 gap-y-2 text-center">
-      <div class="flex items-center justify-center space-x-2">
-        <label class="text-sm text-slate-600">Show</label>
-        <select
-          [value]="pageSize"
-          (change)="onPageSizeChange($event)"
-          class="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-sm text-slate-700 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/40"
-        >
-          <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
-        </select>
-        <span class="text-sm text-slate-600">entries</span>
-      </div>
-
-      <div class="text-sm text-slate-600">
-        Showing <span class="font-medium">{{ startIndex }}</span> to <span class="font-medium">{{ endIndex }}</span> of
-        <span class="font-medium">{{ total }}</span> results
-      </div>
-
-      <div class="flex items-center justify-center space-x-2">
-        <button
-          (click)="onPageChange(pageIndex - 1)"
-          [disabled]="pageIndex === 1"
-          class="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Prev
-        </button>
-
-        <button
-          *ngFor="let page of visiblePages"
-          (click)="onPageChange(page)"
-          [class.bg-emerald-600]="page === pageIndex"
-          [class.text-white]="page === pageIndex"
-          [class.border-emerald-600]="page === pageIndex"
-          [class.hover:bg-slate-100]="page !== pageIndex"
-          class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors"
-        >
-          {{ page }}
-        </button>
-
-        <button
-          (click)="onPageChange(pageIndex + 1)"
-          [disabled]="pageIndex === totalPages"
-          class="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div>
-    </div>
+  <div *ngIf="showPagination && data.length > 0" class="mt-4 rounded-2xl border border-slate-100 bg-white/80 px-5 py-3 dark:border-gray-700">
+    <app-pagination
+      accent="emerald"
+      [collapseMetaOnMobile]="false"
+      [total]="total"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      (pageChange)="onPaginationChange($event)"
+    ></app-pagination>
   </div>
 </div>

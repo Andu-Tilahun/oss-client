@@ -110,8 +110,8 @@ export class InvestmentPackageService {
     );
   }
 
-  getInvestmentPackageById(crowdFundingId: string): Observable<ApiResponse<InvestmentPackage>> {
-    return this.httpService.get<ApiResponse<InvestmentPackage>>(
+  getInvestmentPackageById(crowdFundingId: string): Observable<InvestmentPackage> {
+    return this.httpService.get<InvestmentPackage>(
       `${Endpoints.INVESTMENT_PACKAGES_ENDPOINT}/${crowdFundingId}`,
     );
   }

@@ -1,105 +1,105 @@
-<div class="min-h-screen bg-slate-50 text-slate-900 w-full">
+<div class="min-h-screen bg-slate-50 text-slate-900 w-full dark:bg-gray-800 dark:text-gray-100">
   <header class="mb-8 flex flex-col items-center">
     <p class="text-sm font-medium text-indigo-600 uppercase tracking-wide">Investor dashboard</p>
-    <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">{{ greeting }}</h1>
-    <p class="text-slate-600 mt-1 text-sm sm:text-base text-start w-full">
+    <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 dark:text-gray-100">{{ greeting }}</h1>
+    <p class="text-slate-600 mt-1 text-sm sm:text-base text-start w-full dark:text-gray-400">
       Your portfolio at a glance — a deeper breakdown is one click away.
     </p>
   </header>
 
-  <div *ngIf="loading" class="rounded-xl border border-slate-200 bg-white p-10 text-center text-slate-500">
+  <div *ngIf="loading" class="rounded-xl border border-slate-200 bg-white p-10 text-center text-slate-500 dark:bg-gray-900 dark:text-gray-400 dark:border-gray-700">
     Loading your dashboard…
   </div>
 
   <ng-container *ngIf="!loading">
     <!-- KPI tiles -->
     <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
-      <article class="rounded-xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm min-w-0">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Deployed capital</p>
-        <p class="text-lg sm:text-3xl font-bold text-slate-900 mt-2 truncate" [title]="formatMoney(totalDeployedCapital)">{{ formatCompactMoney(totalDeployedCapital) }}</p>
-        <p class="text-xs sm:text-sm text-slate-600 mt-1">Paid / active / accepted / sent</p>
+      <article class="rounded-xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm min-w-0 dark:bg-gray-900 dark:border-gray-700">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-gray-400">Deployed capital</p>
+        <p class="text-lg sm:text-3xl font-bold text-slate-900 mt-2 truncate dark:text-gray-100" [title]="formatMoney(totalDeployedCapital)">{{ formatCompactMoney(totalDeployedCapital) }}</p>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1 dark:text-gray-400">Paid / active / accepted / sent</p>
       </article>
 
-      <article class="rounded-xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm min-w-0">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Active investments</p>
-        <p class="text-lg sm:text-3xl font-bold text-slate-900 mt-2 truncate">{{ activeInvestmentsCount }}</p>
-        <p class="text-xs sm:text-sm text-slate-600 mt-1">Currently committed</p>
+      <article class="rounded-xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm min-w-0 dark:bg-gray-900 dark:border-gray-700">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-gray-400">Active investments</p>
+        <p class="text-lg sm:text-3xl font-bold text-slate-900 mt-2 truncate dark:text-gray-100">{{ activeInvestmentsCount }}</p>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1 dark:text-gray-400">Currently committed</p>
       </article>
 
-      <article class="rounded-xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm min-w-0">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Blended ROI</p>
-        <p class="text-lg sm:text-3xl font-bold text-slate-900 mt-2 truncate">{{ blendedRoiPct !== null ? blendedRoiPct + '%' : '—' }}</p>
-        <p class="text-xs sm:text-sm text-slate-600 mt-1">Amount-weighted, admin-reported — not audited</p>
+      <article class="rounded-xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm min-w-0 dark:bg-gray-900 dark:border-gray-700">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-gray-400">Blended ROI</p>
+        <p class="text-lg sm:text-3xl font-bold text-slate-900 mt-2 truncate dark:text-gray-100">{{ blendedRoiPct !== null ? blendedRoiPct + '%' : '—' }}</p>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1 dark:text-gray-400">Amount-weighted, admin-reported — not audited</p>
       </article>
 
-      <article class="rounded-xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm min-w-0">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Open opportunities</p>
-        <p class="text-lg sm:text-3xl font-bold text-slate-900 mt-2 truncate">{{ openOpportunitiesCount }}</p>
-        <p class="text-xs sm:text-sm text-slate-600 mt-1">Campaigns accepting investment</p>
+      <article class="rounded-xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm min-w-0 dark:bg-gray-900 dark:border-gray-700">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-gray-400">Open opportunities</p>
+        <p class="text-lg sm:text-3xl font-bold text-slate-900 mt-2 truncate dark:text-gray-100">{{ openOpportunitiesCount }}</p>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1 dark:text-gray-400">Campaigns accepting investment</p>
       </article>
     </section>
 
     <!-- Charts -->
-    <section class="mb-8 rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
-      <h2 class="text-lg font-semibold text-slate-900 mb-1">Portfolio overview</h2>
-      <p class="text-sm text-slate-500 mb-6">Your capital, status, and activity across all investments.</p>
+    <section class="mb-8 rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm dark:bg-gray-900 dark:border-gray-700">
+      <h2 class="text-lg font-semibold text-slate-900 mb-1 dark:text-gray-100">Portfolio overview</h2>
+      <p class="text-sm text-slate-500 mb-6 dark:text-gray-400">Your capital, status, and activity across all investments.</p>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 sm:col-span-2">
-          <h3 class="text-sm font-semibold text-slate-800 mb-3">Portfolio value over time</h3>
-          <div *ngIf="portfolioTrend.length === 0" class="text-sm text-slate-500 py-10 text-center">No deployed capital yet.</div>
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 sm:col-span-2 dark:border-gray-700">
+          <h3 class="text-sm font-semibold text-slate-800 mb-3 dark:text-gray-200">Portfolio value over time</h3>
+          <div *ngIf="portfolioTrend.length === 0" class="text-sm text-slate-500 py-10 text-center dark:text-gray-400">No deployed capital yet.</div>
           <div *ngIf="portfolioTrend.length > 0" echarts [options]="portfolioValueChartOption" class="h-56 w-full"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
-          <h3 class="text-sm font-semibold text-slate-800 mb-3">Investment status breakdown</h3>
-          <div *ngIf="statusBreakdown.length === 0" class="text-sm text-slate-500 py-10 text-center">No investments yet.</div>
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 dark:border-gray-700">
+          <h3 class="text-sm font-semibold text-slate-800 mb-3 dark:text-gray-200">Investment status breakdown</h3>
+          <div *ngIf="statusBreakdown.length === 0" class="text-sm text-slate-500 py-10 text-center dark:text-gray-400">No investments yet.</div>
           <div *ngIf="statusBreakdown.length > 0" echarts [options]="statusBreakdownChartOption" class="h-56 w-full"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
-          <h3 class="text-sm font-semibold text-slate-800 mb-3">Capital allocation by package type</h3>
-          <div *ngIf="packageTypeBreakdown.length === 0" class="text-sm text-slate-500 py-10 text-center">No deployed capital yet.</div>
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 dark:border-gray-700">
+          <h3 class="text-sm font-semibold text-slate-800 mb-3 dark:text-gray-200">Capital allocation by package type</h3>
+          <div *ngIf="packageTypeBreakdown.length === 0" class="text-sm text-slate-500 py-10 text-center dark:text-gray-400">No deployed capital yet.</div>
           <div *ngIf="packageTypeBreakdown.length > 0" echarts [options]="packageTypeChartOption" class="h-56 w-full"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
-          <h3 class="text-sm font-semibold text-slate-800 mb-3">Monthly investment activity</h3>
-          <p class="text-xs text-slate-500 mb-2">Last 6 months</p>
-          <div *ngIf="activeInvestmentsCount === 0 && monthlyActivity.length === 0" class="text-sm text-slate-500 py-10 text-center">No activity yet.</div>
+        <div class="rounded-lg border border-slate-100 bg-slate-50/80 p-4 dark:border-gray-700">
+          <h3 class="text-sm font-semibold text-slate-800 mb-3 dark:text-gray-200">Monthly investment activity</h3>
+          <p class="text-xs text-slate-500 mb-2 dark:text-gray-400">Last 6 months</p>
+          <div *ngIf="activeInvestmentsCount === 0 && monthlyActivity.length === 0" class="text-sm text-slate-500 py-10 text-center dark:text-gray-400">No activity yet.</div>
           <div echarts [options]="monthlyActivityChartOption" class="h-56 w-full"></div>
         </div>
       </div>
     </section>
 
     <!-- Open campaigns -->
-    <section class="mb-8 rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col">
+    <section class="mb-8 rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col dark:bg-gray-900 dark:border-gray-700">
       <div class="flex items-center justify-between gap-2 mb-3">
-        <h2 class="text-lg font-semibold text-slate-900">Open campaigns</h2>
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-gray-100">Open campaigns</h2>
         <a routerLink="/investment-package" class="text-sm font-medium text-indigo-600 hover:text-indigo-800 shrink-0">View all</a>
       </div>
-      <p class="text-sm text-slate-500 mb-4">Open &amp; active, soonest deadline first</p>
+      <p class="text-sm text-slate-500 mb-4 dark:text-gray-400">Open &amp; active, soonest deadline first</p>
       <ul *ngIf="campaigns.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <li *ngFor="let c of campaigns">
           <a
             routerLink="/investment-package"
-            class="block rounded-lg border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/40 p-3 transition h-full"
+            class="block rounded-lg border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/40 p-3 transition h-full dark:border-gray-700"
           >
             <div class="flex justify-between gap-2 items-start">
-              <p class="font-medium text-slate-900 text-sm leading-snug">{{ c.title }}</p>
-              <span class="text-[10px] font-semibold uppercase text-slate-500 shrink-0">{{ c.fundingStatus }}</span>
+              <p class="font-medium text-slate-900 text-sm leading-snug dark:text-gray-100">{{ c.title }}</p>
+              <span class="text-[10px] font-semibold uppercase text-slate-500 shrink-0 dark:text-gray-400">{{ c.fundingStatus }}</span>
             </div>
-            <p class="text-xs text-slate-500 mt-1">{{ c.fundingDeadline | date : 'mediumDate' }}</p>
-            <p class="text-xs text-slate-700 mt-1">
+            <p class="text-xs text-slate-500 mt-1 dark:text-gray-400">{{ c.fundingDeadline | date : 'mediumDate' }}</p>
+            <p class="text-xs text-slate-700 mt-1 dark:text-gray-300">
               Target <span class="font-semibold">{{ formatMoney(c.targetAmount) }}</span>
             </p>
-            <div class="mt-2 h-1 rounded-full bg-slate-100 overflow-hidden">
+            <div class="mt-2 h-1 rounded-full bg-slate-100 overflow-hidden dark:bg-gray-800">
               <div class="h-full rounded-full bg-amber-400" [style.width.%]="campaignUrgencyPct(c)"></div>
             </div>
           </a>
         </li>
       </ul>
-      <p *ngIf="campaigns.length === 0" class="text-sm text-slate-500">No open campaigns.</p>
+      <p *ngIf="campaigns.length === 0" class="text-sm text-slate-500 dark:text-gray-400">No open campaigns.</p>
     </section>
 
     <!-- Reference to the detailed analytics page -->

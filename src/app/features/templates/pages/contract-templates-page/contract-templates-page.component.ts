@@ -1,4 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { deepLinkParam$ } from '../../../../shared/utils/deep-link.util';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SystemConfigService } from '../../../system-config/services/system-config.service';
@@ -18,7 +21,7 @@ import { PageSplitLayoutComponent } from '../../../../shared/components/page-spl
   imports: [CommonModule, ReactiveFormsModule, SharedModule, PageSplitLayoutComponent],
   templateUrl: './contract-templates-page.component.html',
 })
-export class ContractTemplatesPageComponent implements OnInit {
+export class ContractTemplatesPageComponent implements OnInit, OnDestroy {
   templates: MessageTemplate[] = [];
   loading = true;
   saving = false;
@@ -40,9 +43,39 @@ export class ContractTemplatesPageComponent implements OnInit {
     { id: 'delete', icon: 'delete', title: 'Delete', action: t => this.delete(t.id) },
   ];
 
-  constructor(private fb: FormBuilder, private service: SystemConfigService, private toastService: ToastService) {}
+  constructor(
+    private fb: FormBuilder,
+    private service: SystemConfigService,
+    private toastService: ToastService,
+    private route: ActivatedRoute,
+  ) {}
+
+  private deepLinkSub?: Subscription;
+  private pendingSelectId: string | null = null;
+
+  ngOnDestroy(): void {
+    this.deepLinkSub?.unsubscribe();
+  }
+
+  /** The page loads every template of its type, so a deep link is a plain lookup once the list has arrived. */
+  private applyPendingSelection(): void {
+    if (!this.pendingSelectId || this.loading) return;
+    const match = this.templates.find(t => t.id === this.pendingSelectId);
+    if (match) {
+      this.selectedTemplate = match;
+    } else {
+      this.toastService.warning('Template not found — it may have been removed.');
+    }
+    this.pendingSelectId = null;
+  }
 
   ngOnInit(): void {
+    // Subscribed (not a snapshot read) so a global-search click still selects the template when
+    // this page is already open.
+    this.deepLinkSub = deepLinkParam$(this.route).subscribe(id => {
+      this.pendingSelectId = id;
+      this.applyPendingSelection();
+    });
     this.form = this.fb.group({
       name:            ['', Validators.required],
       purpose:         [null],
@@ -63,6 +96,7 @@ export class ContractTemplatesPageComponent implements OnInit {
         if (!this.selectedTemplate && list.length > 0) {
           this.selectedTemplate = list[0];
         }
+        this.applyPendingSelection();
       },
       error: () => { this.loading = false; },
     });

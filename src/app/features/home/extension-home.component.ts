@@ -38,6 +38,7 @@ interface MonthlyCompletion {
   label: string;
   completed: number;
   open: number;
+  closed: number;
 }
 
 @Component({
@@ -58,6 +59,7 @@ export class ExtensionHomeComponent implements OnInit {
   totalFollowUps = 0;
   completedFollowUps = 0;
   openFollowUpsCount = 0;
+  closedFollowUpsCount = 0;
   completionRatePct: number | null = null;
 
   statusBreakdown: CountSlice[] = [];
@@ -128,10 +130,19 @@ export class ExtensionHomeComponent implements OnInit {
     return active.has(status) && packageActive;
   }
 
+  /** Completed means the worker/admin marked it DONE — the same meaning the backend gives taskStatus. */
   private isCompletedFollowUp(followUp: FarmFollowUp): boolean {
-    if (!followUp.endDate) return false;
-    const end = new Date(followUp.endDate).getTime();
-    return Number.isFinite(end) && end < Date.now();
+    return followUp.taskStatus === 'DONE';
+  }
+
+  /** Still in progress (ACTIVE); the deadline sweep flips it to REJECTED once it is overdue. */
+  private isOpenFollowUp(followUp: FarmFollowUp): boolean {
+    return followUp.taskStatus === 'ACTIVE';
+  }
+
+  /** Closed without being completed: rejected (by the system) or excluded. */
+  private isClosedUnfinished(followUp: FarmFollowUp): boolean {
+    return followUp.taskStatus === 'REJECTED' || followUp.taskStatus === 'EXCLUDED';
   }
 
   private computeDashboard(agreements: InvestmentPackageTypeAgreement[]): void {
@@ -153,7 +164,8 @@ export class ExtensionHomeComponent implements OnInit {
 
     this.totalFollowUps = this.allFollowUps.length;
     this.completedFollowUps = this.allFollowUps.filter((f) => this.isCompletedFollowUp(f)).length;
-    this.openFollowUpsCount = this.totalFollowUps - this.completedFollowUps;
+    this.openFollowUpsCount = this.allFollowUps.filter((f) => this.isOpenFollowUp(f)).length;
+    this.closedFollowUpsCount = this.allFollowUps.filter((f) => this.isClosedUnfinished(f)).length;
     this.completionRatePct =
       this.totalFollowUps > 0 ? Math.round((this.completedFollowUps / this.totalFollowUps) * 100) : null;
 
@@ -180,7 +192,7 @@ export class ExtensionHomeComponent implements OnInit {
       .slice(0, 6);
 
     this.upcomingFollowUps = this.allFollowUps
-      .filter((f) => !this.isCompletedFollowUp(f))
+      .filter((f) => this.isOpenFollowUp(f))
       .sort((a, b) => this.followUpDueTime(a) - this.followUpDueTime(b))
       .slice(0, 5);
   }
@@ -205,26 +217,31 @@ export class ExtensionHomeComponent implements OnInit {
 
     const completed: Record<string, number> = {};
     const open: Record<string, number> = {};
+    const closed: Record<string, number> = {};
     for (const m of months) {
       completed[m.key] = 0;
       open[m.key] = 0;
+      closed[m.key] = 0;
     }
 
     for (const f of this.allFollowUps) {
       const isDone = this.isCompletedFollowUp(f);
-      const dateStr = isDone ? f.endDate : f.createdAt ?? f.startDate;
+      const isClosed = this.isClosedUnfinished(f);
+      const dateStr = isDone || isClosed ? f.completedAt ?? f.endDate : f.createdAt ?? f.startDate;
       if (!dateStr) continue;
       const d = new Date(dateStr);
       if (!Number.isFinite(d.getTime())) continue;
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      if (isDone) {
-        if (completed[key] !== undefined) completed[key]++;
-      } else if (open[key] !== undefined) {
-        open[key]++;
-      }
+      const bucket = isDone ? completed : isClosed ? closed : open;
+      if (bucket[key] !== undefined) bucket[key]++;
     }
 
-    return months.map((m) => ({ label: m.label, completed: completed[m.key], open: open[m.key] }));
+    return months.map((m) => ({
+      label: m.label,
+      completed: completed[m.key],
+      open: open[m.key],
+      closed: closed[m.key],
+    }));
   }
 
   private assignmentProgressPct(agreement: InvestmentPackageTypeAgreement): number {
@@ -342,7 +359,7 @@ export class ExtensionHomeComponent implements OnInit {
 
     this.followUpTrendChartOption = {
       tooltip: { trigger: 'axis' },
-      legend: { data: ['Completed', 'Open'], bottom: 0 },
+      legend: { data: ['Completed', 'Open', 'Rejected / Excluded'], bottom: 0 },
       grid: { left: 36, right: 10, top: 20, bottom: 40, containLabel: true },
       xAxis: { type: 'category', data: this.followUpCompletionTrend.map((t) => t.label) },
       yAxis: { type: 'value', minInterval: 1 },
@@ -360,6 +377,13 @@ export class ExtensionHomeComponent implements OnInit {
           stack: 'total',
           itemStyle: { color: '#F59E0B' },
           data: this.followUpCompletionTrend.map((t) => t.open),
+        },
+        {
+          name: 'Rejected / Excluded',
+          type: 'bar',
+          stack: 'total',
+          itemStyle: { color: '#EF4444' },
+          data: this.followUpCompletionTrend.map((t) => t.closed),
         },
       ],
     };

@@ -52,36 +52,36 @@
 
 <!-- Create / Edit Modal -->
 <div *ngIf="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6 dark:bg-gray-900">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-semibold text-gray-800">{{ editingId ? 'Edit Article' : 'New Article' }}</h3>
-      <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">{{ editingId ? 'Edit Article' : 'New Article' }}</h3>
+      <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none dark:text-gray-500">&times;</button>
     </div>
 
     <form [formGroup]="form" (ngSubmit)="onSave()" class="space-y-3">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Title *</label>
         <input formControlName="title" type="text"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600" />
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Category</label>
         <input formControlName="category" type="text"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600"
           placeholder="e.g. News, Sustainability" />
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Summary</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Summary</label>
         <textarea formControlName="summary" rows="2"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600"></textarea>
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Content</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Content</label>
         <textarea formControlName="content" rows="5"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600"></textarea>
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Media</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Media</label>
         <app-gallery-media-picker
           [currentMediaUuid]="form.value.mediaUuid"
           [currentKind]="form.value.kind"
@@ -89,11 +89,11 @@
         </app-gallery-media-picker>
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Additional Media</label>
-        <p *ngIf="!editingId" class="text-xs text-gray-500">Save the article first, then edit it to attach more images or videos.</p>
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Additional Media</label>
+        <p *ngIf="!editingId" class="text-xs text-gray-500 dark:text-gray-400">Save the article first, then edit it to attach more images or videos.</p>
         <div *ngIf="editingId">
           <div *ngIf="editingArticleMedia.length" class="flex flex-wrap gap-2 mb-2">
-            <div *ngFor="let item of editingArticleMedia" class="relative rounded-lg border border-gray-200 overflow-hidden w-20 h-20 bg-gray-50">
+            <div *ngFor="let item of editingArticleMedia" class="relative rounded-lg border border-gray-200 overflow-hidden w-20 h-20 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
               <img *ngIf="item.kind !== 'VIDEO'" [src]="mediaUrl(item)" alt="" class="w-full h-full object-cover" />
               <video *ngIf="item.kind === 'VIDEO'" [src]="mediaUrl(item)" muted class="w-full h-full object-cover"></video>
               <button type="button" (click)="onRemoveMedia(item)" [disabled]="removingMediaId === item.id"
@@ -107,22 +107,22 @@
       </div>
       <div class="grid grid-cols-3 gap-3">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Published At</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Published At</label>
           <input formControlName="publishedAt" type="datetime-local"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <p class="text-xs text-gray-500 mt-1">A future date saves this as Draft and publishes it automatically when reached.</p>
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600" />
+          <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">A future date saves this as Draft and publishes it automatically when reached.</p>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Status</label>
           <select formControlName="status"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600">
             <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
           </select>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Audience</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Audience</label>
           <select formControlName="audience"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600">
             <option *ngFor="let a of audienceOptions" [value]="a">{{ a }}</option>
           </select>
         </div>
@@ -130,7 +130,7 @@
 
       <div class="flex justify-end gap-3 pt-2">
         <button type="button" (click)="closeModal()"
-          class="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">Cancel</button>
+          class="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600">Cancel</button>
         <button type="submit" [disabled]="saving"
           class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
           {{ saving ? 'Saving...' : 'Save' }}
