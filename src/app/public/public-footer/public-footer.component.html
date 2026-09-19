@@ -1,12 +1,26 @@
 <footer class="site-footer">
+  <img src="assets/sys/footer-trees.png" alt="" aria-hidden="true" class="footer-trees-bg" />
   <div class="container footer-content">
     <div>
       <h4>AgriVest</h4>
       <p>Smart agricultural investment opportunities for sustainable growth.</p>
+      <div *ngIf="socialLinks.length > 0" class="footer-social">
+        <a
+          *ngFor="let link of socialLinks"
+          [href]="link.url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="footer-social-link"
+          [style.background]="brandColor(link.platform)"
+          [attr.aria-label]="link.platform"
+        ><app-social-icon [platform]="link.platform" class="footer-social-icon-svg"></app-social-icon></a>
+      </div>
     </div>
     <div>
       <h5>Quick Links</h5>
       <a routerLink="/public" fragment="home">Home</a>
+      <a routerLink="/public" fragment="news">News</a>
+      <a routerLink="/public" fragment="gallery">Gallery</a>
       <a routerLink="/public" fragment="about">About Us</a>
       <a routerLink="/public" fragment="contact">Contact</a>
     </div>

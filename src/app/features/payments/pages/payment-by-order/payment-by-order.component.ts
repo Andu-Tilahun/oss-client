@@ -21,6 +21,9 @@ export class PaymentByOrderComponent {
   ) {}
 
   fetchPayment(): void {
+    if (this.loading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.orderNumber.trim()) {
       this.toastService.warning('Please enter an order number');
       return;
@@ -32,19 +35,20 @@ export class PaymentByOrderComponent {
         this.payment = data ?? null;
         this.loading = false;
         if (this.payment) {
-          this.toastService.success('Payment detail retrieved');
         } else {
           this.toastService.info('No payment found for this order number');
         }
       },
-      error: (err) => {
+      error: () => {
         this.loading = false;
-        this.toastService.error(err?.message || 'Failed to fetch payment');
       }
     });
   }
 
   processPayment(): void {
+    if (this.processing) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.orderNumber.trim()) {
       this.toastService.warning('Please enter an order number');
       return;
@@ -62,9 +66,8 @@ export class PaymentByOrderComponent {
         this.processing = false;
         this.toastService.success('Payment processed successfully');
       },
-      error: (err) => {
+      error: () => {
         this.processing = false;
-        this.toastService.error(err?.message || 'Failed to process payment');
       }
     });
   }

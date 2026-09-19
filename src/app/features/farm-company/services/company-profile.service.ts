@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {HttpService, RequestOption} from '../../../core/services/http.service';
+import {HttpService, RequestOption, RequestType} from '../../../core/services/http.service';
 import {ApiResponse} from '../../../shared/models/api-response.model';
 import {Endpoints} from '../../../core/endpoint/endpoint.model';
 import {CompanyProfile, CompanyProfileRequest} from '../models/company-profile.model';
@@ -16,6 +16,8 @@ export class CompanyProfileService {
   }
 
   updateCompanyProfile(request: CompanyProfileRequest): Observable<ApiResponse<CompanyProfile>> {
-    return this.httpService.put<ApiResponse<CompanyProfile>>(Endpoints.FARM_COMPANY_ENDPOINT, request);
+    return this.httpService.put<ApiResponse<CompanyProfile>>(
+      Endpoints.FARM_COMPANY_ENDPOINT, request, undefined, { requestType: RequestType.LOCAL }
+    );
   }
 }

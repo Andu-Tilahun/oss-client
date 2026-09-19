@@ -27,6 +27,9 @@ export class ItemTypeCreateModalComponent {
   ) {}
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.form.isValid()) {
       this.form.markAllAsTouched();
       return;
@@ -43,7 +46,6 @@ export class ItemTypeCreateModalComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        this.toastService.error(err.message || 'Failed to create item type', 'Create Item Type');
       },
     });
   }

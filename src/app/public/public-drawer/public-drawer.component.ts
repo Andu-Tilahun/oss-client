@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FarmPlot } from '../../features/farm-plots/models/farm-plot.model';
+import { InvestmentPackage } from '../../features/investment-package/models/investment-package.model';
 
 @Component({
   selector: 'app-public-drawer',
@@ -10,7 +10,7 @@ import { FarmPlot } from '../../features/farm-plots/models/farm-plot.model';
   styleUrl: './public-drawer.component.css',
 })
 export class PublicDrawerComponent implements OnChanges, OnDestroy {
-  @Input() selectedPlot: FarmPlot | null = null;
+  @Input() selectedPackage: InvestmentPackage | null = null;
   @Input() imageUrl: string | null = null;
   @Input() imageAlt = '';
   @Input() isOpen = false;
@@ -37,6 +37,13 @@ export class PublicDrawerComponent implements OnChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.restoreBodyScroll();
+  }
+
+  formatAmount(value: number | undefined): string {
+    if (value === undefined || value === null) {
+      return '-';
+    }
+    return new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(value);
   }
 
   private lockBodyScrollOnMobile(): void {

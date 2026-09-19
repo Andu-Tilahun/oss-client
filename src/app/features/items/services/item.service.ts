@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpService } from '../../../core/services/http.service';
+import { HttpService, RequestType } from '../../../core/services/http.service';
 import { Endpoints } from '../../../core/endpoint/endpoint.model';
 import { Item, ItemRequest, ItemFilterRequest } from '../models/item.model';
 import { PageResponse } from '../../../shared/models/api-response.model';
@@ -26,6 +26,8 @@ export class ItemService {
   }
 
   getReplacementQueue(): Observable<Item[]> {
-    return this.httpService.get<Item[]>(`${Endpoints.ITEMS_ENDPOINT}/replacement-queue`);
+    return this.httpService.get<Item[]>(
+      `${Endpoints.ITEMS_ENDPOINT}/replacement-queue`, undefined, undefined, { requestType: RequestType.LOCAL }
+    );
   }
 }

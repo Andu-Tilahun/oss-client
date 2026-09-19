@@ -19,6 +19,8 @@ export class FarmFollowUpFormComponent implements OnChanges {
     this.form = this.fb.group({
       externalId: ['', [Validators.required]],
       remark: ['', [Validators.required, Validators.maxLength(2000)]],
+      startDate: ['', [Validators.required]],
+      endDate: ['', [Validators.required]],
       attachment: [null],
     });
   }
@@ -49,6 +51,8 @@ export class FarmFollowUpFormComponent implements OnChanges {
     return {
       externalId: raw.externalId,
       remark: raw.remark,
+      startDate: raw.startDate,
+      endDate: raw.endDate,
       attachment: raw.attachment,
     };
   }
@@ -57,6 +61,8 @@ export class FarmFollowUpFormComponent implements OnChanges {
     this.form.reset({
       externalId: externalId ?? '',
       remark: '',
+      startDate: '',
+      endDate: '',
       attachment: null,
     });
     if (externalId) {

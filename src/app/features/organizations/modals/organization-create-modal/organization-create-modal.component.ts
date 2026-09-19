@@ -26,6 +26,9 @@ export class OrganizationCreateModalComponent {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.organizationForm.isValid()) {
       this.organizationForm.markAllAsTouched();
       return;
@@ -43,12 +46,8 @@ export class OrganizationCreateModalComponent {
         this.toastService.success(`Organization created successfully`);
         this.organizationCreated.emit();
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to create organization',
-          'Create Organization'
-        );
       }
     });
   }

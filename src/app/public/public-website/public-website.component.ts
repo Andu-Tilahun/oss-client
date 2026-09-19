@@ -1,11 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { FarmPlot, FarmPlotSizeType, FarmPlotSoilType, FarmPlotStatus } from '../../features/farm-plots/models/farm-plot.model';
-import { FarmPlotService } from '../../features/farm-plots/services/farm-plot.service';
 import { CompanyProfile } from '../../features/farm-company/models/company-profile.model';
 import { CompanyProfileService } from '../../features/farm-company/services/company-profile.service';
-import { TableQueryParams } from '../../shared/data-table/models/table-query-params.model';
 import { PageResponse } from '../../shared/models/api-response.model';
 import { environment } from '../../../environments/environment';
 import { RequestType } from '../../core/services/http.service';
@@ -17,11 +14,16 @@ import { PublicContactComponent } from '../public-contact/public-contact.compone
 import { PublicFooterComponent } from '../public-footer/public-footer.component';
 import { PublicDrawerComponent } from '../public-drawer/public-drawer.component';
 import { PublicPlotsComponent } from '../public-plots/public-plots.component';
+import { PublicNewsComponent } from '../public-news/public-news.component';
+import { PublicGalleryComponent } from '../public-gallery/public-gallery.component';
+import { InvestmentPackage } from '../../features/investment-package/models/investment-package.model';
+import { InvestmentPackageService } from '../../features/investment-package/services/investment-package.service';
+import { FarmPlotService } from '../../features/farm-plots/services/farm-plot.service';
 
 @Component({
   selector: 'app-public-website',
   standalone: true,
-  imports: [CommonModule, RouterModule, ImageGalleryModalComponent, PublicHeaderComponent, PublicHeroComponent, PublicAboutUsComponent, PublicContactComponent, PublicFooterComponent, PublicDrawerComponent, PublicPlotsComponent],
+  imports: [CommonModule, RouterModule, ImageGalleryModalComponent, PublicHeaderComponent, PublicHeroComponent, PublicAboutUsComponent, PublicContactComponent, PublicFooterComponent, PublicDrawerComponent, PublicPlotsComponent, PublicNewsComponent, PublicGalleryComponent],
   templateUrl: './public-website.component.html',
   styleUrls: ['./public-website.component.css'],
 })
@@ -30,42 +32,39 @@ export class PublicWebsiteComponent implements OnInit, OnDestroy {
   private readonly initialLoadSize = 500;
   private fragmentSubscription?: { unsubscribe: () => void };
 
-  plots: FarmPlot[] = [];
-  filteredPlots: FarmPlot[] = [];
-  pagedPlots: FarmPlot[] = [];
-  company: CompanyProfile | null = null;
-  selectedPlot: FarmPlot | null = null;
+  readonly maxPreviewPackages = 8;
 
-  loadingPlots = false;
+  packages: InvestmentPackage[] = [];
+  previewPackages: InvestmentPackage[] = [];
+  company: CompanyProfile | null = null;
+  selectedPackage: InvestmentPackage | null = null;
+
+  loadingPackages = false;
   loadingCompany = false;
   galleryLoading = false;
   showGalleryModal = false;
   galleryImageUrls: string[] = [];
   galleryTitle = 'Farm Plot Gallery';
 
-  total = 0;
-  pageIndex = 1;
-  pageSize = 10;
+  get hasMorePackages(): boolean {
+    return this.packages.length > this.maxPreviewPackages;
+  }
 
-  searchText = '';
-  status: FarmPlotStatus | '' = '';
-  soilType: FarmPlotSoilType | '' = '';
-  sizeType: FarmPlotSizeType | '' = '';
-
-  readonly getPlotCardTitle = (plot: FarmPlot): string => plot.title;
-  readonly getPlotThumbnailAlt = (plot: FarmPlot): string => `${plot.title} thumbnail`;
-  readonly getPlotThumbnailUrl = (plot: FarmPlot): string | null =>
-    plot.imageUuid ? `${this.storageApiUrl}/${plot.imageUuid}` : null;
-  readonly getPublicCardSubtitle = (plot: FarmPlot): string =>
-    `${plot.size} ${plot.sizeType} • ${plot.soilType.toLowerCase()} soil`;
-  readonly getPublicCardDescription = (plot: FarmPlot): string =>
-    plot.description || 'Discover this scenic farm plot and reserve your visit today.';
-  readonly getPublicCardBadges = (plot: FarmPlot): string[] => [
-    plot.status === 'ACTIVE' ? 'Guest Favorite' : plot.status.replaceAll('_', ' '),
-    `${plot.sizeType === 'HECTARES' ? 'H' : 'A'} ${plot.size}`,
+  readonly getPackageCardTitle = (pkg: InvestmentPackage): string => pkg.title;
+  readonly getPackageThumbnailAlt = (pkg: InvestmentPackage): string => `${pkg.title} thumbnail`;
+  readonly getPackageThumbnailUrl = (pkg: InvestmentPackage): string | null =>
+    pkg.farmPlot?.imageUuid ? `${this.storageApiUrl}/${pkg.farmPlot.imageUuid}` : null;
+  readonly getPublicCardSubtitle = (pkg: InvestmentPackage): string =>
+    `${pkg.investmentPackageType ?? '-'} • ${pkg.farmActivity} • Target ${this.formatAmount(pkg.targetAmount)}`;
+  readonly getPublicCardDescription = (pkg: InvestmentPackage): string =>
+    pkg.farmPlot?.description || pkg.remark || 'Explore this open investment opportunity.';
+  readonly getPublicCardBadges = (pkg: InvestmentPackage): string[] => [
+    pkg.investmentPackageType ?? '-',
+    pkg.fundingStatus,
   ];
 
   constructor(
+    private investmentPackageService: InvestmentPackageService,
     private farmPlotService: FarmPlotService,
     private companyProfileService: CompanyProfileService,
     private router: Router,
@@ -73,7 +72,7 @@ export class PublicWebsiteComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.loadPlots();
+    this.loadPackages();
     this.loadCompany();
     this.fragmentSubscription = this.route.fragment.subscribe((fragment) => {
       if (!fragment) {
@@ -87,20 +86,20 @@ export class PublicWebsiteComponent implements OnInit, OnDestroy {
     this.fragmentSubscription?.unsubscribe();
   }
 
-  loadPlots(): void {
-    this.loadingPlots = true;
-    this.farmPlotService.getPublicActiveFarmPlots(0, this.initialLoadSize).subscribe({
-      next: (response: PageResponse<FarmPlot>) => {
-        this.plots = response.content ?? [];
-        this.applyClientFilters();
-        this.loadingPlots = false;
+  loadPackages(): void {
+    this.loadingPackages = true;
+    this.investmentPackageService.getPublicInvestmentPackages(0, this.initialLoadSize).subscribe({
+      next: (response: PageResponse<InvestmentPackage>) => {
+        this.packages = (response.content ?? []).filter(
+          (pkg) => pkg.fundingStatus === 'OPEN' && pkg.packageStatus !== 'INACTIVE' && pkg.packageStatus !== 'COMPLITED',
+        );
+        this.previewPackages = this.packages.slice(0, this.maxPreviewPackages);
+        this.loadingPackages = false;
       },
       error: () => {
-        this.plots = [];
-        this.filteredPlots = [];
-        this.pagedPlots = [];
-        this.total = 0;
-        this.loadingPlots = false;
+        this.packages = [];
+        this.previewPackages = [];
+        this.loadingPackages = false;
       },
     });
   }
@@ -122,37 +121,22 @@ export class PublicWebsiteComponent implements OnInit, OnDestroy {
     });
   }
 
-  onFilterChange(): void {
-    this.pageIndex = 1;
-    this.applyClientFilters();
+  openPackageDetail(pkg: InvestmentPackage): void {
+    this.selectedPackage = pkg;
   }
 
-  clearFilters(): void {
-    this.searchText = '';
-    this.status = '';
-    this.soilType = '';
-    this.sizeType = '';
-    this.pageIndex = 1;
-    this.applyClientFilters();
-  }
+  openPublicGallery(pkg: InvestmentPackage): void {
+    const plotId = pkg.farmPlot?.id;
+    if (!plotId) {
+      return;
+    }
 
-  onPageChange(params: TableQueryParams): void {
-    this.pageIndex = params.pageIndex;
-    this.pageSize = params.pageSize;
-    this.applyPagination();
-  }
-
-  openPlotDetail(plot: FarmPlot): void {
-    this.selectedPlot = plot;
-  }
-
-  openPublicGallery(plot: FarmPlot): void {
-    this.galleryTitle = `${plot.title} Gallery`;
+    this.galleryTitle = `${pkg.farmPlot?.title || pkg.title} Gallery`;
     this.showGalleryModal = true;
     this.galleryLoading = true;
     this.galleryImageUrls = [];
 
-    this.farmPlotService.getPublicFarmPlotGallery(plot.id).subscribe({
+    this.farmPlotService.getPublicFarmPlotGallery(plotId).subscribe({
       next: (gallery) => {
         this.galleryImageUrls = gallery
           .map((item) => (item.imageUuid ? `${this.storageApiUrl}/${item.imageUuid}` : null))
@@ -174,8 +158,8 @@ export class PublicWebsiteComponent implements OnInit, OnDestroy {
     }
   }
 
-  closePlotDetail(): void {
-    this.selectedPlot = null;
+  closePackageDetail(): void {
+    this.selectedPackage = null;
   }
 
   goToLogin(): void {
@@ -190,25 +174,10 @@ export class PublicWebsiteComponent implements OnInit, OnDestroy {
     }
   }
 
-  private applyClientFilters(): void {
-    const search = this.searchText.trim().toLowerCase();
-    this.filteredPlots = this.plots.filter((plot) => {
-      const matchesSearch =
-        !search ||
-        plot.title.toLowerCase().includes(search) ||
-        (plot.description ?? '').toLowerCase().includes(search);
-      const matchesStatus = !this.status || plot.status === this.status;
-      const matchesSoilType = !this.soilType || plot.soilType === this.soilType;
-      const matchesSizeType = !this.sizeType || plot.sizeType === this.sizeType;
-      return matchesSearch && matchesStatus && matchesSoilType && matchesSizeType;
-    });
-    this.total = this.filteredPlots.length;
-    this.applyPagination();
-  }
-
-  private applyPagination(): void {
-    const startIndex = (this.pageIndex - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.pagedPlots = this.filteredPlots.slice(startIndex, endIndex);
+  private formatAmount(value: number | undefined): string {
+    if (value === undefined || value === null) {
+      return '-';
+    }
+    return new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(value);
   }
 }

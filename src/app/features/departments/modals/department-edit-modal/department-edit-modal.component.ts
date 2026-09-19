@@ -28,6 +28,9 @@ export class DepartmentEditModalComponent {
   ) {}
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.form.isValid() || !this.department) {
       this.form.markAllAsTouched();
       return;
@@ -44,7 +47,6 @@ export class DepartmentEditModalComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        this.toastService.error(err.message || 'Failed to update department', 'Update Department');
       },
     });
   }

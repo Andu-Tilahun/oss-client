@@ -1,1 +1,6 @@
 /* Woreda filter component styles */
+
+:host {
+  display: block;
+  min-width: 0;
+}

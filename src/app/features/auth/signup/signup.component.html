@@ -1,24 +1,96 @@
 <div class="signup-page">
   <div class="signup-shell">
     <section class="form-panel">
-      <div class="form-wrap frozen">
-        <h2>Sign up</h2>
-        <p class="subtitle">Create your account to start investing.</p>
+      <div class="form-wrap">
 
-        <div class="frozen-form">
-          <div class="fake-field"></div>
-          <div class="fake-field"></div>
-          <div class="fake-field"></div>
-          <div class="fake-field"></div>
-          <div class="fake-field"></div>
-          <div class="fake-button"></div>
+        <!-- Step 1: Registration details -->
+        <div class="form-step" [class.active]="step === 1">
+          <h2>Sign up</h2>
+          <p class="subtitle">Create your account to start investing.</p>
+
+          <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+            <div class="field-row">
+              <div class="field">
+                <label for="firstName">First name <span class="required">*</span></label>
+                <input id="firstName" type="text" formControlName="firstName" placeholder="Enter first name" [class.field-error]="submitted && f['firstName'].errors" />
+                <small *ngIf="submitted && f['firstName'].errors">First name is required</small>
+              </div>
+              <div class="field">
+                <label for="lastName">Last name <span class="required">*</span></label>
+                <input id="lastName" type="text" formControlName="lastName" placeholder="Enter last name" [class.field-error]="submitted && f['lastName'].errors" />
+                <small *ngIf="submitted && f['lastName'].errors">Last name is required</small>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="middleName">Middle name</label>
+              <input id="middleName" type="text" formControlName="middleName" placeholder="Enter middle name (optional)" />
+            </div>
+
+            <div class="field">
+              <label for="email">Email address <span class="required">*</span></label>
+              <input id="email" type="email" formControlName="email" placeholder="Enter your email" [class.field-error]="submitted && f['email'].errors" />
+              <small *ngIf="submitted && f['email'].errors?.['required']">Email is required</small>
+              <small *ngIf="submitted && f['email'].errors?.['email']">Please enter a valid email</small>
+            </div>
+
+            <div class="field">
+              <label for="gender">Gender <span class="required">*</span></label>
+              <select id="gender" formControlName="gender" [class.field-error]="submitted && f['gender'].errors">
+                <option value="" disabled>Select your gender</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+              </select>
+              <small *ngIf="submitted && f['gender'].errors">Gender is required</small>
+            </div>
+
+            <button type="submit" [disabled]="isLoading" class="submit-btn">
+              {{ isLoading ? 'Creating account...' : 'Create Account' }}
+            </button>
+
+            <div class="signup-links">
+              <a routerLink="/login">Already have an account? Sign in</a>
+            </div>
+          </form>
         </div>
 
-        <div class="coming-soon-card">
-          <h3>Coming soon</h3>
-          <p>Signup is currently frozen while we finish the new onboarding flow.</p>
-          <a routerLink="/login">Back to login</a>
+        <!-- Step 2: OTP verification -->
+        <div class="form-step" [class.active]="step === 2">
+          <div class="otp-header">
+            <div class="otp-icon">✉</div>
+            <h2>Check your email</h2>
+            <p class="subtitle">
+              We sent a 6-digit code to<br />
+              <strong>{{ signupEmail }}</strong>
+            </p>
+          </div>
+
+          <div class="otp-boxes">
+            <input
+              *ngFor="let d of otpDigits; let i = index; trackBy: trackByIndex"
+              #otpInput
+              [id]="'otp-' + i"
+              type="text"
+              inputmode="numeric"
+              maxlength="6"
+              class="otp-box"
+              (input)="onOtpInput($event, i)"
+              (keydown)="onOtpKeydown($event, i)"
+              (paste)="onOtpPaste($event)"
+              placeholder="·"
+              [attr.autocomplete]="i === 0 ? 'one-time-code' : 'off'"
+            />
+          </div>
+
+          <button type="button" [disabled]="isLoading || !isOtpComplete" class="submit-btn" (click)="onVerify()">
+            {{ isLoading ? 'Verifying...' : 'Verify Email' }}
+          </button>
+
+          <div class="signup-links">
+            <a routerLink="/login">Back to sign in</a>
+          </div>
         </div>
+
       </div>
     </section>
 
@@ -35,4 +107,3 @@
     </section>
   </div>
 </div>
-

@@ -5,11 +5,12 @@ import { AuthService } from '../auth/services/auth.service';
 import { User } from '../users/models/user.model';
 import { InvestorHomeComponent } from './investor-home.component';
 import { ExtensionHomeComponent } from './extension-home.component';
+import { AdminHomeComponent } from './admin-home.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, InvestorHomeComponent, ExtensionHomeComponent],
+  imports: [CommonModule, RouterModule, InvestorHomeComponent, ExtensionHomeComponent, AdminHomeComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -26,6 +27,10 @@ export class HomeComponent implements OnInit {
 
   get isExtensionWorker(): boolean {
     return this.authService.isExtensionWorker();
+  }
+
+  get isAdmin(): boolean {
+    return this.authService.isAdmin();
   }
 
   ngOnInit() {

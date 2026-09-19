@@ -1,0 +1,21 @@
+<app-modal
+  [(visible)]="visible"
+  title="Create Lease Agreement"
+  size="xl"
+  [confirmText]="'Create Lease Agreement'"
+  [confirmLoading]="isLoading"
+  [confirmDisabled]="!investmentPackageTypeForm || !investmentPackageTypeForm.hasPayments || investmentPackageTypeForm.hasValidationErrors()"
+  (confirm)="onSubmit()"
+  (cancel)="onCancel()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #modalBody>
+    <app-investment-package-type-form
+      [farmPlots]="farmPlots"
+      [selectedFarmPlot]="selectedFarmPlot"
+      #investmentPackageTypeForm
+      mode="create"
+    ></app-investment-package-type-form>
+  </ng-template>
+</app-modal>
+

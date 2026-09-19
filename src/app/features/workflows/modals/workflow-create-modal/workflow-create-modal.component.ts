@@ -29,6 +29,9 @@ export class WorkflowCreateModalComponent {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.workflowForm.isValid()) {
       this.workflowForm.markAllAsTouched();
       return;

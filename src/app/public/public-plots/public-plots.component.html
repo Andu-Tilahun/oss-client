@@ -1,49 +1,51 @@
 <section id="plots" class="plots-section">
   <div class="container">
     <div class="section-title-wrap">
-      <h2>Available Plots</h2>
-      <p>Browse active farm plots ready for development and investment.</p>
+      <h2>Available Investment Packages</h2>
+      <p>Browse open investment opportunities ready for participation.</p>
     </div>
 
     <app-public-card-layout
-      [data]="pagedPlots"
-      [loading]="loadingPlots"
+      [data]="pagedPackages"
+      [loading]="loadingPackages"
       [total]="total"
       [pageSize]="pageSize"
       [pageIndex]="pageIndex"
+      [showPagination]="showPagination"
       [showRefreshButton]="false"
-      [titleAccessor]="getPlotCardTitle"
+      [titleAccessor]="getPackageCardTitle"
       [subtitleAccessor]="getPublicCardSubtitle"
       [descriptionAccessor]="getPublicCardDescription"
-      [imageUrlAccessor]="getPlotThumbnailUrl"
-      [imageAltAccessor]="getPlotThumbnailAlt"
+      [imageUrlAccessor]="getPackageThumbnailUrl"
+      [imageAltAccessor]="getPackageThumbnailAlt"
       [badgesAccessor]="getPublicCardBadges"
       [primaryActionLabel]="'Reserve now'"
       [secondaryActionLabel]="'Open Gallery'"
       [showSecondaryAction]="true"
-      [noDataMessage]="'No active farm plots found'"
+      [noDataMessage]="'No open investment packages found'"
       (pageChange)="pageChange.emit($event)"
       (refreshClick)="refreshClick.emit()"
       (primaryActionClick)="primaryActionClick.emit($event)"
       (secondaryActionClick)="secondaryActionClick.emit($event)"
     >
-      <div class="w-full" extraHeader>
-        <app-farm-plot-filter
-          [showSearch]="false"
+      <div class="w-full" extraHeader *ngIf="showSearch">
+        <app-investment-package-filter
           [showStatus]="false"
           [searchText]="searchText"
           [status]="status"
-          [soilType]="soilType"
-          [sizeType]="sizeType"
           (searchTextChange)="searchTextChange.emit($event)"
           (statusChange)="statusChange.emit($event)"
-          (soilTypeChange)="soilTypeChange.emit($event)"
-          (sizeTypeChange)="sizeTypeChange.emit($event)"
           (filterChange)="filterChange.emit()"
           (searchChange)="searchChange.emit()"
           (clearFilters)="clearFilters.emit()"
-        ></app-farm-plot-filter>
+        ></app-investment-package-filter>
       </div>
     </app-public-card-layout>
+
+    <div *ngIf="showMoreButton" class="plots-more-wrap">
+      <button type="button" class="plots-more-btn" (click)="moreClick.emit()">
+        View More
+      </button>
+    </div>
   </div>
 </section>

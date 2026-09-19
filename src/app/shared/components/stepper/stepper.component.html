@@ -1,4 +1,4 @@
-<div class="bg-white rounded-xl border border-gray-200/60 px-6 py-5 mb-6">
+<div class="bg-white rounded-xl border border-gray-200/60 px-6 py-5 mb-6 dark:bg-gray-900 dark:border-gray-700">
   <div class="flex items-center" *ngIf="steps?.length">
     <ng-container *ngFor="let step of steps; let i = index">
 
@@ -10,7 +10,7 @@
           [ngClass]="{
             'bg-blue-600 text-white shadow-[0_0_0_3px_rgba(37,99,235,0.15)]': currentStep === i + 1,
             'bg-blue-600 text-white shadow-[0_0_0_3px_rgba(37,99,235,0.12)] cursor-pointer hover:bg-blue-700': currentStep > i + 1 && step.clickable,
-            'bg-gray-100 text-gray-400 border border-gray-200': currentStep < i + 1
+            'bg-gray-100 text-gray-400 border border-gray-200 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-700': currentStep < i + 1
           }"
         >
           <!-- Checkmark for completed steps -->
@@ -24,10 +24,10 @@
 
         <div>
           <p class="text-sm font-medium leading-tight"
-             [ngClass]="currentStep >= i + 1 ? 'text-gray-900' : 'text-gray-400'">
+             [ngClass]="currentStep >= i + 1 ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500'">
             {{ step.label }}
           </p>
-          <p *ngIf="step.description" class="text-[11px] text-gray-400 mt-0.5 leading-tight">
+          <p *ngIf="step.description" class="text-[11px] text-gray-400 mt-0.5 leading-tight dark:text-gray-500">
             {{ step.description }}
           </p>
         </div>
@@ -37,7 +37,7 @@
       <div
         *ngIf="i < steps.length - 1"
         class="flex-1 h-px mx-3 rounded-full transition-colors duration-300 min-w-[1.5rem]"
-        [ngClass]="currentStep >= i + 2 ? 'bg-blue-600' : 'bg-gray-200'"
+        [ngClass]="currentStep >= i + 2 ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'"
       ></div>
 
     </ng-container>

@@ -43,12 +43,8 @@ export class OrganizationEditModalComponent {
         this.toastService.success(`Organization updated successfully`);
         this.organizationUpdated.emit();
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to update organization',
-          'Update Organization'
-        );
       }
     });
   }

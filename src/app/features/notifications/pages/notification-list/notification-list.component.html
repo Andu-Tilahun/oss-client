@@ -12,6 +12,7 @@
     <app-data-table
       [columns]="columns"
       [data]="notifications"
+      [selectedRowId]="selectedNotification?.id ?? null"
       [loading]="loading"
       [total]="total"
       [pageSize]="pageSize"
@@ -19,12 +20,15 @@
       [showIndex]="true"
       [showAddButton]="false"
       [showRefreshButton]="true"
-      [showViewButton]="true"
+      [showViewButton]="false"
       [showEditButton]="false"
       [showDeleteButton]="false"
+      [showActionColumn]="false"
+      [rowClickable]="true"
+      [rowDetailTemplate]="rightContent"
       (pageChange)="onPageChange($event)"
       (refreshClick)="loadNotifications()"
-      (viewClick)="onView($event)"
+      (rowClick)="onView($event)"
     >
       <div extraTableHeader class="w-full min-w-0">
         <app-notification-filter

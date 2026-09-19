@@ -1,0 +1,21 @@
+<app-multi-step-form-modal
+  [(visible)]="visible"
+  [title]="title"
+  [steps]="steps"
+  [(currentStep)]="currentStep"
+  size="xxl"
+  [isSubmitting]="isLoading"
+  submitLabel="Update Investment Package"
+  (next)="onNext()"
+  (submitForm)="onSubmit()"
+  (cancelled)="onCancelled()"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #stepBody>
+    <app-investment-package-edit-wizard
+      #wizard
+      [currentStep]="currentStep"
+      [investmentPackage]="investmentPackage"
+    ></app-investment-package-edit-wizard>
+  </ng-template>
+</app-multi-step-form-modal>

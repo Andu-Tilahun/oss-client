@@ -1,23 +1,54 @@
-/* Reserve vertical space so content does not sit under the fixed bar */
+/* Header floats above the hero — no reserved height needed */
 :host {
   display: block;
-  height: 48px;
+  height: 0;
 }
 
+/*
+ * .top-nav must NOT carry transform / filter / backdrop-filter: any of those makes it the
+ * containing block for its position:fixed children (.menu drawer and .menu-overlay), which
+ * then get anchored to and clipped by the 52px pill instead of the viewport. The pill is
+ * centred with left/right + auto margins, and the frosted background lives on ::before.
+ *
+ * will-change: opacity below is deliberate: it nudges mobile browsers to give .top-nav its own
+ * compositor layer (mitigating the mobile WebKit/Blink bug where a fixed header with a
+ * backdrop-filter background can fail to repaint at the right position right as a scroll
+ * gesture ends/bounces at the page bottom) WITHOUT creating a containing block for fixed
+ * descendants -- unlike transform/filter/perspective/contain/backdrop-filter/will-change:
+ * transform, `opacity` never establishes one per spec, so .menu / .menu-overlay stay correctly
+ * anchored to the viewport.
+ */
 .top-nav {
-  height: 48px;
-  background: #eef0f2;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 11%;
+  padding: 0 24px;
   color: #0f172a;
   position: fixed;
-  top: 0;
+  top: 16px;
   left: 0;
   right: 0;
+  margin: 0 auto;
+  width: min(92%, 1080px);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.1);
   z-index: 50;
   box-sizing: border-box;
+  will-change: opacity;
+}
+
+.top-nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(238, 240, 242, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  /* .top-nav is a stacking context (fixed + z-index), so -1 sits behind its children but above the page */
+  z-index: -1;
 }
 
 .menu-toggle {
@@ -112,13 +143,14 @@
 
 @media (max-width: 720px) {
   :host {
-    height: 56px;
+    height: 0;
   }
 
   .top-nav {
     padding: 0 16px;
-    height: 56px;
-    overflow-x: clip;
+    height: 52px;
+    top: 12px;
+    width: min(94%, 480px);
   }
 }
 
@@ -163,16 +195,14 @@
     left: auto;
     width: 50vw;
     min-width: 220px;
-    background: #ffffff;
+    background: linear-gradient(160deg, #16522f, #1f6c3f);
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: 6px;
     padding: 64px 12px 12px;
-    max-height: none;
-    height: 100vh;
     overflow-y: auto;
-    border-left: 1px solid #e0e0e0;
+    border-left: 1px solid rgba(255, 255, 255, 0.18);
     box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
     transform: translateX(100%);
     opacity: 0;
@@ -180,6 +210,15 @@
     pointer-events: none;
     transition: transform 0.25s ease, opacity 0.25s ease, visibility 0.25s ease;
     z-index: 55;
+  }
+
+  .menu .menu-link {
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  .menu .menu-link:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
   }
 
   .menu-overlay {
@@ -216,8 +255,10 @@
     border-radius: 0.6rem;
   }
 
-  .menu-link.active {
-    border-left: 3px solid #047857;
+  .menu .menu-link.active {
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+    border-left: 3px solid #ffffff;
     border-bottom: none;
   }
 

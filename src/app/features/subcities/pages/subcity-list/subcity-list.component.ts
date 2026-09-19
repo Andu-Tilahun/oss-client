@@ -58,14 +58,9 @@ export class SubcityListComponent {
           this.subcities = response.content;
           this.total = response.totalElements;
           this.loading = false;
-          this.toastService.success(`Subcities/Zones retrieved successfully`);
         }
       },
-      error: (error) => {
-        this.toastService.error(
-          error.message || 'Failed to fetch subcities/zones',
-          'Fetch Subcities/Zones'
-        );
+      error: () => {
         this.loading = false;
       }
     });
@@ -118,13 +113,7 @@ export class SubcityListComponent {
         this.selectedSubcity = null;
         this.loadSubcities();
       },
-      error: (error) => {
-        console.error('Error deleting subcity/zone:', error);
-        this.toastService.error(
-          error.message || 'Failed to delete subcity/zone',
-          'Delete Subcity/Zone'
-        );
-      }
+      error: () => {}
     });
   }
 

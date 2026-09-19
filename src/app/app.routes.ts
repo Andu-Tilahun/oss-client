@@ -31,8 +31,8 @@ export const routes: Routes = [
   },
   {
     path: 'profile',
-    loadComponent: () => import('./features/users/pages/profile-page/profile-page.component').then(m => m.ProfilePageComponent),
-    canActivate: [AuthGuard]
+    redirectTo: 'settings/profile',
+    pathMatch: 'full'
   },
   {
     path: 'notifications-inbox',
@@ -216,6 +216,64 @@ export const routes: Routes = [
     data: { roles: ['ADMIN'] },
   },
   {
+    path: 'system-config',
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] },
+    children: [
+      {
+        path: 'organization',
+        loadComponent: () =>
+          import('./features/system-config/pages/organization-config-page/organization-config-page.component')
+            .then(m => m.OrganizationConfigPageComponent),
+      },
+      {
+        path: 'news',
+        loadComponent: () =>
+          import('./features/system-config/pages/news-management-page/news-management-page.component')
+            .then(m => m.NewsManagementPageComponent),
+      },
+      {
+        path: 'social-media',
+        loadComponent: () =>
+          import('./features/system-config/pages/social-media-page/social-media-page.component')
+            .then(m => m.SocialMediaPageComponent),
+      },
+      {
+        path: 'gallery',
+        loadComponent: () =>
+          import('./features/system-config/pages/gallery-management-page/gallery-management-page.component')
+            .then(m => m.GalleryManagementPageComponent),
+      },
+      {
+        path: 'regions',
+        loadComponent: () =>
+          import('./features/system-config/pages/regions-management-page/regions-management-page.component')
+            .then(m => m.RegionsManagementPageComponent),
+      },
+      { path: '', redirectTo: 'organization', pathMatch: 'full' },
+    ],
+  },
+  {
+    path: 'payment-config',
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] },
+    children: [
+      {
+        path: 'bank-accounts',
+        loadComponent: () =>
+          import('./features/system-config/pages/bank-accounts-page/bank-accounts-page.component')
+            .then(m => m.BankAccountsPageComponent),
+      },
+      {
+        path: 'analysis',
+        loadComponent: () =>
+          import('./features/system-config/pages/payment-analysis-page/payment-analysis-page.component')
+            .then(m => m.PaymentAnalysisPageComponent),
+      },
+      { path: '', redirectTo: 'bank-accounts', pathMatch: 'full' },
+    ],
+  },
+  {
     path: 'farm-company',
     loadChildren: () => import('./features/farm-company/farm-company.module').then(m => m.FarmCompanyModule),
     canActivate: [AuthGuard, RoleGuard],
@@ -233,7 +291,7 @@ export const routes: Routes = [
       import('./features/farm-plots/pages/farm-plots-explore-page/farm-plots-explore-page.component')
         .then(m => m.FarmPlotsExplorePageComponent),
     canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['INVESTOR', 'EXTENSION_WORKER', 'ADMIN', 'OPERATOR'] },
+    data: { roles: ['INVESTOR', 'ADMIN', 'OPERATOR'] },
   },
   {
     path: 'farm-plots-extension',
@@ -258,15 +316,70 @@ export const routes: Routes = [
     data: { roles: ['EXTENSION_WORKER', 'ADMIN'] },
   },
   {
-    path: 'farm-leases',
-    loadChildren: () => import('./features/farm-leases/farm-leases.module').then(m => m.FarmLeasesModule),
+    path: 'farm-restoration',
+    loadChildren: () => import('./features/farm-followups/farm-followups.module').then(m => m.FarmFollowupsModule),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['EXTENSION_WORKER', 'ADMIN'] },
+  },
+  {
+    path: 'search',
+    loadComponent: () =>
+      import('./features/search/pages/search-page/search-page.component').then(m => m.SearchPageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] },
+  },
+  {
+    path: 'analytics',
+    loadComponent: () =>
+      import('./features/analytics/analytics-page.component').then(m => m.AnalyticsPageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] },
+  },
+  {
+    path: 'investor-analytics',
+    loadComponent: () =>
+      import('./features/investor-analytics/investor-analytics-page.component').then(m => m.InvestorAnalyticsPageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['INVESTOR'] },
+  },
+  {
+    path: 'investor-news',
+    loadComponent: () =>
+      import('./shared/news/portal-news-page/portal-news-page.component').then(m => m.PortalNewsPageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['INVESTOR'] },
+  },
+  {
+    path: 'investor-news/:id',
+    loadComponent: () =>
+      import('./shared/news/portal-news-detail-page/portal-news-detail-page.component').then(m => m.PortalNewsDetailPageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['INVESTOR'] },
+  },
+  {
+    path: 'farm-plots-extension-news',
+    loadComponent: () =>
+      import('./shared/news/portal-news-page/portal-news-page.component').then(m => m.PortalNewsPageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['EXTENSION_WORKER'] },
+  },
+  {
+    path: 'farm-plots-extension-news/:id',
+    loadComponent: () =>
+      import('./shared/news/portal-news-detail-page/portal-news-detail-page.component').then(m => m.PortalNewsDetailPageComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['EXTENSION_WORKER'] },
+  },
+  {
+    path: 'investment-package-types',
+    loadChildren: () => import('./features/investment-package-types/investment-package-types.module').then(m => m.InvestmentPackageTypesModule),
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
   },
   {
-    path: 'crowd-funding',
+    path: 'investment-package',
     loadChildren: () =>
-      import('./features/crowd-funding/crowd-funding.module').then((m) => m.CrowdFundingModule),
+      import('./features/investment-package/investment-package.module').then((m) => m.InvestmentPackageModule),
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['INVESTOR', 'ADMIN','EXTENSION_WORKER'] },
   },
@@ -288,6 +401,69 @@ export const routes: Routes = [
   //   // canActivate: [AuthGuard],
   //   loadComponent: () => import('./features/users/pages/user-detail/user-detail.component').then(m => m.UserDetailComponent)
   // },
+  {
+    path: 'templates',
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] },
+    children: [
+      {
+        path: 'email',
+        loadComponent: () =>
+          import('./features/templates/pages/email-templates-page/email-templates-page.component')
+            .then(m => m.EmailTemplatesPageComponent),
+      },
+      {
+        path: 'sms',
+        loadComponent: () =>
+          import('./features/templates/pages/sms-templates-page/sms-templates-page.component')
+            .then(m => m.SmsTemplatesPageComponent),
+      },
+      {
+        path: 'contract',
+        loadComponent: () =>
+          import('./features/templates/pages/contract-templates-page/contract-templates-page.component')
+            .then(m => m.ContractTemplatesPageComponent),
+      },
+      { path: '', redirectTo: 'email', pathMatch: 'full' },
+    ],
+  },
+  {
+    path: 'settings',
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/users/pages/profile-page/profile-page.component').then(m => m.ProfilePageComponent),
+      },
+      {
+        path: 'devices',
+        loadComponent: () =>
+          import('./features/settings/pages/devices-page/devices-page.component').then(m => m.DevicesPageComponent),
+      },
+      {
+        path: 'dark-mode',
+        loadComponent: () =>
+          import('./features/settings/pages/dark-mode-page/dark-mode-page.component').then(m => m.DarkModePageComponent),
+      },
+      {
+        path: 'password-reset',
+        loadComponent: () =>
+          import('./features/settings/pages/change-password-page/change-password-page.component').then(m => m.ChangePasswordPageComponent),
+      },
+      {
+        path: 'about',
+        loadComponent: () =>
+          import('./features/settings/pages/about-page/about-page.component').then(m => m.AboutPageComponent),
+      },
+      {
+        path: 'contact',
+        loadComponent: () =>
+          import('./features/settings/pages/contact-page/contact-page.component').then(m => m.ContactPageComponent),
+      },
+      { path: '', redirectTo: 'profile', pathMatch: 'full' },
+    ],
+  },
   {
     path: '403',
     canActivate: [AuthGuard],

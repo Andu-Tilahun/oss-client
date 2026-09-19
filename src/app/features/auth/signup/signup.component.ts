@@ -1,8 +1,11 @@
-import {Component} from '@angular/core';
+import {Component, ElementRef, QueryList, ViewChildren} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router, RouterModule} from '@angular/router';
 import {ToastService} from '../../../shared/toast/toast.service';
+import {AuthService} from '../services/auth.service';
+
+const OTP_LENGTH = 6;
 
 @Component({
   selector: 'app-signup',
@@ -12,23 +15,27 @@ import {ToastService} from '../../../shared/toast/toast.service';
   styleUrl: './signup.component.css',
 })
 export class SignupComponent {
+  @ViewChildren('otpInput') otpInputRefs!: QueryList<ElementRef<HTMLInputElement>>;
+
   signupForm: FormGroup;
   submitted = false;
-  showPassword = false;
-  showConfirmPassword = false;
   isLoading = false;
+  step: 1 | 2 = 1;
+  signupEmail = '';
+  otpDigits: string[] = Array(OTP_LENGTH).fill('');
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private authService: AuthService,
   ) {
     this.signupForm = this.fb.group({
-      fullName: ['', [Validators.required]],
-      username: ['', [Validators.required]],
+      firstName: ['', [Validators.required]],
+      lastName: ['', [Validators.required]],
+      middleName: [''],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]],
+      gender: ['', [Validators.required]],
     });
   }
 
@@ -36,33 +43,169 @@ export class SignupComponent {
     return this.signupForm.controls;
   }
 
-  togglePassword(): void {
-    this.showPassword = !this.showPassword;
+  get otpValue(): string {
+    return this.otpDigits.join('');
   }
 
-  toggleConfirmPassword(): void {
-    this.showConfirmPassword = !this.showConfirmPassword;
+  get isOtpComplete(): boolean {
+    return this.otpDigits.every((d) => d.length === 1);
+  }
+
+  trackByIndex(index: number): number {
+    return index;
+  }
+
+  private setOtpDigits(digits: string[]): void {
+    this.otpDigits = digits.map((d) => d.replace(/\D/g, '').slice(-1));
+  }
+
+  private syncInputsToDom(): void {
+    this.otpInputRefs?.forEach((ref, i) => {
+      ref.nativeElement.value = this.otpDigits[i] ?? '';
+    });
+  }
+
+  private focusOtpInput(index: number): void {
+    const inputs = this.otpInputRefs?.toArray() ?? [];
+    const clamped = Math.max(0, Math.min(index, inputs.length - 1));
+    inputs[clamped]?.nativeElement.focus();
+  }
+
+  private applyDigitsFromIndex(digits: string[], startIndex: number): void {
+    const next = [...this.otpDigits];
+    digits.forEach((d, offset) => {
+      const target = startIndex + offset;
+      if (target < OTP_LENGTH) {
+        next[target] = d;
+      }
+    });
+    this.setOtpDigits(next);
+    this.syncInputsToDom();
+
+    const nextEmpty = next.findIndex((d) => !d);
+    this.focusOtpInput(nextEmpty === -1 ? OTP_LENGTH - 1 : nextEmpty);
+  }
+
+  onOtpInput(event: Event, index: number): void {
+    const input = event.target as HTMLInputElement;
+    const digits = input.value.replace(/\D/g, '');
+
+    if (!digits) {
+      const next = [...this.otpDigits];
+      next[index] = '';
+      this.setOtpDigits(next);
+      input.value = '';
+      return;
+    }
+
+    if (digits.length > 1) {
+      this.applyDigitsFromIndex(digits.split(''), index);
+      return;
+    }
+
+    const next = [...this.otpDigits];
+    next[index] = digits;
+    this.setOtpDigits(next);
+    input.value = digits;
+
+    if (index < OTP_LENGTH - 1) {
+      this.focusOtpInput(index + 1);
+    }
+  }
+
+  onOtpKeydown(event: KeyboardEvent, index: number): void {
+    if (event.key !== 'Backspace') {
+      return;
+    }
+
+    if (this.otpDigits[index]) {
+      return;
+    }
+
+    if (index > 0) {
+      event.preventDefault();
+      const next = [...this.otpDigits];
+      next[index - 1] = '';
+      this.setOtpDigits(next);
+      this.syncInputsToDom();
+      this.focusOtpInput(index - 1);
+    }
+  }
+
+  onOtpPaste(event: ClipboardEvent): void {
+    const digits = (event.clipboardData?.getData('text') ?? '')
+      .replace(/\D/g, '')
+      .slice(0, OTP_LENGTH)
+      .split('');
+
+    if (digits.length === 0) {
+      return;
+    }
+
+    event.preventDefault();
+    this.applyDigitsFromIndex(digits, 0);
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     this.submitted = true;
-
     if (this.signupForm.invalid) {
       this.toastService.error('Please fill in all required fields');
       return;
     }
+    this.isLoading = true;
 
-    if (this.f['password'].value !== this.f['confirmPassword'].value) {
-      this.toastService.error('Password and confirm password do not match');
+    // Public signup runs without a token, so no file upload can happen here
+    // (the storage endpoint requires authentication). Investors are created
+    // without a profile image and can upload one from their profile after login.
+    this.authService.signup({
+      email: this.f['email'].value,
+      firstName: this.f['firstName'].value,
+      lastName: this.f['lastName'].value,
+      middleName: this.f['middleName'].value || undefined,
+      gender: this.f['gender'].value,
+    }).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.signupEmail = this.f['email'].value;
+        this.setOtpDigits(Array(OTP_LENGTH).fill(''));
+        this.step = 2;
+        setTimeout(() => {
+          this.syncInputsToDom();
+          this.focusOtpInput(0);
+        }, 50);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        const message = err?.error?.message || 'Signup failed. Please try again.';
+        this.toastService.error(message);
+      },
+    });
+  }
+
+  onVerify(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight
+    }
+    if (!this.isOtpComplete) {
+      this.toastService.error('Please enter the complete 6-digit code');
       return;
     }
-
     this.isLoading = true;
-    setTimeout(() => {
-      this.isLoading = false;
-      this.toastService.success('Signup form submitted successfully');
-      this.router.navigateByUrl('/login');
-    }, 600);
+    this.authService.verifyEmail({email: this.signupEmail, otp: this.otpValue}).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.toastService.success('Email verified! You can now log in.');
+        this.router.navigateByUrl('/login');
+      },
+      error: (err) => {
+        this.isLoading = false;
+        const message = err?.error?.message || 'Invalid code. Please try again.';
+        this.toastService.error(message);
+      },
+    });
   }
-}
 
+}

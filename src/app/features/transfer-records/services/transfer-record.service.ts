@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpService } from '../../../core/services/http.service';
+import { HttpService, RequestType } from '../../../core/services/http.service';
 import { Endpoints } from '../../../core/endpoint/endpoint.model';
 import { TransferRecord, TransferRequest } from '../models/transfer-record.model';
 
@@ -11,7 +11,7 @@ export class TransferRecordService {
   transfer(request: TransferRequest): Observable<TransferRecord> {
     return this.httpService.post<TransferRecord>(
       `${Endpoints.TRANSFER_RECORDS_ENDPOINT}/transfer`,
-      request
+      request, undefined, { requestType: RequestType.LOCAL }
     );
   }
 }

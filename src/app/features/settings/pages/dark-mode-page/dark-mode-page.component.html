@@ -1,0 +1,36 @@
+<div class="max-w-2xl mx-auto p-4 md:p-0">
+  <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">Dark Mode</h2>
+  <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Choose how AgriVest looks on this device.</p>
+
+  <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm p-6">
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+          {{ themeService.isDark() ? 'Dark theme' : 'Light theme' }}
+        </p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          {{ themeService.isDark()
+            ? 'The interface is using a dark color palette.'
+            : 'The interface is using a light color palette.' }}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        role="switch"
+        [attr.aria-checked]="themeService.isDark()"
+        aria-label="Toggle dark mode"
+        (click)="onToggle()"
+        class="relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+        [class.bg-emerald-600]="themeService.isDark()"
+        [class.bg-gray-300]="!themeService.isDark()"
+      >
+        <span
+          class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform"
+          [class.translate-x-6]="themeService.isDark()"
+          [class.translate-x-1]="!themeService.isDark()"
+        ></span>
+      </button>
+    </div>
+  </div>
+</div>

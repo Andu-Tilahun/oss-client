@@ -1,9 +1,14 @@
-import {Component} from '@angular/core';
-import {FarmFollowUp} from '../../models/farm-followup.model';
+import {Component, OnInit} from '@angular/core';
+import {forkJoin} from 'rxjs';
 import {DataTableColumn} from '../../../../shared/data-table/models/data-table-column.model';
 import {ToastService} from '../../../../shared/toast/toast.service';
-import {FarmFollowUpService} from '../../services/farm-followup.service';
-import {TableQueryParams} from '../../../../shared/data-table/models/table-query-params.model';
+import {FarmPlot, FarmPlotFilterRequest} from '../../../farm-plots/models/farm-plot.model';
+import {FarmPlotService} from '../../../farm-plots/services/farm-plot.service';
+import {RestorationPlan} from '../../models/restoration-plan.model';
+import {RestorationPlanService} from '../../services/restoration-plan.service';
+import {AuthService} from '../../../auth/services/auth.service';
+import {UserService} from '../../../users/services/user.service';
+import {User} from '../../../users/models/user.model';
 
 @Component({
   selector: 'app-farm-followups-page',
@@ -11,100 +16,131 @@ import {TableQueryParams} from '../../../../shared/data-table/models/table-query
   templateUrl: './farm-followups-page.component.html',
   styleUrl: './farm-followups-page.component.css',
 })
-export class FarmFollowupsPageComponent {
-  followUps: FarmFollowUp[] = [];
+export class FarmFollowupsPageComponent implements OnInit {
+  plots: FarmPlot[] = [];
   loading = false;
+  selectedPlot: FarmPlot | null = null;
 
-  externalId = '';
+  plans: RestorationPlan[] = [];
 
-  selectedFollowUp: FarmFollowUp | null = null;
-  detailRefreshKey = 0;
+  workers: User[] = [];
 
-  showCreateModal = false;
-  showViewModal = false;
+  showAssignModal = false;
 
-  columns: DataTableColumn<FarmFollowUp>[] = [
-    {header: 'Remark', value: (x) => x.remark},
-    {header: 'Attachment', value: (x) => x.attachment ?? ''},
-    {header: 'Created At', value: (x) => x.createdAt ?? ''},
-    {header: 'Created By', value: (x) => x.createdBy ?? ''},
+  columns: DataTableColumn<FarmPlot>[] = [
+    {header: 'Title', value: (p) => p.title},
   ];
 
   constructor(
-    private farmFollowUpService: FarmFollowUpService,
+    private farmPlotService: FarmPlotService,
+    private restorationPlanService: RestorationPlanService,
+    private userService: UserService,
+    private authService: AuthService,
     private toastService: ToastService,
   ) {}
 
-  onSearch(): void {
-    const id = (this.externalId ?? '').trim();
-    if (!id) {
-      this.toastService.warning('Please enter External Id', 'Follow Ups');
-      return;
+  ngOnInit(): void {
+    this.loadInitial();
+    if (this.isAdmin) {
+      this.loadWorkers();
     }
-    this.loadFollowUps(id);
   }
 
-  onRefresh(): void {
-    const id = (this.externalId ?? '').trim();
-    if (!id) {
-      this.followUps = [];
-      this.selectedFollowUp = null;
-      return;
-    }
-    this.loadFollowUps(id);
+  get isAdmin(): boolean {
+    return this.authService.isAdmin();
   }
 
-  onAdd(): void {
-    const id = (this.externalId ?? '').trim();
-    if (!id) {
-      this.toastService.warning('Enter External Id first', 'Create Follow Up');
-      return;
-    }
-    this.showCreateModal = true;
+  get isExtensionWorker(): boolean {
+    return this.authService.isExtensionWorker();
   }
 
-  onView(item: FarmFollowUp): void {
-    this.selectedFollowUp = {...item};
-    this.detailRefreshKey++;
+  get currentUserId(): string | null {
+    return this.authService.getCurrentUser()?.id ?? null;
   }
 
-  openViewModal(item: FarmFollowUp): void {
-    this.selectedFollowUp = {...item};
-    this.showViewModal = true;
+  get currentUser(): User | null {
+    return this.authService.getCurrentUser();
   }
 
-  onPageChange(_params: TableQueryParams): void {
-    // Follow-ups are loaded by externalId and returned as a list.
-    // Keep pagination disabled for now to match the backend shape.
+  get selectedPlan(): RestorationPlan | null {
+    if (!this.selectedPlot) return null;
+    return this.plans.find((p) => p.farmPlotId === this.selectedPlot!.id) ?? null;
   }
 
-  private loadFollowUps(externalId: string): void {
+  get visiblePlots(): FarmPlot[] {
+    if (this.isAdmin) return this.plots;
+    const assignedPlotIds = new Set(this.plans.map((p) => p.farmPlotId));
+    return this.plots.filter((p) => assignedPlotIds.has(p.id));
+  }
+
+  selectPlot(plot: FarmPlot): void {
+    this.selectedPlot = plot;
+  }
+
+  onAssignRequested(): void {
+    this.showAssignModal = true;
+  }
+
+  onPlanChanged(): void {
+    this.showAssignModal = false;
+    this.loadPlans();
+  }
+
+  private loadInitial(): void {
     this.loading = true;
-    this.farmFollowUpService.getByExternalId(externalId).subscribe({
-      next: (data) => {
-        this.followUps = data ?? [];
-        this.loading = false;
+    const request: FarmPlotFilterRequest = {
+      sortBy: 'title',
+      sortDirection: 'ASC',
+      page: 0,
+      size: 200,
+    };
+    const plans$ = this.isAdmin
+      ? this.restorationPlanService.listAllForAdmin()
+      : this.restorationPlanService.listForWorker();
 
-        // default selection like farm-plots: pick first if none selected
-        if (!this.selectedFollowUp && this.followUps.length > 0) {
-          this.selectedFollowUp = {...this.followUps[0]};
-          this.detailRefreshKey++;
+    forkJoin({
+      plots: this.farmPlotService.filterRepairFarmPlots(request),
+      plans: plans$,
+    }).subscribe({
+      next: ({plots, plans}) => {
+        this.plots = plots.content ?? [];
+        this.plans = plans ?? [];
+        this.loading = false;
+        if (!this.selectedPlot && this.visiblePlots.length > 0) {
+          this.selectedPlot = this.visiblePlots[0];
         }
       },
       error: (error) => {
+        this.plots = [];
+        this.plans = [];
         this.loading = false;
-        this.toastService.error(error.message || 'Failed to retrieve follow-ups', 'Follow Ups');
-      }
+        this.toastService.error(error.message || 'Failed to retrieve farm plots', 'Farm Plots');
+      },
     });
   }
 
-  onFollowUpCreated(): void {
-    this.showCreateModal = false;
-    this.onRefresh();
+  private loadPlans(): void {
+    const call$ = this.isAdmin
+      ? this.restorationPlanService.listAllForAdmin()
+      : this.restorationPlanService.listForWorker();
+    call$.subscribe({
+      next: (plans) => {
+        this.plans = plans ?? [];
+      },
+      error: () => {
+        this.plans = [];
+      },
+    });
   }
 
-  onCloseDetail(): void {
-    this.selectedFollowUp = null;
+  private loadWorkers(): void {
+    this.userService.getUsersByRole('EXTENSION_WORKER').subscribe({
+      next: (users) => {
+        this.workers = users;
+      },
+      error: () => {
+        this.workers = [];
+      },
+    });
   }
 }
-

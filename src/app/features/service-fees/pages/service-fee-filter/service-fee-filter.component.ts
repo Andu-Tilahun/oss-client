@@ -2,11 +2,12 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {PaymentType} from '../../models/service-fee.model';
+import {FilterBarComponent} from '../../../../shared/components/filter-bar/filter-bar.component';
 
 @Component({
   selector: 'app-service-fee-filter',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FilterBarComponent],
   templateUrl: './service-fee-filter.component.html',
   styleUrls: ['./service-fee-filter.component.css']
 })

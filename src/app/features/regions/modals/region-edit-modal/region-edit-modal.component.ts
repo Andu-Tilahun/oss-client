@@ -27,6 +27,9 @@ export class RegionEditModalComponent {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.regionForm.isValid() || !this.region) {
       this.regionForm.markAllAsTouched();
       return;
@@ -43,12 +46,8 @@ export class RegionEditModalComponent {
         this.toastService.success(`Region updated successfully`);
         this.regionUpdated.emit();
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to update region',
-          'Update Region'
-        );
       }
     });
   }

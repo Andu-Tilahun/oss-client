@@ -63,14 +63,9 @@ export class ServiceFeeListComponent {
           this.serviceFees = response.content;
           this.total = response.totalElements;
           this.loading = false;
-          this.toastService.success(`Service fees retrieved successfully`);
         }
       },
-      error: (error) => {
-        this.toastService.error(
-          error.message || 'Failed to fetch service fees',
-          'Fetch Service Fees'
-        );
+      error: () => {
         this.loading = false;
       }
     });
@@ -125,12 +120,7 @@ export class ServiceFeeListComponent {
         this.selectedServiceFee = null;
         this.loadServiceFees();
       },
-      error: (error) => {
-        this.toastService.error(
-          error.message || 'Failed to delete service fee',
-          'Delete Service Fee'
-        );
-      }
+      error: () => {}
     });
   }
 

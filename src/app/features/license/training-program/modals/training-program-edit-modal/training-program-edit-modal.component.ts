@@ -108,6 +108,9 @@ export class TrainingProgramEditModalComponent implements OnInit, OnChanges {
   }
 
   onBasicInfoSubmit(request: TrainingProgramCreateRequest): void {
+    if (this.isSaving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.programId) {
       return;
     }
@@ -128,6 +131,9 @@ export class TrainingProgramEditModalComponent implements OnInit, OnChanges {
   }
 
   onRegionalQuotaSubmit(request: RegionalQuotaRequest): void {
+    if (this.isSaving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.programId) {
       return;
     }
@@ -148,6 +154,9 @@ export class TrainingProgramEditModalComponent implements OnInit, OnChanges {
   }
 
   onOrganizationalQuotaSubmit(request: OrganizationalQuotaRequest): void {
+    if (this.isSaving) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.programId) {
       return;
     }

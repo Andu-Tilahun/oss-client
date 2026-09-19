@@ -1,0 +1,21 @@
+<app-filter-bar
+  [(searchText)]="searchText"
+  (searchTextChange)="onSearchTextChange($event)"
+  searchPlaceholder="Explore Options"
+  applyLabel="Search"
+  clearLabel="Clear Filters"
+  (searchChange)="onSearch()"
+  (clearFilters)="onClearFilters()"
+>
+  <app-funding-status-filter
+    *ngIf="showStatus"
+    [(status)]="status"
+    [statuses]="investmentPackageFundingStatuses"
+    allOptionLabel="All"
+    selectId="investment-package-status"
+    [showLabel]="true"
+    label="Status"
+    (statusChange)="onStatusChange($event)"
+  ></app-funding-status-filter>
+</app-filter-bar>
+

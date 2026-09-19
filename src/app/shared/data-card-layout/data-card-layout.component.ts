@@ -63,50 +63,6 @@ export class DataCardLayoutComponent<T> {
   @ContentChild(CardBodyTemplateDirective) bodyTemplate?: CardBodyTemplateDirective<T>;
   @ContentChild(CardFooterTemplateDirective) footerTemplate?: CardFooterTemplateDirective<T>;
 
-  pageSizeOptions = [10, 20, 50, 100];
-
-  get totalPages(): number {
-    return Math.ceil(this.total / this.pageSize);
-  }
-
-  get startIndex(): number {
-    return (this.pageIndex - 1) * this.pageSize + 1;
-  }
-
-  get endIndex(): number {
-    return Math.min(this.pageIndex * this.pageSize, this.total);
-  }
-
-  get visiblePages(): number[] {
-    const pages: number[] = [];
-    const maxVisible = 5;
-    let start = Math.max(1, this.pageIndex - Math.floor(maxVisible / 2));
-    let end = Math.min(this.totalPages, start + maxVisible - 1);
-
-    if (end - start < maxVisible - 1) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-    return pages;
-  }
-
-  onPageChange(page: number): void {
-    if (page >= 1 && page <= this.totalPages && page !== this.pageIndex) {
-      this.pageIndex = page;
-      this.emitPageChange();
-    }
-  }
-
-  onPageSizeChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    this.pageSize = Number(target.value);
-    this.pageIndex = 1;
-    this.emitPageChange();
-  }
-
   trackByIndex(index: number): number {
     return index;
   }
@@ -121,6 +77,12 @@ export class DataCardLayoutComponent<T> {
 
   getThumbnailUrl(item: T): string | null | undefined {
     return this.thumbnailUrlAccessor ? this.thumbnailUrlAccessor(item) : null;
+  }
+
+  onPaginationChange(params: TableQueryParams): void {
+    this.pageIndex = params.pageIndex;
+    this.pageSize = params.pageSize;
+    this.emitPageChange();
   }
 
   private emitPageChange(): void {

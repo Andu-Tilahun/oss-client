@@ -1,4 +1,4 @@
-import {Component, forwardRef, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, forwardRef, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {
   ControlValueAccessor,
@@ -34,9 +34,15 @@ import {AuthService} from "../../../auth/services/auth.service";
 export class UserFormComponent implements OnInit, OnChanges, ControlValueAccessor {
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() user: User | null = null;
-  profileImageUuid?: string;
+  /** Restricts (and, when exactly one, auto-selects + locks) the role options offered in create mode. */
+  @Input() allowedRoleNames: string[] = ['ADMIN', 'OPERATOR', 'EXTENSION_WORKER'];
+  @ViewChild(ProfilePictureUploadComponent) profilePictureUpload?: ProfilePictureUploadComponent;
   userForm: FormGroup;
   @Input() profileUpdate = false;
+  @Input() profileImageInline = true;
+  /** Fires right after a photo finishes uploading — lets the parent persist it immediately
+   *  instead of relying on a later, separate form submit that the user might never trigger. */
+  @Output() profileImageUploaded = new EventEmitter<string>();
   roles: Role[] = [];
   employees: Employee[] = [];
 
@@ -91,7 +97,6 @@ export class UserFormComponent implements OnInit, OnChanges, ControlValueAccesso
       middleName: [''],
       username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', this.mode === 'create' ? [Validators.required, Validators.minLength(6)] : []],
       gender: ['', Validators.required],
       profileImageUuid: [''],
       roleId: ['', Validators.required],
@@ -120,10 +125,6 @@ export class UserFormComponent implements OnInit, OnChanges, ControlValueAccesso
     // Disable username in edit mode (usually shouldn't be changed)
     if (this.mode === 'edit') {
       this.userForm.get('username')?.disable();
-      // Remove password requirement in edit mode
-      this.userForm.get('password')?.clearValidators();
-      this.userForm.get('password')?.updateValueAndValidity();
-
       // Role is assigned at creation time only for now
       this.userForm.get('roleId')?.clearValidators();
       this.userForm.get('roleId')?.updateValueAndValidity();
@@ -170,10 +171,6 @@ export class UserFormComponent implements OnInit, OnChanges, ControlValueAccesso
     this.userForm.reset();
   }
 
-  get showPasswordField(): boolean {
-    return this.mode === 'create';
-  }
-
   get showBranchField(): boolean {
     return !this.isEmployee;
   }
@@ -182,30 +179,60 @@ export class UserFormComponent implements OnInit, OnChanges, ControlValueAccesso
     return this.isEmployee;
   }
 
+  setProfileImageUuid(fileId: string): void {
+    this.onProfilePictureUploaded(fileId);
+  }
+
   onProfilePictureUploaded(fileId: string) {
+    this.userForm.patchValue({profileImageUuid: fileId});
     if (this.user) {
       this.user.profileImageUuid = fileId;
-      this.patchFormValues(this.user);
     }
-
+    this.profileImageUploaded.emit(fileId);
   }
 
   onProfilePictureRemoved() {
+    this.userForm.patchValue({profileImageUuid: ''});
     if (this.user) {
       this.user.profileImageUuid = undefined;
-      this.patchFormValues(this.user);
     }
+  }
+
+  hasPendingProfileUpload(): boolean {
+    return this.profilePictureUpload?.hasPendingUpload() ?? false;
+  }
+
+  get pendingProfilePreviewUrl(): string | undefined {
+    return this.profilePictureUpload?.pendingPreviewUrl;
+  }
+
+  get profileImageFileId(): string | undefined {
+    return this.userForm.get('profileImageUuid')?.value || this.user?.profileImageUuid || undefined;
   }
 
   private loadRoles(): void {
     this.roleService.getRoles(0, 100, 'id', 'ASC').subscribe({
       next: (page) => {
-        this.roles = page.content;
+        this.roles = page.content.filter(r => this.allowedRoleNames.includes(r.roleName));
+        this.applyRoleLock();
       },
       error: (error) => {
         console.error('Failed to load roles', error);
       }
     });
+  }
+
+  /** When the caller only allows a single role, pre-select it and lock the field (mirrors the edit-mode roleId disable in patchFormValues). */
+  private applyRoleLock(): void {
+    if (this.allowedRoleNames.length !== 1) {
+      return;
+    }
+    const onlyRole = this.roles.find(r => r.roleName === this.allowedRoleNames[0]);
+    if (!onlyRole) {
+      return;
+    }
+    this.userForm.get('roleId')?.setValue(onlyRole.id);
+    this.userForm.get('roleId')?.disable();
   }
 
 

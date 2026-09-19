@@ -19,6 +19,20 @@ export interface User {
   updatedAt: Date;
 }
 
+export interface SignupRequest {
+  email: string;
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  gender: string;
+  profileImageUuid?: string;
+}
+
+export interface VerifyEmailRequest {
+  email: string;
+  otp: string;
+}
+
 export interface RegisterRequest {
   username: string;
   password: string;
@@ -59,6 +73,19 @@ export interface AuthResponse {
   refreshToken: string;
   type: string;
   user: User;
+}
+
+/** One login (device/browser) of the current user, as returned by GET /auth/sessions. */
+export interface UserSession {
+  sessionId: string;
+  deviceLabel: string;
+  ipAddress: string;
+  createdAt: string;
+  lastSeenAt: string;
+  expiresAt: string;
+  revoked: boolean;
+  /** True only for the session making this request. */
+  current: boolean;
 }
 
 

@@ -1,0 +1,26 @@
+<app-filter-bar
+  [(searchText)]="searchText"
+  (searchTextChange)="onSearchTextInput($event)"
+  searchPlaceholder="Search by title..."
+  applyLabel="Search"
+  clearLabel="Clear"
+  (searchChange)="onSearch()"
+  (clearFilters)="onClearFilters()"
+>
+  <select
+    [ngModel]="selectedStatus"
+    (ngModelChange)="onStatusChange($event)"
+    class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 w-40 dark:border-gray-700"
+  >
+    <option value="">Status: All</option>
+    <option *ngFor="let s of statuses" [value]="s">Status: {{ s }}</option>
+  </select>
+  <select
+    [ngModel]="selectedAudience"
+    (ngModelChange)="onAudienceChange($event)"
+    class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 w-44 dark:border-gray-700"
+  >
+    <option value="">Audience: All</option>
+    <option *ngFor="let a of audiences" [value]="a">Audience: {{ a }}</option>
+  </select>
+</app-filter-bar>

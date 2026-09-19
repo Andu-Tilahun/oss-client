@@ -1,2 +1,6 @@
 /* Branch filter styles - simple layout, consistent with other filters */
 
+:host {
+  display: block;
+  min-width: 0;
+}

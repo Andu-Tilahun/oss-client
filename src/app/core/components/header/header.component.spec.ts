@@ -4,6 +4,7 @@ import {of} from 'rxjs';
 
 import {HeaderComponent} from './header.component';
 import {NotificationLogService} from '../../../features/notifications/services/notification.service';
+import {AuthService} from '../../../features/auth/services/auth.service';
 
 const emptyPage = {
   content: [],
@@ -28,6 +29,18 @@ describe('HeaderComponent', () => {
           provide: NotificationLogService,
           useValue: {
             getNotifications: () => of(emptyPage),
+            unreadCount$: of(0),
+            refreshUnreadCount: () => of(0),
+            clearUnreadCount: () => {},
+          },
+        },
+        {
+          provide: AuthService,
+          useValue: {
+            currentUser$: of(null),
+            isSessionValid: () => false,
+            isAuthenticated: () => false,
+            ensureValidSession: () => of(void 0),
           },
         },
       ],

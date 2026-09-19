@@ -4,33 +4,28 @@
   <app-public-hero (exploreOpportunities)="scrollTo('plots')"></app-public-hero>
 
   <app-public-plots
-    [pagedPlots]="pagedPlots"
-    [loadingPlots]="loadingPlots"
-    [total]="total"
-    [pageSize]="pageSize"
-    [pageIndex]="pageIndex"
-    [searchText]="searchText"
-    [status]="status"
-    [soilType]="soilType"
-    [sizeType]="sizeType"
-    [getPlotCardTitle]="getPlotCardTitle"
+    [pagedPackages]="previewPackages"
+    [loadingPackages]="loadingPackages"
+    [total]="previewPackages.length"
+    [pageSize]="maxPreviewPackages"
+    [pageIndex]="1"
+    [showSearch]="false"
+    [showPagination]="false"
+    [showMoreButton]="hasMorePackages"
+    [getPackageCardTitle]="getPackageCardTitle"
     [getPublicCardSubtitle]="getPublicCardSubtitle"
     [getPublicCardDescription]="getPublicCardDescription"
-    [getPlotThumbnailUrl]="getPlotThumbnailUrl"
-    [getPlotThumbnailAlt]="getPlotThumbnailAlt"
+    [getPackageThumbnailUrl]="getPackageThumbnailUrl"
+    [getPackageThumbnailAlt]="getPackageThumbnailAlt"
     [getPublicCardBadges]="getPublicCardBadges"
-    (pageChange)="onPageChange($event)"
-    (refreshClick)="loadPlots()"
-    (primaryActionClick)="openPlotDetail($event)"
+    (primaryActionClick)="openPackageDetail($event)"
     (secondaryActionClick)="openPublicGallery($event)"
-    (searchTextChange)="searchText = $event"
-    (statusChange)="status = $event"
-    (soilTypeChange)="soilType = $event"
-    (sizeTypeChange)="sizeType = $event"
-    (filterChange)="onFilterChange()"
-    (searchChange)="onFilterChange()"
-    (clearFilters)="clearFilters()"
+    (moreClick)="goToLogin()"
   ></app-public-plots>
+
+  <app-public-news></app-public-news>
+
+  <app-public-gallery></app-public-gallery>
 
   <app-public-about-us [company]="company"></app-public-about-us>
 
@@ -39,12 +34,12 @@
   <app-public-footer [company]="company"></app-public-footer>
 
   <app-public-drawer
-    [selectedPlot]="selectedPlot"
-    [imageUrl]="selectedPlot ? getPlotThumbnailUrl(selectedPlot) : null"
-    [imageAlt]="selectedPlot ? getPlotThumbnailAlt(selectedPlot) : ''"
-    [isOpen]="!!selectedPlot"
-    (close)="closePlotDetail()"
-    (openGallery)="selectedPlot && openPublicGallery(selectedPlot)"
+    [selectedPackage]="selectedPackage"
+    [imageUrl]="selectedPackage ? getPackageThumbnailUrl(selectedPackage) : null"
+    [imageAlt]="selectedPackage ? getPackageThumbnailAlt(selectedPackage) : ''"
+    [isOpen]="!!selectedPackage"
+    (close)="closePackageDetail()"
+    (openGallery)="selectedPackage && openPublicGallery(selectedPackage)"
     (reserve)="goToLogin()"
   ></app-public-drawer>
 

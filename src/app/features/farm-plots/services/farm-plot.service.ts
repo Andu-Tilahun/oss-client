@@ -4,7 +4,16 @@ import {Observable} from 'rxjs';
 import {HttpService, RequestType} from '../../../core/services/http.service';
 import {ApiResponse, PageResponse} from '../../../shared/models/api-response.model';
 import {Endpoints} from '../../../core/endpoint/endpoint.model';
-import {FarmGallery, FarmGalleryCreateRequest, FarmPlot, FarmPlotFilterRequest, FarmPlotRequest} from '../models/farm-plot.model';
+import {
+  FarmGallery,
+  FarmGalleryCreateRequest,
+  FarmPlot,
+  FarmPlotFilterRequest,
+  FarmPlotImageDto,
+  FarmPlotMaintenanceRequest,
+  FarmPlotRequest,
+} from '../models/farm-plot.model';
+import {ExportNotificationRequest} from '../../../shared/models/export-notification-request.model';
 
 @Injectable({
   providedIn: 'root',
@@ -32,12 +41,32 @@ export class FarmPlotService {
     return this.httpService.post<PageResponse<FarmPlot>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/filter`, request);
   }
 
+  /** Operational tab: status bucket is enforced server-side. */
+  filterOperationalFarmPlots(request: FarmPlotFilterRequest): Observable<PageResponse<FarmPlot>> {
+    return this.httpService.post<PageResponse<FarmPlot>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/filter/operational`, request);
+  }
+
+  /** Repair/Damaged tab: status bucket is enforced server-side. */
+  filterRepairFarmPlots(request: FarmPlotFilterRequest): Observable<PageResponse<FarmPlot>> {
+    return this.httpService.post<PageResponse<FarmPlot>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/filter/repair`, request);
+  }
+
+  /** Archived tab: status bucket is enforced server-side. */
+  filterArchivedFarmPlots(request: FarmPlotFilterRequest): Observable<PageResponse<FarmPlot>> {
+    return this.httpService.post<PageResponse<FarmPlot>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/filter/archived`, request);
+  }
+
   getFarmPlotById(id: string): Observable<FarmPlot> {
     return this.httpService.get<FarmPlot>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}`);
   }
 
   getFarmPlotGallery(id: string): Observable<FarmGallery[]> {
     return this.httpService.get<FarmGallery[]>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/gallery`);
+  }
+
+  /** Admin-only: every farm plot's main image + gallery images, across all plots. */
+  getAllFarmPlotImages(): Observable<FarmPlotImageDto[]> {
+    return this.httpService.get<FarmPlotImageDto[]>(`${Endpoints.FARM_PLOTS_ENDPOINT}/gallery-images`);
   }
 
   getPublicFarmPlotGallery(id: string): Observable<FarmGallery[]> {
@@ -49,24 +78,79 @@ export class FarmPlotService {
     );
   }
 
+  getPublicFarmPlotGalleryByPlotId(id: string): Observable<FarmGallery[]> {
+    return this.httpService.get<FarmGallery[]>(
+      `${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/gallery`,
+      undefined,
+      undefined,
+      {requestType: RequestType.LOCAL, skipAuthRedirect: true},
+    );
+  }
+
   addFarmPlotGalleryImage(id: string, request: FarmGalleryCreateRequest): Observable<FarmGallery> {
-    return this.httpService.post<FarmGallery>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/gallery`, request);
+    return this.httpService.post<FarmGallery>(
+      `${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/gallery`,
+      request,
+      undefined,
+      {requestType: RequestType.LOCAL},
+    );
   }
 
   deleteFarmPlotGalleryImage(id: string, galleryId: string): Observable<void> {
-    return this.httpService.delete<void>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/gallery/${galleryId}`);
+    return this.httpService.delete<void>(
+      `${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/gallery/${galleryId}`,
+      undefined,
+      {requestType: RequestType.LOCAL},
+    );
   }
 
   createFarmPlot(request: FarmPlotRequest): Observable<FarmPlot> {
-    return this.httpService.post<FarmPlot>(Endpoints.FARM_PLOTS_ENDPOINT, request);
+    return this.httpService.post<FarmPlot>(
+      Endpoints.FARM_PLOTS_ENDPOINT,
+      request,
+      undefined,
+      {requestType: RequestType.LOCAL},
+    );
   }
 
   updateFarmPlot(id: string, request: FarmPlotRequest): Observable<FarmPlot> {
-    return this.httpService.put<FarmPlot>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}`, request);
+    return this.httpService.put<FarmPlot>(
+      `${Endpoints.FARM_PLOTS_ENDPOINT}/${id}`,
+      request,
+      undefined,
+      {requestType: RequestType.LOCAL},
+    );
   }
 
-  deleteFarmPlot(id: string): Observable<ApiResponse<void>> {
-    return this.httpService.delete<ApiResponse<void>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/${id}`);
+  deactivateFarmPlot(id: string): Observable<ApiResponse<void>> {
+    return this.httpService.put<ApiResponse<void>>(
+      `${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/deactivate`,
+      null,
+      undefined,
+      {requestType: RequestType.LOCAL},
+    );
+  }
+
+  markUnderMaintenance(id: string, request: FarmPlotMaintenanceRequest): Observable<FarmPlot> {
+    return this.httpService.put<FarmPlot>(
+      `${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/mark-under-maintenance`,
+      request,
+      undefined,
+      {requestType: RequestType.LOCAL},
+    );
+  }
+
+  markRepaired(id: string): Observable<FarmPlot> {
+    return this.httpService.put<FarmPlot>(
+      `${Endpoints.FARM_PLOTS_ENDPOINT}/${id}/mark-repaired`,
+      null,
+      undefined,
+      {requestType: RequestType.LOCAL},
+    );
+  }
+
+  notifyExport(request: ExportNotificationRequest): Observable<ApiResponse<void>> {
+    return this.httpService.post<ApiResponse<void>>(`${Endpoints.FARM_PLOTS_ENDPOINT}/exports/notify`, request);
   }
 }
 

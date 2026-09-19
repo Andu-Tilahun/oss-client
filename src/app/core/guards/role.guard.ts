@@ -20,7 +20,10 @@ export class RoleGuard implements CanActivate {
       return false;
     }
     if (requiredRoles && !requiredRoles.includes(currentUser.role)) {
-      this.router.navigate(['/403']); // Forbidden page
+      // The cached session's role doesn't match what this route requires — rather than showing a
+      // generic Forbidden page while leaving a stale/wrong session in place, clear it and force the
+      // user back through login.
+      this.authService.forceLogout();
       return false;
     }
     return true;

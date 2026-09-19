@@ -16,6 +16,7 @@ import {DetailSectionComponent} from "../../shared/components/detail-field/detai
 import {DetailFieldComponent} from "../../shared/components/detail-field/detail-field/detail-field.component";
 import {PageSplitLayoutComponent} from "../../shared/components/page-split-layout/page-split-layout/page-split-layout.component";
 import {UserViewComponent} from "./components/user-view/user-view.component";
+import {TabsComponent} from "../../shared/tabs/app-tabs/app-tabs.component";
 
 @NgModule({
   declarations: [UserDetailComponent, UserListComponent],
@@ -33,7 +34,8 @@ import {UserViewComponent} from "./components/user-view/user-view.component";
     DetailSectionComponent,
     DetailFieldComponent,
     PageSplitLayoutComponent,
-    UserViewComponent
+    UserViewComponent,
+    TabsComponent
   ]
 })
 export class UserModule {

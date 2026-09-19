@@ -13,6 +13,7 @@ export class ImageGalleryModalComponent implements OnChanges {
   @Input() loading = false;
   @Input() title = 'Image Gallery';
   @Input() imageUrls: string[] = [];
+  @Input() initialIndex = 0;
 
   @Output() visibleChange = new EventEmitter<boolean>();
 
@@ -53,12 +54,29 @@ export class ImageGalleryModalComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (!changes['imageUrls']) {
+    if (changes['visible']?.currentValue === true) {
+      this.syncActiveIndex();
       return;
     }
 
-    if (this.activeIndex >= this.imageUrls.length) {
-      this.activeIndex = 0;
+    if (changes['initialIndex'] || changes['imageUrls']) {
+      this.syncActiveIndex();
     }
+  }
+
+  private syncActiveIndex(): void {
+    if (!this.hasImages) {
+      this.activeIndex = 0;
+      return;
+    }
+
+    this.activeIndex = this.clampIndex(this.initialIndex);
+  }
+
+  private clampIndex(index: number): number {
+    if (!this.hasImages) {
+      return 0;
+    }
+    return Math.min(Math.max(0, index), this.imageUrls.length - 1);
   }
 }

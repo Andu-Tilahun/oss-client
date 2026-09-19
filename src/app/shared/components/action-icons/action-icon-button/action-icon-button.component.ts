@@ -11,8 +11,16 @@ export type ActionIconType =
   | 'send'
   | 'assign'
   | 'download'
+  | 'document'
   | 'check'
-  | 'cancel';
+  | 'cancel'
+  | 'delete'
+  | 'power'
+  | 'ban'
+  | 'currency'
+  | 'sign'
+  | 'eye'
+  | 'complete';
 
 @Component({
   selector: 'app-action-icon-button',
@@ -40,7 +48,14 @@ export class ActionIconButtonComponent {
    */
   @Input() svgClass = '';
 
-  @Output() click = new EventEmitter<void>();
+  /**
+   * Named `buttonClick` (not `click`) deliberately: this component wraps a native
+   * <button>, and naming an @Output() after a native DOM event causes Angular to
+   * double-bind it on the host element — the wrapped button's native 'click' bubbles
+   * up and re-triggers the same handler alongside the proper output emission,
+   * firing every consumer's handler twice per physical click.
+   */
+  @Output() buttonClick = new EventEmitter<void>();
 
   get computedTitle(): string {
     return this.title || this.icon[0].toUpperCase() + this.icon.slice(1);
@@ -71,6 +86,8 @@ export class ActionIconButtonComponent {
         return 'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8M17 13.5l2 2 4-4';
       case 'download':
         return 'M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 3v12m-4-4l4 4 4-4';
+      case 'document':
+        return 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z';
       case 'export':
         return 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4';
       case 'save':
@@ -81,6 +98,20 @@ export class ActionIconButtonComponent {
         return 'M5 13l4 4L19 7';
       case 'cancel':
         return 'M18 6L6 18M6 6l12 12';  // Circle with X (close/cancel style)
+      case 'delete':
+        return 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16';
+      case 'power':
+        return 'M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9';
+      case 'ban':
+        return 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636';
+      case 'currency':
+        return 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
+      case 'sign':
+        return 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z';
+      case 'eye':
+        return 'M15 12a3 3 0 11-6 0 3 3 0 016 0z';
+      case 'complete':
+        return 'M5 13l4 4L19 7';
       default:
         return 'M12 4v16m8-8H4';
     }

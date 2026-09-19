@@ -46,17 +46,12 @@ export class AuditListComponent implements OnInit {
     this.auditService.getAllAudits(this.pageIndex - 1, this.pageSize).subscribe({
       next: (response: PageResponse<AuditLog>) => {
         if (response) {
-          this.toastService.success(`Audit retrieved successfully`);
           this.audits = response.content;
           this.total = response.totalElements;
         }
         this.loading = false;
       },
-      error: (error) => {
-        this.toastService.error(
-          error.message || 'Failed to fetch audits',
-          'Fetch Audits'
-        );
+      error: () => {
         this.loading = false;
       }
     });

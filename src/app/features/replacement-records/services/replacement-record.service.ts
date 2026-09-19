@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpService } from '../../../core/services/http.service';
+import { HttpService, RequestType } from '../../../core/services/http.service';
 import { Endpoints } from '../../../core/endpoint/endpoint.model';
 import { ConfirmReplacementRequest, ReplacementRecord } from '../models/replacement-record.model';
 
@@ -11,7 +11,7 @@ export class ReplacementRecordService {
   confirm(request: ConfirmReplacementRequest): Observable<ReplacementRecord> {
     return this.httpService.post<ReplacementRecord>(
       `${Endpoints.REPLACEMENT_RECORDS_ENDPOINT}/confirm`,
-      request
+      request, undefined, { requestType: RequestType.LOCAL }
     );
   }
 }

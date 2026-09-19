@@ -41,16 +41,14 @@ export class WoredaCreateModalComponent implements OnInit {
       next: response => {
         this.subcities = response.content;
       },
-      error: error => {
-        this.toastService.error(
-          error.message || 'Failed to load subcities/zones',
-          'Load Subcities/Zones'
-        );
-      }
+      error: () => {}
     });
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.woredaForm.isValid()) {
       this.woredaForm.markAllAsTouched();
       return;
@@ -70,10 +68,6 @@ export class WoredaCreateModalComponent implements OnInit {
       },
       error: (error) => {
         this.isLoading = false;
-        this.toastService.error(
-          error.message || 'Failed to create woreda',
-          'Create Woreda'
-        );
       }
     });
   }

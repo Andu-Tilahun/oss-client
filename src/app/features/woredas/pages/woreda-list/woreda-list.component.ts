@@ -58,14 +58,9 @@ export class WoredaListComponent {
           this.woredas = response.content;
           this.total = response.totalElements;
           this.loading = false;
-          this.toastService.success(`Woredas retrieved successfully`);
         }
       },
-      error: (error) => {
-        this.toastService.error(
-          error.message || 'Failed to fetch woredas',
-          'Fetch Woredas'
-        );
+      error: () => {
         this.loading = false;
       }
     });
@@ -118,13 +113,7 @@ export class WoredaListComponent {
         this.selectedWoreda = null;
         this.loadWoredas();
       },
-      error: (error) => {
-        console.error('Error deleting woreda:', error);
-        this.toastService.error(
-          error.message || 'Failed to delete woreda',
-          'Delete Woreda'
-        );
-      }
+      error: () => {}
     });
   }
 

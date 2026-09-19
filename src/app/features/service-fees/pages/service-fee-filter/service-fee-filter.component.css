@@ -1,2 +1,6 @@
-/* intentionally empty - styles via Tailwind utility classes */
+/* intentionally minimal - styles via Tailwind utility classes */
 
+:host {
+  display: block;
+  min-width: 0;
+}

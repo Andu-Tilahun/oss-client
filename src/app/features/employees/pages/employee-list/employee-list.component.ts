@@ -59,11 +59,9 @@ export class EmployeeListComponent implements OnInit {
         this.employees = res?.content ?? [];
         this.total = res?.totalElements ?? 0;
         this.loading = false;
-        this.toastService.success('Employees retrieved successfully');
       },
       error: (err) => {
         this.loading = false;
-        this.toastService.error(err.message || 'Failed to fetch employees', 'Fetch Employees');
       },
     });
   }

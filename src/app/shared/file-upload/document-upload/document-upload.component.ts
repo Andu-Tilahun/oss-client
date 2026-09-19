@@ -14,6 +14,7 @@ export class DocumentUploadComponent implements OnInit {
   @Input() currentFileId?: string;
   @Input() accept: string = 'image/*,.pdf'; // Images and PDFs
   @Input() required: boolean = false;
+  @Input() maxSizeMb: number = 10;
   /** When true, hide upload/remove controls and allow view only */
   @Input() viewOnly: boolean = false;
 
@@ -58,10 +59,9 @@ export class DocumentUploadComponent implements OnInit {
 
     if (!file) return;
 
-    // Validate file size (10MB)
-    const maxSize = 10 * 1024 * 1024;
+    const maxSize = this.maxSizeMb * 1024 * 1024;
     if (file.size > maxSize) {
-      this.errorMessage = 'File size must be less than 10MB';
+      this.errorMessage = `File size must be less than ${this.maxSizeMb}MB`;
       this.uploadError.emit(this.errorMessage);
       return;
     }

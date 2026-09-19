@@ -46,6 +46,9 @@ export class ReplacementModalComponent {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.record?.id) return;
     if (!this.replacementForm) return;
     if (!this.replacementForm.isValid()) {

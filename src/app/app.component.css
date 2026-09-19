@@ -1,0 +1,9 @@
+/* <main> is meant to be the ONLY scroll container, with the header staying outside of it.
+   100vh on mobile resolves to the largest viewport (address bar hidden) -- taller than what's
+   actually visible while the browser chrome is showing. Mid-scroll this can desync the shell
+   from the real viewport and carry the header off-screen. 100dvh tracks the current visible
+   viewport instead; vh is declared first as a fallback for browsers without dvh support. */
+.app-shell {
+  height: 100vh;
+  height: 100dvh;
+}

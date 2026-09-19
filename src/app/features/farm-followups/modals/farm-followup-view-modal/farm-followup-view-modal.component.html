@@ -6,7 +6,12 @@
   (visibleChange)="visibleChange.emit($event)"
 >
   <ng-template #modalBody>
-    <app-farm-followup-view [followUp]="followUp"></app-farm-followup-view>
+    <app-farm-followup-view
+      [followUp]="followUp"
+      [readOnly]="readOnly"
+      [canAct]="canAct"
+      (outcomeRequested)="outcomeRequested.emit($event)"
+    ></app-farm-followup-view>
   </ng-template>
 </app-modal>
 

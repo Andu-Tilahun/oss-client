@@ -7,7 +7,7 @@ import {
   OrganizationalQuotaRequest,
   TrainingProgramFilterRequest
 } from '../models/training.model';
-import {HttpService} from "../../../../core/services/http.service";
+import {HttpService, RequestType} from "../../../../core/services/http.service";
 import {Endpoints} from "../../../../core/endpoint/endpoint.model";
 import {PageResponse} from "../../../../shared/models/api-response.model";
 import {ClearingAgentApplicant} from "../../clearing-agent-applicant/models/clearing-agent-applicant.model";
@@ -23,28 +23,28 @@ export class TrainingService {
   createProgram(request: TrainingProgramCreateRequest): Observable<TrainingProgram> {
     return this.httpService.post<TrainingProgram>(
       Endpoints.TRAINING_PROGRAMS_ENDPOINT,
-      request
+      request, undefined, { requestType: RequestType.LOCAL }
     );
   }
 
   assignRegionalQuota(programId: string, request: RegionalQuotaRequest): Observable<TrainingProgram> {
     return this.httpService.put<TrainingProgram>(
       `${Endpoints.TRAINING_PROGRAMS_ENDPOINT}/${programId}/regional-quota`,
-      request
+      request, undefined, { requestType: RequestType.LOCAL }
     );
   }
 
   assignOrganizationalQuota(programId: string, request: OrganizationalQuotaRequest): Observable<TrainingProgram> {
     return this.httpService.put<TrainingProgram>(
       `${Endpoints.TRAINING_PROGRAMS_ENDPOINT}/${programId}/organizational-quota`,
-      request
+      request, undefined, { requestType: RequestType.LOCAL }
     );
   }
 
   publishProgram(programId: string): Observable<TrainingProgram> {
     return this.httpService.put<TrainingProgram>(
       `${Endpoints.TRAINING_PROGRAMS_ENDPOINT}/${programId}/publish`,
-      {}
+      {}, undefined, { requestType: RequestType.LOCAL }
     );
   }
 
@@ -63,6 +63,7 @@ export class TrainingService {
   getByUserRequestId(userRequestId: string): Observable<TrainingProgram> {
     return this.httpService.get<TrainingProgram>(
       `${Endpoints.TRAINING_PROGRAMS_ENDPOINT}/by-user-request/${userRequestId}`,
+      undefined, undefined, { requestType: RequestType.LOCAL }
     );
   }
 
@@ -76,7 +77,7 @@ export class TrainingService {
   updateProgram(programId: string, request: TrainingProgramCreateRequest): Observable<TrainingProgram> {
     return this.httpService.put<TrainingProgram>(
       `${Endpoints.TRAINING_PROGRAMS_ENDPOINT}/${programId}`,
-      request
+      request, undefined, { requestType: RequestType.LOCAL }
     );
   }
 }

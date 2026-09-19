@@ -45,6 +45,9 @@ export class TransferModalComponent {
   }
 
   onSubmit(): void {
+    if (this.isLoading) {
+      return; // a request is already in flight (e.g. Enter pressed again)
+    }
     if (!this.record?.itemId || !this.record?.employeeId) return;
     if (!this.transferForm) return;
     if (!this.transferForm.isValid()) {

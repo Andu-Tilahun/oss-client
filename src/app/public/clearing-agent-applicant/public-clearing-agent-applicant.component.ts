@@ -101,6 +101,7 @@ export class PublicClearingAgentApplicantComponent implements OnInit {
   }
 
   lookup(referenceNumber: string): void {
+    if (this.loading) return; // a request is already in flight
     const ref = String(referenceNumber ?? '').trim();
     if (!ref) return;
     this.loading = true;
@@ -119,6 +120,7 @@ export class PublicClearingAgentApplicantComponent implements OnInit {
   }
 
   onApplicantInfoSubmit(request: ClearingAgentApplicantCreateRequest): void {
+    if (this.saving) return; // a request is already in flight
     this.saving = true;
     const save$ = this.applicantId
       ? this.applicantService.update(this.applicantId, request)
@@ -141,6 +143,7 @@ export class PublicClearingAgentApplicantComponent implements OnInit {
   }
 
   onDocumentsSubmit(documents: ClearingAgentDocumentRequest[]): void {
+    if (this.saving) return; // a request is already in flight
     if (!this.applicantId) return;
     this.saving = true;
     this.applicantService.saveDocuments(this.applicantId, documents).subscribe({
@@ -156,6 +159,7 @@ export class PublicClearingAgentApplicantComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (this.saving) return; // a request is already in flight
     if (!this.applicantId) return;
     this.saving = true;
     this.applicantService.submit(this.applicantId).subscribe({
